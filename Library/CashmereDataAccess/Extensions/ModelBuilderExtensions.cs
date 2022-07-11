@@ -1709,19 +1709,16 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
                 entity.HasOne(d => d.TxText)
                     .WithMany(p => p.TransactionTypeListItems)
                     .HasForeignKey(d => d.TxTextId)
-                    .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_TransactionTypeListItem_TransactionText");
 
                 entity.HasOne(d => d.TxType)
                     .WithMany(p => p.TransactionTypeListItems)
                     .HasForeignKey(d => d.TxTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_TransactionListItem_TransactionType");
 
                 entity.HasOne(d => d.TxTypeGuiScreenList)
                     .WithMany(p => p.TransactionTypeListItems)
                     .HasForeignKey(d => d.TxTypeGuiScreenListId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_TransactionTypeListItem_GUIScreenList");
             });
 
