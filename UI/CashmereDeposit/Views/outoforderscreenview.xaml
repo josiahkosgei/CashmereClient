@@ -1,0 +1,34 @@
+<UserControl x:Class="CashmereDeposit.Views.OutOfOrderScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls"
+             xmlns:local="clr-namespace:CashmereDeposit.Views">
+  <Control.Background>
+    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+  </Control.Background>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="14*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="124*"/>
+      <ColumnDefinition Width="313*"/>
+    </Grid.ColumnDefinitions>
+    <DockPanel Grid.RowSpan="2" Grid.ColumnSpan="2">
+      <uc:ScreenHeader DockPanel.Dock="Top"/>
+      <TextBlock x:Name="OutofOrderErrorTitleText" DockPanel.Dock="Top" Grid.Row="1"
+                 Style="{StaticResource Heading1}" Text="Out of Order"/>
+      <uc:ScreenFooter DockPanel.Dock="Bottom"/>
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                    PanningMode="VerticalOnly" Background="White">
+        <TextBlock x:Name="OutofOrderErrorDescriptionText" Margin="10" TextWrapping="Wrap"
+                   Text="Device is temporarily out of order" HorizontalAlignment="Stretch" TextAlignment="Center"
+                   VerticalAlignment="Center" Style="{StaticResource ImportantTextBlock}"/>
+      </ScrollViewer>
+    </DockPanel>
+    <Button x:Name="AdminButton" Opacity="0"/>
+  </Grid>
+</UserControl>

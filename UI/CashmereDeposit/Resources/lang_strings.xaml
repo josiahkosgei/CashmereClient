@@ -1,0 +1,152 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+   
+    <!--#region General Texts -->
+    <system:String x:Key="ApplicationTitleText">Cash Deposit Machine</system:String>
+    <system:String x:Key="CancelButton_Caption">Cancel</system:String>
+    <system:String x:Key="BackButton_Caption">Back</system:String>
+    <system:String x:Key="NextButton_Caption">Next</system:String>
+
+    <system:String x:Key="GetPreviousPageButton_Caption">Prev</system:String>
+    <system:String x:Key="GetNextPage_Caption">More</system:String>
+    <system:String x:Key="GetFirstPage_Caption">First</system:String>
+    <system:String x:Key="GetLastPage_Caption">Last</system:String>
+
+    <system:String x:Key="PrintButton_Caption">Print</system:String>
+
+    <system:String x:Key="ErrorMessageExpander_TitleCaption">Errors</system:String>
+    <system:String x:Key="FullInstructionsExpander_TitleCaption">Instructions</system:String>
+    <system:String x:Key="FullInstructionsExpander_ShowButtonCaption">Help</system:String>
+
+    <system:String x:Key="DisclaimerTitle_Caption">Disclaimer</system:String>
+
+    <!--#endregion-->
+    
+    <!--#region Dialog Box-->
+    <system:String x:Key="Dialog_OK_Caption">OK</system:String>
+    <system:String x:Key="Dialog_Yes_Caption">Yes</system:String>
+    <system:String x:Key="Dialog_No_Caption">No</system:String>
+    <system:String x:Key="Dialog_Cancel_Caption">Cancel</system:String>
+    <system:String x:Key="Dialog_Accept_Caption">Accept</system:String>
+    <system:String x:Key="Dialog_Decline_Caption">Decline</system:String>
+    <!--#region Idle Screen Timeout Dialog -->
+    <system:String x:Key="Dialog_ScreenIdleTimeout_TitleText">Hello</system:String>
+    <system:String x:Key="Dialog_ScreenIdleTimeout_DescriptionText">Would you like more time?</system:String>
+    <!--#endregion-->
+    <!--#endregion-->
+
+    <!--#region Count Screen -->
+    <system:String x:Key="Currency_Caption">Currency</system:String>
+    <system:String x:Key="CountScreenTotalLabelText">Total:</system:String>
+    <system:String x:Key="AutoCountCheckbox_Caption">Auto Count</system:String>
+    <system:String x:Key="CountButton_Caption">Count</system:String>
+    <system:String x:Key="AutoEscrowDropCheckbox_Caption">Auto Drop</system:String>
+    <system:String x:Key="EscrowDropButton_Caption">Drop</system:String>
+    <system:String x:Key="EscrowRejectButton_Caption">Reject</system:String>
+    <system:String x:Key="TransactionCompleteButton_Caption">Accept</system:String>
+    <!--#endregion-->
+    
+    <!--#region Logging In-->
+    <system:String x:Key="LoginUserScreenTitle">Login</system:String>
+    <system:String x:Key="UsernameLabel_Caption">Username</system:String>
+    <system:String x:Key="PasswordLabel_Caption">Password</system:String>
+    <system:String x:Key="Login_NextCaption">Login</system:String>
+    <system:String x:Key="Login_BackCaption">Cancel</system:String>
+    <!--#endregion-->
+
+    <!--#region Keyboard-->
+    <system:String x:Key="Key_Delete_Caption">Delete</system:String>
+    <system:String x:Key="Key_CapsLock_Caption">Caps</system:String>
+    <system:String x:Key="Key_Backspace_Caption">Backspace</system:String>
+    <system:String x:Key="Key_Enter_Caption">Enter</system:String>
+    <system:String x:Key="Key_Shift_Caption">Shift</system:String>
+    <system:String x:Key="Key_Space_Caption">Space</system:String>
+    <!--#endregion-->
+    
+    <!--#region Main Menu-->
+    <system:String x:Key="TransactionManagementScreenTitle">Transaction Management</system:String>
+    <system:String x:Key="UserManagementScreenTitle">User Management</system:String>
+    <system:String x:Key="CITManagementScreenTitle">CIT Management</system:String>
+    
+    <!--#endregion-->
+    <!--#region CIT Management-->
+    <system:String x:Key="CITFormScreenTitle">CIT Operation</system:String>
+    <system:String x:Key="CIT_NewBagNumber_Caption">New Bag Number</system:String>
+    <system:String x:Key="CIT_SealNumber_Caption">Seal Number</system:String>
+    <system:String x:Key="StartCITCommand_Caption">Start CIT</system:String>
+    <system:String x:Key="CITListCommand_Caption">CIT List</system:String>
+    <system:String x:Key="CITListScreenTitle">CIT Management</system:String>
+    
+    <!--#endregion-->
+
+    <!--#region Transaction Management-->
+    <system:String x:Key="TransactionListScreenTitle">Transaction Management</system:String>
+    <system:String x:Key="TransactionlistCommand_Caption">List</system:String>
+    <!--#endregion-->
+
+    <!--#region Device Status Management-->
+    <system:String x:Key="DeviceStatusScreenTitle">Device Management</system:String>
+    <system:String x:Key="DeviceSummaryCommand_Caption">Device Summary</system:String>
+    <system:String x:Key="DevicePowerMenuScreenTitle_Caption">Device Power Management</system:String>
+    <system:String x:Key="ShowDeviceControllerCommand_Caption">Show Controller</system:String>
+    <!--#endregion-->
+
+    <!--#region Device Power Management-->
+    <system:String x:Key="DevicePowerRestartCommand_Caption">Restart PC</system:String>
+    <!--#endregion-->
+
+    <!--#region Device Summary Management-->
+    <system:String x:Key="DeviceSummary_ScreenTitle">Device Summary</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Header">Summary</system:String>
+    <system:String x:Key="DeviceSummary_Summary_ControllerStatus">Controller Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Transaction">Transaction</system:String>
+
+    <system:String x:Key="DeviceSummary_Summary_Machine_Name_Caption">Machine Name</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Cashmere_Deposit_Version_Caption">Cashmere GUI Version</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Device_Manager_Version_Caption">Device Manager Version</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Cashmere_Util_Version_Caption">Cashmere Util Version</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Sensor_Bag_Caption">Sensor Bag</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Sensor_Door_Caption">Sensor Door</system:String>
+
+    <system:String x:Key="DeviceSummaryBagHeader">Bag Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Bag_Status_Caption">Bag Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Bag_Number_Caption">Bag Number</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Bag_PercentFull_Caption">Bag %</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Bag_NoteLevel_Caption">Bag Note Level</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Bag_NoteCapacity_Caption">Bag Note Capacity</system:String>
+
+    <system:String x:Key="DeviceSummary_Summary_BA_Status_Caption">BA Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_BA_Type_Caption">BA Type</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Escrow_Type_Caption">Escrow Type</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Escrow_Status_Caption">Escrow Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Escrow_Position_Caption">Escrow Position</system:String>
+
+    <system:String x:Key="DeviceSummary_Summary_Application_Status_Caption">App Status</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Application_State_Caption">App State</system:String>
+    <system:String x:Key="DeviceSummary_Summary_Device_State_Caption">Device State</system:String>
+    
+    <system:String x:Key="DeviceSummaryControllerHeader">Controller Status</system:String>
+    <system:String x:Key="DeviceSummaryAcceptorsHeader">Acceptors</system:String>
+    <system:String x:Key="DeviceSummaryEscrowHeader">Escrow</system:String>
+    <system:String x:Key="DeviceSummaryDispensorsHeader">Dispensors</system:String>
+    <system:String x:Key="DeviceSummaryGPIOHeader">GPIO</system:String>
+    <!--#endregion-->
+<!--#region Receipt Template-->
+    <system:String x:Key="ReceiptTemplate">[newline]{receipt_bank_name}[newline]{receipt_copy_text}[newline]{receipt_copy_print_date}[newline]========================[newline]{transactiontypelistitem_name}[newline]========================[newline]Date: {tx_end_date}[newline]A/C No: {tx_account_number}[newline]A/C Name: {cb_account_name}[newline]{tx_ref_account}[newline]{cb_ref_account_name}[newline]Device: {device_name}[newline]Branch: {branch_name}[newline]Tran Code: {tx_random_number}[newline]Tran ID: {cb_tx_number}[newline]Currency: {tx_currency}[newline]{tx_narration}[newline]{tx_depositor_name}[newline]{tx_phone}[newline]{tx_id_number}[newline]------------------------[newline]Denominations[newline]------------------------[newline]{denomination_breakdown}[newline][newline]{Printout_UUID}[newline][newline][newline]Thank You[newline][newline][newline][newline][newline]    </system:String>
+    <!--#endregion-->
+<!--#region User Management-->
+    <system:String x:Key="User_ChangePasswordCommand_Caption">Change Password</system:String>
+    <!--#region Menus-->
+    <system:String x:Key="UserManagementScreenTitle_Caption">User Management</system:String>
+    <!--#endregion-->
+    <!--#region Password Management-->
+    <system:String x:Key="UserChangePasswordFormScreenTitle">Change Password</system:String>
+    <system:String x:Key="User_OldPassword_Caption">Current Password</system:String>
+    <system:String x:Key="User_NewPassword_Caption">New Password</system:String>
+    <system:String x:Key="User_ConfirmPassword_Caption">Confirm Password</system:String>
+    <!--#endregion-->
+    <!--#endregion-->
+</ResourceDictionary>
+    

@@ -1,0 +1,41 @@
+<UserControl x:Class="CashmereDeposit.Views.StartupImageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             Height="{Binding Source={x:Static SystemParameters.PrimaryScreenHeight}}"
+             Width="{Binding Source={x:Static SystemParameters.PrimaryScreenWidth}}">
+  <Grid>
+    <Panel.Background>
+      <ImageBrush ImageSource="{StaticResource startupBackground}"/>
+    </Panel.Background>
+    <Grid Margin="20">
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="2*"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock x:Name="ProductName" Text="Cashmere Deposit" FontSize="60" Margin="5,5,0,0"/>
+        <TextBlock x:Name="Trademark" Text="Cashmere Deposit" FontSize="30" Margin="5,5,0,0"/>
+      </StackPanel>
+      <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" HorizontalAlignment="Right">
+        <Label Content="CashmereGUIVersion:" FontSize="20"/>
+        <TextBlock x:Name="CashmereGUIVersion" FontSize="20" Text="0.0.0.0"/>
+        <Label Content="DeviceManagerVersion:" FontSize="20"/>
+        <TextBlock x:Name="DeviceManagerVersion" FontSize="20" Text="0.0.0.0"/>
+        <Label Content="CashmereUtilVersion:" FontSize="20"/>
+        <TextBlock x:Name="CashmereUtilVersion" FontSize="20" Text="0.0.0.0"/>
+        <Label Content="Credits:" FontSize="20" Margin="0,40,0,0"/>
+        <TextBlock x:Name="Credits" FontSize="15" Margin="0,5" TextWrapping="Wrap"/>
+      </StackPanel>
+      <StackPanel Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+        <TextBlock x:Name="Copyright" FontSize="20" Margin="20" Text="Copyright Kamau Thuo 2018. All rights reserved"/>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

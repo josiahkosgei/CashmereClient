@@ -1,0 +1,56 @@
+<UserControl x:Class="CashmereDeposit.Views.FormFieldView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls">
+  <DockPanel>
+    <Viewbox DockPanel.Dock="Top" MaxHeight="50"/>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="20*"/>
+        <ColumnDefinition Width="60*"/>
+        <ColumnDefinition Width="20*"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="70*"/>
+        <RowDefinition Height="auto"/>
+      </Grid.RowDefinitions>
+      <Grid Row="100" ColumnSpan="100">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+        <Button x:Name="Validate" Grid.Column="3" Style="{StaticResource NextNavigationButton}">
+          <TextBlock x:Name="NextButton_Caption" Text="Next"/>
+        </Button>
+        <Button x:Name="Back" Grid.Column="1" Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="BackButton_Caption" Text="Back"/>
+        </Button>
+      </Grid>
+      <DockPanel Grid.ColumnSpan="3" Grid.RowSpan="2" Margin="10">
+        <Grid DockPanel.Dock="Top" Margin="10" Height="auto">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="3*"/>
+          </Grid.ColumnDefinitions>
+          <Label x:Name="DataEntryLabel" Content="Username" Style="{StaticResource FormLabel1}" Margin="0,5,5,5"
+                 Grid.RowSpan="2" Target="{x:Reference Name=DataEntryTextbox}"/>
+          <TextBox x:Name="DataEntryTextbox" Grid.Column="1" Style="{StaticResource FormTextbox}"/>
+        </Grid>
+        <uc:NumericKeypad x:Name="NumericKeypad" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="330" Width="330"
+                          Margin="0 10 0 5" Visibility="Collapsed" DataContext="{x:Reference Name=DataEntryTextbox}"/>
+        <uc:FullAlphanumericKeyboard x:Name="AlphanumericKeyboard" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
+                                     Margin="75 10 25 90" DataContext="{x:Reference Name=DataEntryTextbox}"/>
+      </DockPanel>
+    </Grid>
+  </DockPanel>
+</UserControl>

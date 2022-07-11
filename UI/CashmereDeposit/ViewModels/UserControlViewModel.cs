@@ -1,0 +1,293 @@
+﻿
+// Type: CashmereDeposit.ViewModels.UserControlViewModel
+
+// MVID: F63D4D22-EE07-4205-A184-9ED72F588748
+
+
+using Caliburn.Micro;
+using Cashmere.Library.Standard.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Cashmere.Library.CashmereDataAccess.Entities;
+
+namespace CashmereDeposit.ViewModels
+{
+  internal class UserControlViewModel : FormViewModelBase
+  {
+    private ApplicationUser ApplicationUser;
+    private string _username;
+    public string _password;
+    public string _passwordHash;
+    public string _secondPassword;
+    public string _firstName;
+    public string _lastName;
+    public string _email;
+    public Role _role;
+
+    public string Username
+    {
+        get { return _username; }
+        set
+      {
+        _username = value;
+        NotifyOfPropertyChange(nameof (Username));
+      }
+    }
+
+    public string UsernameError { get; set; } = "Default error";
+
+    public string Password
+    {
+        get { return _password; }
+        set
+      {
+        _password = value;
+        NotifyOfPropertyChange(nameof (Password));
+      }
+    }
+
+    public string PasswordHash
+    {
+        get { return _passwordHash; }
+        set
+      {
+        _passwordHash = value;
+        NotifyOfPropertyChange(nameof (PasswordHash));
+      }
+    }
+
+    public string SecondPassword
+    {
+        get { return _secondPassword; }
+        set
+      {
+        _secondPassword = value;
+        NotifyOfPropertyChange(nameof (SecondPassword));
+      }
+    }
+
+    public string FirstName
+    {
+        get { return _firstName; }
+        set
+      {
+        _firstName = value;
+        NotifyOfPropertyChange(nameof (FirstName));
+      }
+    }
+
+    public string LastName
+    {
+        get { return _lastName; }
+        set
+      {
+        _lastName = value;
+        NotifyOfPropertyChange(nameof (LastName));
+      }
+    }
+
+    public string Email
+    {
+        get { return _email; }
+        set
+      {
+        _email = value;
+        NotifyOfPropertyChange(nameof (Email));
+      }
+    }
+
+    public Role Role
+    {
+        get { return _role; }
+        set
+      {
+        _role = value;
+        NotifyOfPropertyChange(nameof (Role));
+      }
+    }
+
+    public UserControlViewModel(
+      ApplicationViewModel applicationViewModel,
+      Conductor<Screen> conductor,
+      Screen callingObject,
+      ApplicationUser applicationUser,
+      bool isNewEntry)
+      : base(applicationViewModel, conductor, callingObject, isNewEntry)
+    {
+      ApplicationUser = applicationUser;
+      Username = ApplicationUser?.Username;
+      FirstName = ApplicationUser?.Fname;
+      LastName = ApplicationUser?.Lname;
+      Email = ApplicationUser?.Email;
+      Role = ApplicationUser?.Role;
+      PasswordHash = applicationUser?.Password;
+      List<string> list = depositorDbContext.Roles.Select(x => x.Name).ToList();
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = nameof (Username),
+        Validate = new Func<string, string>(ValidateUsername),
+        ValidatedText = Username,
+        DataTextBoxLabel = Username,
+        FormListItemType = FormListItemType.ALPHATEXTBOX
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = nameof (Password),
+        Validate = new Func<string, string>(ValidatePassword),
+        ValidatedText = "********",
+        FormListItemType = FormListItemType.ALPHAPASSWORD
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = "Re-Enter Password",
+        Validate = new Func<string, string>(ValidateSecondPassword),
+        ValidatedText = "********",
+        FormListItemType = FormListItemType.ALPHAPASSWORD
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = "First Name",
+        Validate = new Func<string, string>(ValidateFirstName),
+        ValidatedText = FirstName,
+        DataTextBoxLabel = FirstName,
+        FormListItemType = FormListItemType.ALPHATEXTBOX
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = "Last Name",
+        Validate = new Func<string, string>(ValidateLastName),
+        ValidatedText = LastName,
+        DataTextBoxLabel = LastName,
+        FormListItemType = FormListItemType.ALPHATEXTBOX
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = nameof (Email),
+        Validate = new Func<string, string>(ValidateEmail),
+        ValidatedText = Email,
+        DataTextBoxLabel = Email,
+        FormListItemType = FormListItemType.ALPHATEXTBOX
+      });
+      Fields.Add(new FormListItem()
+      {
+        DataLabel = nameof (Role),
+        ItemList = list,
+        Validate = new Func<string, string>(ValidateRole),
+        ValidatedText = Role?.Name,
+        DataTextBoxLabel = Role?.Name,
+        FormListItemType = FormListItemType.LISTBOX
+      });
+      if (isNew)
+        ScreenTitle = "Create New User";
+      ActivateItemAsync(new FormListViewModel(this));
+    }
+
+    public string ValidateUsername(string username)
+    {
+      if (string.IsNullOrWhiteSpace(username))
+        return "Please enter a username";
+      if (isNew)
+      {
+        if (depositorDbContext.ApplicationUsers.Any(x=>x.Username.ToUpper()==username.ToUpper()))
+          return "User already exists";
+      }
+      return null;
+    }
+
+    public string ValidatePassword(string password)
+    {
+        return null;
+    }
+
+    public string ValidateSecondPassword(string password)
+    {
+      if (!(password == Password))
+        return "Passwords do not match";
+      SecondPassword = password;
+      return null;
+    }
+
+    public string ValidateFirstName(string name)
+    {
+      if (string.IsNullOrWhiteSpace(name))
+        return "Please enter a first name";
+      FirstName = name;
+      return null;
+    }
+
+    public string ValidateLastName(string name)
+    {
+      if (string.IsNullOrWhiteSpace(name))
+        return "Please enter a last name";
+      LastName = name;
+      return null;
+    }
+
+    private string ValidateEmail(string email)
+    {
+      if (string.IsNullOrWhiteSpace(email))
+        return "Please enter an email";
+      if (!email.isEmail())
+        return "Invalid email address entered";
+      Email = email;
+      return null;
+    }
+
+    private string ValidateRole(string role)
+    {
+      if (string.IsNullOrWhiteSpace(role))
+        return "Please select a role";
+      Role role1 = depositorDbContext.Roles.FirstOrDefault(x => x.Name == role);
+      if (role1 == null)
+        return "Role does not exist";
+      Role = role1;
+      return null;
+    }
+
+    public override async Task<string> SaveForm()
+    {
+      string str = null;
+      if (FormValidation() > 0)
+        return "Form validation failed with {0} errors. Kindly correct them and try saving again";
+      ApplicationUser.Username = Username;
+      ApplicationUser.Password = PasswordHash;
+      ApplicationUser.Fname = FirstName;
+      ApplicationUser.Lname = LastName;
+      ApplicationUser.Email = Email;
+      ApplicationUser.RoleId = Role.Id;
+      if (isNew)
+        depositorDbContext.ApplicationUsers.Add(ApplicationUser);
+      try
+      {
+        ApplicationViewModel.SaveToDatabase(depositorDbContext);
+      }
+      catch (Exception ex)
+      {
+        ApplicationViewModel.Log.Error(GetType().Name, nameof (UserControlViewModel), nameof (SaveForm), "Error saving user to database: {0}", new object[1]
+        {
+          ex.MessageString()
+        });
+        return "Error occurred while creating user.";
+      }
+      return str;
+    }
+
+    public override int FormValidation()
+    {
+      int num = 0;
+      foreach (FormListItem field in Fields)
+      {
+        Func<string, string> validate = field.Validate;
+        string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+        if (str != null)
+        {
+          field.ErrorMessageTextBlock = str;
+          ++num;
+        }
+      }
+      return num;
+    }
+  }
+}

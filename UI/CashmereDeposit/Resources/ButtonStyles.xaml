@@ -1,0 +1,265 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--#region Buttons-->
+    <!--#region Keypad/Keyboard Buttons-->
+    <Color x:Key="ButtonBorderColor">#000000</Color>
+    <Color x:Key="ButtonNormalColor">#01553d</Color>
+    <Color x:Key="ButtonNormalTextColour">#FFFFFF</Color>
+    <Color x:Key="ButtonHoverColor">#79c143</Color>
+    <Color x:Key="ButtonHoverTextColour">#FFFFFF</Color>
+    <Color x:Key="ButtonActiveColor">#01553d</Color>
+    <Color x:Key="ButtonActiveTextColour">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="{StaticResource ButtonBorderColor}" />
+    <SolidColorBrush x:Key="ButtonNormalBrush" Color="{StaticResource ButtonNormalColor}" />
+    <SolidColorBrush x:Key="ButtonNormalTextBrush" Color="{StaticResource ButtonNormalTextColour}" />
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{StaticResource ButtonHoverColor}" />
+    <SolidColorBrush x:Key="ButtonHoverTextBrush" Color="{StaticResource ButtonHoverTextColour}" />
+    <SolidColorBrush x:Key="ButtonActiveBrush" Color="{StaticResource ButtonActiveColor}" />
+    <SolidColorBrush x:Key="ButtonActiveTextBrush" Color="{StaticResource ButtonActiveTextColour}" />
+
+    <FontFamily x:Key="ButtonNormalFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="ButtonHoverFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="ButtonActiveFontFamily">Arial</FontFamily>
+
+    <Color x:Key="DeleteButtonNormalColor">#79c143</Color>
+    <Color x:Key="DeleteButtonNormalTextColour">#FFFFFF</Color>
+    <Color x:Key="DeleteButtonHoverColor">#01553d</Color>
+    <Color x:Key="DeleteButtonHoverTextColour">#FFFFFF</Color>
+    <Color x:Key="DeleteButtonActiveColor">#ff6d00</Color>
+    <Color x:Key="DeleteButtonActiveTextColour">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="DeleteButtonNormalBrush" Color="{StaticResource DeleteButtonNormalColor}" />
+    <SolidColorBrush x:Key="DeleteButtonNormalTextBrush" Color="{StaticResource DeleteButtonNormalTextColour}" />
+    <SolidColorBrush x:Key="DeleteButtonHoverBrush" Color="{StaticResource DeleteButtonHoverColor}" />
+    <SolidColorBrush x:Key="DeleteButtonHoverTextBrush" Color="{StaticResource DeleteButtonHoverTextColour}" />
+    <SolidColorBrush x:Key="DeleteButtonActiveBrush" Color="{StaticResource DeleteButtonActiveColor}" />
+    <SolidColorBrush x:Key="DeleteButtonActiveTextBrush" Color="{StaticResource DeleteButtonActiveTextColour}" />
+
+    <FontFamily x:Key="DeleteButtonNormalFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="DeleteButtonHoverFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="DeleteButtonActiveFontFamily">Arial</FontFamily>
+    <!--#endregion-->
+    <!--#region Navigation Buttons-->
+    <Color x:Key="NavigationButtonBorderColor">#000000</Color>
+    <Color x:Key="NavigationButtonNormalColor">#FF86bd45</Color>
+    <Color x:Key="NavigationButtonNormalTextColour">#FFFFFF</Color>
+    <Color x:Key="NavigationButtonHoverColor">#5CAB00</Color>
+    <Color x:Key="NavigationButtonHoverTextColour">#FFFFFF</Color>
+    <Color x:Key="NavigationButtonActiveColor">#FFFF8427</Color>
+    <Color x:Key="NavigationButtonActiveTextColour">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="NavigationButtonBorderBrush" Color="{StaticResource NavigationButtonBorderColor}" />
+    <SolidColorBrush x:Key="NavigationButtonNormalBrush" Color="{StaticResource NavigationButtonNormalColor}" />
+    <SolidColorBrush x:Key="NavigationButtonNormalTextBrush" Color="{StaticResource NavigationButtonNormalTextColour}" />
+    <SolidColorBrush x:Key="NavigationButtonHoverBrush" Color="{StaticResource NavigationButtonHoverColor}" />
+    <SolidColorBrush x:Key="NavigationButtonHoverTextBrush" Color="{StaticResource NavigationButtonHoverTextColour}" />
+    <SolidColorBrush x:Key="NavigationButtonActiveBrush" Color="{StaticResource NavigationButtonActiveColor}" />
+    <SolidColorBrush x:Key="NavigationButtonActiveTextBrush" Color="{StaticResource NavigationButtonActiveTextColour}" />
+
+    <FontFamily x:Key="NavigationButtonNormalFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="NavigationButtonHoverFontFamily">Arial</FontFamily>
+    <FontFamily x:Key="NavigationButtonActiveFontFamily">Arial</FontFamily>
+    <!--#endregion-->
+
+    <Style TargetType="{x:Type Control}" x:Key="DefaultControlStyle">
+        <Setter Property="FontFamily" Value="{StaticResource ButtonNormalFontFamily}"/>
+        <Setter Property="FontSize" Value="25"/>
+        <Setter Property="Margin" Value="3"/>
+    </Style>
+
+    <Style TargetType="{x:Type Control}" x:Key="DefaultDeleteControlStyle" BasedOn="{StaticResource DefaultControlStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource DeleteButtonNormalFontFamily}"/>
+    </Style>
+    <!--#endregion-->
+
+    <!--#region Delete Button-->
+    <Style TargetType="{x:Type Button}" x:Key="DeleteButtonBase" BasedOn="{StaticResource DefaultDeleteControlStyle}">
+        <Setter Property="Foreground" Value="{StaticResource DeleteButtonNormalTextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Name="Border" CornerRadius="2" Background="{StaticResource DeleteButtonNormalBrush}">
+                        <ContentPresenter  HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource DeleteButtonHoverFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource DeleteButtonHoverBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource DeleteButtonHoverTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource DeleteButtonActiveFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource DeleteButtonActiveBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource DeleteButtonActiveTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion-->
+
+    <Style TargetType="{x:Type Button}" x:Key="ButtonBase" BasedOn="{StaticResource DefaultControlStyle}">
+        <Setter Property="Foreground" Value="{StaticResource ButtonNormalTextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Name="Border" CornerRadius="2" Background="{StaticResource ButtonNormalBrush}">
+                        <ContentPresenter  HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonHoverFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonHoverTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonActiveFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonActiveBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonActiveTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource ButtonBase}" x:Key="BorderedButtonBase" TargetType="Button">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Margin" Value="6"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{StaticResource ButtonBorderBrush}" CornerRadius="6"  Padding="5">
+                        <Border Name="Border" CornerRadius="2" Background="{StaticResource ButtonNormalBrush}" >
+                            <ContentPresenter  HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Border>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonHoverFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonHoverTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonActiveFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonActiveBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonActiveTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ToggleButton}" x:Key="ToggleButtonBase" BasedOn="{StaticResource DefaultControlStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border Name="OuterBorder" Background="{StaticResource ButtonNormalBrush}" CornerRadius="3"  Padding="5">
+                        <Border Name="Border" CornerRadius="3" Background="{StaticResource ButtonNormalBrush}" >
+                            <ContentPresenter  HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Border>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonHoverFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonHoverTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="FontFamily" Value="{StaticResource ButtonActiveFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonActiveBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonActiveTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonNormalBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource ButtonNormalTextBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style BasedOn="{StaticResource ButtonBase}" x:Key="NavigationButtonBase" TargetType="Button">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Margin" Value="6"/>
+        <Setter Property="MinHeight" Value="75"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Name="Border" CornerRadius="3" Background="{StaticResource NavigationButtonNormalBrush}" >
+                        <ContentPresenter  HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource NavigationButtonHoverFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource NavigationButtonHoverBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource NavigationButtonHoverTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="FontFamily" Value="{StaticResource NavigationButtonActiveFontFamily}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource NavigationButtonActiveBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource NavigationButtonActiveTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource NavigationButtonBase}" x:Key="NavigationButton" TargetType="Button">
+        <Setter Property="MinWidth" Value="100"/>
+        <Setter Property="MaxWidth" Value="200"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource NavigationButton}" x:Key="NextNavigationButton" TargetType="Button">
+        <Setter Property="Width" Value="200"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource NavigationButton}" x:Key="CancelNavigationButton" TargetType="Button">
+        <Setter Property="Width" Value="100"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource ButtonBase}" x:Key="MiddleNavigationButton" TargetType="Button">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Margin" Value="0 6 0 6"/>
+        <Setter Property="MinHeight" Value="0"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource NavigationButton}" x:Key="FirstNavigationButton" TargetType="Button">
+        <Setter Property="Margin" Value="6 6 0 6"/>
+        <Setter Property="MinHeight" Value="0"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource NavigationButton}" x:Key="LastNavigationButton" TargetType="Button">
+        <Setter Property="Margin" Value="0 6 6 6"/>
+        <Setter Property="MinHeight" Value="0"/>
+    </Style>
+
+    <Style x:Key="ScrollViewerBase" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="PanningMode" Value="VerticalOnly"/>
+    </Style>
+
+    <Style BasedOn="{StaticResource ScrollViewerBase}" x:Key="Instructions_ScrollViewer" TargetType="ScrollViewer" />
+</ResourceDictionary>

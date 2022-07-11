@@ -1,0 +1,28 @@
+<UserControl x:Class="CashmereDeposit.Views.NoteJamScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views">
+  <Control.Background>
+    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+  </Control.Background>
+  <DockPanel>
+    <uc:ScreenHeader DockPanel.Dock="Top"/>
+    <TextBlock x:Name="NoteJamErrorTitleText" DockPanel.Dock="Top" Style="{StaticResource Heading1}"
+               Text="Note Jam Detected"/>
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+      <TextBlock x:Name="NoteJamErrorDescriptionText" Grid.ColumnSpan="3" Margin="20 5"
+                 Text="A note has become stuck while being counted. Kindly remove the trapped notes as per the instructions below or contact a custodian for assistance."
+                 TextWrapping="Wrap" Style="{StaticResource Heading3}"/>
+      <MediaElement Loaded="myMediaElement_Loaded" MediaEnded="myMediaElement_MediaEnded" Name="myMediaElement"
+                    Grid.Row="1" Grid.Column="1" Source="Resources/notejam.mp4" LoadedBehavior="Manual"
+                    Stretch="Uniform" Volume="0"/>
+    </Grid>
+  </DockPanel>
+</UserControl>

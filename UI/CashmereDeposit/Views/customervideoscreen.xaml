@@ -1,0 +1,40 @@
+<UserControl x:Class="CashmereDeposit.Views.CustomerVideoScreen"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views">
+  <Control.Background>
+    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+  </Control.Background>
+  <DockPanel>
+    <uc:ScreenHeader DockPanel.Dock="Top"/>
+    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}" Text="Video Title"/>
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="auto"/>
+      </Grid.RowDefinitions>
+      <TextBlock x:Name="Description" Grid.ColumnSpan="3" Margin="20 5"
+                 Text="Informative text that accompanies the video is shown here" TextWrapping="Wrap"
+                 Style="{StaticResource Heading3}"/>
+      <MediaElement Loaded="myMediaElement_Loaded" MediaEnded="myMediaElement_MediaEnded" Name="myMediaElement"
+                    Grid.Row="1" Grid.Column="1" LoadedBehavior="Manual" Stretch="Uniform" Volume="0"/>
+      <Grid Row="100" ColumnSpan="100">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+        <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
+          <TextBlock x:Name="CancelCaption" Text="Cancel"/>
+        </Button>
+      </Grid>
+    </Grid>
+  </DockPanel>
+</UserControl>

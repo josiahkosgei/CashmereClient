@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Cashmere.API.CDM.Reporting.Uptime</AssemblyName>
+    <RootNamespace>Cashmere.API.CDM.Reporting.Uptime</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Library\Standard\Standard.csproj" />
+    <ProjectReference Include="..\..\Messaging\Integration\Integration.csproj" />
+    <ProjectReference Include="..\Messaging\CDMMessaging.csproj" />
+  </ItemGroup>
+
+</Project>

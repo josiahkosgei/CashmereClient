@@ -1,0 +1,147 @@
+<UserControl x:Class="CashmereDeposit.UserControls.FullAlphanumericKeyboard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.UserControls"
+             Loaded="UserControl_Loaded" Background="White">
+  <Grid x:Name="MainGrid">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition/>
+      <RowDefinition/>
+      <RowDefinition/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <Button Click="Key_Pressed" x:Name="key1" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">1</Button>
+    <Button Click="Key_Pressed" x:Name="key2" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">2</Button>
+    <Button Click="Key_Pressed" x:Name="key3" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">3</Button>
+    <Button Click="Key_Pressed" x:Name="key4" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">4</Button>
+    <Button Click="Key_Pressed" x:Name="key5" Grid.Row="0" Grid.Column="8" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">5</Button>
+    <Button Click="Key_Pressed" x:Name="key6" Grid.Row="0" Grid.Column="10" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">6</Button>
+    <Button Click="Key_Pressed" x:Name="key7" Grid.Row="0" Grid.Column="12" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">7</Button>
+    <Button Click="Key_Pressed" x:Name="key8" Grid.Row="0" Grid.Column="14" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">8</Button>
+    <Button Click="Key_Pressed" x:Name="key9" Grid.Row="0" Grid.Column="16" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">9</Button>
+    <Button Click="Key_Pressed" x:Name="key0" Grid.Row="0" Grid.Column="18" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">0</Button>
+    <Button Click="keydelete_Click" x:Name="key_bspace" Grid.Row="0" Grid.Column="20" Grid.ColumnSpan="6"
+            Style="{StaticResource DeleteButtonBase}" Content="{StaticResource Key_Backspace_Caption}"/>
+    <Button Click="Key_Pressed" x:Name="keyq" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">Q</Button>
+    <Button Click="Key_Pressed" x:Name="keyw" Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">W</Button>
+    <Button Click="Key_Pressed" x:Name="keye" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">E</Button>
+    <Button Click="Key_Pressed" x:Name="keyr" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">R</Button>
+    <Button Click="Key_Pressed" x:Name="keyt" Grid.Row="1" Grid.Column="9" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">T</Button>
+    <Button Click="Key_Pressed" x:Name="keyy" Grid.Row="1" Grid.Column="11" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">Y</Button>
+    <Button Click="Key_Pressed" x:Name="keyu" Grid.Row="1" Grid.Column="13" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">U</Button>
+    <Button Click="Key_Pressed" x:Name="keyi" Grid.Row="1" Grid.Column="15" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">I</Button>
+    <Button Click="Key_Pressed" x:Name="keyo" Grid.Row="1" Grid.Column="17" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">O</Button>
+    <Button Click="Key_Pressed" x:Name="keyp" Grid.Row="1" Grid.Column="19" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">P</Button>
+    <Button Click="Key_Pressed" x:Name="key_hyphen" Grid.Row="1" Grid.Column="21" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">-</Button>
+    <Button Click="Key_Pressed" x:Name="key_bang" Grid.Row="1" Grid.Column="23" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">!</Button>
+    <Button Click="Key_Pressed" x:Name="keya" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">A</Button>
+    <Button Click="Key_Pressed" x:Name="keys" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">S</Button>
+    <Button Click="Key_Pressed" x:Name="keyd" Grid.Row="2" Grid.Column="6" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">D</Button>
+    <Button Click="Key_Pressed" x:Name="keyf" Grid.Row="2" Grid.Column="8" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">F</Button>
+    <Button Click="Key_Pressed" x:Name="keyg" Grid.Row="2" Grid.Column="10" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">G</Button>
+    <Button Click="Key_Pressed" x:Name="keyh" Grid.Row="2" Grid.Column="12" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">H</Button>
+    <Button Click="Key_Pressed" x:Name="keyj" Grid.Row="2" Grid.Column="14" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">J</Button>
+    <Button Click="Key_Pressed" x:Name="keyk" Grid.Row="2" Grid.Column="16" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">K</Button>
+    <Button Click="Key_Pressed" x:Name="keyl" Grid.Row="2" Grid.Column="18" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">L</Button>
+    <Button Click="Key_Pressed" x:Name="key_at" Grid.Row="2" Grid.Column="20" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">@</Button>
+    <Button Click="Key_Pressed" x:Name="key_hash" Grid.Row="2" Grid.Column="22" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">#</Button>
+    <ToggleButton Click="keyCaps_Click" x:Name="keyCaps" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                  Style="{StaticResource ToggleButtonBase}" Content="{StaticResource Key_CapsLock_Caption}"/>
+    <Button Click="Key_Pressed" x:Name="keyz" Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">Z</Button>
+    <Button Click="Key_Pressed" x:Name="keyx" Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">X</Button>
+    <Button Click="Key_Pressed" x:Name="keyc" Grid.Row="3" Grid.Column="7" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">C</Button>
+    <Button Click="Key_Pressed" x:Name="keyv" Grid.Row="3" Grid.Column="9" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">V</Button>
+    <Button Click="Key_Pressed" x:Name="keyb" Grid.Row="3" Grid.Column="11" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">B</Button>
+    <Button Click="Key_Pressed" x:Name="keyn" Grid.Row="3" Grid.Column="13" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">N</Button>
+    <Button Click="Key_Pressed" x:Name="keym" Grid.Row="3" Grid.Column="15" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">M</Button>
+    <Button Click="Key_Pressed" x:Name="key_comma" Grid.Row="3" Grid.Column="17" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">,</Button>
+    <Button Click="Key_Pressed" x:Name="key_period" Grid.Row="3" Grid.Column="19" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">.</Button>
+    <Button Click="Key_Pressed" x:Name="key_dollar" Grid.Row="3" Grid.Column="21" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">$</Button>
+    <Button Click="Key_Pressed" x:Name="key_percent" Grid.Row="3" Grid.Column="23" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">%</Button>
+    <Button Click="Key_Pressed" x:Name="key_cravat" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">^</Button>
+    <Button Click="Key_Pressed" x:Name="key_bslash" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">\</Button>
+    <Button Click="key_space_Click" x:Name="key_space" Grid.Row="4" Grid.Column="6" Grid.ColumnSpan="12"
+            Style="{StaticResource ButtonBase}" Content="{StaticResource Key_Space_Caption}"/>
+    <Button Click="Key_Pressed" x:Name="key_fslash" Grid.Row="4" Grid.Column="18" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">/</Button>
+    <Button Click="Key_Pressed" x:Name="key_asterisk" Grid.Row="4" Grid.Column="20" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">*</Button>
+  </Grid>
+</UserControl>

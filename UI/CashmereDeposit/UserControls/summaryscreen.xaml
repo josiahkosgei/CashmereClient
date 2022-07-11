@@ -1,0 +1,24 @@
+<UserControl x:Class="CashmereDeposit.UserControls.SummaryScreen"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.UserControls">
+  <ItemsControl ManipulationBoundaryFeedback="OnManipulationBoundaryFeedback" x:Name="SummaryListBox" Width="440"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock VerticalAlignment="Top" Margin="10" HorizontalAlignment="Right" Style="{StaticResource Heading2}"
+                     FontWeight="Bold" Text="{Binding Path=Title}"/>
+          <TextBlock Grid.Column="1" VerticalAlignment="Top" Margin="10" TextWrapping="Wrap"
+                     Style="{StaticResource Heading2}" Text="{Binding Path=Value}"/>
+        </Grid>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

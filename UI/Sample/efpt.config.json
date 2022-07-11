@@ -1,0 +1,487 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "DepositorProductionBackupContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": null,
+   "ProjectRootNamespace": "Sample",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[bak].[AlertEmail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[AlertEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[AlertSMS]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[ApplicationException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[ApplicationLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[CrashEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[SessionException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[bak].[TransactionException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[cb].[PingRequest]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertEmail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertEmailResult]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertMessageRegistry]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertMessageType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertSMS]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ApplicationLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ApplicationUser]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ApplicationUserChangePassword]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ApplicationUserLoginDetail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Bank]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Branch]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CashmereCommunicationServiceStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CIT]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CITDenominations]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CITPrintout]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Config]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ConfigCategory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ConfigGroup]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Country]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Currency]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CurrencyList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CurrencyList_Currency]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DashboardData]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DenominationDetail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DepositorSession]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Device]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceConfig]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceLock]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceLogin]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DevicePrinter]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceSuspenseAccount]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIPrepopItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIPrepopList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIPrepopList_Item]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIScreen]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIScreenList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GuiScreenList_Screen]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIScreenText]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[GUIScreenType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Language]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LanguageList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LanguageList_Language]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ModelDifference]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ModelDifferenceAspect]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PasswordHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PasswordPolicy]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Permission]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PermissionPolicyMemberPermissionsObject]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PermissionPolicyNavigationPermissionsObject]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PermissionPolicyObjectPermissionsObject]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PermissionPolicyRole]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PermissionPolicyTypePermissionsObject]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PrinterStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Printout]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Role]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Transaction]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionLimitList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionLimitListItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionText]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionTypeList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionTypeList_TransactionTypeListItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TransactionTypeListItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserGroup]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserLock]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationItemValue]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationList_ValidationItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationText]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ValidationType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WebPortalLogin]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WebPortalRole]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WebPortalRoleRoles_ApplicationUserApplicationUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WebUserLoginCount]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WebUserPasswordHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[XPObjectType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[exp].[ApplicationException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[exp].[CrashEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[exp].[EscrowJam]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[exp].[SessionException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[exp].[TransactionException]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[sysTextItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[sysTextItemCategory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[sysTextItemType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[sysTextTranslation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[TextItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[TextItemCategory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[TextItemType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[xlns].[TextTranslation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DenominationView]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[ThisDevice]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[TransactionView]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[viewConfig]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[viewPermissions]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[GetCITDenominationByDates]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[GetDestinationEmailsByAlertType]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[GetDeviceConfigByUserGroup]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[GetDeviceUsersByDevice]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[HashTransaction]",
+         "ObjectType": 1
+      }
+   ],
+   "UiHint": "H3NCHNL\\SQLEXPRESS.DepositorProductionBackup",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": true,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": true,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false
+}

@@ -1,0 +1,62 @@
+<UserControl x:Class="CashmereDeposit.Views.ATMScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls">
+  <DockPanel>
+    <uc:ScreenHeader DockPanel.Dock="Top"/>
+    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}" Text="Select an option"/>
+    <TextBlock x:Name="ErrorText" DockPanel.Dock="Top" Style="{StaticResource FormErrorTextBlock}"/>
+    <Grid DockPanel.Dock="Bottom" Row="100" ColumnSpan="100">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+      </Grid.ColumnDefinitions>
+      <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+      <Button x:Name="Cancel" HorizontalAlignment="Stretch" Style="{StaticResource CancelNavigationButton}"
+              Visibility="Hidden">
+        <TextBlock x:Name="CancelButton_Caption" Text="Cancel"/>
+      </Button>
+      <Button x:Name="NavigateBack" Grid.Column="0" HorizontalAlignment="Stretch"
+              Style="{StaticResource NavigationButton}">
+        <TextBlock x:Name="BackButton_Caption" Text="Back"/>
+      </Button>
+      <Button x:Name="GetPreviousPage" Grid.Column="3" HorizontalAlignment="Stretch"
+              Style="{StaticResource NavigationButton}">
+        <TextBlock x:Name="GetPreviousPageButton_Caption" Text="Prev"/>
+      </Button>
+      <Button x:Name="GetNextPage" Grid.Column="4" HorizontalAlignment="Stretch"
+              Style="{StaticResource NavigationButton}">
+        <TextBlock x:Name="GetNextPageButton_Caption" Text="More"/>
+      </Button>
+    </Grid>
+    <ListBox x:Name="VisibleOptions">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="2"/>
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Grid Margin="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="20*"/>
+              <ColumnDefinition Width="80*"/>
+            </Grid.ColumnDefinitions>
+            <Border MaxHeight="75" Margin="10" BorderBrush="{StaticResource ButtonNormalBrush}" BorderThickness="0">
+              <Image Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                     Source="{Binding Path=ImageContent}"/>
+            </Border>
+            <TextBlock Grid.Column="1" FontSize="30" VerticalAlignment="Center" Margin="10"
+                       Text="{Binding Path=SelectionText}"/>
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ListBox>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,103 @@
+<UserControl x:Class="CashmereDeposit.Views.TransactionReportScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls">
+  <DockPanel>
+    <uc:ScreenHeader DockPanel.Dock="Top"/>
+    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}" Text="Transactions"/>
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition Height="75"/>
+        <RowDefinition Height="75"/>
+        <RowDefinition Height="auto"/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="auto"/>
+      </Grid.ColumnDefinitions>
+      <DataGrid x:Name="Transactions" SelectionMode="Single" SelectionUnit="FullRow" CanUserAddRows="false"
+                CanUserDeleteRows="false" CanUserResizeRows="false" CanUserSortColumns="false" Margin="5 0"
+                AutoGenerateColumns="false">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Date" Binding="{Binding Path=tx_end_date}"/>
+          <DataGridTextColumn Header="Type" Binding="{Binding Path=TransactionTypeListItem.name}"/>
+          <DataGridTextColumn Header="Account Number" Binding="{Binding Path=tx_account_number}"/>
+          <DataGridTextColumn Header="Account Name" Binding="{Binding Path=cb_account_name}"/>
+          <DataGridTextColumn Header="Ref Account" Binding="{Binding Path=tx_ref_account}"/>
+          <DataGridTextColumn Header="Ref Name" Binding="{Binding Path=cb_ref_account_name}"/>
+          <DataGridTextColumn Header="Currency" Binding="{Binding Path=Currency.code}"/>
+          <DataGridTextColumn Header="Total Amount" Binding="{Binding Path=tx_amount}"/>
+          <DataGridTextColumn Header="Transaction Number" Binding="{Binding Path=cb_tx_number}"/>
+          <DataGridTextColumn Header="Narration" Binding="{Binding Path=tx_narration}"/>
+        </DataGrid.Columns>
+      </DataGrid>
+      <DataGrid x:Name="DenominationList" SelectionMode="Single" SelectionUnit="FullRow" CanUserAddRows="false"
+                CanUserDeleteRows="false" CanUserResizeRows="false" CanUserSortColumns="false" Margin="5 0"
+                Grid.Column="1" AutoGenerateColumns="false">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Denomination" Binding="{Binding Path=denom}"/>
+          <DataGridTextColumn Header="Count" Binding="{Binding Path=count}"/>
+          <DataGridTextColumn Header="Sub Total" Binding="{Binding Path=subtotal}"/>
+        </DataGrid.Columns>
+      </DataGrid>
+      <Grid Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="120"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="PageFirst_Transaction" MinHeight="0" Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="GetFirstPageButton_Caption" Text="First"/>
+        </Button>
+        <Button x:Name="PagePrevious_Transaction" Grid.Column="1" MinHeight="0"
+                Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="GetPreviousPageButton_Caption" Text="Prev"/>
+        </Button>
+        <TextBlock x:Name="PageNumberText" Grid.Column="2" MinHeight="0" Style="{StaticResource Heading2}"/>
+        <Button x:Name="PageNext_Transaction" Grid.Column="3" MinHeight="0"
+                Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="GetNextPageButton_Caption" Text="Prev"/>
+        </Button>
+        <Button x:Name="PageLast_Transaction" Grid.Column="4" MinHeight="0"
+                Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="GetLastPageButton_Caption" Text="Prev"/>
+        </Button>
+      </Grid>
+      <Grid Row="2" HorizontalAlignment="Left" Width="640">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="150"/>
+          <ColumnDefinition Width="150"/>
+          <ColumnDefinition Width="100"/>
+          <ColumnDefinition Width="120"/>
+          <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+      </Grid>
+      <Grid Row="100" ColumnSpan="100">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition Width="auto"/>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+        <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
+          <TextBlock x:Name="CancelButton_Caption" Text="Cancel"/>
+        </Button>
+        <Button x:Name="Back" Grid.Column="1" Style="{StaticResource NavigationButton}">
+          <TextBlock x:Name="BackButton_Caption" Text="Back"/>
+        </Button>
+      </Grid>
+      <Button x:Name="PrintReceipt" Grid.Column="1" Grid.Row="1" Margin="20 5"
+              Style="{StaticResource LastNavigationButton}">
+        <TextBlock x:Name="PrintButton_Caption" Text="Print"/>
+      </Button>
+    </Grid>
+  </DockPanel>
+</UserControl>

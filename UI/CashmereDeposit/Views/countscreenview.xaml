@@ -1,0 +1,93 @@
+<UserControl x:Class="CashmereDeposit.Views.CountScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             xmlns:DummyData="clr-namespace:CashmereDeposit.ViewModels.DummyData"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls"
+             xmlns:cal="http://www.caliburnproject.org"
+             cal:Message.Attach="[Event PreviewMouseDown] = [Action ResetIdleTimerOnUserInteraction]">
+  <Control.Background>
+    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+  </Control.Background>
+  <DockPanel>
+    <uc:ScreenHeader DockPanel.Dock="Top"/>
+    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}" Text="Count"/>
+    <TextBlock x:Name="ErrorText" DockPanel.Dock="Top" Style="{StaticResource FormErrorTextBlock}"
+               HorizontalAlignment="Center"/>
+    <Grid>
+      <Grid x:Name="FullInstructionsExpanderIsVisible" Visibility="Hidden" ZIndex="10000"
+            Style="{StaticResource FullInstructions_Grid}">
+        <DockPanel>
+          <TextBlock x:Name="FullInstructionsTitle" DockPanel.Dock="Top" Style="{StaticResource Heading2}"
+                     FontWeight="Bold" Text="Instructions"/>
+          <Button x:Name="HideFullInstructions" DockPanel.Dock="Bottom" Style="{StaticResource NavigationButton}">
+            <TextBlock x:Name="HideFullInstructionsCaption" Text="OK"/>
+          </Button>
+          <ScrollViewer Style="{StaticResource Instructions_ScrollViewer}">
+            <TextBlock x:Name="FullInstructions" Style="{StaticResource ImportantTextBlock}" TextWrapping="Wrap"
+                       TextAlignment="Left" Text="Instruction text goes here"/>
+          </ScrollViewer>
+        </DockPanel>
+      </Grid>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="70*"/>
+          <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+          </Grid.RowDefinitions>
+          <Viewbox Grid.Row="0" DockPanel.Dock="Top" MaxHeight="60">
+            <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Style="{StaticResource CurrentCountText}">
+              <TextBlock x:Name="CountScreenTotalCaption" VerticalAlignment="Center" HorizontalAlignment="Center"
+                         Style="{StaticResource Heading2}" Text="Total"/>
+              <TextBlock x:Name="CurrentTransaction_CurrencyCode" Margin="10 0" VerticalAlignment="Center"
+                         HorizontalAlignment="Center" Style="{StaticResource Heading2}" Text="KES"/>
+              <TextBlock x:Name="CurrentTransaction_TotalDisplayAmountString" VerticalAlignment="Center"
+                         HorizontalAlignment="Center" Style="{StaticResource Heading2}" Text="999,999,999"/>
+            </StackPanel>
+          </Viewbox>
+          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20">
+            <Button x:Name="Count" Style="{StaticResource ButtonBase}" MinWidth="200" MinHeight="75"
+                    Grid.ColumnSpan="3">
+              <TextBlock x:Name="CountButtonCaption" Text="Count"/>
+            </Button>
+          </StackPanel>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="EscrowReject" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
+                    MinHeight="75" Grid.ColumnSpan="3">
+              <TextBlock x:Name="EscrowRejectButtonCaption" Text="Reject"/>
+            </Button>
+            <Button x:Name="EscrowDrop" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
+                    MinHeight="75" Grid.ColumnSpan="3">
+              <TextBlock x:Name="EscrowDropButtonCaption" Text="Drop"/>
+            </Button>
+          </StackPanel>
+        </Grid>
+        <Grid Row="100" ColumnSpan="100">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+          <Button x:Name="Next" Grid.Column="0" Grid.ColumnSpan="20" Style="{StaticResource NextNavigationButton}">
+            <TextBlock x:Name="NextCaption" Text="Go for it!"/>
+          </Button>
+          <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
+            <TextBlock x:Name="CancelCaption" Text="Cancel"/>
+          </Button>
+          <Button x:Name="ShowFullInstructions" Grid.Column="1" Style="{StaticResource NavigationButton}">
+            <TextBlock x:Name="ShowFullInstructionsCaption" Text="Help"/>
+          </Button>
+        </Grid>
+      </Grid>
+    </Grid>
+  </DockPanel>
+</UserControl>

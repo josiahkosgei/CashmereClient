@@ -1,0 +1,32 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="GeneralErrorTitleText">An Error has been detected</system:String>
+    <system:String x:Key="GeneralErrorDescriptionText">An error was encoutered during the operation of the machine. Kindly remove the trapped notes as per the instructions below or contact Customer Care or a custodian for assistance.</system:String>
+    <system:String x:Key="NoteJamErrorTitleText">Note Jam Detected</system:String>
+    <system:String x:Key="NoteJamErrorDescriptionText">A note has become stuck while being counted. Kindly remove the trapped notes as per the instructions below or contact a custodian for assistance.</system:String>
+    <system:String x:Key="OutofOrderErrorTitleText">Out of Order</system:String>
+    <system:String x:Key="OutofOrderErrorDescriptionText">The depositor is temporarily unavailable, kindly use a different machine.</system:String>
+    <system:String x:Key="ProcessingTitleText">Processing</system:String>
+    <system:String x:Key="ProcessingDescriptionText">Please wait while the selected process is performed</system:String>
+
+    <!--#region Idle Screen Timeout -->
+    <system:String x:Key="ScreenIdleTimeout_TitleText">Timeout elsapsed</system:String>
+    <system:String x:Key="ScreenIdleTimeout_DescriptionText">Screen timed out on no user input</system:String>
+    <!--#endregion-->
+    
+    <!--#region Validation Error Messages -->
+    <system:String x:Key="ValidationErrorGeneric">Validation Error, Validation Failed</system:String>
+    <system:String x:Key="ValidationRequiredFieldError">This field is required</system:String>
+    <!--#endregion-->
+
+    <!--#region Validation Error Messages -->
+    <system:String x:Key="OverCount_ErrorMessage">Cannot deposit more than {0} {1:#,##0.00}. Press {btn_escrow_reject_caption} to continue.</system:String>
+    <system:String x:Key="OverDeposit_ErrorMessage">WARNING: deposits greater than {0} {1:#,##0.00} will not be credited.</system:String>
+    <!--#endregion-->
+
+    <!--#region Count Error Messages -->
+    <system:String x:Key="UnderDeposit_ErrorMessage">Kindly deposit {0} {1:#,##0.00} or more to continue or cancel the transaction</system:String>
+    <system:String x:Key="Bagfull_Overflow_WarningMessage">Counting Complete. Press {btn_escrow_drop_caption} to complete the deposit or {btn_escrow_reject_caption} to Cancel</system:String>
+    <!--#endregion-->
+</ResourceDictionary>

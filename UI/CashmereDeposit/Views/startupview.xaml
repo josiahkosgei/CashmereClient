@@ -1,0 +1,12 @@
+<UserControl x:Class="CashmereDeposit.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views"
+             Height="{Binding Source={x:Static SystemParameters.PrimaryScreenHeight}}"
+             Width="{Binding Source={x:Static SystemParameters.PrimaryScreenWidth}}">
+  <Grid Background="White">
+    <ContentControl x:Name="ActiveItem"/>
+  </Grid>
+</UserControl>

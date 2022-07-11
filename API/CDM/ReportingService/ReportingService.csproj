@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Cashmere.API.CDM.ReportingService</AssemblyName>
+    <RootNamespace>Cashmere.API.CDM.ReportingService</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Library\Standard\Standard.csproj" />
+    <ProjectReference Include="..\Reporting.Uptime.DataAccess\Reporting.UptimeDataAccess.csproj" />
+    <ProjectReference Include="..\UptimeReportLibrary\UptimeReportLibrary.csproj" />
+  </ItemGroup>
+
+</Project>
