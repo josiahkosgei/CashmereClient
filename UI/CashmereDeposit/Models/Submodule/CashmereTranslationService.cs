@@ -21,7 +21,6 @@ namespace CashmereDeposit.Models.Submodule
   public class CashmereTranslationService : SubmoduleBase
   {
     public bool isMultiLanguage { get; }
-
     public CashmereTranslationService(ApplicationViewModel applicationViewModel, CDMLicense license)
       : base(applicationViewModel, license, new Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE"), nameof (CashmereTranslationService))
     {

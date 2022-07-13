@@ -313,7 +313,7 @@ namespace CashmereDeposit.Models
       {
         ApplicationViewModel.Log.InfoFormat(GetType().Name, "Currency Changed", "Tx Property Changed", "Currency changed from {0} to {1}", _currency?.Code, value?.Code);
         _currency = DepositorDBContext.Currencies.First(x => x.Code == value.Code);
-        Transaction.Currency = _currency;
+        Transaction.TxCurrencyNavigation = _currency;
         NotifyOfPropertyChange(nameof (Currency));
       }
     }
@@ -496,7 +496,7 @@ namespace CashmereDeposit.Models
         var transactionType = TransactionType;
         if (transactionType == null)
           return null;
-        var transactionLimitList = transactionType.TxLimitList;
+        var transactionLimitList = transactionType.TxLimitListNavigation;
         if (transactionLimitList == null)
           return null;
         var transactionLimitListItems = transactionLimitList.TransactionLimitListItems;
@@ -510,12 +510,12 @@ namespace CashmereDeposit.Models
     [IgnoreDataMember]
     public TransactionTypeListItem TransactionType
     {
-      get => _transaction?.TransactionTypeListItem;
+      get => _transaction?.TxTypeNavigation;
       set
       {
         ApplicationViewModel.Log.InfoFormat(GetType().Name, "TransactionType Changed", "Tx Property Changed", "TransactionType changed from {0} to {1}", _transactionType?.CbTxType, value?.CbTxType);
         _transactionType = value;
-        Transaction.TransactionTypeListItem = DepositorDBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == value.Id);
+        Transaction.TxTypeNavigation = DepositorDBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == value.Id);
         NotifyOfPropertyChange(nameof (TransactionType));
       }
     }
@@ -526,31 +526,31 @@ namespace CashmereDeposit.Models
       get
       {
         var summaryListItemList = new List<SummaryListItem>();
-        if (Transaction.TransactionTypeListItem.DefaultAccount == null)
+        if (Transaction.TxTypeNavigation.DefaultAccount == null)
         {
           if (AccountNumber != null)
             summaryListItemList.Add(new SummaryListItem()
             {
-              Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Account Number", TransactionType?.TransactionText?.AccountNumberCaptionId, "Account Number"),
+              Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Account Number", TransactionType?.TransactionText?.AccountNumberCaption, "Account Number"),
               Value = AccountNumber.Trim()
             });
           if (AccountName != null)
             summaryListItemList.Add(new SummaryListItem()
             {
-              Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Account Name", TransactionType?.TransactionText?.AccountNameCaptionId, "Account Name"),
+              Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Account Name", TransactionType?.TransactionText?.AccountNameCaption, "Account Name"),
               Value = AccountName.Trim()
             });
         }
         if (ReferenceAccount != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Reference Number", TransactionType?.TransactionText?.ReferenceAccountNumberCaptionId, "Reference Number"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Reference Number", TransactionType?.TransactionText?.ReferenceAccountNumberCaption, "Reference Number"),
             Value = ReferenceAccount.Trim()
           });
         if (ReferenceAccountName != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Reference Name", TransactionType?.TransactionText?.ReferenceAccountNameCaptionId, "Reference Name"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionAccountReferences Reference Name", TransactionType?.TransactionText?.ReferenceAccountNameCaption, "Reference Name"),
             Value = ReferenceAccountName.Trim()
           });
         return summaryListItemList;
@@ -571,31 +571,31 @@ namespace CashmereDeposit.Models
         if (FundsSource != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  FundsSource", TransactionType?.TransactionText?.FundsSourceCaptionId, "Source of Funds"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  FundsSource", TransactionType?.TransactionText?.FundsSourceCaption, "Source of Funds"),
             Value = FundsSource.Trim()
           });
         if (Narration != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  Narration", TransactionType?.TransactionText?.NarrationCaptionId, "Narration"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  Narration", TransactionType?.TransactionText?.NarrationCaption, "Narration"),
             Value = Narration.Trim()
           });
         if (DepositorName != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences Depositor Name", TransactionType?.TransactionText?.DepositorNameCaptionId, "Depositor Name"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences Depositor Name", TransactionType?.TransactionText?.DepositorNameCaption, "Depositor Name"),
             Value = DepositorName.Trim()
           });
         if (IDNumber != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  ID Number", TransactionType?.TransactionText?.IdNumberCaptionId, "ID Number"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  ID Number", TransactionType?.TransactionText?.IdNumberCaption, "ID Number"),
             Value = IDNumber.Trim()
           });
         if (Phone != null)
           summaryListItemList.Add(new SummaryListItem()
           {
-            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  Phone", TransactionType?.TransactionText?.PhoneNumberCaptionId, "Phone"),
+            Title = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".TransactionReferences  Phone", TransactionType?.TransactionText?.PhoneNumberCaption, "Phone"),
             Value = Phone.Trim()
           });
         return summaryListItemList;
@@ -608,10 +608,10 @@ namespace CashmereDeposit.Models
         get
         {
             DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
-            if ((deviceConfiguration != null ? (deviceConfiguration.USE_MAX_DEPOSIT_COUNT ? 1 : 0) : 0) == 0 || this.TransactionType?.TxLimitList?.Get_overcount_amount(this.Currency) <= 0L || (bool)!this.TransactionType?.TxLimitList?.Get_prevent_overcount(this.Currency))
+            if ((deviceConfiguration != null ? (deviceConfiguration.USE_MAX_DEPOSIT_COUNT ? 1 : 0) : 0) == 0 || this.TransactionType?.TxLimitListNavigation?.Get_overcount_amount(this.Currency) <= 0L || (bool)!this.TransactionType?.TxLimitListNavigation?.Get_prevent_overcount(this.Currency))
                 return false;
             Decimal totalDisplayAmount = this.TotalDisplayAmount;
-            long? overcountAmount = this.TransactionType?.TxLimitList?.Get_overcount_amount(this.Currency);
+            long? overcountAmount = this.TransactionType?.TxLimitListNavigation?.Get_overcount_amount(this.Currency);
             Decimal? nullable = overcountAmount.HasValue ? new Decimal?((Decimal) overcountAmount.GetValueOrDefault()) : new Decimal?();
             Decimal valueOrDefault = nullable.GetValueOrDefault();
             return totalDisplayAmount >= valueOrDefault & nullable.HasValue;
@@ -622,10 +622,10 @@ namespace CashmereDeposit.Models
     {
         get
         {
-            if (this.TransactionType?.TxLimitList?.Get_overdeposit_amount(this.Currency) <= 0L || (bool)!this.TransactionType?.TxLimitList?.Get_prevent_overdeposit(this.Currency))
+            if (this.TransactionType?.TxLimitListNavigation?.Get_overdeposit_amount(this.Currency) <= 0L || (bool)!this.TransactionType?.TxLimitListNavigation?.Get_prevent_overdeposit(this.Currency))
                 return false;
             Decimal totalDisplayAmount = this.TotalDisplayAmount;
-            long? overdepositAmount = this.TransactionType?.TxLimitList?.Get_overdeposit_amount(this.Currency);
+            long? overdepositAmount = this.TransactionType?.TxLimitListNavigation?.Get_overdeposit_amount(this.Currency);
             Decimal? nullable = overdepositAmount.HasValue ? new Decimal?((Decimal) overdepositAmount.GetValueOrDefault()) : new Decimal?();
             Decimal valueOrDefault = nullable.GetValueOrDefault();
             return totalDisplayAmount >= valueOrDefault & nullable.HasValue;
@@ -637,7 +637,7 @@ namespace CashmereDeposit.Models
         get
         {
             var transactionLimits = this.TransactionLimits;
-            if ((transactionLimits != null ? (transactionLimits.PreventUnderdeposit ? 1 : 0) : 0) == 0 || !(this.TotalDisplayAmount > 0M))
+            if ((transactionLimits != null ? ((bool)transactionLimits.PreventUnderdeposit ? 1 : 0) : 0) == 0 || !(this.TotalDisplayAmount > 0M))
                 return false;
             Decimal totalDisplayAmount = this.TotalDisplayAmount;
             long? underdepositAmount = this.TransactionLimits?.UnderdepositAmount;
@@ -851,7 +851,7 @@ namespace CashmereDeposit.Models
       {
         (object) this._transaction.TxStartDate,
         (object) this._transaction.TxEndDate,
-        (object) this._transaction.TransactionTypeListItem.Name,
+        (object) this._transaction.TxTypeNavigation.Name,
         (object) this._transaction.TxAccountNumber,
         (object) this._transaction.CbAccountName,
         (object) this._transaction.TxRefAccount,
@@ -901,7 +901,7 @@ namespace CashmereDeposit.Models
       {
         (object) this._transaction.TxStartDate,
         (object) this._transaction.TxEndDate,
-        (object) this._transaction.TransactionTypeListItem.Name,
+        (object) this._transaction.TxTypeNavigation.Name,
         (object) this._transaction.TxAccountNumber,
         (object) this._transaction.CbAccountName,
         (object) this._transaction.TxRefAccount,

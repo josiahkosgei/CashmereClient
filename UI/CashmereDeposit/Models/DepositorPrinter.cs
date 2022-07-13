@@ -77,7 +77,7 @@ namespace CashmereDeposit.Models
 
         private void dispTimer_Tick(object sender, EventArgs e) => CTSHolding = GetCTSHolding();
 
-        public void PrintCIT(CIT cit, DepositorDBContext DBContext, bool isCopy)
+        public void PrintCIT(CIT CIT, DepositorDBContext DBContext, bool isCopy)
         {
             CITPrintout printout = new CITPrintout()
             {
@@ -89,7 +89,7 @@ namespace CashmereDeposit.Models
             string printoutFromCIT;
             try
             {
-                printoutFromCIT = GeneratePrintoutFromCIT(cit, printout);
+                printoutFromCIT = GeneratePrintoutFromCIT(CIT, printout);
             }
             catch (IOException ex)
             {
@@ -106,7 +106,7 @@ namespace CashmereDeposit.Models
                 Log?.ErrorFormat(GetType().Name, 3, ApplicationErrorConst.ERROR_SYSTEM.ToString(), "Error generating CIT receipt: {0}", ex.MessageString());
                 throw;
             }
-            cit.CITPrintouts.Add(printout);
+            CIT.CITPrintouts.Add(printout);
             try
             {
                 ApplicationViewModel.SaveToDatabase(DBContext);
@@ -192,17 +192,17 @@ namespace CashmereDeposit.Models
           Printout printout,
           DepositorDBContext depositorDBContext)
         {
-            TransactionText transactionText = transaction?.TransactionTypeListItem?.TransactionText;
+            TransactionText transactionText = transaction?.TxTypeNavigation?.TransactionText;
             if (transactionText == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): transactionText cannot be null");
-            string str1 = "\r\n" + ApplicationViewModel.CashmereTranslationService?.TranslateUserText(GetType().Name + ".GeneratePrintoutFromTransaction receiptTemplate", transactionText.ReceiptTemplateId, null).Replace("\r\n", "\n").Replace("\n", "\r\n");
+            string str1 = "\r\n" + ApplicationViewModel.CashmereTranslationService?.TranslateUserText(GetType().Name + ".GeneratePrintoutFromTransaction receiptTemplate", transactionText.ReceiptTemplate, null).Replace("\r\n", "\n").Replace("\n", "\r\n");
             if (str1 == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): receipt_template cannot be null");
             Device device = depositorDBContext.Devices.FirstOrDefault(x => x.Id == transaction.DeviceId);
             if (device == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): transactionDevice cannot be null");
             string str2 = str1.Replace("{device_name}", device.Name).Replace("{device_machine_name}", device.MachineName).Replace("{device_device_number}", device.DeviceNumber).Replace("{receipt_bank_name}", ApplicationViewModel.DeviceConfiguration.RECEIPT_BANK_NAME);
-            string str3 = (!printout.IsCopy ? str2.Replace("{receipt_copy_text}" + Environment.NewLine, "").Replace("{receipt_copy_print_date}" + Environment.NewLine, "") : str2.Replace("{receipt_copy_text}", ApplicationViewModel.DeviceConfiguration.RECEIPT_COPY_TEXT).Replace("{receipt_copy_print_date}", "Printed on: " + DateTime.Now.ToString(ApplicationViewModel.DeviceConfiguration.RECEIPT_DATE_FORMAT))).Replace("{transactiontypelistitem_name}", transaction.TransactionTypeListItem.Name);
+            string str3 = (!printout.IsCopy ? str2.Replace("{receipt_copy_text}" + Environment.NewLine, "").Replace("{receipt_copy_print_date}" + Environment.NewLine, "") : str2.Replace("{receipt_copy_text}", ApplicationViewModel.DeviceConfiguration.RECEIPT_COPY_TEXT).Replace("{receipt_copy_print_date}", "Printed on: " + DateTime.Now.ToString(ApplicationViewModel.DeviceConfiguration.RECEIPT_DATE_FORMAT))).Replace("{transactiontypelistitem_name}", transaction.TxTypeNavigation.Name);
             Transaction transaction1 = transaction;
             DateTime dateTime;
             string newValue1;
@@ -230,14 +230,14 @@ namespace CashmereDeposit.Models
             string str5 = str4.Replace("{tx_start_date}", newValue2);
             int val = transaction.TxAccountNumber.Length - ApplicationViewModel.DeviceConfiguration.RECEIPT_ACCOUNT_NUMBER_VISIBLE_DIGITS;
             string str6 = str5.Replace("{tx_account_number}", transaction.TxAccountNumber.Substring(val.Clamp(0, transaction.TxAccountNumber.Length - 1)).PadLeft(transaction.TxAccountNumber.Length, ApplicationViewModel.DeviceConfiguration.RECEIPT_ACCOUNT_NO_PAD_CHAR)).Replace("{cb_account_name}", transaction.CbAccountName);
-            string str7 = transaction.TxRefAccount == null ? str6.Replace("{tx_ref_account}" + Environment.NewLine, "") : str6.Replace("{tx_ref_account}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DevicePrinter.PrintTransaction.reference_account_number_caption", transactionText?.ReferenceAccountNumberCaptionId, "Reference Account"), transaction.TxRefAccount));
-            string str8 = (transaction.CbRefAccountName == null ? str7.Replace("{cb_ref_account_name}" + Environment.NewLine, "") : str7.Replace("{cb_ref_account_name}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DevicePrinter.PrintTransaction.reference_account_name_caption", transactionText?.ReferenceAccountNameCaptionId, "Reference Name"), transaction.CbRefAccountName))).Replace("{branch_name}", device.Branch.Name).Replace("{tx_random_number}", transaction.TxRandomNumber.Value.ToString() ?? "");
+            string str7 = transaction.TxRefAccount == null ? str6.Replace("{tx_ref_account}" + Environment.NewLine, "") : str6.Replace("{tx_ref_account}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DevicePrinter.PrintTransaction.reference_account_number_caption", transactionText?.ReferenceAccountNumberCaption, "Reference Account"), transaction.TxRefAccount));
+            string str8 = (transaction.CbRefAccountName == null ? str7.Replace("{cb_ref_account_name}" + Environment.NewLine, "") : str7.Replace("{cb_ref_account_name}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DevicePrinter.PrintTransaction.reference_account_name_caption", transactionText?.ReferenceAccountNameCaption, "Reference Name"), transaction.CbRefAccountName))).Replace("{branch_name}", device.Branch.Name).Replace("{tx_random_number}", transaction.TxRandomNumber.Value.ToString() ?? "");
             string str9 = (transaction.CbTxNumber == null ? str8.Replace("{cb_tx_number}" + Environment.NewLine, "") : str8.Replace("{cb_tx_number}", transaction.CbTxNumber ?? "")).Replace("{tx_currency}", transaction.TxCurrency.ToUpper());
-            string str10 = transaction.TxNarration == null ? str9.Replace("{tx_narration}" + Environment.NewLine, "") : str9.Replace("{tx_narration}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.narration_caption", transactionText?.NarrationCaptionId, "Narration"), transaction.TxNarration));
-            string str11 = transaction.FundsSource == null ? str10.Replace("{tx_funds_source}" + Environment.NewLine, "") : str10.Replace("{tx_funds_source}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.funds_source_caption", transactionText?.FundsSourceCaptionId, "Funds Source"), transaction.FundsSource));
-            string str12 = transaction.TxDepositorName == null ? str11.Replace("{tx_depositor_name}" + Environment.NewLine, "") : str11.Replace("{tx_depositor_name}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.depositor_name_caption", transactionText?.DepositorNameCaptionId, "Depositor Name"), transaction.TxDepositorName));
-            string str13 = string.IsNullOrWhiteSpace(transaction.TxIdNumber) ? str12.Replace("{tx_id_number}" + Environment.NewLine, "") : str12.Replace("{tx_id_number}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.id_number_caption", transactionText?.IdNumberCaptionId, "ID Number"), transaction.TxIdNumber));
-            List<string> list = (transaction.TxPhone == null ? str13.Replace("{tx_phone}" + Environment.NewLine, "") : str13.Replace("{tx_phone}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.phone_number_caption", transactionText?.PhoneNumberCaptionId, "Phone"), transaction.TxPhone))).Replace("{denomination_breakdown}", GenerateDenominationBreakdown(transaction)).Replace("{Printout_UUID}", printout.PrintGuid.ToString()).Split(new string[1]
+            string str10 = transaction.TxNarration == null ? str9.Replace("{tx_narration}" + Environment.NewLine, "") : str9.Replace("{tx_narration}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.narration_caption", transactionText?.NarrationCaption, "Narration"), transaction.TxNarration));
+            string str11 = transaction.FundsSource == null ? str10.Replace("{tx_funds_source}" + Environment.NewLine, "") : str10.Replace("{tx_funds_source}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.funds_source_caption", transactionText?.FundsSourceCaption, "Funds Source"), transaction.FundsSource));
+            string str12 = transaction.TxDepositorName == null ? str11.Replace("{tx_depositor_name}" + Environment.NewLine, "") : str11.Replace("{tx_depositor_name}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.depositor_name_caption", transactionText?.DepositorNameCaption, "Depositor Name"), transaction.TxDepositorName));
+            string str13 = string.IsNullOrWhiteSpace(transaction.TxIdNumber) ? str12.Replace("{tx_id_number}" + Environment.NewLine, "") : str12.Replace("{tx_id_number}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.id_number_caption", transactionText?.IdNumberCaption, "ID Number"), transaction.TxIdNumber));
+            List<string> list = (transaction.TxPhone == null ? str13.Replace("{tx_phone}" + Environment.NewLine, "") : str13.Replace("{tx_phone}", string.Format("{0}: {1}", ApplicationViewModel.CashmereTranslationService.TranslateUserText("DepositorPrinter.GeneratePrintoutFromTransaction.phone_number_caption", transactionText?.PhoneNumberCaption, "Phone"), transaction.TxPhone))).Replace("{denomination_breakdown}", GenerateDenominationBreakdown(transaction)).Replace("{Printout_UUID}", printout.PrintGuid.ToString()).Split(new string[1]
             {
           Environment.NewLine
             }, StringSplitOptions.None).ToList();
@@ -274,14 +274,14 @@ namespace CashmereDeposit.Models
             return path1;
         }
 
-        private string GeneratePrintoutFromCIT(CIT cit, CITPrintout printout)
+        private string GeneratePrintoutFromCIT(CIT CIT, CITPrintout printout)
         {
             lock (PrintCITReceiptLock)
             {
                 try
                 {
                     List<string> stringList1 = new List<string>();
-                    new DepositorDBContext().Devices.FirstOrDefault(x => x.Id == cit.DeviceId);
+                    new DepositorDBContext().Devices.FirstOrDefault(x => x.Id == CIT.DeviceId);
                     stringList1.Add(MakeTitleText(ApplicationViewModel.DeviceConfiguration.RECEIPT_BANK_NAME));
                     if (printout.IsCopy)
                         stringList1.Add("RECEIPT COPY");
@@ -296,57 +296,57 @@ namespace CashmereDeposit.Models
                     stringList1.Add("Start Date: ");
                     List<string> stringList3 = stringList1;
                     string str2;
-                    if (!cit.FromDate.HasValue)
+                    if (!CIT.FromDate.HasValue)
                     {
                         dateTime = DateTime.MinValue;
                         str2 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     }
                     else
                     {
-                        dateTime = cit.FromDate.Value;
+                        dateTime = CIT.FromDate.Value;
                         str2 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     }
                     stringList3.Add(str2);
                     stringList1.Add("End Date: ");
                     List<string> stringList4 = stringList1;
-                    dateTime = cit.ToDate;
+                    dateTime = CIT.ToDate;
                     string str3 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     stringList4.Add(str3);
                     stringList1.Add("User: ");
-                    stringList1.Add(cit.StartUser.Username);
+                    stringList1.Add(CIT.StartUserNavigation.Username);
                     stringList1.Add("Authorising User: ");
-                    stringList1.Add(cit.AuthorisingUser.Username);
+                    stringList1.Add(CIT.AuthUserNavigation.Username);
                     stringList1.Add("Branch:");
-                    stringList1.Add(cit.Device.Branch.Name);
+                    stringList1.Add(CIT.Device.Branch.Name);
                     stringList1.Add("Device Name:");
-                    stringList1.Add(cit.Device.Name);
+                    stringList1.Add(CIT.Device.Name);
                     stringList1.Add("Device Location:");
-                    stringList1.Add(cit.Device.DeviceLocation);
+                    stringList1.Add(CIT.Device.DeviceLocation);
                     stringList1.Add("Bag Number:");
-                    stringList1.Add(cit.OldBagNumber);
+                    stringList1.Add(CIT.OldBagNumber);
                     stringList1.Add("Seal Number:");
-                    stringList1.Add(cit.SealNumber);
+                    stringList1.Add(CIT.SealNumber);
                     stringList1.Add("Total Transaction Count:");
-                    stringList1.Add(cit.Transactions.Count().ToString() ?? "");
+                    stringList1.Add(CIT.Transactions.Count().ToString() ?? "");
                     stringList1.Add("Total Note Count:");
-                    stringList1.Add(cit.Transactions.Sum(x => x.DenominationDetails.Sum(y => y.Count)).ToString() ?? "");
+                    stringList1.Add(CIT.Transactions.Sum(x => x.DenominationDetails.Sum(y => y.Count)).ToString() ?? "");
                     stringList1.Add("Total Currency Count:");
                     List<string> stringList5 = stringList1;
-                    int num1 = cit.Transactions.Select(x => x.Currency).Distinct().Count();
+                    int num1 = CIT.Transactions.Select(x => x.TxCurrencyNavigation).Distinct().Count();
                     string str4 = num1.ToString() ?? "";
                     stringList5.Add(str4);
                     stringList1.Add(DrawSingleLine(ApplicationViewModel.DeviceConfiguration.RECEIPT_WIDTH));
                     stringList1.Add(DrawDoubleLine(ApplicationViewModel.DeviceConfiguration.RECEIPT_WIDTH));
                     stringList1.Add(DrawSingleLine(ApplicationViewModel.DeviceConfiguration.RECEIPT_WIDTH));
-                    foreach (Currency currency1 in cit.Transactions.Select(x => x.Currency).Distinct().ToList())
+                    foreach (Currency currency1 in CIT.Transactions.Select(x => x.TxCurrencyNavigation).Distinct().ToList())
                     {
                         Currency currency = currency1;
-                        List<CITDenomination> list = cit.CITDenominations.Where(x => x.CurrencyId == currency.Code).ToList();
+                        List<CITDenomination> list = CIT.CITDenominations.Where(x => x.CurrencyId == currency.Code).ToList();
                         stringList1.Add("Currency:");
                         stringList1.Add(currency.Code.ToUpper());
                         stringList1.Add("Transaction Count:");
                         List<string> stringList6 = stringList1;
-                        num1 = cit.Transactions.Where(x => x.Currency == currency).Count();
+                        num1 = CIT.Transactions.Where(x => x.TxCurrencyNavigation == currency).Count();
                         string str5 = num1.ToString() ?? "";
                         stringList6.Add(str5);
                         stringList1.Add(DrawSingleLine(ApplicationViewModel.DeviceConfiguration.RECEIPT_WIDTH));
@@ -368,7 +368,7 @@ namespace CashmereDeposit.Models
                         stringList1.Add(DrawDoubleLine(ApplicationViewModel.DeviceConfiguration.RECEIPT_WIDTH));
                         try
                         {
-                            ICollection<Transaction> transactions = cit.Transactions;
+                            ICollection<Transaction> transactions = CIT.Transactions;
                             long? nullable1;
                             if (transactions == null)
                             {
@@ -397,12 +397,12 @@ namespace CashmereDeposit.Models
                     }
                     stringList1.Add("\n");
                     stringList1.Add("\n");
-                    stringList1.Add(cit.Id.ToString().ToUpper());
+                    stringList1.Add(CIT.Id.ToString().ToUpper());
                     stringList1.Add("\n");
-                    string path1 = string.Format("{0}\\[{1}]_citreceipt_{2}.txt", ApplicationViewModel.DeviceConfiguration.RECEIPT_FOLDER, DateTime.Now.ToString("yyy-MM-dd HH.mm.ss.fff"), cit.Id);
+                    string path1 = string.Format("{0}\\[{1}]_citreceipt_{2}.txt", ApplicationViewModel.DeviceConfiguration.RECEIPT_FOLDER, DateTime.Now.ToString("yyy-MM-dd HH.mm.ss.fff"), CIT.Id);
                     File.WriteAllText(path1 + "1", string.Join("\r", stringList1.ToArray()));
                     printout.PrintContent = string.Join(Environment.NewLine, stringList1.ToArray());
-                    cit.CITPrintouts.Add(printout);
+                    CIT.CITPrintouts.Add(printout);
                     if (ApplicationViewModel.DeviceConfiguration.RECEIPT_INVERT_ORDER)
                         stringList1.Reverse();
                     string str9 = string.Join("\r", stringList1.ToArray());

@@ -270,7 +270,6 @@ namespace CashmereDeposit
         {
             return dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception("Device not set correctly in database. Device is null during start up.");
         }
-
         /// <summary>
         /// Run migrations against Environment set
         /// </summary>

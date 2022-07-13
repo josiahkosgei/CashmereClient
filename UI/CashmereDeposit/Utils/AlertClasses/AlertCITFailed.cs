@@ -22,10 +22,10 @@ namespace CashmereDeposit.Utils.AlertClasses
     public const int ALERT_ID = 1300;
     private CIT _cit;
 
-    public AlertCITFailed(CIT cit, Device device, DateTime dateDetected)
+    public AlertCITFailed(CIT CIT, Device device, DateTime dateDetected)
       : base(device, dateDetected)
     {
-      _cit = cit != null ? cit : throw new NullReferenceException("Variable cit cannot be null");
+      _cit = CIT != null ? CIT : throw new NullReferenceException("Variable CIT cannot be null");
       using DepositorDBContext depositorDbContext = new DepositorDBContext();
       AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1300);
     }
@@ -53,7 +53,7 @@ namespace CashmereDeposit.Utils.AlertClasses
               entity.AlertEmails.Add(email);
           AlertSMS sms = GenerateSMS();
           if (sms != null)
-              entity.AlertSMSes.Add(sms);
+              entity.AlertSMS.Add(sms);
           ApplicationViewModel.SaveToDatabase(DBContext);
           return true;
       }
@@ -115,7 +115,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       tokens1.Add("[event_id]", str1);
       Tokens.Add("[event_name]", AlertType.Name);
       Tokens.Add("[event_description]", AlertType.Description);
-      Tokens.Add("[cit_date]", _cit.CITDate.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
+      Tokens.Add("[CIT_date]", _cit.CITDate.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
       IDictionary<string, string> tokens2 = Tokens;
       DateTime? nullable = _cit.FromDate;
       DateTime dateTime;
@@ -131,11 +131,11 @@ namespace CashmereDeposit.Utils.AlertClasses
         dateTime = nullable.Value;
         str2 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff");
       }
-      tokens2.Add("[cit_start]", str2);
+      tokens2.Add("[CIT_start]", str2);
       IDictionary<string, string> tokens3 = Tokens;
       dateTime = _cit.ToDate;
       string str3 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff");
-      tokens3.Add("[cit_end]", str3);
+      tokens3.Add("[CIT_end]", str3);
       IDictionary<string, string> tokens4 = Tokens;
       nullable = _cit.CITCompleteDate;
       string str4;
@@ -149,9 +149,9 @@ namespace CashmereDeposit.Utils.AlertClasses
         dateTime = nullable.Value;
         str4 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff");
       }
-      tokens4.Add("[cit_completed_date]", str4);
-      Tokens.Add("[user_init]", _cit.StartUser.Username);
-      Tokens.Add("[user_auth]", _cit.AuthorisingUser.Username);
+      tokens4.Add("[CIT_completed_date]", str4);
+      Tokens.Add("[user_init]", _cit.StartUserNavigation.Username);
+      Tokens.Add("[user_auth]", _cit.AuthUserNavigation.Username);
       Tokens.Add("[old_bag_number]", _cit.OldBagNumber);
       Tokens.Add("[new_bag_number]", _cit.NewBagNumber);
       Tokens.Add("[seal_number]", _cit.SealNumber);
@@ -172,7 +172,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         Currency groupKey = source.Key;
         stringBuilder.AppendLine(string.Format("<hr /><h3>Currency: {0}</h3><hr />", groupKey.Code.ToUpper()));
-        stringBuilder.AppendLine(string.Format("Transaction Count:{0}<br />", _cit.Transactions.Where(x => x.Currency.Code == groupKey.Code).Count()));
+        stringBuilder.AppendLine(string.Format("Transaction Count:{0}<br />", _cit.Transactions.Where(x => x.TxCurrencyNavigation.Code == groupKey.Code).Count()));
         stringBuilder.AppendLine("<table style=\"text - align: left\">");
         stringBuilder.AppendLine("<tr><th>Denomination</th><th>Count</th><th>Sub Total</th></tr>");
         foreach (CITDenomination citDenomination in source)
@@ -197,7 +197,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         Currency groupKey = source.Key;
         stringBuilder.AppendLine("----------------------------------------");
         stringBuilder.AppendLine(string.Format("Currency: {0}", groupKey.Code.ToUpper()));
-        stringBuilder.AppendLine(string.Format("Transaction Count:{0}", _cit.Transactions.Where(x => x.Currency.Code == groupKey.Code).Count()));
+        stringBuilder.AppendLine(string.Format("Transaction Count:{0}", _cit.Transactions.Where(x => x.TxCurrencyNavigation.Code == groupKey.Code).Count()));
         stringBuilder.AppendLine("----------------------------------------");
         stringBuilder.AppendLine(string.Format("{0,-10}{1,7}{2,21}", "Denomination", "Count", "Sub Total"));
         stringBuilder.AppendLine("________________________________________");
@@ -223,7 +223,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         Currency groupKey = source.Key;
         stringBuilder.AppendLine("CCY: " + groupKey.Code.ToUpper());
-        stringBuilder.AppendLine(string.Format("Tx: {0}", _cit.Transactions.Where(x => x.Currency == groupKey).Count()));
+        stringBuilder.AppendLine(string.Format("Tx: {0}", _cit.Transactions.Where(x => x.TxCurrencyNavigation == groupKey).Count()));
         stringBuilder.AppendLine("Notes: " + source.Sum(x => x.Count));
         stringBuilder.AppendLine(string.Format("{0} Total: {1:0.##}", groupKey.Code.ToUpper(), source.Sum(x => x.Subtotal) / 100.0));
       }

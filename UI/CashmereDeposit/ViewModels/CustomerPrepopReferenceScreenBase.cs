@@ -17,7 +17,7 @@ namespace CashmereDeposit.ViewModels
   public abstract class CustomerPrepopReferenceScreenBase : DepositorCustomerScreenBaseViewModel, ICustomerComboBoxInputScreen
   {
     private GuiScreenListScreen _GuiScreenListScreens;
-    private GuiPrepopList _GUIPrepopList;
+    private GUIPrepopList _GUIPrepopList;
     private string _EditComboBoxButtonCaption;
     private string _CancelEditComboBoxButtonCaption;
     private bool _ComboBoxGridIsVisible;
@@ -52,13 +52,13 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public GuiPrepopList GUIPrepopList
+    public GUIPrepopList GUIPrepopList
     {
         get { return _GUIPrepopList; }
         set
       {
         _GUIPrepopList = value;
-        NotifyOfPropertyChange((Expression<Func<GuiPrepopList>>) (() => GUIPrepopList));
+        NotifyOfPropertyChange((Expression<Func<GUIPrepopList>>) (() => GUIPrepopList));
       }
     }
 
@@ -116,7 +116,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        GuiPrepopList guiPrepopList = GUIPrepopList;
+        GUIPrepopList guiPrepopList = GUIPrepopList;
         return guiPrepopList == null || guiPrepopList.AllowFreeText;
       }
       set
@@ -190,10 +190,10 @@ namespace CashmereDeposit.ViewModels
       CustomerPrepopReferenceScreenBase referenceScreenBase = this;
       IsComboBoxEditMode = true;
       CustomerInput = customerInput;
-      GuiScreenListScreens = applicationViewModel.CurrentGUIScreen.GuiScreenListScreens.FirstOrDefault(x => x.GuiScreenList.Id == applicationViewModel.CurrentTransaction.TransactionType.TxTypeGuiScreenList.Id);
+      GuiScreenListScreens = applicationViewModel.CurrentGUIScreen.GuiScreenListScreens.FirstOrDefault(x => x.GuiScreenList == applicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlistNavigation.Id);
       EditComboBoxButtonCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(nameof (EditComboBoxButtonCaption), "sys_EditComboBoxButtonCaption", "Edit");
       CancelEditComboBoxButtonCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(nameof (CancelEditComboBoxButtonCaption), "sys_CancelEditComboBoxButtonCaption", "Choose");
-      if ((bool)!GuiScreenListScreens?.GuiPrepopList?.Enabled)
+      if ((bool)!GuiScreenListScreens?.GUIPrepopList?.Enabled)
         return;
       GuiScreenListScreen screenListScreen = GuiScreenListScreens;
       int num1;
@@ -203,14 +203,14 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        int? count = screenListScreen.GuiPrepopList?.GuiPrepopListItems?.Count;
+        int? count = screenListScreen.GUIPrepopList?.GUIPrepopListItems?.Count;
         int num2 = 0;
         num1 = count.GetValueOrDefault() > num2 & count.HasValue ? 1 : 0;
       }
       if (num1 == 0)
         return;
-      GUIPrepopList = GuiScreenListScreens.GuiPrepopList;
-      GuiPrepopList guiPrepopList = GUIPrepopList;
+      GUIPrepopList = GuiScreenListScreens.GUIPrepopList;
+      GUIPrepopList guiPrepopList = GUIPrepopList;
       List<string> list;
       if (guiPrepopList == null)
       {
@@ -218,22 +218,22 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        ICollection<GuiPrepopListItem> guiPrepopListItem = guiPrepopList.GuiPrepopListItems;
+        ICollection<GUIPrepopListItem> guiPrepopListItem = guiPrepopList.GUIPrepopListItems;
         if (guiPrepopListItem == null)
         {
           list = null;
         }
         else
         {
-          IEnumerable<GuiPrepopListItem> source1 = guiPrepopListItem.Where(x => x.GuiPrepopItem.Enabled);
+          IEnumerable<GUIPrepopListItem> source1 = guiPrepopListItem.Where(x => (bool)x.GUIPrepopItem.Enabled);
           if (source1 == null)
           {
             list = null;
           }
           else
           {
-            IOrderedEnumerable<GuiPrepopListItem> source2 = source1.OrderBy(x => x.ListOrder);
-            list = source2 != null ? source2.Select(x => ApplicationViewModel.CashmereTranslationService.TranslateUserText("CustomerPrepopReferenceScreenBase.CustomerComboBoxInput", new Guid?(x.GuiPrepopItem.ValueId), "Empty ListItem")).ToList() : null;
+            IOrderedEnumerable<GUIPrepopListItem> source2 = source1.OrderBy(x => x.ListOrder);
+            list = source2 != null ? source2.Select(x => ApplicationViewModel.CashmereTranslationService.TranslateUserText("CustomerPrepopReferenceScreenBase.CustomerComboBoxInput", new Guid?(x.GUIPrepopItem.Value), "Empty ListItem")).ToList() : null;
           }
         }
       }
@@ -256,10 +256,10 @@ namespace CashmereDeposit.ViewModels
 
     protected void SetComboBoxDefault(bool overrideWithDefault = false)
     {
-      GuiPrepopList guiPrepopList = GUIPrepopList;
-      if ((guiPrepopList != null ? (guiPrepopList.UseDefault ? 1 : 0) : 0) == 0 || !overrideWithDefault && !string.IsNullOrWhiteSpace(CustomerInput))
+      GUIPrepopList guiPrepopList = GUIPrepopList;
+      if ((guiPrepopList != null ? ((bool)guiPrepopList.UseDefault ? 1 : 0) : 0) == 0 || !overrideWithDefault && !string.IsNullOrWhiteSpace(CustomerInput))
         return;
-      SelectedCustomerComboBoxInput = CustomerComboBoxInput[GUIPrepopList.DefaultIndex.Clamp(0, GUIPrepopList.GuiPrepopListItems.Count - 1)];
+      SelectedCustomerComboBoxInput = CustomerComboBoxInput[GUIPrepopList.DefaultIndex.Clamp(0, GUIPrepopList.GUIPrepopListItems.Count - 1)];
     }
 
     public bool CanEditComboBox

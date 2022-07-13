@@ -21,7 +21,7 @@ namespace CashmereDeposit.ViewModels
 {
     public class DepositorCustomerScreenBaseViewModel : TimeoutScreenBase
     {
-        private GuiScreenText _currentGUIScreenText;
+        private GUIScreenText _currentGUIScreenText;
         private string _customerInput;
         private string _cancelCaption;
         private string _nextCaption;
@@ -57,13 +57,13 @@ namespace CashmereDeposit.ViewModels
             InitialiseScreen();
         }
 
-        public GuiScreenText CurrentGUIScreenText
+        public GUIScreenText CurrentGUIScreenText
         {
             get { return _currentGUIScreenText; }
             set
             {
                 _currentGUIScreenText = value;
-                NotifyOfPropertyChange((Expression<Func<GuiScreenText>>)(() => CurrentGUIScreenText));
+                NotifyOfPropertyChange((Expression<Func<GUIScreenText>>)(() => CurrentGUIScreenText));
             }
         }
 
@@ -256,7 +256,7 @@ namespace CashmereDeposit.ViewModels
 
         private void InitialiseScreen()
         {
-            CurrentGUIScreenText = ApplicationViewModel?.CurrentGUIScreen?.GuiScreenText;
+            CurrentGUIScreenText = ApplicationViewModel?.CurrentGUIScreen?.GUIScreenText;
             ApplicationViewModel applicationViewModel1 = ApplicationViewModel;
             int? nullable1;
             int num1;
@@ -266,7 +266,7 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                GuiScreen currentGuiScreen = applicationViewModel1.CurrentGUIScreen;
+                GUIScreen currentGuiScreen = applicationViewModel1.CurrentGUIScreen;
                 if (currentGuiScreen == null)
                 {
                     num1 = 0;
@@ -293,7 +293,7 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    GuiScreen currentGuiScreen = applicationViewModel2.CurrentGUIScreen;
+                    GUIScreen currentGuiScreen = applicationViewModel2.CurrentGUIScreen;
                     if (currentGuiScreen == null)
                     {
                         nullable1 = new int?();
@@ -306,14 +306,14 @@ namespace CashmereDeposit.ViewModels
                 num2 = nullable1.Value;
             }
             Keyboard = (KeyboardType)num2;
-            ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitleId, ApplicationViewModel?.CurrentGUIScreen?.Name) :this.ScreenTitle;
-            CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaptionId, "Cancel");
-            BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaptionId, "Back");
-            NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaptionId, "Next");
+            ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) :this.ScreenTitle;
+            CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
+            BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
+            NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
             GetPreviousPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetPreviousPageCaption", "sys_GetPreviousPage_Caption", "Prev");
             GetNextPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetNextPageCaption", "sys_GetNextPage_Caption", "Next");
-            FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructionsId, null));
-            ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstructionId, null));
+            FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructions, null));
+            ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstruction, null));
             ShowFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("ShowFullInstructionsCaption", "sys_ShowFullInstructions_Caption", "Help");
             HideFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("HideFullInstructionsCaption", "sys_Dialog_OK_Caption", "OK");
             FullInstructionsTitle = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("FullInstructionsTitle", "sys_FullInstructionsExpander_TitleCaption", "Instructions");
@@ -358,8 +358,8 @@ namespace CashmereDeposit.ViewModels
                 }
 
                 using DepositorDBContext depositorDbContext = new DepositorDBContext();
-                GuiScreen guiScreen = depositorDbContext.GuiScreens.Where(z => z.Id == ApplicationViewModel.CurrentGUIScreen.Id).FirstOrDefault();
-                ValidationList validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenListId == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGuiScreenListId).FirstOrDefault()?.ValidationList : null;
+                GUIScreen guiScreen = depositorDbContext.GuiScreens.Where(z => z.Id == ApplicationViewModel.CurrentGUIScreen.Id).FirstOrDefault();
+                ValidationList validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenList == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlist).FirstOrDefault()?.ValidationList : null;
                 if (validationList != null)
                 {
                     List<ValidationListValidationItem> listValidationItemList;
@@ -374,11 +374,11 @@ namespace CashmereDeposit.ViewModels
                     }
                     foreach (ValidationListValidationItem listValidationItem in listValidationItemList)
                     {
-                        if (listValidationItem.Enabled && listValidationItem.ValidationItem.Enabled && (listValidationItem.ValidationItem.ValidationType.Enabled && listValidationItem.ValidationItem.ValidationType.Name == "Regex") && (listValidationItem.ValidationItem.ValidationItemValues.Count <= 0 || !ClientValidationRules.RegexValidation(valueToValidate, listValidationItem.ValidationItem.ValidationItemValues.OrderBy(x => x.Order).ToList()[0].Value.Replace("\r\n", "\n").Replace("\n", ""))))
+                        if ((bool)listValidationItem.Enabled && listValidationItem.ValidationItem.Enabled && (listValidationItem.ValidationItem.ValidationType.Enabled && listValidationItem.ValidationItem.ValidationType.Name == "Regex") && (listValidationItem.ValidationItem.ValidationItemValues.Count <= 0 || !ClientValidationRules.RegexValidation(valueToValidate, listValidationItem.ValidationItem.ValidationItemValues.OrderBy(x => x.Order).ToList()[0].Value.Replace("\r\n", "\n").Replace("\n", ""))))
                         {
                             try
                             {
-                                PrintErrorText(ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ClientValidation Validation.ErrorMessage", listValidationItem?.ValidationItem?.ValidationText?.ErrorMessageId, "Validation Failed"));
+                                PrintErrorText(ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ClientValidation Validation.ErrorMessage", listValidationItem?.ValidationItem?.ValidationText?.ErrorMessage, "Validation Failed"));
                             }
                             catch (Exception ex)
                             {

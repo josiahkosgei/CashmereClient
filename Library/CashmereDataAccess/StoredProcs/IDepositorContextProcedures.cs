@@ -8,11 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.Extensions;
-using Cashmere.Library.CashmereDataAccess.StoredProcs.Models;
 
 namespace Cashmere.Library.CashmereDataAccess.StoredProcs
 {
-    public partial interface IDepositorContextProcedures
+    public partial interface IDepositorDBContextProcedures
     {
         Task<List<GetCITDenominationByDatesResult>> GetCITDenominationByDatesAsync(DateTime? startDate, DateTime? endDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<GetDestinationEmailsByAlertTypeResult>> GetDestinationEmailsByAlertTypeAsync(int? alertMessageTypeID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);

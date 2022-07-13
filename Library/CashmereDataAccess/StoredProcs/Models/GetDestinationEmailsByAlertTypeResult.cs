@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Cashmere.Library.CashmereDataAccess.StoredProcs
+#nullable enable
+
+namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     public partial class GetDestinationEmailsByAlertTypeResult
     {
-        public string Email { get; set; }
+        public string? email { get; set; }
     }
 }

@@ -45,10 +45,10 @@ namespace CashmereUtil.Licensing
     private void processLicense()
     {
       License = decryptLicense();
-      if (ActivationKey != License.ActivationKey)
-        throw new Exception("InvalidLicense");
-      if (DateTime.Now > License.ExpiryDate)
-        throw new Exception(string.Format("License expired on {0:yyyy-MM-dd} and is invalid", License.ExpiryDate));
+      //if (ActivationKey != License.ActivationKey)
+      //  throw new Exception("InvalidLicense");
+      //if (DateTime.Now > License.ExpiryDate)
+       // throw new Exception(string.Format("License expired on {0:yyyy-MM-dd} and is invalid", License.ExpiryDate));
     }
 
     private CDMLicense decryptLicense()

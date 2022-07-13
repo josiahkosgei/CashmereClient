@@ -59,7 +59,7 @@ namespace CashmereDeposit.ViewModels
       FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly().Location);
       Trademark = versionInfo.LegalTrademarks;
       CompanyName = versionInfo.CompanyName;
-      Copyright = "Copyright (c) 2016 - " + DateTime.Now.ToString("yyyy") + " Kamau Thuo. All rights reserved.";
+      Copyright = $"Copyright © 2018 - {DateTime.Now:yyyy} Maniwa Technologies Ltd. All rights reserved.";
       ApplicationTitle = versionInfo.ProductName;
     }
   }

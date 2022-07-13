@@ -213,7 +213,7 @@ namespace CashmereDeposit.ViewModels
                     SpecialLength = passwordPolicy.MinSpecial,
                     UpperCaseLength = passwordPolicy.MinUppercase
                 };
-                IList<PasswordHistory> list = DBContext.PasswordHistories.Where(x => x.ApplicationUserId == User.Id).OrderByDescending(x => x.LogDate).Take(passwordPolicy.HistorySize).ToList();
+                IList<PasswordHistory> list = DBContext.PasswordHistories.Where(x => x.User == User.Id).OrderByDescending(x => x.LogDate).Take(passwordPolicy.HistorySize).ToList();
                 if (!string.IsNullOrWhiteSpace(OldPassword) && !string.IsNullOrWhiteSpace(NewPassword) && !string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     if (PasswordStorage.VerifyPassword(OldPassword, User.Password))
@@ -223,7 +223,7 @@ namespace CashmereDeposit.ViewModels
                             IList<PasswordPolicyResult> passwordPolicyResultList = PasswordPolicyManager.Validate(NewPassword, Policy);
                             if (passwordPolicyResultList == null)
                             {
-                                if (passwordPolicy.UseHistory && list != null)
+                                if ((bool)passwordPolicy.UseHistory && (bool)(list != null))
                                 {
                                     foreach (PasswordHistory passwordHistory in list)
                                     {

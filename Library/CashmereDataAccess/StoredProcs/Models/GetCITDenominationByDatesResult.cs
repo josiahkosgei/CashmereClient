@@ -3,13 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Cashmere.Library.CashmereDataAccess.StoredProcs
+#nullable enable
+
+namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     public partial class GetCITDenominationByDatesResult
     {
-        public string Txcurrency { get; set; }
-        public int Denom { get; set; }
-        public long? Count { get; set; }
-        public long? SubTotal { get; set; }
+        public string? tx_currency { get; set; }
+        public int denom { get; set; }
+        public long? count { get; set; }
+        public long? subtotal { get; set; }
     }
 }

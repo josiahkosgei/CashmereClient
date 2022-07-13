@@ -17,6 +17,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("Latin1_General_CI_AS")
                 .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -27,58 +28,61 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Short description of the activity being performed");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("The name of the activity. will be used in lookups");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("Activity");
-
-                    b.HasComment("a task a user needs permission to perform");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertAttachmentType", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Code")
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)")
+                        .HasColumnName("code");
 
                     b.Property<int?>("AlertTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int")
+                        .HasColumnName("alert_type_id");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("MimeSubtype")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("mime_subtype");
 
                     b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("mime_type");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Code");
 
                     b.ToTable("AlertAttachmentType");
                 });
@@ -86,169 +90,114 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEmail", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("AlertEventId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("Corresponding Alert that is tied to this email message");
-
-                    b.Property<string>("Attachments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Pipe delimited List of filenames for files to attach when sending. Files must be accessible from the server");
+                        .HasColumnName("alert_event_id");
 
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getdate())")
-                        .HasComment("Datetime when the email message was created");
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("From")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasComment("Email address of the sender");
+                        .HasColumnName("from");
 
                     b.Property<string>("HtmlMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("The HTML formatted message");
+                        .HasColumnName("html_message");
 
                     b.Property<string>("RawTextMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("The raw ANSI text version of the email for clients that do not support HTML emails e.g. mobile phones etc");
+                        .HasColumnName("raw_text_message");
 
                     b.Property<DateTime?>("SendDate")
                         .HasColumnType("datetime2")
-                        .HasComment("Datetime when the email message was processed by the server");
+                        .HasColumnName("send_date");
 
                     b.Property<bool>("SendError")
                         .HasColumnType("bit")
-                        .HasComment("Was there a fatal error during processing this email message");
+                        .HasColumnName("send_error");
 
                     b.Property<string>("SendErrorMessage")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
-                        .HasComment("Error message returned by the server when email sending failed");
+                        .HasColumnName("send_error_message");
 
                     b.Property<bool>("Sent")
                         .HasColumnType("bit")
-                        .HasComment("Whether or not the email message has been processed by the server");
+                        .HasColumnName("sent");
 
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasComment("Subject of the email");
+                        .HasColumnName("subject");
 
                     b.Property<string>("To")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("Fills the \"To:\" heading of the email");
+                        .HasColumnName("to");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AlertEventId");
 
                     b.ToTable("AlertEmail");
-
-                    b.HasComment("Stores emails sent by the system");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEmailAttachment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("AlertEmailId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("alert_email_id");
 
                     b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("data");
 
                     b.Property<byte[]>("Hash")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("binary(64)")
+                        .HasColumnName("hash")
+                        .IsFixedLength();
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("path");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(6)
+                        .HasColumnType("nchar(6)")
+                        .HasColumnName("type")
+                        .IsFixedLength();
 
                     b.HasKey("Id");
 
                     b.ToTable("AlertEmailAttachment");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEmailResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<Guid>("AlertEmailId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<DateTime?>("DateSent")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Error")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HtmlMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("RawTextMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Recipient")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasDefaultValueSql("(N'NEW')");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AlertEmailResult");
-
-                    b.HasComment("Result of sending an alert email");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEvent", b =>
@@ -256,55 +205,58 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid?>("AlertEventId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("if this alert is paired with a previous alert, it is linked here");
+                        .HasColumnName("alert_event_id");
 
                     b.Property<int>("AlertTypeId")
                         .HasColumnType("int")
-                        .HasComment("the type of alert");
+                        .HasColumnName("alert_type_id");
 
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getdate())")
-                        .HasComment("The exact moment the alert was raised");
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<DateTime>("DateDetected")
                         .HasColumnType("datetime2")
-                        .HasComment("When was the alert detected, in case it is different from the created date. e.g. may indicate the event occured some other time, possibly before it was created in the db");
+                        .HasColumnName("date_detected");
 
                     b.Property<DateTime?>("DateResolved")
                         .HasColumnType("datetime2")
-                        .HasComment("If tied to another Alert, this is when the the paired Alert was resolved e.g. a door close alert may resolve a previous door open alert");
+                        .HasColumnName("date_resolved");
 
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The Device that raised the alert");
+                        .HasColumnName("device_id");
 
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("bit")
-                        .HasComment("has this alert been processed and messages created accordingly");
+                        .HasColumnName("is_processed");
 
                     b.Property<bool>("IsProcessing")
                         .HasColumnType("bit")
-                        .HasComment("is this alert currently being processed, used for concurrency control");
+                        .HasColumnName("is_processing");
 
                     b.Property<bool>("IsResolved")
                         .HasColumnType("bit")
-                        .HasComment("whether the Alert in qustion has been resolved or is still open");
+                        .HasColumnName("is_resolved");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.HasKey("Id");
 
-                    b.ToTable("AlertEvent");
+                    b.HasIndex("AlertEventId");
 
-                    b.HasComment("An event that has raised an alert. Various messages can be sent based on the alert raised e.g. SMS EMail etc");
+                    b.ToTable("AlertEvent");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageRegistry", b =>
@@ -312,25 +264,27 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<int>("AlertTypeId")
                         .HasColumnType("int")
-                        .HasComment("The type of alert the role can receive");
+                        .HasColumnName("alert_type_id");
 
-                    b.Property<bool>("EmailEnabled")
+                    b.Property<bool?>("EmailEnabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValueSql("((1))")
-                        .HasComment("Can the role receive email");
+                        .HasColumnName("email_enabled")
+                        .HasDefaultValueSql("((1))");
 
                     b.Property<bool>("PhoneEnabled")
                         .HasColumnType("bit")
-                        .HasComment("Can the role receive an SMS message for the alert message type");
+                        .HasColumnName("phone_enabled");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The role that will be given rights to the AlertMssage type");
+                        .HasColumnName("role_id");
 
                     b.HasKey("Id");
 
@@ -339,155 +293,160 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AlertMessageRegistry");
-
-                    b.HasComment("Register a role to receive an alert");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageType", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("EmailContentTemplate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("The HTML template that will be merged into later");
+                        .HasColumnName("email_content_template");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValueSql("((1))")
-                        .HasComment("whether or not the alert message type in enabled and can be instantiated");
+                        .HasColumnName("enabled")
+                        .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Name of the AlertMessage");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("PhoneContentTemplate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("The SMS template that will be merged into later");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("phone_content_template");
 
                     b.Property<string>("RawEmailContentTemplate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("The raw text template that will be merged into later");
+                        .HasColumnName("raw_email_content_template");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Title displayed in th eheader sction of messages");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
 
                     b.HasKey("Id");
 
                     b.ToTable("AlertMessageType");
-
-                    b.HasComment("Types of messages for alerts sent via email or phone");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertSMS", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("AlertEventId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("the associated AlertEvent for this SMS message");
+                        .HasColumnName("alert_event_id");
 
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getdate())")
-                        .HasComment("Datetime when the SMS alert message was created by the system");
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("From")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("the number from which the SMS originates");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("from");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("the SMS text message to deliver");
+                        .HasColumnName("message");
 
                     b.Property<DateTime?>("SendDate")
                         .HasColumnType("datetime2")
-                        .HasComment("the datetime when the SMS message was processed");
+                        .HasColumnName("send_date");
 
                     b.Property<bool>("SendError")
                         .HasColumnType("bit")
-                        .HasComment("was there a fatal rror during processing?");
+                        .HasColumnName("send_error");
 
                     b.Property<string>("SendErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("error mssage returned by the system while processing the SMS message");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("send_error_message");
 
                     b.Property<bool>("Sent")
                         .HasColumnType("bit")
-                        .HasComment("whether or not the SMS message was processed");
+                        .HasColumnName("sent");
 
                     b.Property<string>("To")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("Pipe delimited List of phone numbers to receive SMSes");
+                        .HasColumnName("to");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AlertEventId");
 
                     b.ToTable("AlertSMS");
-
-                    b.HasComment("AlertSmses");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationException", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("AdditionalInfo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("additional_info");
 
                     b.Property<int>("Code")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("level");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("message");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Stack")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("stack");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
 
                     b.ToTable("ApplicationException", "exp");
                 });
@@ -495,57 +454,65 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationLog", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Component")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("component")
                         .HasComment("Which internal component produced the log entry e.g. GUI, APIs, DeviceController etc");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<string>("EventDetail")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("event_detail")
                         .HasComment("the details of the log message");
 
                     b.Property<string>("EventName")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("event_name")
                         .HasComment("The name of the log event");
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("event_type")
                         .HasComment("the type of the log event used for grouping and sorting");
 
                     b.Property<DateTime>("LogDate")
                         .HasColumnType("datetime2")
+                        .HasColumnName("log_date")
                         .HasComment("Datetime the system deems for the log entry.");
 
                     b.Property<int>("LogLevel")
                         .HasColumnType("int")
+                        .HasColumnName("log_level")
                         .HasComment("the LogLevel");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<Guid?>("SessionId")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("session_id")
                         .HasComment("The session this log entry belongs to");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("SessionId");
 
                     b.ToTable("ApplicationLog");
 
@@ -557,222 +524,96 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("ApplicationUserLoginDetailId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AuthUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AuthorisinguserId")
+                    b.Property<Guid?>("ApplicationUserLoginDetail")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("DepositorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("depositor_enabled");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("user email address, used to receive emails from the system");
+                        .HasColumnName("email");
 
-                    b.Property<bool>("EmailEnabled")
+                    b.Property<bool?>("EmailEnabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValueSql("((1))")
-                        .HasComment("whether or not the user is allowed to receive emails");
+                        .HasColumnName("email_enabled")
+                        .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Fname")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("First names");
-
-                    b.Property<Guid?>("InitialisinguserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnName("fname");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsAdUser")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("is_ad_user");
 
                     b.Property<string>("Lname")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("Last name");
+                        .HasColumnName("lname");
 
                     b.Property<int>("LoginAttempts")
                         .HasColumnType("int")
-                        .HasComment("how many unsuccessful login attempts has the user mad in a row. used to lock the user automatically");
+                        .HasColumnName("login_attempts");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(71)
                         .IsUnicode(false)
                         .HasColumnType("char(71)")
-                        .IsFixedLength()
-                        .HasComment("salted and hashed password utilising a password library");
+                        .HasColumnName("password")
+                        .IsFixedLength();
 
                     b.Property<bool>("PasswordResetRequired")
                         .HasColumnType("bit")
-                        .HasComment("should the user rset their password at their next login");
+                        .HasColumnName("password_reset_required");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("the phone number for the user to rceive SMSes from the system");
+                        .HasColumnName("phone");
 
                     b.Property<bool>("PhoneEnabled")
                         .HasColumnType("bit")
-                        .HasComment("can the user receive SMSes from the system");
+                        .HasColumnName("phone_enabled");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The role the user has e.g. Custodian, Branch Manager tc");
+                        .HasColumnName("role_id");
 
-                    b.Property<bool>("UserDeleted")
+                    b.Property<bool?>("UserDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("UserGroupId")
-                        .HasColumnType("int");
+                    b.Property<int>("UserGroup")
+                        .HasColumnType("int")
+                        .HasColumnName("user_group");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
-                        .HasComment("username for logging into the system");
+                        .HasColumnName("username");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserLoginDetailId");
-
-                    b.HasIndex("AuthUserId")
-                        .IsUnique()
-                        .HasFilter("[AuthUserId] IS NOT NULL");
-
-                    b.HasIndex("AuthorisinguserId")
-                        .IsUnique()
-                        .HasFilter("[AuthorisinguserId] IS NOT NULL");
-
-                    b.HasIndex("InitialisinguserId")
-                        .IsUnique()
-                        .HasFilter("[InitialisinguserId] IS NOT NULL");
-
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("UserGroupId");
+                    b.HasIndex("UserGroup");
 
                     b.ToTable("ApplicationUser");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserChangePassword", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConfirmPassword")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<string>("NewPassword")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("OldPassword")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("PasswordPolicyId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UserId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("PasswordPolicyId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ApplicationUserChangePassword");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("FailedLoginCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("GCRecord")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastLoginLogEntryId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("LastPasswordDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OTP")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("OTPEnabled")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("OTPExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResetEmailCode")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<bool?>("ResetEmailEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ResetEmailExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UserId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("LastLoginLogEntryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ApplicationUserLoginDetail");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Bank", b =>
@@ -780,34 +621,39 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("BankCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("bank_code");
 
                     b.Property<string>("CountryCode")
                         .IsRequired()
+                        .HasMaxLength(2)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
+                        .HasColumnType("char(2)")
+                        .HasColumnName("country_code")
                         .IsFixedLength();
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CountryCode");
 
                     b.ToTable("Bank");
-
-                    b.HasComment("The bank that owns the depositor");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Branch", b =>
@@ -815,22 +661,29 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("BankId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("bank_id");
 
                     b.Property<string>("BranchCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("branch_code");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
@@ -839,133 +692,81 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.ToTable("Branch");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CashmereCommunicationServiceStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("EmailError")
-                        .HasColumnType("int")
-                        .HasColumnName("email_error");
-
-                    b.Property<string>("EmailErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("email_error_message");
-
-                    b.Property<int>("EmailStatus")
-                        .HasColumnType("int")
-                        .HasColumnName("email_status");
-
-                    b.Property<DateTime>("Modified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("modified")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<int>("SmsError")
-                        .HasColumnType("int")
-                        .HasColumnName("sms_error");
-
-                    b.Property<string>("SmsErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("sms_error_message");
-
-                    b.Property<int>("SmsStatus")
-                        .HasColumnType("int")
-                        .HasColumnName("sms_status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CashmereCommunicationServiceStatus");
-
-                    b.HasComment("status of the communication service for email, sms etc");
-                });
-
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CIT", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AuthUserId")
+                    b.Property<Guid?>("AuthUser")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("Application User who authorised the CIT event");
+                        .HasColumnName("auth_user");
 
                     b.Property<DateTime?>("CITCompleteDate")
                         .HasColumnType("datetime2")
-                        .HasComment("Datetime when the CIT was completed");
+                        .HasColumnName("cit_complete_date");
 
                     b.Property<DateTime>("CITDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getdate())")
-                        .HasComment("Datetime of the CIT");
+                        .HasColumnName("cit_date")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<int>("CITError")
                         .HasColumnType("int")
-                        .HasComment("The error code encountered during CIT");
+                        .HasColumnName("cit_error");
 
                     b.Property<string>("CITErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Error message encounterd during CIT");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("cit_error_message");
 
                     b.Property<bool>("Complete")
                         .HasColumnType("bit")
-                        .HasComment("Has the CIT been completed, used for calculating incomplete CITs");
+                        .HasColumnName("complete");
 
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("Device that conducted the CIT");
+                        .HasColumnName("device_id");
 
                     b.Property<DateTime?>("FromDate")
                         .HasColumnType("datetime2")
-                        .HasComment("The datetime from which the CIT calculations will be carrid out");
+                        .HasColumnName("fromDate");
 
                     b.Property<string>("NewBagNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("The asset number of the empty bag that was inserted");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("new_bag_number");
 
                     b.Property<string>("OldBagNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("The asset number of the Bag that was removed i.e. the full bag");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("old_bag_number");
 
                     b.Property<string>("SealNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("The numbr on the tamper evident seal tag used to seal the bag");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("seal_number");
 
-                    b.Property<Guid>("StartUserId")
+                    b.Property<Guid>("StartUser")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("ApplicationUser who initiated the CIT");
+                        .HasColumnName("start_user");
 
                     b.Property<DateTime>("ToDate")
                         .HasColumnType("datetime2")
-                        .HasComment("The datetime until which the CIT calculations will be carrid out");
+                        .HasColumnName("toDate");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("AuthUser");
 
                     b.HasIndex("DeviceId");
 
-                    b.HasIndex("StartUserId");
+                    b.HasIndex("StartUser");
 
                     b.ToTable("CIT");
-
-                    b.HasComment("store a CIT transaction");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CITDenomination", b =>
@@ -973,34 +774,36 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("CITId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The CIT the record belongs to");
+                        .HasColumnName("cit_id");
 
                     b.Property<long>("Count")
                         .HasColumnType("bigint")
-                        .HasComment("How many of the denomination were counted");
+                        .HasColumnName("count");
 
                     b.Property<string>("CurrencyId")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
-                        .IsFixedLength()
-                        .HasComment("The currency code");
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency_id")
+                        .IsFixedLength();
 
                     b.Property<DateTime?>("Datetime")
                         .HasColumnType("datetime2")
-                        .HasComment("When this item was recorded");
+                        .HasColumnName("datetime");
 
                     b.Property<int>("Denom")
                         .HasColumnType("int")
-                        .HasComment("denomination of note or coin in major currency");
+                        .HasColumnName("denom");
 
                     b.Property<long>("Subtotal")
                         .HasColumnType("bigint")
-                        .HasComment("The subtotal of the denomination calculated as denom*count");
+                        .HasColumnName("subtotal");
 
                     b.HasKey("Id");
 
@@ -1009,8 +812,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("CurrencyId");
 
                     b.ToTable("CITDenomination");
-
-                    b.HasComment("currency and deomination breakdown of the CIT bag");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CITPrintout", b =>
@@ -1018,91 +819,109 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("CITId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The CIT this rceipt belongs to");
+                        .HasColumnName("cit_id");
 
                     b.Property<DateTime>("Datetime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
+                        .HasColumnName("datetime")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<bool>("IsCopy")
                         .HasColumnType("bit")
-                        .HasComment("Is this CIT Receipt a copy, used for marking duplicate receipts");
+                        .HasColumnName("is_copy");
 
                     b.Property<string>("PrintContent")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("Text of the receipt");
+                        .HasColumnName("print_content");
 
                     b.Property<Guid>("PrintGuid")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("Receipt SHA512 hash");
+                        .HasColumnName("print_guid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CITId");
 
                     b.ToTable("CITPrintout");
-
-                    b.HasComment("Stores CIT receipts");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CITTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("account_number");
 
                     b.Property<long>("Amount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount");
 
                     b.Property<Guid>("CITId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("cit_id");
 
                     b.Property<DateTime?>("CbDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("cb_date");
 
                     b.Property<string>("CbStatusDetail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("cb_status_detail");
 
                     b.Property<string>("CbTxNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cb_tx_number");
 
                     b.Property<string>("CbTxStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cb_tx_status");
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(3)
+                        .IsUnicode(false)
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency")
+                        .IsFixedLength();
 
                     b.Property<DateTime>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<int>("ErrorCode")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("error_code");
 
                     b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("error_message");
 
                     b.Property<string>("Narration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("narration");
 
                     b.Property<string>("SuspenseAccount")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("suspense_account");
 
                     b.HasKey("Id");
 
@@ -1113,32 +932,29 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Config", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("category_id");
 
                     b.Property<string>("DefaultValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("default_value");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
+                    b.HasKey("Name");
 
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Config");
-
-                    b.HasComment("Configuration List");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ConfigCategory", b =>
@@ -1146,67 +962,74 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Name of the AlertMessage");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("ConfigCategory");
-
-                    b.HasComment("Categorisation of configuration opions");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<int?>("ParentGroupId")
-                        .IsRequired()
-                        .HasColumnType("int");
+                    b.Property<int?>("ParentGroup")
+                        .HasColumnType("int")
+                        .HasColumnName("parent_group");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentGroupId");
+                    b.HasIndex("ParentGroup");
 
                     b.ToTable("ConfigGroup");
-
-                    b.HasComment("Group together configurations so devices can share configs");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Country", b =>
                 {
                     b.Property<string>("CountryCode")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(2)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
+                        .HasColumnType("char(2)")
+                        .HasColumnName("country_code")
                         .HasDefaultValueSql("('')")
                         .IsFixedLength();
 
                     b.Property<string>("CountryName")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("country_name")
                         .HasDefaultValueSql("('')");
 
                     b.HasKey("CountryCode");
@@ -1217,29 +1040,35 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CrashEvent", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("content");
 
                     b.Property<DateTime>("DateDetected")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_detected");
 
                     b.Property<DateTime>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
 
                     b.ToTable("CrashEvent", "exp");
 
@@ -1249,72 +1078,81 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Currency", b =>
                 {
                     b.Property<string>("Code")
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
-                        .IsFixedLength()
-                        .HasComment("ISO 4217 Three Character Currency Code");
+                        .HasColumnType("char(3)")
+                        .HasColumnName("code")
+                        .IsFixedLength();
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit")
-                        .HasComment("whether the system supports the language");
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Flag")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("two character country code for the national flag to display for the language");
+                        .HasMaxLength(2)
+                        .IsUnicode(false)
+                        .HasColumnType("char(2)")
+                        .HasColumnName("flag")
+                        .IsFixedLength();
 
                     b.Property<string>("Iso3NumericCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(3)
+                        .IsUnicode(false)
+                        .HasColumnType("char(3)")
+                        .HasColumnName("ISO_3_Numeric_Code")
+                        .IsFixedLength();
 
                     b.Property<int>("Minor")
                         .HasColumnType("int")
-                        .HasComment("Expresses the relationship between a major currency unit and its corresponding minor currency unit. This mechanism is called the currency \"exponent\" and assumes a base of 10. Will be used with converters in the GUI");
+                        .HasColumnName("minor");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Name of the currency");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Code");
 
                     b.ToTable("Currency");
-
-                    b.HasComment("Currency enumeration");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("DefaultCurrencyId")
+                    b.Property<string>("DefaultCurrency")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("default_currency")
                         .IsFixedLength();
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultCurrencyId");
+                    b.HasIndex("DefaultCurrency");
 
                     b.ToTable("CurrencyList");
-
-                    b.HasComment("Enumeration of allowed Currencies. A device can then associate with a currency List");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CurrencyListCurrency", b =>
@@ -1322,69 +1160,40 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<string>("CurrencyItemId")
+                    b.Property<string>("CurrencyItem")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
-                        .IsFixedLength()
-                        .HasComment("The currency in the List");
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency_item")
+                        .IsFixedLength();
 
-                    b.Property<int>("CurrencyListId")
+                    b.Property<int>("CurrencyList")
                         .HasColumnType("int")
-                        .HasComment("The Currency List to which the currency is associated");
+                        .HasColumnName("currency_list");
 
                     b.Property<int>("CurrencyOrder")
                         .HasColumnType("int")
-                        .HasComment("ASC Order of sorting for currencies in List.");
+                        .HasColumnName("currency_order");
 
                     b.Property<int>("MaxCount")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("max_count");
 
                     b.Property<long>("MaxValue")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("max_value");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrencyItemId");
+                    b.HasIndex("CurrencyItem");
 
-                    b.HasIndex("CurrencyListId");
+                    b.HasIndex("CurrencyList");
 
                     b.ToTable("CurrencyListCurrency");
-
-                    b.HasComment("[m2m] Currency and CurrencyList");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DashboardDatum", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("SynchronizeTitle")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex(new[] { "Gcrecord" }, "iGCRecord_DashboardData");
-
-                    b.ToTable("DashboardDatum");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DenominationDetail", b =>
@@ -1392,33 +1201,34 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<long>("Count")
                         .HasColumnType("bigint")
-                        .HasComment("How many of the denomination were counted");
+                        .HasColumnName("count");
 
                     b.Property<DateTime?>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<int>("Denom")
                         .HasColumnType("int")
-                        .HasComment("denomination of note or coin in major currency");
+                        .HasColumnName("denom");
 
                     b.Property<long>("Subtotal")
                         .HasColumnType("bigint")
-                        .HasComment("The subtotal of the denomination calculated as denom*count");
+                        .HasColumnName("subtotal");
 
                     b.Property<Guid>("TxId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("tx_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TxId");
 
                     b.ToTable("DenominationDetail");
-
-                    b.HasComment("Denomination enumeration for a Transaction");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", b =>
@@ -1426,49 +1236,62 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<bool>("AccountVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("account_verified");
 
                     b.Property<bool>("Complete")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("complete");
 
                     b.Property<bool>("CompleteSuccess")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("complete_success");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<int?>("ErrorCode")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("error_code");
 
                     b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("error_message");
 
                     b.Property<string>("LanguageCode")
-                        .IsRequired()
+                        .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
+                        .HasColumnName("language_code")
                         .IsFixedLength();
 
                     b.Property<bool>("ReferenceAccountVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("reference_account_verified");
 
                     b.Property<string>("Salt")
-                        .IsRequired()
+                        .HasMaxLength(64)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("salt");
 
                     b.Property<DateTime?>("SessionEnd")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("session_end");
 
                     b.Property<DateTime>("SessionStart")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("session_start");
 
                     b.Property<bool>("TermsAccepted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("terms_accepted");
 
                     b.HasKey("Id");
 
@@ -1477,8 +1300,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("LanguageCode");
 
                     b.ToTable("DepositorSession");
-
-                    b.HasComment("Stores details of a customer deposit session. Asuccessful session ends in a successful transaction");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Device", b =>
@@ -1486,118 +1307,120 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("AppId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("app_id");
 
                     b.Property<byte[]>("AppKey")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasMaxLength(32)
+                        .HasColumnType("binary(32)")
+                        .HasColumnName("app_key")
+                        .IsFixedLength();
 
                     b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("branch_id");
 
-                    b.Property<int>("ConfigGroupId")
-                        .HasColumnType("int");
+                    b.Property<int>("ConfigGroup")
+                        .HasColumnType("int")
+                        .HasColumnName("config_group");
 
-                    b.Property<int>("CurrencyListId")
-                        .HasColumnType("int");
+                    b.Property<int>("CurrencyList")
+                        .HasColumnType("int")
+                        .HasColumnName("currency_list");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("DeviceLocation")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("device_location");
 
                     b.Property<string>("DeviceNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("device_number");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
-                    b.Property<int>("GuiScreenListId")
+                    b.Property<int>("GUIScreenList")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
+                        .HasColumnName("GUIScreen_list")
                         .HasDefaultValueSql("((1))");
 
-                    b.Property<int?>("LanguageListId")
-                        .IsRequired()
-                        .HasColumnType("int");
+                    b.Property<int?>("LanguageList")
+                        .HasColumnType("int")
+                        .HasColumnName("language_list");
 
                     b.Property<int>("LoginAttempts")
                         .HasColumnType("int")
-                        .HasComment("how many times in a row a login attempt has failed");
+                        .HasColumnName("login_attempts");
 
                     b.Property<int>("LoginCycles")
                         .HasColumnType("int")
-                        .HasComment("how many cycles of failed logins have been detected. used to lock the machine in case of password guessing");
+                        .HasColumnName("login_cycles");
 
                     b.Property<string>("MacAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(17)
+                        .IsUnicode(false)
+                        .HasColumnType("char(17)")
+                        .HasColumnName("mac_address")
+                        .IsFixedLength();
 
                     b.Property<string>("MachineName")
-                        .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(128)")
+                        .HasColumnName("machine_name");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .IsUnicode(false)
-                        .HasColumnType("char(128)")
-                        .IsFixedLength();
-
-                    b.Property<string>("Secret")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .IsUnicode(false)
-                        .HasColumnType("char(128)")
-                        .IsFixedLength();
-
-                    b.Property<int>("TransactionTypeListId")
+                    b.Property<int>("TransactionTypeList")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
+                        .HasColumnName("transaction_type_list")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<int>("TypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type_id");
 
-                    b.Property<int?>("UserGroupId")
-                        .IsRequired()
-                        .HasColumnType("int");
+                    b.Property<int?>("UserGroup")
+                        .HasColumnType("int")
+                        .HasColumnName("user_group");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BranchId");
 
-                    b.HasIndex("ConfigGroupId");
+                    b.HasIndex("ConfigGroup");
 
-                    b.HasIndex("CurrencyListId");
+                    b.HasIndex("CurrencyList");
 
-                    b.HasIndex("GuiScreenListId");
+                    b.HasIndex("GUIScreenList");
 
-                    b.HasIndex("LanguageListId");
+                    b.HasIndex("LanguageList");
 
-                    b.HasIndex("TransactionTypeListId");
+                    b.HasIndex("TransactionTypeList");
 
                     b.HasIndex("TypeId");
 
-                    b.HasIndex("UserGroupId");
+                    b.HasIndex("UserGroup");
 
                     b.ToTable("Device");
                 });
@@ -1606,28 +1429,40 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid?>("Account")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("account");
 
                     b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("account_name");
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("account_number");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
-                        .HasColumnType("char(900)");
+                        .HasMaxLength(3)
+                        .IsUnicode(false)
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency_code")
+                        .IsFixedLength();
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.HasKey("Id");
 
@@ -1643,17 +1478,23 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid>("ConfigId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ConfigId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("config_id");
 
                     b.Property<string>("ConfigValue")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("config_value");
 
                     b.Property<int>("GroupId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
 
                     b.HasKey("Id");
 
@@ -1662,8 +1503,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("DeviceConfig");
-
-                    b.HasComment("Link a Device to its configuration");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceLock", b =>
@@ -1671,39 +1510,41 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<DateTime>("LockDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("lock_date");
 
                     b.Property<bool>("Locked")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("locked");
 
                     b.Property<bool>("LockedByDevice")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("locked_by_device");
 
                     b.Property<Guid?>("LockingUser")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("locking_user");
 
                     b.Property<string>("WebLockingUser")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("web_locking_user");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("DeviceLock");
+                    b.HasIndex("LockingUser");
 
-                    b.HasComment("Record device locking and unlocking activity");
+                    b.ToTable("DeviceLock");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceLogin", b =>
@@ -1711,6 +1552,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<bool?>("ChangePassword")
@@ -1720,7 +1562,8 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<bool?>("ForcedLogout")
                         .HasColumnType("bit");
@@ -1732,20 +1575,20 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool?>("Success")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("User")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("User");
 
                     b.ToTable("DeviceLogin");
                 });
@@ -1755,40 +1598,51 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
-                    b.Property<bool>("IsInfront")
+                    b.Property<bool?>("IsInfront")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValueSql("((1))")
-                        .HasComment("Is the printer in the front i.e. customer facing or in the rear i.e. custodian facing");
+                        .HasColumnName("is_infront")
+                        .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Make")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("make");
 
                     b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("model");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Port")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)")
+                        .HasColumnName("port");
 
                     b.Property<string>("Serial")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("serial");
 
                     b.HasKey("Id");
 
@@ -1802,111 +1656,151 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("BaCurrency")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("ba_currency")
                         .IsFixedLength();
 
                     b.Property<string>("BaStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ba_status");
 
                     b.Property<string>("BaType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ba_type");
 
                     b.Property<string>("BagNoteCapacity")
                         .IsRequired()
-                        .HasColumnType("nchar")
+                        .HasMaxLength(10)
+                        .HasColumnType("nchar(10)")
+                        .HasColumnName("bag_note_capacity")
                         .IsFixedLength();
 
                     b.Property<int>("BagNoteLevel")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("bag_note_level");
 
                     b.Property<string>("BagNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("bag_number");
 
                     b.Property<int>("BagPercentFull")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("bag_percent_full");
 
                     b.Property<string>("BagStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("bag_status");
 
                     b.Property<long?>("BagValueCapacity")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("bag_value_capacity");
 
                     b.Property<long?>("BagValueLevel")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("bag_value_level");
 
                     b.Property<string>("ControllerState")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("controller_state");
 
                     b.Property<int>("CurrentStatus")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("current_status");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<string>("EscrowPosition")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("escrow_position");
 
                     b.Property<string>("EscrowStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("escrow_status");
 
                     b.Property<string>("EscrowType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("escrow_type");
 
                     b.Property<DateTime?>("MachineDatetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("machine_datetime");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<DateTime?>("Modified")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified");
 
                     b.Property<string>("SensorsBag")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("sensors_bag");
 
                     b.Property<string>("SensorsDoor")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("sensors_door");
 
                     b.Property<string>("SensorsStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("sensors_status");
 
                     b.Property<string>("SensorsType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("sensors_type");
 
                     b.Property<int>("SensorsValue")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("sensors_value");
 
                     b.Property<string>("TransactionStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("transaction_status");
 
                     b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("transaction_type");
 
                     b.HasKey("Id");
 
                     b.ToTable("DeviceStatus");
-
-                    b.HasComment("Current State of the device");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceSuspenseAccount", b =>
@@ -1914,30 +1808,39 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid?>("Account")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("account");
 
                     b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("account_name");
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("account_number");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency_code")
                         .IsFixedLength();
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.HasKey("Id");
 
@@ -1952,133 +1855,260 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<bool>("CoinEscrow")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("coin_escrow");
 
                     b.Property<bool>("CoinIn")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("coin_in");
 
                     b.Property<bool>("CoinOut")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("coin_out");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<bool>("NoteEscrow")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("note_escrow");
 
                     b.Property<bool>("NoteIn")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("note_in");
 
                     b.Property<bool>("NoteOut")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("note_out");
 
                     b.HasKey("Id");
 
                     b.ToTable("DeviceType");
-
-                    b.HasComment("Describes the type of device");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.EscrowJam", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
 
                     b.Property<string>("AdditionalInfo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("additional_info");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ApplicationUserId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AuthorisinguserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AuthorisingUser")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("authorising_user");
 
                     b.Property<DateTime>("DateDetected")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_detected");
 
                     b.Property<long>("DroppedAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("dropped_amount");
 
                     b.Property<long>("EscrowAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("escrow_amount");
 
-                    b.Property<Guid?>("InitialisinguserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("InitialisingUser")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("initialising_user");
 
                     b.Property<long>("PostedAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("posted_amount");
 
                     b.Property<DateTime?>("RecoveryDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("recovery_date");
 
                     b.Property<long>("RetreivedAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("retreived_amount");
 
                     b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("transaction_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("AuthorisingUser");
 
-                    b.HasIndex("ApplicationUserId1");
+                    b.HasIndex("InitialisingUser");
 
                     b.HasIndex("TransactionId");
 
                     b.ToTable("EscrowJam", "exp");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopItem", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GetCITDenominationByDatesResult", b =>
+                {
+                    b.Property<long?>("count")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("denom")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("subtotal")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("tx_currency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToView(null);
+                });
+
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GetDestinationEmailsByAlertTypeResult", b =>
+                {
+                    b.Property<string>("email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToView(null);
+                });
+
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GetDeviceConfigByUserGroupResult", b =>
+                {
+                    b.Property<string>("config_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("config_value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("group_id")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ToView(null);
+                });
+
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GetDeviceUsersByDeviceResult", b =>
+                {
+                    b.Property<Guid?>("ApplicationUserLoginDetail")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("UserDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("depositor_enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("email_enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("fname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("is_ad_user")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("lname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("login_attempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("password_reset_required")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("phone_enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("role_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("user_group")
+                        .HasColumnType("int");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToView(null);
+                });
+
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("description");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("enabled")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<Guid>("ValueId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("Value")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("value");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ValueId");
+                    b.HasIndex("Value");
 
-                    b.ToTable("GuiPrepopItem");
+                    b.ToTable("GUIPrepopItem");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopList", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopList", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<bool>("AllowFreeText")
@@ -2088,137 +2118,148 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("description");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("enabled")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<bool>("UseDefault")
+                    b.Property<bool?>("UseDefault")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValueSql("((1))");
 
                     b.HasKey("Id");
 
-                    b.ToTable("GuiPrepopList");
+                    b.ToTable("GUIPrepopList");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopListItem", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopListItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid>("GuiPrepopItemId")
+                    b.Property<Guid>("Item")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GuiPrepopListId")
+                    b.Property<Guid>("List")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ListOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("List_Order");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuiPrepopItemId");
+                    b.HasIndex("Item");
 
-                    b.HasIndex("GuiPrepopListId");
+                    b.HasIndex("List");
 
-                    b.ToTable("GuiPrepopListItem");
+                    b.ToTable("GUIPrepopListItem");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreen", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreen", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
-                    b.Property<Guid?>("GuiScreenTextId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("GuiScreenTypeId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("GuiText")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("gui_text");
 
                     b.Property<string>("InputMask")
-                        .IsRequired()
+                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("input_mask");
 
                     b.Property<bool?>("IsMasked")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("is_masked");
 
                     b.Property<int?>("Keyboard")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("keyboard");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("PrefillText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("Text to prefil in the textbox");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("prefill_text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuiScreenTextId");
+                    b.HasIndex("GuiText");
 
-                    b.HasIndex("GuiScreenTypeId");
+                    b.HasIndex("Type");
 
-                    b.ToTable("GuiScreen");
+                    b.ToTable("GUIScreen");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("GuiScreenListId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuiScreenListId")
-                        .IsUnique()
-                        .HasFilter("[GuiScreenListId] IS NOT NULL");
-
-                    b.ToTable("GuiScreenList");
+                    b.ToTable("GUIScreenList");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenListScreen", b =>
@@ -2226,126 +2267,137 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
-                    b.Property<Guid?>("GuiPrepopListId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("GUIPrepoplistId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("guiprepoplist_id");
 
-                    b.Property<int>("GuiScreenId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GuiScreenListId")
-                        .HasColumnType("int");
+                    b.Property<int>("GuiScreenList")
+                        .HasColumnType("int")
+                        .HasColumnName("gui_screen_list");
 
                     b.Property<bool>("Required")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("required");
+
+                    b.Property<int>("Screen")
+                        .HasColumnType("int")
+                        .HasColumnName("screen");
 
                     b.Property<int>("ScreenOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("screen_order");
 
                     b.Property<Guid?>("ValidationListId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_list_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuiPrepopListId");
+                    b.HasIndex("GUIPrepoplistId");
 
-                    b.HasIndex("GuiScreenId");
+                    b.HasIndex("GuiScreenList");
 
-                    b.HasIndex("GuiScreenListId");
+                    b.HasIndex("Screen");
 
                     b.HasIndex("ValidationListId");
 
                     b.ToTable("GuiScreenListScreen");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenText", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenText", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("BtnAcceptCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("BtnAcceptCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("btn_accept_caption");
 
-                    b.Property<Guid?>("BtnBackCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("BtnBackCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("btn_back_caption");
 
-                    b.Property<Guid?>("BtnCancelCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("BtnCancelCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("btn_cancel_caption");
 
-                    b.Property<Guid?>("FullInstructionsId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("FullInstructions")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("full_instructions");
 
-                    b.Property<int>("GuiScreenId")
+                    b.Property<int>("GUIScreenId")
                         .HasColumnType("int")
-                        .HasComment("The GUIScreen this entry corresponds to");
+                        .HasColumnName("guiscreen_id");
 
-                    b.Property<Guid>("ScreenTitleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ScreenTitle")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("screen_title");
 
-                    b.Property<Guid?>("ScreenTitleInstructionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ScreenTitleInstruction")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("screen_title_instruction");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BtnAcceptCaptionId");
+                    b.HasIndex("BtnAcceptCaption");
 
-                    b.HasIndex("BtnBackCaptionId");
+                    b.HasIndex("BtnBackCaption");
 
-                    b.HasIndex("BtnCancelCaptionId");
+                    b.HasIndex("BtnCancelCaption");
 
-                    b.HasIndex("FullInstructionsId");
+                    b.HasIndex("FullInstructions");
 
-                    b.HasIndex("GuiScreenId");
+                    b.HasIndex("GUIScreenId")
+                        .IsUnique();
 
-                    b.HasIndex("ScreenTitleId");
+                    b.HasIndex("ScreenTitle");
 
-                    b.HasIndex("ScreenTitleInstructionId");
+                    b.HasIndex("ScreenTitleInstruction");
 
-                    b.ToTable("GuiScreenText");
-
-                    b.HasComment("Stores the text for a screen for a language");
+                    b.ToTable("GUIScreenText");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenType", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<Guid>("Code")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("code");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
-                    b.ToTable("GuiScreenType");
+                    b.ToTable("GUIScreenType");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Language", b =>
@@ -2354,66 +2406,71 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
+                        .HasColumnName("code")
                         .IsFixedLength();
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit")
-                        .HasComment("whether the system supports the language");
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Flag")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComment("two character country code for the national flag to display for the language");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("flag");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Code")
                         .HasName("PK_Languages");
 
                     b.ToTable("Language");
-
-                    b.HasComment("Available languages in the system");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("DefaultLanguageId")
+                    b.Property<string>("DefaultLanguage")
                         .IsRequired()
+                        .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
+                        .HasColumnName("default_language")
                         .IsFixedLength();
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("description");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("enabled")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultLanguageId");
+                    b.HasIndex("DefaultLanguage");
 
                     b.ToTable("LanguageList");
-
-                    b.HasComment("A List of languages a device supports");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.LanguageListLanguage", b =>
@@ -2421,91 +2478,32 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<string>("LanguageItemId")
+                    b.Property<string>("LanguageItem")
                         .IsRequired()
+                        .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
+                        .HasColumnName("language_item")
                         .IsFixedLength();
 
-                    b.Property<int>("LanguageListId")
-                        .HasColumnType("int");
+                    b.Property<int>("LanguageList")
+                        .HasColumnType("int")
+                        .HasColumnName("language_list");
 
                     b.Property<int>("LanguageOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("language_order");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LanguageItemId");
+                    b.HasIndex("LanguageItem");
 
-                    b.HasIndex("LanguageListId");
+                    b.HasIndex("LanguageList");
 
                     b.ToTable("LanguageListLanguage");
-
-                    b.HasComment("[m2m] LanguageList and Language");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ModelDifference", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContextId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Oid");
-
-                    b.ToTable("ModelDifference");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ModelDifferenceAspect", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Xml")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("ModelDifferenceAspect");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PasswordHistory", b =>
@@ -2513,22 +2511,22 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("LogDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(71)
+                        .HasColumnType("nvarchar(71)");
+
+                    b.Property<Guid?>("User")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("User");
 
                     b.ToTable("PasswordHistory");
                 });
@@ -2538,44 +2536,53 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("AllowedSpecial")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("allowed_special");
 
                     b.Property<int>("ExpiryDays")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("expiry_days");
 
                     b.Property<int>("HistorySize")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("history_size");
 
                     b.Property<int>("MinDigits")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_digits");
 
                     b.Property<int>("MinLength")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_length");
 
                     b.Property<int>("MinLowercase")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_lowercase");
 
                     b.Property<int>("MinSpecial")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_special");
 
                     b.Property<int>("MinUppercase")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_uppercase");
 
-                    b.Property<bool>("UseHistory")
+                    b.Property<bool?>("UseHistory")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("use_history")
                         .HasDefaultValueSql("((1))");
 
                     b.HasKey("Id");
 
                     b.ToTable("PasswordPolicy");
-
-                    b.HasComment("The system password policy");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Permission", b =>
@@ -2583,22 +2590,28 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid>("ActivityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("activity_id");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("role_id");
 
                     b.Property<bool>("StandaloneAllowed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("standalone_allowed");
 
                     b.Property<bool>("StandaloneAuthenticationRequired")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("standalone_authentication_required");
 
                     b.Property<bool>("StandaloneCanAuthenticate")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("standalone_can_Authenticate");
 
                     b.HasKey("Id");
 
@@ -2607,228 +2620,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Permission");
-
-                    b.HasComment("grant a role to perform an activity");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyMemberPermissionsObject", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Criteria")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<string>("Members")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReadState")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("TypePermissionObjectId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("WriteState")
-                        .HasColumnType("int");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("TypePermissionObjectId");
-
-                    b.ToTable("PermissionPolicyMemberPermissionsObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyNavigationPermissionsObject", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<string>("ItemPath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("NavigateState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("PermissionPolicyNavigationPermissionsObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyObjectPermissionsObject", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Criteria")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DeleteState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<int?>("NavigateState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReadState")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("TypePermissionObjectId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("WriteState")
-                        .HasColumnType("int");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("TypePermissionObjectId");
-
-                    b.ToTable("PermissionPolicyObjectPermissionsObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("CanEditModel")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsAdministrative")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("ObjectTypeId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PermissionPolicy")
-                        .HasColumnType("int");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("ObjectTypeId");
-
-                    b.ToTable("PermissionPolicyRole");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyTypePermissionsObject", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("CreateState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DeleteState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int")
-                        .HasColumnName("GCRecord");
-
-                    b.Property<int?>("NavigateState")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReadState")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TargetType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("WriteState")
-                        .HasColumnType("int");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("PermissionPolicyTypePermissionsObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PingRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsError")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("MessageDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RequestUuid")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("RequestUUID");
-
-                    b.Property<bool>("ServerOnline")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("Success")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PingRequest", "cb");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PrinterStatus", b =>
@@ -2836,39 +2627,51 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<bool>("CoverOpen")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("cover_open");
 
                     b.Property<int>("ErrorCode")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("error_code");
 
                     b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("error_message");
 
                     b.Property<string>("ErrorName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("error_name");
 
                     b.Property<bool>("HasPaper")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("has_paper");
 
                     b.Property<bool>("IsError")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("is_error");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<DateTime>("Modified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
+                        .HasColumnName("modified")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<Guid>("PrinterId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("printer_id");
 
                     b.HasKey("Id");
 
@@ -2880,33 +2683,36 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<DateTime>("Datetime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
+                        .HasColumnName("datetime")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<bool>("IsCopy")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("is_copy");
 
                     b.Property<string>("PrintContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("print_content");
 
                     b.Property<Guid>("PrintGuid")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("print_guid");
 
                     b.Property<Guid>("TxId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("tx_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TxId");
 
                     b.ToTable("Printout");
-
-                    b.HasComment("Stores contents of a printout for a transaction");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Role", b =>
@@ -2914,64 +2720,75 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("Role");
-
-                    b.HasComment("a user's role storing all their permissions");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SessionException", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("AdditionalInfo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("additional_info");
 
                     b.Property<int>("Code")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("level");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("message");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("session_id");
 
                     b.Property<string>("Stack")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("stack");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SessionId");
 
                     b.ToTable("SessionException", "exp");
                 });
@@ -2981,9 +2798,10 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("Category")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DefaultTranslation")
@@ -2991,24 +2809,25 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("TextItemTypeId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("TextItemTypeID");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("Category");
 
                     b.HasIndex("TextItemTypeId");
 
@@ -3020,23 +2839,26 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<Guid?>("ParentId")
-                        .IsRequired()
+                    b.Property<Guid?>("Parent")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("Parent");
 
                     b.ToTable("SysTextItemCategory", "xlns");
                 });
@@ -3046,19 +2868,25 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("token");
 
                     b.HasKey("Id");
 
@@ -3070,16 +2898,19 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
+                        .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
                         .IsFixedLength();
 
                     b.Property<Guid>("SysTextItemId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("SysTextItemID");
 
                     b.Property<string>("TranslationSysText")
                         .IsRequired()
@@ -3099,9 +2930,10 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("Category")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DefaultTranslation")
@@ -3109,7 +2941,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
@@ -3119,16 +2950,16 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("TextItemTypeId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("TextItemTypeID");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("Category");
 
                     b.HasIndex("TextItemTypeId");
 
-                    b.ToTable("TextItem");
+                    b.ToTable("TextItem", "xlns");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", b =>
@@ -3136,25 +2967,28 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<Guid?>("ParentId")
-                        .IsRequired()
+                    b.Property<Guid?>("Parent")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("Parent");
 
-                    b.ToTable("TextItemCategory");
+                    b.ToTable("TextItemCategory", "xlns");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItemType", b =>
@@ -3162,23 +2996,29 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("token");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TextItemType");
+                    b.ToTable("TextItemType", "xlns");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextTranslation", b =>
@@ -3186,16 +3026,19 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
+                        .HasMaxLength(5)
                         .IsUnicode(false)
                         .HasColumnType("char(5)")
                         .IsFixedLength();
 
                     b.Property<Guid>("TextItemId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("TextItemID");
 
                     b.Property<string>("TranslationText")
                         .IsRequired()
@@ -3207,73 +3050,86 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.HasIndex("TextItemId");
 
-                    b.ToTable("TextTranslation");
+                    b.ToTable("TextTranslation", "xlns");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ThisDevice", b =>
                 {
                     b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("branch_id");
 
                     b.Property<int>("ConfigGroup")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("config_group");
 
                     b.Property<int>("CurrencyList")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("currency_list");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("DeviceLocation")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("device_location");
 
                     b.Property<string>("DeviceNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("device_number");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
-                    b.Property<int>("GuiscreenList")
-                        .HasColumnType("int");
+                    b.Property<int>("GUIScreenList")
+                        .HasColumnType("int")
+                        .HasColumnName("GUIScreen_list");
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
 
                     b.Property<int?>("LanguageList")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("language_list");
 
                     b.Property<int>("LoginAttempts")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("login_attempts");
 
                     b.Property<int>("LoginCycles")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("login_cycles");
 
                     b.Property<string>("MachineName")
-                        .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(128)")
+                        .HasColumnName("machine_name");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<int>("TransactionTypeList")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("transaction_type_list");
 
                     b.Property<int>("TypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type_id");
 
                     b.Property<int?>("UserGroup")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("user_group");
 
                     b.ToTable("ThisDevice");
 
@@ -3285,161 +3141,162 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newsequentialid())")
-                        .HasComment("Globally Unique Identifier for replication");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<Guid?>("AuthUser")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("auth_user");
 
                     b.Property<Guid?>("CITId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("cit_id");
 
                     b.Property<string>("CbAccountName")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("The account name returned by core banking.");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("cb_account_name");
 
                     b.Property<DateTime?>("CbDate")
                         .HasColumnType("datetime2")
-                        .HasComment("Core banking returned transaction date and time");
+                        .HasColumnName("cb_date");
 
                     b.Property<string>("CbRefAccountName")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Core banking returned Reference Account Name if any following a validation request for a Reference Account Number");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("cb_ref_account_name");
 
                     b.Property<string>("CbStatusDetail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasComment("Additional status details returned by core banking e.g. 'Amount must be less that MAX_AMOUNT'");
+                        .HasColumnName("cb_status_detail");
 
                     b.Property<string>("CbTxNumber")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Core banking returned transaction number");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cb_tx_number");
 
                     b.Property<string>("CbTxStatus")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Core banking returned transaction status e.g. SUCCESS or FAILURE");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cb_tx_status");
 
                     b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
 
                     b.Property<bool>("EscrowJam")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("escrow_jam");
 
                     b.Property<string>("FundsSource")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("funds_source");
 
                     b.Property<Guid?>("InitUser")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("init_user");
 
                     b.Property<bool>("JamDetected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("jam_detected");
 
                     b.Property<bool>("NotesRejected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("notes_rejected");
 
                     b.Property<Guid>("SessionId")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("The session this transaction fullfills");
+                        .HasColumnName("session_id");
 
                     b.Property<string>("TxAccountNumber")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Account Number for crediting. This can be a suspense account");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_account_number");
 
                     b.Property<long?>("TxAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("tx_amount");
 
                     b.Property<bool>("TxCompleted")
                         .HasColumnType("bit")
-                        .HasComment("Indicate if the transaction has completed or is in progress");
+                        .HasColumnName("tx_completed");
 
                     b.Property<string>("TxCurrency")
-                        .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
-                        .IsFixedLength()
-                        .HasComment("User selected currency. A transaction can only have one currency at a time");
+                        .HasColumnType("char(3)")
+                        .HasColumnName("tx_currency")
+                        .IsFixedLength();
 
                     b.Property<string>("TxDepositorName")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Customer's name");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_depositor_name");
 
                     b.Property<DateTime?>("TxEndDate")
                         .HasColumnType("datetime2")
-                        .HasComment("The date and time the transaction was recorded in the database. Can be different from core banking's transaction date");
+                        .HasColumnName("tx_end_date");
 
                     b.Property<int>("TxErrorCode")
                         .HasColumnType("int")
-                        .HasComment("Last error code encountered during the transaction");
+                        .HasColumnName("tx_error_code");
 
                     b.Property<string>("TxErrorMessage")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Last error message encountered during the transaction");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("tx_error_message");
 
                     b.Property<string>("TxIdNumber")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Customer's ID number");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_id_number");
 
                     b.Property<string>("TxNarration")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("The narration from the deposit slip. Usually set to 16 characters in core banking");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_narration");
 
                     b.Property<string>("TxPhone")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Customer entered phone number");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_phone");
 
                     b.Property<int?>("TxRandomNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("tx_random_number");
 
                     b.Property<string>("TxRefAccount")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("Used for double validation transactions where the user enters a second account number. E.g Mpesa Agent Number");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_ref_account");
 
                     b.Property<int>("TxResult")
                         .HasColumnType("int")
-                        .HasComment("Boolean for if the transaction succeeded 100% without encountering a critical terminating error");
+                        .HasColumnName("tx_result");
 
                     b.Property<DateTime>("TxStartDate")
                         .HasColumnType("datetime2")
-                        .HasComment("The date and time the transaction was recorded in the database. Can be different from core banking's transaction date");
+                        .HasColumnName("tx_start_date");
 
                     b.Property<string>("TxSuspenseAccount")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("tx_suspense_account");
 
                     b.Property<int?>("TxType")
-                        .IsRequired()
                         .HasColumnType("int")
-                        .HasComment("The transaction type chosen by the user from TransactionTypeListItem");
+                        .HasColumnName("tx_type");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthUser");
 
                     b.HasIndex("CITId");
 
                     b.HasIndex("DeviceId");
+
+                    b.HasIndex("InitUser");
 
                     b.HasIndex("SessionId");
 
@@ -3448,43 +3305,49 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("TxType");
 
                     b.ToTable("Transaction");
-
-                    b.HasComment("Stores the summary of a transaction attempt. A transaction can have various stages of completion if an error is encountered.");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionException", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("AdditionalInfo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("additional_info");
 
                     b.Property<int>("Code")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("Datetime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("datetime");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("level");
 
                     b.Property<string>("MachineName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("machine_name");
 
                     b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("message");
 
                     b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("transaction_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TransactionId");
 
                     b.ToTable("TransactionException", "exp");
 
@@ -3496,21 +3359,23 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("TransactionLimitList");
-
-                    b.HasComment("Sets the transaction limit amounts for each currency");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitListItem", b =>
@@ -3518,162 +3383,67 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
-                        .IsFixedLength()
-                        .HasComment("ISO 4217 Three Character Currency Code");
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency_code")
+                        .IsFixedLength();
 
                     b.Property<long>("FundsSourceAmount")
                         .HasColumnType("bigint")
-                        .HasComment("The amount after which the Source of Funds screen will be shown");
+                        .HasColumnName("funds_source_amount");
 
                     b.Property<int>("OvercountAmount")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("overcount_amount");
 
                     b.Property<long>("OverdepositAmount")
                         .HasColumnType("bigint")
-                        .HasComment("The amount after which the CDM will disable the counter");
+                        .HasColumnName("overdeposit_amount");
 
                     b.Property<bool>("PreventOvercount")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("prevent_overcount");
 
                     b.Property<bool>("PreventOverdeposit")
                         .HasColumnType("bit")
-                        .HasComment("CDM will not accept further deposits past the maximum");
+                        .HasColumnName("prevent_overdeposit");
 
-                    b.Property<bool>("PreventUnderdeposit")
+                    b.Property<bool?>("PreventUnderdeposit")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("prevent_underdeposit")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<Guid?>("ShowFundsForm")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("show_funds_form");
 
                     b.Property<bool>("ShowFundsSource")
                         .HasColumnType("bit")
-                        .HasComment("Whether to show the source of funds screen after deposit limit is reached or passed");
+                        .HasColumnName("show_funds_source");
 
-                    b.Property<Guid>("TransactionLimitListId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("TransactionitemlistId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("transactionitemlist_id");
 
                     b.Property<long>("UnderdepositAmount")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("underdeposit_amount");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CurrencyCode");
 
-                    b.HasIndex("TransactionLimitListId");
+                    b.HasIndex("TransactionitemlistId");
 
                     b.ToTable("TransactionLimitListItem");
-
-                    b.HasComment("Limit values for each currency");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionPosting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newsequentialid())");
-
-                    b.Property<DateTime?>("AuthDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("AuthResponse")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("AuthorisingUserId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CbDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CbStatusDetail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CbTxNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CbTxStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CrAccount")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("CrAmount")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("CrCurrency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("DeviceInitiated")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("DrAccount")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("DrAmount")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("DrCurrency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ErrorCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("InitDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("InitialisingUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsComplete")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Narration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PostDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PostStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TxId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorisingUserId");
-
-                    b.HasIndex("InitialisingUserId");
-
-                    b.HasIndex("TxId");
-
-                    b.ToTable("TransactionPosting");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", b =>
@@ -3681,169 +3451,185 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("AccountNameCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AccountNameCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("account_name_caption");
 
-                    b.Property<Guid?>("AccountNumberCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AccountNumberCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("account_number_caption");
 
-                    b.Property<Guid?>("AliasAccountNameCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AliasAccountNameCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("alias_account_name_caption");
 
-                    b.Property<Guid?>("AliasAccountNumberCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AliasAccountNumberCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("alias_account_number_caption");
 
-                    b.Property<Guid?>("DepositorNameCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("DepositorNameCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("depositor_name_caption");
 
-                    b.Property<Guid?>("DisclaimerId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("Disclaimer")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("disclaimer");
 
-                    b.Property<Guid?>("FullInstructionsId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("FullInstructions")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("full_instructions");
 
-                    b.Property<Guid?>("FundsSourceCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("FundsSourceCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("FundsSource_caption");
 
-                    b.Property<Guid?>("IdNumberCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("IdNumberCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_number_caption");
 
-                    b.Property<Guid?>("ListItemCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ListItemCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("listItem_caption");
 
-                    b.Property<Guid?>("NarrationCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("NarrationCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("narration_caption");
 
-                    b.Property<Guid?>("PhoneNumberCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("PhoneNumberCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("phone_number_caption");
 
-                    b.Property<Guid?>("ReceiptTemplateId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ReceiptTemplate")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("receipt_template");
 
-                    b.Property<Guid?>("ReferenceAccountNameCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ReferenceAccountNameCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("reference_account_name_caption");
 
-                    b.Property<Guid?>("ReferenceAccountNumberCaptionId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ReferenceAccountNumberCaption")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("reference_account_number_caption");
 
-                    b.Property<Guid?>("TermsId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("Terms")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("terms");
 
-                    b.Property<int>("TxItemId")
-                        .HasColumnType("int");
+                    b.Property<int>("TxItem")
+                        .HasColumnType("int")
+                        .HasColumnName("tx_item");
+
+                    b.Property<Guid?>("ValidationTextErrorMessage")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_text_error_message");
+
+                    b.Property<Guid?>("ValidationTextSuccessMessage")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_text_success_message");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountNameCaptionId");
+                    b.HasIndex("AccountNameCaption");
 
-                    b.HasIndex("AccountNumberCaptionId");
+                    b.HasIndex("AccountNumberCaption");
 
-                    b.HasIndex("AliasAccountNameCaptionId");
+                    b.HasIndex("AliasAccountNameCaption");
 
-                    b.HasIndex("AliasAccountNumberCaptionId");
+                    b.HasIndex("AliasAccountNumberCaption");
 
-                    b.HasIndex("DepositorNameCaptionId");
+                    b.HasIndex("DepositorNameCaption");
 
-                    b.HasIndex("DisclaimerId");
+                    b.HasIndex("Disclaimer");
 
-                    b.HasIndex("FullInstructionsId");
+                    b.HasIndex("FullInstructions");
 
-                    b.HasIndex("FundsSourceCaptionId");
+                    b.HasIndex("FundsSourceCaption");
 
-                    b.HasIndex("IdNumberCaptionId");
+                    b.HasIndex("IdNumberCaption");
 
-                    b.HasIndex("ListItemCaptionId");
+                    b.HasIndex("ListItemCaption");
 
-                    b.HasIndex("NarrationCaptionId");
+                    b.HasIndex("NarrationCaption");
 
-                    b.HasIndex("PhoneNumberCaptionId");
+                    b.HasIndex("PhoneNumberCaption");
 
-                    b.HasIndex("ReceiptTemplateId");
+                    b.HasIndex("ReceiptTemplate");
 
-                    b.HasIndex("ReferenceAccountNameCaptionId");
+                    b.HasIndex("ReferenceAccountNameCaption");
 
-                    b.HasIndex("ReferenceAccountNumberCaptionId");
+                    b.HasIndex("ReferenceAccountNumberCaption");
 
-                    b.HasIndex("TermsId");
+                    b.HasIndex("Terms");
 
-                    b.HasIndex("TxItemId")
+                    b.HasIndex("TxItem")
                         .IsUnique();
 
-                    b.ToTable("TransactionText");
+                    b.HasIndex("ValidationTextErrorMessage");
 
-                    b.HasComment("Stores the multi language texts for a tx");
+                    b.HasIndex("ValidationTextSuccessMessage");
+
+                    b.ToTable("TransactionText");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<Guid>("Code")
                         .HasColumnType("uniqueidentifier")
-                        .HasComment("Vendor supplied ScreenType GUID");
+                        .HasColumnName("code");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common description for the transaction type");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common name for the transaction e.g. Mpesa Deposit");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("TransactionType");
-
-                    b.HasComment("");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
@@ -3853,109 +3639,115 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<Guid?>("AccountPermission")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("account_permission");
 
                     b.Property<bool>("AuthUserRequired")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("auth_user_required");
 
                     b.Property<string>("CbTxType")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("A string passed to core banking with transaction details so core banking can route the deposit to the correct handler");
+                        .HasColumnName("cb_tx_type");
 
                     b.Property<string>("DefaultAccount")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("the default account that pre-polulates the AccountNumber of a transaction");
+                        .HasColumnName("default_account");
 
-                    b.Property<string>("DefaultAccountCurrencyId")
+                    b.Property<string>("DefaultAccountCurrency")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
                         .IsUnicode(false)
-                        .HasColumnType("char(900)")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("default_account_currency")
                         .HasDefaultValueSql("('KES')")
                         .IsFixedLength();
 
                     b.Property<string>("DefaultAccountName")
-                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("default_account_name");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
-                        .HasComment("common description for the transaction type");
+                        .HasColumnName("description");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("enabled")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<byte[]>("Icon")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("InitUserRequired")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("init_user_required");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("common name for the transaction e.g. Mpesa Deposit");
+                        .HasColumnName("name");
 
                     b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("password");
 
-                    b.Property<Guid?>("TxLimitListId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("TxLimitList")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("tx_limit_list");
 
-                    b.Property<Guid?>("TxTextId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("TxText")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("tx_text");
 
-                    b.Property<int>("TxTypeGuiScreenListId")
+                    b.Property<int>("TxType")
+                        .HasColumnType("int")
+                        .HasColumnName("tx_type");
+
+                    b.Property<int>("TxTypeGUIScreenlist")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
+                        .HasColumnName("tx_type_guiscreenlist")
                         .HasDefaultValueSql("((1))");
 
-                    b.Property<int>("TxTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username")
-                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("username");
 
                     b.Property<bool>("ValidateDefaultAccount")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("validate_default_account");
 
                     b.Property<bool>("ValidateReferenceAccount")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("validate_reference_account");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultAccountCurrencyId");
+                    b.HasIndex("DefaultAccountCurrency");
 
-                    b.HasIndex("TxLimitListId");
+                    b.HasIndex("TxLimitList");
 
-                    b.HasIndex("TxTextId");
+                    b.HasIndex("TxText");
 
-                    b.HasIndex("TxTypeGuiScreenListId");
+                    b.HasIndex("TxType");
 
-                    b.HasIndex("TxTypeId");
+                    b.HasIndex("TxTypeGUIScreenlist");
 
                     b.ToTable("TransactionTypeListItem");
-
-                    b.HasComment("Transactions that the system can perform e.g. regular deposit, Mpesa deposit, etc");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListTransactionTypeListItem", b =>
@@ -3963,192 +3755,59 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<int>("ListOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("list_order");
 
-                    b.Property<int>("TxtypeListId")
-                        .HasColumnType("int");
+                    b.Property<int>("TxtypeList")
+                        .HasColumnType("int")
+                        .HasColumnName("txtype_list");
 
-                    b.Property<int>("TxtypeListItemId")
-                        .HasColumnType("int");
+                    b.Property<int>("TxtypeListItem")
+                        .HasColumnType("int")
+                        .HasColumnName("txtype_list_item");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TxtypeListId");
+                    b.HasIndex("TxtypeList");
 
-                    b.HasIndex("TxtypeListItemId");
+                    b.HasIndex("TxtypeListItem");
 
                     b.ToTable("TransactionTypeListTransactionTypeListItem");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionView", b =>
-                {
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("BranchName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("CITId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CbStatus")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(16)");
-
-                    b.Property<string>("CbTransactionNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .IsUnicode(false)
-                        .HasColumnType("char(3)")
-                        .IsFixedLength();
-
-                    b.Property<long>("Denomination100")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("Denomination1000")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("Denomination200")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("Denomination50")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("Denomination500")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("DepositorName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeviceLocation")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DeviceName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ErrorCode")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<bool>("JamDetected")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Narration")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int?>("RandomNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ReferenceAccountName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("ReferenceAccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int>("Result")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("SubTotal")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TransactionTypeName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.ToTable("TransactionView");
-
-                    b.ToView("TransactionView");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.UptimeComponentState", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<int>("ComponentState")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("component_state");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<Guid>("Device")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device");
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("end_date");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("start_date");
 
                     b.HasKey("Id");
 
@@ -4159,22 +3818,31 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<Guid>("Device")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device");
 
                     b.Property<int>("DeviceMode")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("device_mode");
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("end_date");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("start_date");
 
                     b.HasKey("Id");
 
@@ -4185,31 +3853,31 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("nvarchar(512)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
-                    b.Property<int?>("ParentGroupId")
-                        .IsRequired()
-                        .HasColumnType("int");
+                    b.Property<int?>("ParentGroup")
+                        .HasColumnType("int")
+                        .HasColumnName("parent_group");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentGroupId");
+                    b.HasIndex("ParentGroup");
 
                     b.ToTable("UserGroup");
-
-                    b.HasComment("groups together users ho have privileges on the same machine");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.UserLock", b =>
@@ -4217,30 +3885,27 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("ApplicationUserLoginDetailId")
-                        .IsRequired()
+                    b.Property<Guid?>("ApplicationUserLoginDetail")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("InitiatingUserId")
-                        .IsRequired()
+                    b.Property<Guid?>("InitiatingUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("LockType")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("LogDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime");
 
                     b.Property<bool?>("WebPortalInitiated")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserLoginDetailId");
-
-                    b.HasIndex("InitiatingUserId");
+                    b.HasIndex("InitiatingUser");
 
                     b.ToTable("UserLock");
                 });
@@ -4250,45 +3915,46 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Category")
-                        .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("category");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)")
-                        .HasComment("common description for the transaction type");
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<int?>("ErrorCode")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("error_code");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasComment("common name for the transaction e.g. Mpesa Deposit");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("TypeId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("type_id");
 
                     b.Property<Guid?>("ValidationTextId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ValidationTypeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_text_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ValidationTextId");
+                    b.HasIndex("TypeId");
 
-                    b.HasIndex("ValidationTypeId");
+                    b.HasIndex("ValidationTextId");
 
                     b.ToTable("ValidationItem");
                 });
@@ -4298,25 +3964,28 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("order");
 
                     b.Property<Guid>("ValidationItemId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_item_id");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("value");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ValidationItemId");
 
                     b.ToTable("ValidationItemValue");
-
-                    b.HasComment("Individual values for the validation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationList", b =>
@@ -4324,32 +3993,32 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
+                        .HasColumnName("category");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common description for the transaction type");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common name for the transaction e.g. Mpesa Deposit");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("ValidationList");
-
-                    b.HasComment("List of validations to be performed on a field");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationListValidationItem", b =>
@@ -4357,21 +4026,27 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
+                        .HasColumnName("enabled")
                         .HasDefaultValueSql("((1))");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("order");
 
                     b.Property<Guid>("ValidationItemId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_item_id");
 
                     b.Property<Guid>("ValidationListId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_list_id");
 
                     b.HasKey("Id");
 
@@ -4380,8 +4055,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasIndex("ValidationListId");
 
                     b.ToTable("ValidationListValidationItem");
-
-                    b.HasComment("Link a ValidationItem to a ValidationList");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", b =>
@@ -4389,30 +4062,30 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
-                    b.Property<Guid?>("ErrorMessageId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ErrorMessage")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("error_message");
 
-                    b.Property<Guid?>("SuccessMessageId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("SuccessMessage")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("success_message");
 
                     b.Property<Guid>("ValidationItemId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("validation_item_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ErrorMessageId");
+                    b.HasIndex("ErrorMessage");
 
-                    b.HasIndex("SuccessMessageId");
+                    b.HasIndex("SuccessMessage");
 
                     b.HasIndex("ValidationItemId");
 
                     b.ToTable("ValidationText");
-
-                    b.HasComment("Multilanguage validation result text");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationType", b =>
@@ -4420,389 +4093,27 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common description for the transaction type");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("enabled");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(max)")
-                        .HasComment("common name for the transaction e.g. Mpesa Deposit");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.ToTable("ValidationType");
-
-                    b.HasComment("The type of validation e.g. regex, etc");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ViewConfig", b =>
-                {
-                    b.Property<string>("ConfigId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ConfigValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("ViewConfig");
-
-                    b.ToView("viewConfig");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ViewPermission", b =>
-                {
-                    b.Property<string>("Activity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("StandaloneAllowed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("StandaloneAuthenticationRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("StandaloneCanAuthenticate")
-                        .HasColumnType("bit");
-
-                    b.ToTable("ViewPermission");
-
-                    b.ToView("viewPermissions");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalLogin", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ApplicationUserLoginDetailId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("ChangePassword")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Hash")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LogDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SFBegone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SessionID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool?>("Success")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("WebPortalLoginAction")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserLoginDetailId");
-
-                    b.ToTable("WebPortalLogin");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRole", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Oid");
-
-                    b.ToTable("WebPortalRole");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRoleRolesApplicationUserApplicationUser", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ApplicationUsersId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("RolesId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Oid");
-
-                    b.HasIndex("ApplicationUsersId");
-
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("WebPortalRoleRolesApplicationUserApplicationUser");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebUserLoginCount", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LoginCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("Modified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<string>("User")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Oid");
-
-                    b.ToTable("WebUserLoginCount");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebUserPasswordHistory", b =>
-                {
-                    b.Property<Guid>("Oid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("Datetime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("Gcrecord")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OptimisticLockField")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("User")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Oid");
-
-                    b.ToTable("WebUserPasswordHistory");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.XpobjectType", b =>
-                {
-                    b.Property<int>("Oid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Oid"), 1L, 1);
-
-                    b.Property<string>("AssemblyName")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.HasKey("Oid");
-
-                    b.ToTable("XpobjectType");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.StoredProcs.GetCITDenominationByDatesResult", b =>
-                {
-                    b.Property<long?>("Count")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Denom")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("SubTotal")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Txcurrency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToView(null);
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.StoredProcs.GetDestinationEmailsByAlertTypeResult", b =>
-                {
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToView(null);
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.StoredProcs.HashTransactionResult", b =>
-                {
-                    b.Property<string>("NewHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToView(null);
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.StoredProcs.Models.GetDeviceConfigByUserGroupResult", b =>
-                {
-                    b.Property<string>("ConfigId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ConfigValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ToView(null);
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.StoredProcs.Models.GetDeviceUsersByDeviceResult", b =>
-                {
-                    b.Property<Guid?>("ApplicationUserLoginDetail")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("DepositorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("EmailEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Fname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Lname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LoginAttempts")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PasswordResetRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("UserDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserGroup")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToView(null);
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Views.DenominationView", b =>
-                {
-                    b.Property<long?>("Subtotal")
-                        .HasColumnType("bigint")
-                        .HasColumnName("subtotal");
-
-                    b.Property<Guid>("TxId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("tx_id");
-
-                    b.Property<long>("_100")
-                        .HasColumnType("bigint")
-                        .HasColumnName("100");
-
-                    b.Property<long>("_1000")
-                        .HasColumnType("bigint")
-                        .HasColumnName("1000");
-
-                    b.Property<long>("_200")
-                        .HasColumnType("bigint")
-                        .HasColumnName("200");
-
-                    b.Property<long>("_50")
-                        .HasColumnType("bigint")
-                        .HasColumnName("50");
-
-                    b.Property<long>("_500")
-                        .HasColumnType("bigint")
-                        .HasColumnName("500");
-
-                    b.ToTable("DenominationView");
-
-                    b.ToView("DenominationView");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEmail", b =>
@@ -4816,9 +4127,19 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("AlertEvent");
                 });
 
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertEvent", b =>
+                {
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.AlertEvent", "AlertEventNavigation")
+                        .WithMany("InverseAlertEventNavigation")
+                        .HasForeignKey("AlertEventId")
+                        .HasConstraintName("FK_AlertEmailEvent_AlertEmailEvent");
+
+                    b.Navigation("AlertEventNavigation");
+                });
+
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageRegistry", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageType", "AlertMessageType")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageType", "AlertType")
                         .WithMany("AlertMessageRegistries")
                         .HasForeignKey("AlertTypeId")
                         .IsRequired()
@@ -4830,7 +4151,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_AlertMessageRegistry_Role");
 
-                    b.Navigation("AlertMessageType");
+                    b.Navigation("AlertType");
 
                     b.Navigation("Role");
                 });
@@ -4838,7 +4159,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertSMS", b =>
                 {
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.AlertEvent", "AlertEvent")
-                        .WithMany("AlertSMSes")
+                        .WithMany("AlertSMS")
                         .HasForeignKey("AlertEventId")
                         .IsRequired()
                         .HasConstraintName("FK_AlertSMS_AlertEvent");
@@ -4846,133 +4167,34 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("AlertEvent");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationException", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
-                        .WithMany("ApplicationExceptions")
-                        .HasForeignKey("DeviceId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationException_Device");
-
-                    b.Navigation("Device");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationLog", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
-                        .WithMany("ApplicationLogs")
-                        .HasForeignKey("DeviceId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationLog_Device");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", "Session")
-                        .WithMany("ApplicationLogs")
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationLog_DepositorSession");
-
-                    b.Navigation("Device");
-
-                    b.Navigation("Session");
-                });
-
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", "ApplicationUserLoginDetail")
-                        .WithMany("ApplicationUsers")
-                        .HasForeignKey("ApplicationUserLoginDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationUser_ApplicationUserLoginDetail");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CIT", null)
-                        .WithOne("AuthorisingUser")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthUserId")
-                        .HasConstraintName("FK_CIT_ApplicationUser_AuthUser");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.EscrowJam", null)
-                        .WithOne("AuthorisingUser")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthorisinguserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_EscrowJam_AppUser_Approver");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.EscrowJam", null)
-                        .WithOne("InitialisingUser")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitialisinguserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_EscrowJam_AppUser_Initiator");
-
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Role", "Role")
                         .WithMany("ApplicationUsers")
                         .HasForeignKey("RoleId")
                         .IsRequired()
                         .HasConstraintName("FK_ApplicationUser_Role");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "UserGroup")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "UserGroupNavigation")
                         .WithMany("ApplicationUsers")
-                        .HasForeignKey("UserGroupId")
+                        .HasForeignKey("UserGroup")
                         .IsRequired()
                         .HasConstraintName("FK_ApplicationUser_UserGroup");
 
-                    b.Navigation("ApplicationUserLoginDetail");
-
                     b.Navigation("Role");
 
-                    b.Navigation("UserGroup");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserChangePassword", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PasswordPolicy", "PasswordPolicy")
-                        .WithMany("ApplicationUserChangePasswords")
-                        .HasForeignKey("PasswordPolicyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationUserChangePassword_PasswordPolicy");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "User")
-                        .WithMany("ApplicationUserChangePasswords")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationUserChangePassword_User");
-
-                    b.Navigation("PasswordPolicy");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.WebPortalLogin", "LastLoginLogEntry")
-                        .WithMany("ApplicationUserLoginDetails")
-                        .HasForeignKey("LastLoginLogEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationUserLoginDetail_LastLoginLogEntry");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "User")
-                        .WithMany("ApplicationUserLoginDetails")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ApplicationUserLoginDetail_User");
-
-                    b.Navigation("LastLoginLogEntry");
-
-                    b.Navigation("User");
+                    b.Navigation("UserGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Bank", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Country", "Country")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Country", "CountryCodeNavigation")
                         .WithMany("Banks")
                         .HasForeignKey("CountryCode")
                         .IsRequired()
                         .HasConstraintName("FK_Bank_Country");
 
-                    b.Navigation("Country");
+                    b.Navigation("CountryCodeNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Branch", b =>
@@ -4988,9 +4210,10 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CIT", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", null)
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthUserNavigation")
                         .WithMany("CITAuthUsers")
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("AuthUser")
+                        .HasConstraintName("FK_CIT_ApplicationUser_AuthUser");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
                         .WithMany("CITs")
@@ -4998,15 +4221,17 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_CIT_DeviceList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "StartUser")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "StartUserNavigation")
                         .WithMany("CITStartUsers")
-                        .HasForeignKey("StartUserId")
+                        .HasForeignKey("StartUser")
                         .IsRequired()
                         .HasConstraintName("FK_CIT_ApplicationUser_StartUser");
 
+                    b.Navigation("AuthUserNavigation");
+
                     b.Navigation("Device");
 
-                    b.Navigation("StartUser");
+                    b.Navigation("StartUserNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CITDenomination", b =>
@@ -5044,84 +4269,72 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CIT", "CIT")
                         .WithMany("CITTransactions")
                         .HasForeignKey("CITId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_CITTransaction_CIT");
 
                     b.Navigation("CIT");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Config", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigCategory", "ConfigCategory")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigCategory", "Category")
                         .WithMany("Configs")
                         .HasForeignKey("CategoryId")
                         .IsRequired()
                         .HasConstraintName("FK_Config_ConfigCategory");
 
-                    b.Navigation("ConfigCategory");
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "ParentGroup")
-                        .WithMany("ParentGroups")
-                        .HasForeignKey("ParentGroupId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "ParentGroupNavigation")
+                        .WithMany("InverseParentGroupNavigation")
+                        .HasForeignKey("ParentGroup")
                         .HasConstraintName("FK_ConfigGroup_ConfigGroup");
 
-                    b.Navigation("ParentGroup");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CrashEvent", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
-                        .WithMany("CrashEvents")
-                        .HasForeignKey("DeviceId")
-                        .IsRequired()
-                        .HasConstraintName("FK_CrashEvent_Device");
-
-                    b.Navigation("Device");
+                    b.Navigation("ParentGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "DefaultCurrency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "DefaultCurrencyNavigation")
                         .WithMany("CurrencyLists")
-                        .HasForeignKey("DefaultCurrencyId")
+                        .HasForeignKey("DefaultCurrency")
                         .IsRequired()
                         .HasConstraintName("FK_CurrencyList_Currency");
 
-                    b.Navigation("DefaultCurrency");
+                    b.Navigation("DefaultCurrencyNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CurrencyListCurrency", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "CurrencyItem")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "CurrencyItemNavigation")
                         .WithMany("CurrencyListCurrencies")
-                        .HasForeignKey("CurrencyItemId")
+                        .HasForeignKey("CurrencyItem")
                         .IsRequired()
                         .HasConstraintName("FK_Currency_CurrencyList_Currency");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", "CurrencyList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", "CurrencyListNavigation")
                         .WithMany("CurrencyListCurrencies")
-                        .HasForeignKey("CurrencyListId")
+                        .HasForeignKey("CurrencyList")
                         .IsRequired()
                         .HasConstraintName("FK_Currency_CurrencyList_CurrencyList");
 
-                    b.Navigation("CurrencyItem");
+                    b.Navigation("CurrencyItemNavigation");
 
-                    b.Navigation("CurrencyList");
+                    b.Navigation("CurrencyListNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DenominationDetail", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Transaction")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Tx")
                         .WithMany("DenominationDetails")
                         .HasForeignKey("TxId")
                         .IsRequired()
                         .HasConstraintName("FK_DenominationDetail_Transaction");
 
-                    b.Navigation("Transaction");
+                    b.Navigation("Tx");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", b =>
@@ -5132,16 +4345,14 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DepositorSession_DeviceList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "Language")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "LanguageCodeNavigation")
                         .WithMany("DepositorSessions")
                         .HasForeignKey("LanguageCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_DepositorSession_Language");
 
                     b.Navigation("Device");
 
-                    b.Navigation("Language");
+                    b.Navigation("LanguageCodeNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Device", b =>
@@ -5152,82 +4363,78 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_Branch");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "ConfigGroup")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "ConfigGroupNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("ConfigGroupId")
+                        .HasForeignKey("ConfigGroup")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_ConfigGroup");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", "CurrencyList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CurrencyList", "CurrencyListNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("CurrencyListId")
+                        .HasForeignKey("CurrencyList")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_CurrencyList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", "GuiScreenList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenList", "GUIScreenListNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("GuiScreenListId")
+                        .HasForeignKey("GUIScreenList")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_GUIScreenList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", "LanguageList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", "LanguageListNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("LanguageListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
+                        .HasForeignKey("LanguageList")
                         .HasConstraintName("FK_Device_LanguageList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeList", "TransactionTypeList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeList", "TransactionTypeListNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("TransactionTypeListId")
+                        .HasForeignKey("TransactionTypeList")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_TransactionTypeList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.DeviceType", "DeviceType")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.DeviceType", "Type")
                         .WithMany("Devices")
                         .HasForeignKey("TypeId")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceList_DeviceType");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "UserGroup")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "UserGroupNavigation")
                         .WithMany("Devices")
-                        .HasForeignKey("UserGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
+                        .HasForeignKey("UserGroup")
                         .HasConstraintName("FK_DeviceList_UserGroup");
 
                     b.Navigation("Branch");
 
-                    b.Navigation("ConfigGroup");
+                    b.Navigation("ConfigGroupNavigation");
 
-                    b.Navigation("CurrencyList");
+                    b.Navigation("CurrencyListNavigation");
 
-                    b.Navigation("DeviceType");
+                    b.Navigation("GUIScreenListNavigation");
 
-                    b.Navigation("GuiScreenList");
+                    b.Navigation("LanguageListNavigation");
 
-                    b.Navigation("LanguageList");
+                    b.Navigation("TransactionTypeListNavigation");
 
-                    b.Navigation("TransactionTypeList");
+                    b.Navigation("Type");
 
-                    b.Navigation("UserGroup");
+                    b.Navigation("UserGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceCITSuspenseAccount", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "Currency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "CurrencyCodeNavigation")
                         .WithMany("DeviceCITSuspenseAccounts")
                         .HasForeignKey("CurrencyCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_DeviceCITSuspenseAccount_Currency");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
-                        .WithMany()
+                        .WithMany("DeviceCITSuspenseAccounts")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_DeviceCITSuspenseAccount_Device");
 
-                    b.Navigation("Currency");
+                    b.Navigation("CurrencyCodeNavigation");
 
                     b.Navigation("Device");
                 });
@@ -5240,7 +4447,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DeviceConfig_Config");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "ConfigGroup")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ConfigGroup", "Group")
                         .WithMany("DeviceConfigs")
                         .HasForeignKey("GroupId")
                         .IsRequired()
@@ -5248,26 +4455,24 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("Config");
 
-                    b.Navigation("ConfigGroup");
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceLock", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "ApplicationUser")
-                        .WithMany("DeviceLocks")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
                         .WithMany("DeviceLocks")
                         .HasForeignKey("DeviceId")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceLock_Device");
 
-                    b.Navigation("ApplicationUser");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "LockingUserNavigation")
+                        .WithMany("DeviceLocks")
+                        .HasForeignKey("LockingUser");
 
                     b.Navigation("Device");
+
+                    b.Navigation("LockingUserNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceLogin", b =>
@@ -5278,15 +4483,15 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DeviceLogin_Device");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "UserNavigation")
                         .WithMany("DeviceLogins")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("User")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceLogin_ApplicationUser");
 
-                    b.Navigation("ApplicationUser");
-
                     b.Navigation("Device");
+
+                    b.Navigation("UserNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DevicePrinter", b =>
@@ -5302,32 +4507,34 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DeviceSuspenseAccount", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "Currency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "CurrencyCodeNavigation")
                         .WithMany("DeviceSuspenseAccounts")
                         .HasForeignKey("CurrencyCode")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceSuspenseAccount_Currency");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
-                        .WithMany("DeviceCITSuspenseAccounts")
+                        .WithMany("DeviceSuspenseAccounts")
                         .HasForeignKey("DeviceId")
                         .IsRequired()
                         .HasConstraintName("FK_DeviceSuspenseAccount_DeviceList");
 
-                    b.Navigation("Currency");
+                    b.Navigation("CurrencyCodeNavigation");
 
                     b.Navigation("Device");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.EscrowJam", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", null)
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthorisingUserNavigation")
                         .WithMany("EscrowJamAuthorisingUsers")
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("AuthorisingUser")
+                        .HasConstraintName("FK_EscrowJam_AppUser_Approver");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", null)
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitialisingUserNavigation")
                         .WithMany("EscrowJamInitialisingUsers")
-                        .HasForeignKey("ApplicationUserId1");
+                        .HasForeignKey("InitialisingUser")
+                        .HasConstraintName("FK_EscrowJam_AppUser_Initiator");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Transaction")
                         .WithMany("EscrowJams")
@@ -5335,211 +4542,186 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_EscrowJam_Transaction");
 
+                    b.Navigation("AuthorisingUserNavigation");
+
+                    b.Navigation("InitialisingUserNavigation");
+
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopItem", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "Value")
-                        .WithMany("GuiPrepopItems")
-                        .HasForeignKey("ValueId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ValueNavigation")
+                        .WithMany("GUIPrepopItems")
+                        .HasForeignKey("Value")
                         .IsRequired()
                         .HasConstraintName("FK_GUIPrepopItem_TextItem");
 
-                    b.Navigation("Value");
+                    b.Navigation("ValueNavigation");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopListItem", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopListItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopItem", "GuiPrepopItem")
-                        .WithMany("GuiPrepopListItems")
-                        .HasForeignKey("GuiPrepopItemId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopItem", "GUIPrepopItem")
+                        .WithMany("GUIPrepopListItems")
+                        .HasForeignKey("Item")
                         .IsRequired()
                         .HasConstraintName("FK_GUIPrepopList_Item_GUIPrepopItem");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopList", "GuiPrepopList")
-                        .WithMany("GuiPrepopListItems")
-                        .HasForeignKey("GuiPrepopListId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopList", "ListNavigation")
+                        .WithMany("GUIPrepopListItems")
+                        .HasForeignKey("List")
                         .IsRequired()
                         .HasConstraintName("FK_GUIPrepopList_Item_GUIPrepopList");
 
-                    b.Navigation("GuiPrepopItem");
+                    b.Navigation("GUIPrepopItem");
 
-                    b.Navigation("GuiPrepopList");
+                    b.Navigation("ListNavigation");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreen", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreen", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenText", "GuiScreenText")
-                        .WithMany("GuiScreens")
-                        .HasForeignKey("GuiScreenTextId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenText", "GuiTextNavigation")
+                        .WithMany("GUIScreens")
+                        .HasForeignKey("GuiText")
                         .HasConstraintName("FK_GUIScreen_GUIScreenText");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenType", "GuiScreenType")
-                        .WithMany("GuiScreens")
-                        .HasForeignKey("GuiScreenTypeId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenType", "GUIScreenType")
+                        .WithMany("GUIScreens")
+                        .HasForeignKey("Type")
                         .IsRequired()
                         .HasConstraintName("FK_GUIScreen_GUIScreenType");
 
-                    b.Navigation("GuiScreenText");
+                    b.Navigation("GUIScreenType");
 
-                    b.Navigation("GuiScreenType");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenListScreen", null)
-                        .WithOne("GuiScreenList")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", "GuiScreenListId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_GuiScreenList_Screen_GUIScreenList");
+                    b.Navigation("GuiTextNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenListScreen", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopList", "GuiPrepopList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopList", "GUIPrepopList")
                         .WithMany("GuiScreenListScreens")
-                        .HasForeignKey("GuiPrepopListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
+                        .HasForeignKey("GUIPrepoplistId")
                         .HasConstraintName("FK_GuiScreenList_Screen_GUIPrepopList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreen", "GuiScreen")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenList", "GuiScreenListNavigation")
                         .WithMany("GuiScreenListScreens")
-                        .HasForeignKey("GuiScreenId")
+                        .HasForeignKey("GuiScreenList")
+                        .IsRequired()
+                        .HasConstraintName("FK_GuiScreenList_Screen_GUIScreenList");
+
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreen", "ScreenNavigation")
+                        .WithMany("GuiScreenListScreens")
+                        .HasForeignKey("Screen")
                         .IsRequired()
                         .HasConstraintName("FK_GuiScreenList_Screen_GUIScreen");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", null)
-                        .WithMany("GuiScreenListScreens")
-                        .HasForeignKey("GuiScreenListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationList", "ValidationList")
                         .WithMany("GuiScreenListScreens")
                         .HasForeignKey("ValidationListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_GuiScreenList_Screen_ValidationList");
 
-                    b.Navigation("GuiPrepopList");
+                    b.Navigation("GUIPrepopList");
 
-                    b.Navigation("GuiScreen");
+                    b.Navigation("GuiScreenListNavigation");
+
+                    b.Navigation("ScreenNavigation");
 
                     b.Navigation("ValidationList");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenText", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenText", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnAcceptCaption")
-                        .WithMany("GuiScreenTextBtnAcceptCaptions")
-                        .HasForeignKey("BtnAcceptCaptionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_BtnAcceptCaption");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnAcceptCaptionNavigation")
+                        .WithMany("GUIScreenTextBtnAcceptCaptions")
+                        .HasForeignKey("BtnAcceptCaption")
+                        .HasConstraintName("FK_GUIScreenText_btn_accept_caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnBackCaption")
-                        .WithMany("GuiScreenTextBtnBackCaptions")
-                        .HasForeignKey("BtnBackCaptionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_BtnBackCaption");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnBackCaptionNavigation")
+                        .WithMany("GUIScreenTextBtnBackCaptions")
+                        .HasForeignKey("BtnBackCaption")
+                        .HasConstraintName("FK_GUIScreenText_btn_back_caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnCancelCaption")
-                        .WithMany("GuiScreenTextBtnCancelCaptions")
-                        .HasForeignKey("BtnCancelCaptionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_BtnCancelCaption");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "BtnCancelCaptionNavigation")
+                        .WithMany("GUIScreenTextBtnCancelCaptions")
+                        .HasForeignKey("BtnCancelCaption")
+                        .HasConstraintName("FK_GUIScreenText_btn_cancel_caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FullInstructions")
-                        .WithMany("GuiScreenTextFullInstructions")
-                        .HasForeignKey("FullInstructionsId")
-                        .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_FullInstructions");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FullInstructionsNavigation")
+                        .WithMany("GUIScreenTextFullInstructionss")
+                        .HasForeignKey("FullInstructions")
+                        .HasConstraintName("FK_GUIScreenText_full_instructions");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreen", "GuiScreen")
-                        .WithMany("GuiScreenTexts")
-                        .HasForeignKey("GuiScreenId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreen", "GUIScreen")
+                        .WithOne("GUIScreenText")
+                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenText", "GUIScreenId")
                         .IsRequired()
                         .HasConstraintName("FK_GUIScreenText_GUIScreen");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ScreenTitle")
-                        .WithMany("GuiScreenTextScreenTitles")
-                        .HasForeignKey("ScreenTitleId")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ScreenTitleNavigation")
+                        .WithMany("GUIScreenTextScreenTitles")
+                        .HasForeignKey("ScreenTitle")
                         .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_ScreenTitle");
+                        .HasConstraintName("FK_GUIScreenText_screen_title");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ScreenTitleInstruction")
-                        .WithMany("GuiScreenTextScreenTitleInstructions")
-                        .HasForeignKey("ScreenTitleInstructionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_GUIScreenText_ScreenTitleInstruction");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ScreenTitleInstructionNavigation")
+                        .WithMany("GUIScreenTextScreenTitleInstructions")
+                        .HasForeignKey("ScreenTitleInstruction")
+                        .HasConstraintName("FK_GUIScreenText_screen_title_instruction");
 
-                    b.Navigation("BtnAcceptCaption");
+                    b.Navigation("BtnAcceptCaptionNavigation");
 
-                    b.Navigation("BtnBackCaption");
+                    b.Navigation("BtnBackCaptionNavigation");
 
-                    b.Navigation("BtnCancelCaption");
+                    b.Navigation("BtnCancelCaptionNavigation");
 
-                    b.Navigation("FullInstructions");
+                    b.Navigation("FullInstructionsNavigation");
 
-                    b.Navigation("GuiScreen");
+                    b.Navigation("GUIScreen");
 
-                    b.Navigation("ScreenTitle");
+                    b.Navigation("ScreenTitleInstructionNavigation");
 
-                    b.Navigation("ScreenTitleInstruction");
+                    b.Navigation("ScreenTitleNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "DefaultLanguage")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "DefaultLanguageNavigation")
                         .WithMany("LanguageLists")
-                        .HasForeignKey("DefaultLanguageId")
+                        .HasForeignKey("DefaultLanguage")
                         .IsRequired()
                         .HasConstraintName("FK_LanguageList_Language");
 
-                    b.Navigation("DefaultLanguage");
+                    b.Navigation("DefaultLanguageNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.LanguageListLanguage", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "LanguageItem")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "LanguageItemNavigation")
                         .WithMany("LanguageListLanguages")
-                        .HasForeignKey("LanguageItemId")
+                        .HasForeignKey("LanguageItem")
                         .IsRequired()
                         .HasConstraintName("FK_LanguageList_Language_Language");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", "LanguageList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.LanguageList", "LanguageListNavigation")
                         .WithMany("LanguageListLanguages")
-                        .HasForeignKey("LanguageListId")
+                        .HasForeignKey("LanguageList")
                         .IsRequired()
                         .HasConstraintName("FK_LanguageList_Language_LanguageList");
 
-                    b.Navigation("LanguageItem");
+                    b.Navigation("LanguageItemNavigation");
 
-                    b.Navigation("LanguageList");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ModelDifferenceAspect", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ModelDifference", "Owner")
-                        .WithMany("ModelDifferenceAspects")
-                        .HasForeignKey("OwnerId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ModelDifferenceAspect_Owner");
-
-                    b.Navigation("Owner");
+                    b.Navigation("LanguageListNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PasswordHistory", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "UserNavigation")
                         .WithMany("PasswordHistories")
-                        .HasForeignKey("ApplicationUserId")
-                        .IsRequired()
+                        .HasForeignKey("User")
                         .HasConstraintName("FK_PasswordHistory_User");
 
-                    b.Navigation("ApplicationUser");
+                    b.Navigation("UserNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Permission", b =>
@@ -5561,122 +4743,48 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyMemberPermissionsObject", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyTypePermissionsObject", "TypePermissionObject")
-                        .WithMany("PermissionPolicyMemberPermissionsObjects")
-                        .HasForeignKey("TypePermissionObjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PermissionPolicyMemberPermissionsObject_TypePermissionObject");
-
-                    b.Navigation("TypePermissionObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyNavigationPermissionsObject", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", "Role")
-                        .WithMany("PermissionPolicyNavigationPermissionsObjects")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PermissionPolicyPermissionsObject_Role");
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyObjectPermissionsObject", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyTypePermissionsObject", "TypePermissionObject")
-                        .WithMany("PermissionPolicyObjectPermissionsObjects")
-                        .HasForeignKey("TypePermissionObjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PermissionPolicyObjectPermissionsObject_TypePermissionObject");
-
-                    b.Navigation("TypePermissionObject");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.XpobjectType", "ObjectType")
-                        .WithMany("PermissionPolicyRoles")
-                        .HasForeignKey("ObjectTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PermissionPolicyRole_ObjectType");
-
-                    b.Navigation("ObjectType");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyTypePermissionsObject", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", "Role")
-                        .WithMany("PermissionPolicyTypePermissionsObjects")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PermissionPolicyTypePermissionsObject_Role");
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Printout", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Transaction")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Tx")
                         .WithMany("Printouts")
                         .HasForeignKey("TxId")
                         .IsRequired()
                         .HasConstraintName("FK_Printout_Transaction");
 
-                    b.Navigation("Transaction");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SessionException", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", "Session")
-                        .WithMany("SessionExceptions")
-                        .HasForeignKey("SessionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_SessionException_DepositorSession");
-
-                    b.Navigation("Session");
+                    b.Navigation("Tx");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SysTextItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", "Category")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", "CategoryNavigation")
                         .WithMany("SysTextItems")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("Category")
                         .IsRequired()
                         .HasConstraintName("FK_SysTextItem_SysTextItemCategory");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemType", "TextItemType")
                         .WithMany("SysTextItems")
                         .HasForeignKey("TextItemTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_sysTextItem_sysTextItemType");
 
-                    b.Navigation("Category");
+                    b.Navigation("CategoryNavigation");
 
                     b.Navigation("TextItemType");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", "Parent")
-                        .WithMany("Parents")
-                        .HasForeignKey("ParentId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", "ParentNavigation")
+                        .WithMany("InverseParentNavigation")
+                        .HasForeignKey("Parent")
                         .HasConstraintName("FK_TextItemCategory_TextItemCategory");
 
-                    b.Navigation("Parent");
+                    b.Navigation("ParentNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SysTextTranslation", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "Language")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "LanguageCodeNavigation")
                         .WithMany("SysTextTranslations")
                         .HasForeignKey("LanguageCode")
                         .IsRequired()
@@ -5689,16 +4797,16 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_sysTextTranslation_sysTextItem");
 
-                    b.Navigation("Language");
+                    b.Navigation("LanguageCodeNavigation");
 
                     b.Navigation("SysTextItem");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", "Category")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", "CategoryNavigation")
                         .WithMany("TextItems")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("Category")
                         .IsRequired()
                         .HasConstraintName("FK_UI_TextItem_TextItemCategory");
 
@@ -5706,28 +4814,26 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .WithMany("TextItems")
                         .HasForeignKey("TextItemTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_UI_TextItem_TextItemType");
 
-                    b.Navigation("Category");
+                    b.Navigation("CategoryNavigation");
 
                     b.Navigation("TextItemType");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", "Parent")
-                        .WithMany("Parents")
-                        .HasForeignKey("ParentId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", "ParentNavigation")
+                        .WithMany("InverseParentNavigation")
+                        .HasForeignKey("Parent")
                         .HasConstraintName("FK_UI_TextItemCategory_TextItemCategory");
 
-                    b.Navigation("Parent");
+                    b.Navigation("ParentNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextTranslation", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "Language")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Language", "LanguageCodeNavigation")
                         .WithMany("TextTranslations")
                         .HasForeignKey("LanguageCode")
                         .IsRequired()
@@ -5740,18 +4846,21 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_UI_Translation_TextItem");
 
-                    b.Navigation("Language");
+                    b.Navigation("LanguageCodeNavigation");
 
                     b.Navigation("TextItem");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Transaction", b =>
                 {
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthUserNavigation")
+                        .WithMany("TransactionAuthUsers")
+                        .HasForeignKey("AuthUser")
+                        .HasConstraintName("FK_Transaction_auth_user");
+
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.CIT", "CIT")
                         .WithMany("Transactions")
                         .HasForeignKey("CITId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_Transaction_CIT");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Device", "Device")
@@ -5760,342 +4869,291 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Transaction_DeviceList");
 
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitUserNavigation")
+                        .WithMany("TransactionInitUsers")
+                        .HasForeignKey("InitUser")
+                        .HasConstraintName("FK_Transaction_init_user");
+
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", "Session")
                         .WithMany("Transactions")
                         .HasForeignKey("SessionId")
                         .IsRequired()
                         .HasConstraintName("FK_Transaction_DepositorSession");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "Currency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "TxCurrencyNavigation")
                         .WithMany("Transactions")
                         .HasForeignKey("TxCurrency")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_Transaction_Currency_Transaction");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TransactionTypeListItem")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TxTypeNavigation")
                         .WithMany("Transactions")
                         .HasForeignKey("TxType")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_Transaction_TransactionTypeListItem");
+
+                    b.Navigation("AuthUserNavigation");
 
                     b.Navigation("CIT");
 
-                    b.Navigation("Currency");
-
                     b.Navigation("Device");
+
+                    b.Navigation("InitUserNavigation");
 
                     b.Navigation("Session");
 
-                    b.Navigation("TransactionTypeListItem");
-                });
+                    b.Navigation("TxCurrencyNavigation");
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionException", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Transaction")
-                        .WithMany("TransactionExceptions")
-                        .HasForeignKey("TransactionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TransactionException_Transaction");
-
-                    b.Navigation("Transaction");
+                    b.Navigation("TxTypeNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitListItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "Currency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "CurrencyCodeNavigation")
                         .WithMany("TransactionLimitListItems")
                         .HasForeignKey("CurrencyCode")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionLimitListItem_Currency");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitList", "TransactionLimitList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitList", "Transactionitemlist")
                         .WithMany("TransactionLimitListItems")
-                        .HasForeignKey("TransactionLimitListId")
+                        .HasForeignKey("TransactionitemlistId")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionLimitListItem_TransactionLimitList");
 
-                    b.Navigation("Currency");
+                    b.Navigation("CurrencyCodeNavigation");
 
-                    b.Navigation("TransactionLimitList");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionPosting", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "AuthorisingUser")
-                        .WithMany("TransactionPostingAuthUsers")
-                        .HasForeignKey("AuthorisingUserId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TransactionPosting_AuthorisingUser");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitialisingUser")
-                        .WithMany("TransactionPostingInitUsers")
-                        .HasForeignKey("InitialisingUserId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TransactionPosting_InitialisingUser");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Transaction", "Transaction")
-                        .WithMany("TransactionPostings")
-                        .HasForeignKey("TxId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TransactionPosting_Transaction");
-
-                    b.Navigation("AuthorisingUser");
-
-                    b.Navigation("InitialisingUser");
-
-                    b.Navigation("Transaction");
+                    b.Navigation("Transactionitemlist");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AccountNameCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AccountNameCaptionNavigation")
                         .WithMany("TransactionTextAccountNameCaptions")
-                        .HasForeignKey("AccountNameCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("AccountNameCaption")
                         .HasConstraintName("FK_TransactionText_Account_Name_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AccountNumberCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AccountNumberCaptionNavigation")
                         .WithMany("TransactionTextAccountNumberCaptions")
-                        .HasForeignKey("AccountNumberCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("AccountNumberCaption")
                         .HasConstraintName("FK_TransactionText_Account_Number_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AliasAccountNameCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AliasAccountNameCaptionNavigation")
                         .WithMany("TransactionTextAliasAccountNameCaptions")
-                        .HasForeignKey("AliasAccountNameCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("AliasAccountNameCaption")
                         .HasConstraintName("FK_TransactionText_Alias_Account_Name_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AliasAccountNumberCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "AliasAccountNumberCaptionNavigation")
                         .WithMany("TransactionTextAliasAccountNumberCaptions")
-                        .HasForeignKey("AliasAccountNumberCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("AliasAccountNumberCaption")
                         .HasConstraintName("FK_TransactionText_Alias_Account_Number_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "DepositorNameCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "DepositorNameCaptionNavigation")
                         .WithMany("TransactionTextDepositorNameCaptions")
-                        .HasForeignKey("DepositorNameCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("DepositorNameCaption")
                         .HasConstraintName("FK_TransactionText_Depositor_Name_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "Disclaimer")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "DisclaimerNavigation")
                         .WithMany("TransactionTextDisclaimers")
-                        .HasForeignKey("DisclaimerId")
-                        .IsRequired()
+                        .HasForeignKey("Disclaimer")
                         .HasConstraintName("FK_TransactionText_Disclaimers");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FullInstructions")
-                        .WithMany("TransactionTextFullInstructions")
-                        .HasForeignKey("FullInstructionsId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FullInstructionsNavigation")
+                        .WithMany("TransactionTextFullInstructionss")
+                        .HasForeignKey("FullInstructions")
                         .HasConstraintName("FK_TransactionText_full_instructions");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FundsSourceCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "FundsSourceCaptionNavigation")
                         .WithMany("TransactionTextFundsSourceCaptions")
-                        .HasForeignKey("FundsSourceCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("FundsSourceCaption")
                         .HasConstraintName("FK_TransactionText_Funds_Source_Caption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "IdNumberCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "IdNumberCaptionNavigation")
                         .WithMany("TransactionTextIdNumberCaptions")
-                        .HasForeignKey("IdNumberCaptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
+                        .HasForeignKey("IdNumberCaption")
                         .HasConstraintName("FK_TransactionText_IdNumberCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ListItemCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ListItemCaptionNavigation")
                         .WithMany("TransactionTextListItemCaptions")
-                        .HasForeignKey("ListItemCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("ListItemCaption")
                         .HasConstraintName("FK_TransactionText_ListItemCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "NarrationCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "NarrationCaptionNavigation")
                         .WithMany("TransactionTextNarrationCaptions")
-                        .HasForeignKey("NarrationCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("NarrationCaption")
                         .HasConstraintName("FK_TransactionText_NarrationCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "PhoneNumberCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "PhoneNumberCaptionNavigation")
                         .WithMany("TransactionTextPhoneNumberCaptions")
-                        .HasForeignKey("PhoneNumberCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("PhoneNumberCaption")
                         .HasConstraintName("FK_TransactionText_PhoneNumberCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReceiptTemplate")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReceiptTemplateNavigation")
                         .WithMany("TransactionTextReceiptTemplates")
-                        .HasForeignKey("ReceiptTemplateId")
-                        .IsRequired()
+                        .HasForeignKey("ReceiptTemplate")
                         .HasConstraintName("FK_TransactionText_ReceiptTemplate");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReferenceAccountNameCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReferenceAccountNameCaptionNavigation")
                         .WithMany("TransactionTextReferenceAccountNameCaptions")
-                        .HasForeignKey("ReferenceAccountNameCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("ReferenceAccountNameCaption")
                         .HasConstraintName("FK_TransactionText_ReferenceAccountNameCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReferenceAccountNumberCaption")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ReferenceAccountNumberCaptionNavigation")
                         .WithMany("TransactionTextReferenceAccountNumberCaptions")
-                        .HasForeignKey("ReferenceAccountNumberCaptionId")
-                        .IsRequired()
+                        .HasForeignKey("ReferenceAccountNumberCaption")
                         .HasConstraintName("FK_TransactionText_ReferenceAccountNumberCaption");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "Terms")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "TermsNavigation")
                         .WithMany("TransactionTextTerms")
-                        .HasForeignKey("TermsId")
-                        .IsRequired()
+                        .HasForeignKey("Terms")
                         .HasConstraintName("FK_TransactionText_Terms");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TxItem")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TxItemNavigation")
                         .WithOne("TransactionText")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", "TxItemId")
+                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", "TxItem")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionText_TransactionTypeListItem");
 
-                    b.Navigation("AccountNameCaption");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", "ValidationTextErrorMessageNavigation")
+                        .WithMany("ValidationTextErrorMessages")
+                        .HasForeignKey("ValidationTextErrorMessage")
+                        .HasConstraintName("FK_TransactionText_ValidationTextErrorMessages");
 
-                    b.Navigation("AccountNumberCaption");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", "ValidationTextSuccessMessageNavigation")
+                        .WithMany("ValidationTextSuccessMessages")
+                        .HasForeignKey("ValidationTextSuccessMessage")
+                        .HasConstraintName("FK_TransactionText_ValidationTextSuccessMessages");
 
-                    b.Navigation("AliasAccountNameCaption");
+                    b.Navigation("AccountNameCaptionNavigation");
 
-                    b.Navigation("AliasAccountNumberCaption");
+                    b.Navigation("AccountNumberCaptionNavigation");
 
-                    b.Navigation("DepositorNameCaption");
+                    b.Navigation("AliasAccountNameCaptionNavigation");
 
-                    b.Navigation("Disclaimer");
+                    b.Navigation("AliasAccountNumberCaptionNavigation");
 
-                    b.Navigation("FullInstructions");
+                    b.Navigation("DepositorNameCaptionNavigation");
 
-                    b.Navigation("FundsSourceCaption");
+                    b.Navigation("DisclaimerNavigation");
 
-                    b.Navigation("IdNumberCaption");
+                    b.Navigation("FullInstructionsNavigation");
 
-                    b.Navigation("ListItemCaption");
+                    b.Navigation("FundsSourceCaptionNavigation");
 
-                    b.Navigation("NarrationCaption");
+                    b.Navigation("IdNumberCaptionNavigation");
 
-                    b.Navigation("PhoneNumberCaption");
+                    b.Navigation("ListItemCaptionNavigation");
 
-                    b.Navigation("ReceiptTemplate");
+                    b.Navigation("NarrationCaptionNavigation");
 
-                    b.Navigation("ReferenceAccountNameCaption");
+                    b.Navigation("PhoneNumberCaptionNavigation");
 
-                    b.Navigation("ReferenceAccountNumberCaption");
+                    b.Navigation("ReceiptTemplateNavigation");
 
-                    b.Navigation("Terms");
+                    b.Navigation("ReferenceAccountNameCaptionNavigation");
 
-                    b.Navigation("TxItem");
+                    b.Navigation("ReferenceAccountNumberCaptionNavigation");
+
+                    b.Navigation("TermsNavigation");
+
+                    b.Navigation("TxItemNavigation");
+
+                    b.Navigation("ValidationTextErrorMessageNavigation");
+
+                    b.Navigation("ValidationTextSuccessMessageNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "DefaultAccountCurrency")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.Currency", "DefaultAccountCurrencyNavigation")
                         .WithMany("TransactionTypeListItems")
-                        .HasForeignKey("DefaultAccountCurrencyId")
+                        .HasForeignKey("DefaultAccountCurrency")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionTypeListItem_Currency");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitList", "TxLimitList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitList", "TxLimitListNavigation")
                         .WithMany("TransactionTypeListItems")
-                        .HasForeignKey("TxLimitListId")
-                        .IsRequired()
+                        .HasForeignKey("TxLimitList")
                         .HasConstraintName("FK_TransactionTypeListItem_TransactionLimitList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", "TxText")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionText", "TxTextNavigation")
                         .WithMany("TransactionTypeListItems")
-                        .HasForeignKey("TxTextId")
+                        .HasForeignKey("TxText")
                         .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
                         .HasConstraintName("FK_TransactionTypeListItem_TransactionText");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", "TxTypeGuiScreenList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionType", "TxTypeNavigation")
                         .WithMany("TransactionTypeListItems")
-                        .HasForeignKey("TxTypeGuiScreenListId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TransactionTypeListItem_GUIScreenList");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionType", "TxType")
-                        .WithMany("TransactionTypeListItems")
-                        .HasForeignKey("TxTypeId")
+                        .HasForeignKey("TxType")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionListItem_TransactionType");
 
-                    b.Navigation("DefaultAccountCurrency");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenList", "TxTypeGUIScreenlistNavigation")
+                        .WithMany("TransactionTypeListItems")
+                        .HasForeignKey("TxTypeGUIScreenlist")
+                        .IsRequired()
+                        .HasConstraintName("FK_TransactionTypeListItem_GUIScreenList");
 
-                    b.Navigation("TxLimitList");
+                    b.Navigation("DefaultAccountCurrencyNavigation");
 
-                    b.Navigation("TxText");
+                    b.Navigation("TxLimitListNavigation");
 
-                    b.Navigation("TxType");
+                    b.Navigation("TxTextNavigation");
 
-                    b.Navigation("TxTypeGuiScreenList");
+                    b.Navigation("TxTypeGUIScreenlistNavigation");
+
+                    b.Navigation("TxTypeNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListTransactionTypeListItem", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeList", "TxTypeList")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeList", "TxtypeListNavigation")
                         .WithMany("TransactionTypeListTransactionTypeListItems")
-                        .HasForeignKey("TxtypeListId")
+                        .HasForeignKey("TxtypeList")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionTypeList_TransactionTypeListItem_TransactionTypeList");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TxTypeListItem")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TransactionTypeListItem", "TxtypeListItemNavigation")
                         .WithMany("TransactionTypeListTransactionTypeListItems")
-                        .HasForeignKey("TxtypeListItemId")
+                        .HasForeignKey("TxtypeListItem")
                         .IsRequired()
                         .HasConstraintName("FK_TransactionTypeList_TransactionTypeListItem_TransactionTypeListItem");
 
-                    b.Navigation("TxTypeList");
+                    b.Navigation("TxtypeListItemNavigation");
 
-                    b.Navigation("TxTypeListItem");
+                    b.Navigation("TxtypeListNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "ParentGroup")
-                        .WithMany("ParentGroups")
-                        .HasForeignKey("ParentGroupId")
-                        .IsRequired()
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.UserGroup", "ParentGroupNavigation")
+                        .WithMany("InverseParentGroupNavigation")
+                        .HasForeignKey("ParentGroup")
                         .HasConstraintName("FK_UserGroup_UserGroup");
 
-                    b.Navigation("ParentGroup");
+                    b.Navigation("ParentGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.UserLock", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", "ApplicationUserLoginDetail")
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitiatingUserNavigation")
                         .WithMany("UserLocks")
-                        .HasForeignKey("ApplicationUserLoginDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_UserLock_ApplicationUserLoginDetail");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "InitiatingUser")
-                        .WithMany("UserLocks")
-                        .HasForeignKey("InitiatingUserId")
-                        .IsRequired()
+                        .HasForeignKey("InitiatingUser")
                         .HasConstraintName("FK_UserLock_InitiatingUser");
 
-                    b.Navigation("ApplicationUserLoginDetail");
-
-                    b.Navigation("InitiatingUser");
+                    b.Navigation("InitiatingUserNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationItem", b =>
                 {
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationType", "ValidationType")
+                        .WithMany("ValidationItems")
+                        .HasForeignKey("TypeId")
+                        .IsRequired()
+                        .HasConstraintName("FK_ValidationItem_ValidationType");
+
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", "ValidationText")
                         .WithMany("ValidationItems")
                         .HasForeignKey("ValidationTextId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_ValidationItem_ValidationText");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationType", "ValidationType")
-                        .WithMany("ValidationItems")
-                        .HasForeignKey("ValidationTypeId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ValidationItem_ValidationType");
 
                     b.Navigation("ValidationText");
 
@@ -6134,17 +5192,13 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", b =>
                 {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ErrorMessage")
-                        .WithMany("ValidationTextErrorMessages")
-                        .HasForeignKey("ErrorMessageId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ValidationText_ErrorMessage");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "ErrorMessageNavigation")
+                        .WithMany()
+                        .HasForeignKey("ErrorMessage");
 
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "SuccessMessage")
-                        .WithMany("ValidationTextSuccessMessages")
-                        .HasForeignKey("SuccessMessageId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ValidationText_SuccessMessage");
+                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.TextItem", "SuccessMessageNavigation")
+                        .WithMany()
+                        .HasForeignKey("SuccessMessage");
 
                     b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ValidationItem", "ValidationItem")
                         .WithMany("ValidationTexts")
@@ -6152,55 +5206,11 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ValidationText_ValidationItem");
 
-                    b.Navigation("ErrorMessage");
+                    b.Navigation("ErrorMessageNavigation");
 
-                    b.Navigation("SuccessMessage");
+                    b.Navigation("SuccessMessageNavigation");
 
                     b.Navigation("ValidationItem");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalLogin", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", "ApplicationUserLoginDetail")
-                        .WithMany("WebPortalLogins")
-                        .HasForeignKey("ApplicationUserLoginDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_WebPortalLogin_ApplicationUserLoginDetail");
-
-                    b.Navigation("ApplicationUserLoginDetail");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRole", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", "PermissionPolicyRole")
-                        .WithOne("WebPortalRole")
-                        .HasForeignKey("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRole", "Oid")
-                        .IsRequired()
-                        .HasConstraintName("FK_WebPortalRole_Oid");
-
-                    b.Navigation("PermissionPolicyRole");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRoleRolesApplicationUserApplicationUser", b =>
-                {
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", "ApplicationUsers")
-                        .WithMany("WebPortalRoleRolesApplicationUserApplicationUsers")
-                        .HasForeignKey("ApplicationUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_WebPortalRoleRoles_ApplicationUserApplicationUsers_ApplicationUsers");
-
-                    b.HasOne("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRole", "Roles")
-                        .WithMany("WebPortalRoleRolesApplicationUserApplicationUsers")
-                        .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_WebPortalRoleRoles_ApplicationUserApplicationUsers_Roles");
-
-                    b.Navigation("ApplicationUsers");
-
-                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Activity", b =>
@@ -6212,7 +5222,9 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                 {
                     b.Navigation("AlertEmails");
 
-                    b.Navigation("AlertSMSes");
+                    b.Navigation("AlertSMS");
+
+                    b.Navigation("InverseAlertEventNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.AlertMessageType", b =>
@@ -6222,10 +5234,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUser", b =>
                 {
-                    b.Navigation("ApplicationUserChangePasswords");
-
-                    b.Navigation("ApplicationUserLoginDetails");
-
                     b.Navigation("CITAuthUsers");
 
                     b.Navigation("CITStartUsers");
@@ -6240,22 +5248,11 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("PasswordHistories");
 
-                    b.Navigation("TransactionPostingAuthUsers");
+                    b.Navigation("TransactionAuthUsers");
 
-                    b.Navigation("TransactionPostingInitUsers");
-
-                    b.Navigation("UserLocks");
-
-                    b.Navigation("WebPortalRoleRolesApplicationUserApplicationUsers");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ApplicationUserLoginDetail", b =>
-                {
-                    b.Navigation("ApplicationUsers");
+                    b.Navigation("TransactionInitUsers");
 
                     b.Navigation("UserLocks");
-
-                    b.Navigation("WebPortalLogins");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Bank", b =>
@@ -6270,9 +5267,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.CIT", b =>
                 {
-                    b.Navigation("AuthorisingUser")
-                        .IsRequired();
-
                     b.Navigation("CITDenominations");
 
                     b.Navigation("CITPrintouts");
@@ -6298,7 +5292,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("Devices");
 
-                    b.Navigation("ParentGroups");
+                    b.Navigation("InverseParentGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Country", b =>
@@ -6334,22 +5328,12 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.DepositorSession", b =>
                 {
-                    b.Navigation("ApplicationLogs");
-
-                    b.Navigation("SessionExceptions");
-
                     b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Device", b =>
                 {
-                    b.Navigation("ApplicationExceptions");
-
-                    b.Navigation("ApplicationLogs");
-
                     b.Navigation("CITs");
-
-                    b.Navigation("CrashEvents");
 
                     b.Navigation("DepositorSessions");
 
@@ -6361,6 +5345,8 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("DevicePrinters");
 
+                    b.Navigation("DeviceSuspenseAccounts");
+
                     b.Navigation("Transactions");
                 });
 
@@ -6369,35 +5355,27 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("Devices");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.EscrowJam", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopItem", b =>
                 {
-                    b.Navigation("AuthorisingUser")
-                        .IsRequired();
-
-                    b.Navigation("InitialisingUser")
-                        .IsRequired();
+                    b.Navigation("GUIPrepopListItems");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopItem", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIPrepopList", b =>
                 {
-                    b.Navigation("GuiPrepopListItems");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiPrepopList", b =>
-                {
-                    b.Navigation("GuiPrepopListItems");
+                    b.Navigation("GUIPrepopListItems");
 
                     b.Navigation("GuiScreenListScreens");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreen", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreen", b =>
                 {
-                    b.Navigation("GuiScreenListScreens");
+                    b.Navigation("GUIScreenText")
+                        .IsRequired();
 
-                    b.Navigation("GuiScreenTexts");
+                    b.Navigation("GuiScreenListScreens");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenList", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenList", b =>
                 {
                     b.Navigation("Devices");
 
@@ -6406,20 +5384,14 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("TransactionTypeListItems");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenListScreen", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenText", b =>
                 {
-                    b.Navigation("GuiScreenList")
-                        .IsRequired();
+                    b.Navigation("GUIScreens");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenText", b =>
+            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GUIScreenType", b =>
                 {
-                    b.Navigation("GuiScreens");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.GuiScreenType", b =>
-                {
-                    b.Navigation("GuiScreens");
+                    b.Navigation("GUIScreens");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Language", b =>
@@ -6442,33 +5414,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("LanguageListLanguages");
                 });
 
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ModelDifference", b =>
-                {
-                    b.Navigation("ModelDifferenceAspects");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PasswordPolicy", b =>
-                {
-                    b.Navigation("ApplicationUserChangePasswords");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyRole", b =>
-                {
-                    b.Navigation("PermissionPolicyNavigationPermissionsObjects");
-
-                    b.Navigation("PermissionPolicyTypePermissionsObjects");
-
-                    b.Navigation("WebPortalRole")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.PermissionPolicyTypePermissionsObject", b =>
-                {
-                    b.Navigation("PermissionPolicyMemberPermissionsObjects");
-
-                    b.Navigation("PermissionPolicyObjectPermissionsObjects");
-                });
-
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.Role", b =>
                 {
                     b.Navigation("AlertMessageRegistries");
@@ -6485,7 +5430,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.SysTextItemCategory", b =>
                 {
-                    b.Navigation("Parents");
+                    b.Navigation("InverseParentNavigation");
 
                     b.Navigation("SysTextItems");
                 });
@@ -6497,19 +5442,19 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItem", b =>
                 {
-                    b.Navigation("GuiPrepopItems");
+                    b.Navigation("GUIPrepopItems");
 
-                    b.Navigation("GuiScreenTextBtnAcceptCaptions");
+                    b.Navigation("GUIScreenTextBtnAcceptCaptions");
 
-                    b.Navigation("GuiScreenTextBtnBackCaptions");
+                    b.Navigation("GUIScreenTextBtnBackCaptions");
 
-                    b.Navigation("GuiScreenTextBtnCancelCaptions");
+                    b.Navigation("GUIScreenTextBtnCancelCaptions");
 
-                    b.Navigation("GuiScreenTextFullInstructions");
+                    b.Navigation("GUIScreenTextFullInstructionss");
 
-                    b.Navigation("GuiScreenTextScreenTitleInstructions");
+                    b.Navigation("GUIScreenTextScreenTitleInstructions");
 
-                    b.Navigation("GuiScreenTextScreenTitles");
+                    b.Navigation("GUIScreenTextScreenTitles");
 
                     b.Navigation("TextTranslations");
 
@@ -6525,7 +5470,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("TransactionTextDisclaimers");
 
-                    b.Navigation("TransactionTextFullInstructions");
+                    b.Navigation("TransactionTextFullInstructionss");
 
                     b.Navigation("TransactionTextFundsSourceCaptions");
 
@@ -6544,15 +5489,11 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("TransactionTextReferenceAccountNumberCaptions");
 
                     b.Navigation("TransactionTextTerms");
-
-                    b.Navigation("ValidationTextErrorMessages");
-
-                    b.Navigation("ValidationTextSuccessMessages");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TextItemCategory", b =>
                 {
-                    b.Navigation("Parents");
+                    b.Navigation("InverseParentNavigation");
 
                     b.Navigation("TextItems");
                 });
@@ -6569,10 +5510,6 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
                     b.Navigation("EscrowJams");
 
                     b.Navigation("Printouts");
-
-                    b.Navigation("TransactionExceptions");
-
-                    b.Navigation("TransactionPostings");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.TransactionLimitList", b =>
@@ -6615,7 +5552,7 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
 
                     b.Navigation("Devices");
 
-                    b.Navigation("ParentGroups");
+                    b.Navigation("InverseParentGroupNavigation");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationItem", b =>
@@ -6637,26 +5574,15 @@ namespace Cashmere.Library.CashmereDataAccess.Migrations
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationText", b =>
                 {
                     b.Navigation("ValidationItems");
+
+                    b.Navigation("ValidationTextErrorMessages");
+
+                    b.Navigation("ValidationTextSuccessMessages");
                 });
 
             modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.ValidationType", b =>
                 {
                     b.Navigation("ValidationItems");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalLogin", b =>
-                {
-                    b.Navigation("ApplicationUserLoginDetails");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.WebPortalRole", b =>
-                {
-                    b.Navigation("WebPortalRoleRolesApplicationUserApplicationUsers");
-                });
-
-            modelBuilder.Entity("Cashmere.Library.CashmereDataAccess.Entities.XpobjectType", b =>
-                {
-                    b.Navigation("PermissionPolicyRoles");
                 });
 #pragma warning restore 612, 618
         }

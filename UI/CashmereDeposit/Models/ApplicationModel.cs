@@ -16,14 +16,14 @@ namespace CashmereDeposit.Models
 {
     public class ApplicationModel
     {
-        private List<GuiScreen> _dbGUIScreens;
+        private List<GUIScreen> _dbGUIScreens;
         private List<Currency> _dbcurrencyList;
         private PasswordPolicyItems _passwordPolicy;
         public List<Language> _dblanguageList;
         public List<TransactionTypeListItem> _txTypeList;
         private ApplicationViewModel _applicationViewModel;
 
-        public List<GuiScreen> dbGUIScreens => _dbGUIScreens;
+        public List<GUIScreen> dbGUIScreens => _dbGUIScreens;
 
         public List<Currency> CurrencyList => _dbcurrencyList;
 
@@ -124,10 +124,10 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateScreenList), "Initialisation", "Generating Screens List");
-            _dbGUIScreens = GetDevice(DBContext).GuiScreenList.GuiScreenListScreens.OrderBy(x => x.ScreenOrder).Select(x => x.GuiScreen).Where(x => x.Enabled).ToList();
+            _dbGUIScreens = GetDevice(DBContext).GUIScreenListNavigation.GuiScreenListScreens.OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).Where(x => x.Enabled).ToList();
             if (_dbGUIScreens != null)
             {
-                List<GuiScreen> dbGuiScreens = _dbGUIScreens;
+                List<GUIScreen> dbGuiScreens = _dbGUIScreens;
                 // ISSUE: explicit non-virtual call
                 if ((dbGuiScreens != null ? ((dbGuiScreens.Count) == 0 ? 1 : 0) : 0) == 0)
                     return;
@@ -140,7 +140,7 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateLanguageList), "Initialisation", "Generating Language List");
-            _dblanguageList = GetDevice(DBContext).LanguageList.LanguageListLanguages.OrderBy(x => x.LanguageOrder).Select(x => x.LanguageItem).Where(x => x.Enabled).ToList();
+            _dblanguageList = GetDevice(DBContext).LanguageListNavigation.LanguageListLanguages.OrderBy(x => x.LanguageOrder).Select(x => x.LanguageItemNavigation).Where(x => x.Enabled).ToList();
             if (_dblanguageList != null)
             {
                 List<Language> dblanguageList = _dblanguageList;
@@ -156,7 +156,7 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateCurrencyList), "Initialisation", "Generating Currency List");
-            _dbcurrencyList = GetDevice(DBContext).CurrencyList.CurrencyListCurrencies.OrderBy(x => x.CurrencyOrder).Select(x => x.CurrencyItem).Skip(1).ToList();
+            _dbcurrencyList = GetDevice(DBContext).CurrencyListNavigation.CurrencyListCurrencies.OrderBy(x => x.CurrencyOrder).Select(x => x.CurrencyItemNavigation).Skip(1).ToList();
             if (_dbcurrencyList != null)
             {
                 List<Currency> dbcurrencyList = _dbcurrencyList;
@@ -173,7 +173,7 @@ namespace CashmereDeposit.Models
             try
             {
                 ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateTransactionTypeList), "Initialisation", "Generating Transaction Type List");
-                _txTypeList = GetDevice(DBContext).TransactionTypeList.TransactionTypeListTransactionTypeListItems.OrderBy(x => x.ListOrder).Select(x => x.TxTypeListItem).Where(x => x.Enabled).ToList();
+                _txTypeList = GetDevice(DBContext).TransactionTypeListNavigation.TransactionTypeListTransactionTypeListItems.OrderBy(x => x.ListOrder).Select(x => x.TxtypeListItemNavigation).Where(x => (bool)x.Enabled).ToList();
                 if (_txTypeList != null)
                 {
                     List<TransactionTypeListItem> txTypeList = _txTypeList;
@@ -191,8 +191,8 @@ namespace CashmereDeposit.Models
             }
         }
 
-        public List<GuiScreen> GetTransactionTypeScreenList(
-          TransactionTypeListItem transactionChosen) => transactionChosen.TxTypeGuiScreenList.GuiScreenListScreens.Where(x => x.Enabled).OrderBy(x => x.ScreenOrder).Select(x => x.GuiScreen).Where(x => x.Enabled).ToList();
+        public List<GUIScreen> GetTransactionTypeScreenList(
+          TransactionTypeListItem transactionChosen) => transactionChosen.TxTypeGUIScreenlistNavigation.GuiScreenListScreens.Where(x => x.Enabled).OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).Where(x => x.Enabled).ToList();
 
         public event EventHandler<EventArgs> DatabaseStorageErrorEvent;
 

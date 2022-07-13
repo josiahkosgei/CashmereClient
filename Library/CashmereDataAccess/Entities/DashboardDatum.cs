@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
-    [Index(nameof(Gcrecord), Name = "iGCRecord_DashboardData")]
+    //[Index(nameof(Gcrecord), Name = "iGCRecord_DashboardData")]
     public class DashboardDatum
     {
         [Key]

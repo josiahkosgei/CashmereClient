@@ -46,7 +46,8 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public virtual async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            return await DbContext.Set<T>().ToListAsync();
+            var result = await DbContext.Set<T>().ToListAsync();
+            return result;
 
         }    
 

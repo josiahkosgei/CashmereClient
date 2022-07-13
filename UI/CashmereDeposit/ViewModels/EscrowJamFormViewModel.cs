@@ -129,8 +129,8 @@ namespace CashmereDeposit.ViewModels
           EscrowJam.RecoveryDate = new DateTime?(DateTime.Now);
           EscrowJam.RetreivedAmount = (long) (RetreivedAmount * 100M);
           EscrowJam.AdditionalInfo = AdditionalInfo;
-          EscrowJam.AuthorisinguserId = new Guid?(ApplicationViewModel.ValidatingUser.Id);
-          EscrowJam.InitialisinguserId = new Guid?(ApplicationViewModel.CurrentUser.Id);
+          EscrowJam.AuthorisingUser = new Guid?(ApplicationViewModel.ValidatingUser.Id);
+          EscrowJam.InitialisingUser = new Guid?(ApplicationViewModel.CurrentUser.Id);
           ApplicationViewModel.SaveToDatabase(depositorDbContext);
           ApplicationViewModel.EndEscrowJam();
         }

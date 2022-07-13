@@ -30,7 +30,7 @@ namespace CashmereDeposit.ViewModels
       : base(screenTitle, applicationViewModel, required)
     {
         using DepositorDBContext DBContext = new DepositorDBContext();
-        FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", DBContext.TransactionTexts.FirstOrDefault(y => y.TxItemId == x.Id)?.ListItemCaptionId, "No Text"), (object) x)).ToList();
+        FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", DBContext.TransactionTexts.FirstOrDefault(y => y.TxItem == x.Id)?.ListItemCaption, "No Text"), (object) x)).ToList();
         GetFirstPage();
     }
 
@@ -96,7 +96,7 @@ namespace CashmereDeposit.ViewModels
         string str2 = SelectedTransactionListItem?.DefaultAccount ?? "";
         if (!string.IsNullOrWhiteSpace(SelectedTransactionListItem.DefaultAccount) && SelectedTransactionListItem.ValidateDefaultAccount)
         {
-          AccountNumberValidationResponse result = Task.Run((Func<Task<AccountNumberValidationResponse>>) (() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrencyId, SelectedTransactionListItem.Id))).Result;
+          AccountNumberValidationResponse result = Task.Run((Func<Task<AccountNumberValidationResponse>>) (() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrency, SelectedTransactionListItem.Id))).Result;
           if (result == null || !result.IsSuccess || !result.CanTransact)
           {
             ErrorText = "Transaction Type is offline. Please try again later";
@@ -120,7 +120,7 @@ namespace CashmereDeposit.ViewModels
         }
         else
         {
-          string s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", ApplicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText?.DisclaimerId, null);
+          string s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", ApplicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText?.Disclaimer, null);
           str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
         }
         string message = str3;

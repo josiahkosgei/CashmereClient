@@ -27,7 +27,7 @@ namespace CashmereDeposit.ViewModels
       ApplicationViewModel.CurrentTransaction.AccountName = ApplicationViewModel.CurrentTransaction.TransactionType.DefaultAccountName;
       try
       {
-        ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ReferenceAccountNumberInputScreenViewModel  ScreenTitle", applicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText.ReferenceAccountNumberCaptionId, "Reference Number");
+        ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ReferenceAccountNumberInputScreenViewModel  ScreenTitle", applicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText.ReferenceAccountNumberCaption, "Reference Number");
       }
       catch (Exception ex)
       {

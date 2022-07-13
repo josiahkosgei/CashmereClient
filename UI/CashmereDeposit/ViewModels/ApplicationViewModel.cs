@@ -14,8 +14,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Reflection;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,7 +30,6 @@ using Cashmere.API.Messaging.Integration.Validations.AccountNumberValidations;
 using Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValidations;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
 using Microsoft.EntityFrameworkCore;
 using CashmereDeposit.Interfaces;
 using CashmereDeposit.Models;
@@ -39,9 +38,10 @@ using CashmereDeposit.Utils;
 using CashmereDeposit.Utils.AlertClasses;
 using Activity = Cashmere.Library.CashmereDataAccess.Entities.Activity;
 
+
 namespace CashmereDeposit.ViewModels
 {
-    // [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
+    [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
     public class ApplicationViewModel : Conductor<Screen>, IShell
     {
         private bool _adminMode;
@@ -75,7 +75,7 @@ namespace CashmereDeposit.ViewModels
 
         public bool AdminMode
         {
-            get { return _adminMode; }
+            get => _adminMode;
             set
             {
                 _adminMode = value;
@@ -97,7 +97,7 @@ namespace CashmereDeposit.ViewModels
 
         public ApplicationUser CurrentUser
         {
-            get { return _currentUser; }
+            get => _currentUser;
             set
             {
                 _currentUser = value;
@@ -107,7 +107,7 @@ namespace CashmereDeposit.ViewModels
 
         public ApplicationUser ValidatingUser
         {
-            get { return _validatingUser; }
+            get => _validatingUser;
             set
             {
                 _validatingUser = value;
@@ -119,35 +119,23 @@ namespace CashmereDeposit.ViewModels
 
         public AppSession CurrentSession { get; set; }
 
-        public AppTransaction CurrentTransaction
-        {
-            get { return CurrentSession?.Transaction; }
-        }
+        public AppTransaction CurrentTransaction => CurrentSession?.Transaction;
 
         public CashAccSysDeviceManager.CashAccSysDeviceManager DeviceManager
         {
-            get { return _deviceManager; }
-            set { _deviceManager = value; }
+            get => _deviceManager;
+            set => _deviceManager = value;
         }
 
-        public List<Language> LanguagesAvailable
-        {
-            get { return ApplicationModel.LanguageList; }
-        }
+        public List<Language> LanguagesAvailable => ApplicationModel.LanguageList;
 
-        public List<Currency> CurrenciesAvailable
-        {
-            get { return ApplicationModel.CurrencyList; }
-        }
+        public List<Currency> CurrenciesAvailable => ApplicationModel.CurrencyList;
 
-        public List<TransactionTypeListItem> TransactionTypesAvailable
-        {
-            get { return ApplicationModel.TransactionList; }
-        }
+        public List<TransactionTypeListItem> TransactionTypesAvailable => ApplicationModel.TransactionList;
 
         public ApplicationState CurrentApplicationState
         {
-            get { return _currentApplicationState; }
+            get => _currentApplicationState;
             set
             {
                 if (DeviceManager != null)
@@ -194,9 +182,9 @@ namespace CashmereDeposit.ViewModels
         {
             get
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
-                Device device = ApplicationModel.GetDevice(DBContext);
-                return DBContext.CITs.Where(y => y.DeviceId == device.Id).OrderByDescending(x => x.CITDate).FirstOrDefault();
+                using var dbContext = new DepositorDBContext();
+                var device = ApplicationModel.GetDevice(dbContext);
+                return dbContext.CITs.Where(y => y.DeviceId == device.Id).OrderByDescending(x => x.CITDate).FirstOrDefault();
             }
         }
 
@@ -218,8 +206,8 @@ namespace CashmereDeposit.ViewModels
             AlertManager = startupModel.AlertManager;
             AlertManager.Log = Log;
             Log.Info(GetType().Name, "Application Startup", "Constructor", "Initialising Application");
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            DBContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName);
+            using var dbContext = new DepositorDBContext();
+            dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName);
             InitialiseLicense();
             statusTimer.Interval = TimeSpan.FromSeconds(DeviceConfiguration.SERVER_POLL_INTERVAL);
             statusTimer.Tick += new EventHandler(statusTimer_Tick);
@@ -233,12 +221,12 @@ namespace CashmereDeposit.ViewModels
             if (CurrentApplicationState != ApplicationState.STARTUP_COMPLETE || ApplicationStatus.CashmereDeviceState != CashmereDeviceState.NONE)
                 return;
             Log.Info(GetType().Name, "Application Startup", "ApplicationState.STARTUP_COMPLETE", "Application started successfully");
-            AlertManager.SendAlert(new AlertDeviceStartupSuccess(ApplicationModel.GetDevice(DBContext), DateTime.Now));
+            AlertManager.SendAlert(new AlertDeviceStartupSuccess(ApplicationModel.GetDevice(dbContext), DateTime.Now));
         }
 
         private void statusTimer_Tick(object sender, EventArgs e)
         {
-            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            var backgroundWorker = new BackgroundWorker();
             backgroundWorker.WorkerReportsProgress = false;
             backgroundWorker.DoWork += new DoWorkEventHandler(statusWorker_DoWork);
             backgroundWorker.RunWorkerAsync();
@@ -267,7 +255,6 @@ namespace CashmereDeposit.ViewModels
         {
             Log.Info(GetType().Name, nameof(InitialiseApp), "Initialisation", "Initialising Application");
             CheckHDDSpace();
-            InitialiseLicense();
             InitialiseDevice();
             if (CurrentApplicationState == ApplicationState.STARTUP)
             {
@@ -292,6 +279,7 @@ namespace CashmereDeposit.ViewModels
 
         private void statusWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            InitialiseLicense();
             InitialiseCoreBankingAsync().AsResult();
             CheckDeviceLockStatus();
             CheckHDDSpace();
@@ -299,8 +287,8 @@ namespace CashmereDeposit.ViewModels
 
         private void CheckHDDSpace()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            DriveInfo driveInfo = DriveInfo.GetDrives().FirstOrDefault(x => x.RootDirectory.FullName.Equals("c:\\", StringComparison.InvariantCultureIgnoreCase));
+            using var dbContext = new DepositorDBContext();
+            var driveInfo = DriveInfo.GetDrives().FirstOrDefault(x => x.RootDirectory.FullName.Equals("c:\\", StringComparison.InvariantCultureIgnoreCase));
             if (driveInfo == null)
                 return;
             Console.WriteLine(driveInfo.Name);
@@ -312,10 +300,10 @@ namespace CashmereDeposit.ViewModels
                 if (ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.HDD_FULL))
                     return;
                 SetCashmereDeviceState(CashmereDeviceState.HDD_FULL);
-                double availableSpace = driveInfo.AvailableFreeSpace / 1073741824.0;
-                double minimumSpace = minHddSpace / 1073741824.0;
+                var availableSpace = driveInfo.AvailableFreeSpace / 1073741824.0;
+                var minimumSpace = minHddSpace / 1073741824.0;
                 Log.InfoFormat(GetType().Name, "Device", "HDD FULL", "Setting CashmereDeviceState.HDD_FULL as HDD space of {0:0.##} GB < {1:0.##} GB", availableSpace, minimumSpace);
-                AlertManager.SendAlert(new AlertHDDFull(availableSpace, minimumSpace, ApplicationModel.GetDevice(DBContext), DateTime.Now));
+                AlertManager.SendAlert(new AlertHDDFull(availableSpace, minimumSpace, ApplicationModel.GetDevice(dbContext), DateTime.Now));
             }
             else
             {
@@ -347,8 +335,8 @@ namespace CashmereDeposit.ViewModels
 
         private void CheckDeviceLockStatus()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            Device device = ApplicationModel.GetDevice(DBContext);
+            using var dbContext = new DepositorDBContext();
+            var device = ApplicationModel.GetDevice(dbContext);
             if (device == null)
                 return;
             DeviceManager.Enabled = device.Enabled;
@@ -356,8 +344,8 @@ namespace CashmereDeposit.ViewModels
 
         private async Task InitialiseCoreBankingAsync()
         {
-            ApplicationViewModel applicationViewModel = this;
-            DepositorDBContext DBContext = new DepositorDBContext();
+            var applicationViewModel = this;
+            var dbContext = new DepositorDBContext();
             try
             {
                 if (applicationViewModel.debugNoCoreBanking)
@@ -367,16 +355,16 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    AppSession currentSession = applicationViewModel.CurrentSession;
-                    bool allowConnectionError = currentSession == null || !currentSession.CountingStarted;
+                    var currentSession = applicationViewModel.CurrentSession;
+                    var allowConnectionError = currentSession == null || !currentSession.CountingStarted;
                     try
                     {
-                        Device device = applicationViewModel.ApplicationModel.GetDevice(DBContext);
-                        Guid id = device.Id;
-                        Guid appId = applicationViewModel.ApplicationModel.GetDevice(DBContext).AppId;
-                        IntegrationServiceClient integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, appId, device.AppKey, null);
-                        IntegrationServerPingRequest request = new IntegrationServerPingRequest();
-                        Guid guid = Guid.NewGuid();
+                        var device = applicationViewModel.ApplicationModel.GetDevice(dbContext);
+                        var Id = device.Id;
+                        var appId = applicationViewModel.ApplicationModel.GetDevice(dbContext).AppId;
+                        var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, appId, device.AppKey, null);
+                        var request = new IntegrationServerPingRequest();
+                        var guid = Guid.NewGuid();
                         request.SessionID = guid.ToString();
                         guid = Guid.NewGuid();
                         request.MessageID = guid.ToString();
@@ -384,7 +372,7 @@ namespace CashmereDeposit.ViewModels
                         request.AppName = device.MachineName;
                         request.Language = applicationViewModel.CurrentLanguage;
                         request.MessageDateTime = DateTime.Now;
-                        IntegrationServerPingResponse serverPingResponse = await integrationServiceClient.ServerPingAsync(request);
+                        var serverPingResponse = await integrationServiceClient.ServerPingAsync(request);
                         applicationViewModel.CheckIntegrationResponseMessageDateTime(serverPingResponse.MessageDateTime);
                         applicationViewModel.ApplicationStatus.CoreBankingStatus = new CoreBankingStatus()
                         {
@@ -392,7 +380,7 @@ namespace CashmereDeposit.ViewModels
                         };
                         if (allowConnectionError && !serverPingResponse.ServerOnline)
                         {
-                            CashmereDeviceStatus applicationStatus = applicationViewModel.ApplicationStatus;
+                            var applicationStatus = applicationViewModel.ApplicationStatus;
                             if ((applicationStatus != null ? (applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0) : 0) == 0)
                             {
                                 Log.ErrorFormat(applicationViewModel.GetType().Name, 92, ApplicationErrorConst.ERROR_CORE_BANKING.ToString(), "Could not connect to core banking with error: {0}>Server Error>{1}", serverPingResponse.PublicErrorMessage, serverPingResponse.ServerErrorMessage);
@@ -423,34 +411,25 @@ namespace CashmereDeposit.ViewModels
             }
             finally
             {
-                DBContext?.Dispose();
+                dbContext?.Dispose();
             }
         label_19:
-            DBContext = null;
+            dbContext = null;
         }
 
-        public void InitialiseUsersAndPermissions()
-        {
-            LogoffUsers();
-        }
+        public void InitialiseUsersAndPermissions() => LogoffUsers();
 
         private void InitialiseEmailManager()
         {
         }
 
-        private void InitialiseFolders()
-        {
-            Directory.CreateDirectory(DeviceConfiguration.TRANSACTION_LOG_FOLDER);
-        }
+        private void InitialiseFolders() => Directory.CreateDirectory(DeviceConfiguration.TRANSACTION_LOG_FOLDER);
 
-        private void InitialiseApplicationModel()
-        {
-            ApplicationModel.InitialiseApplicationModel();
-        }
+        private void InitialiseApplicationModel() => ApplicationModel.InitialiseApplicationModel();
 
         private void SystemStartupChecks()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Debug(GetType().Name, nameof(SystemStartupChecks), "Initialisation", "Performing startup checks");
             Log.Debug(GetType().Name, "SystemStartupDatabaseCheck", "Initialisation", "Performing database check");
             if (!ApplicationModel.TestConnection())
@@ -458,7 +437,7 @@ namespace CashmereDeposit.ViewModels
                 Log.Fatal(GetType().Name, 88, ApplicationErrorConst.ERROR_DATABASE_OFFLINE.ToString(), "Could not connect to database during system startup, terminating...");
                 OnApplicationStartupFailedEvent(this, ApplicationErrorConst.ERROR_DATABASE_OFFLINE, "Could not connect to database during system startup, terminating...");
             }
-            else if (ApplicationModel.GetDevice(DBContext) == null)
+            else if (ApplicationModel.GetDevice(dbContext) == null)
             {
                 Log.Fatal(GetType().Name, 88, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "This Device does not exist in the system, terminating...");
                 OnApplicationStartupFailedEvent(this, ApplicationErrorConst.ERROR_DEVICE_DOES_NOT_EXIST, "This Device does not exist in the system, terminating...");
@@ -487,8 +466,8 @@ namespace CashmereDeposit.ViewModels
 
         private void InitialiseDevice()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            Device device = ApplicationModel.GetDevice(DBContext);
+            using var dbContext = new DepositorDBContext();
+            var device = ApplicationModel.GetDevice(dbContext);
             if (device == null)
             {
                 Log.FatalFormat(GetType().Name, 97, ApplicationErrorConst.ERROR_DEVICE_DOES_NOT_EXIST.ToString(), "Device with machine name = {0} does not exists in the local database.", Environment.MachineName);
@@ -503,7 +482,7 @@ namespace CashmereDeposit.ViewModels
                     if (string.IsNullOrWhiteSpace(device.MacAddress))
                     {
                         device.MacAddress = ExtentionMethods.GetDefaultMacAddress();
-                        SaveToDatabase(DBContext);
+                        SaveToDatabase(dbContext);
                     }
                     _deviceManager = new CashAccSysDeviceManager.CashAccSysDeviceManager(DeviceConfiguration.DEVICECONTROLLER_HOST, DeviceConfiguration.DEVICECONTROLLER_PORT, device?.MacAddress, 1234, DeviceConfiguration.FIX_DEVICE_PORT, DeviceConfiguration.FIX_CONTROLLER_PORT, DeviceConfiguration.BAGFULL_WARN_PERCENT, DeviceConfiguration.SENSOR_INVERT_DOOR, DeviceConfiguration.CONTROLLER_LOG_DIRECTORY);
                     if (DeviceManager == null)
@@ -537,8 +516,8 @@ namespace CashmereDeposit.ViewModels
                     DeviceManager.EscrowJamEndEvent += new EventHandler<EventArgs>(DeviceManager_EscrowJamEndEvent);
                 }
                 DeviceManager.Initialise();
-                EscrowJam escrowJam = DBContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
-                if (escrowJam == null || (escrowJam.RecoveryDate.HasValue || DeviceManager.DeviceManagerMode == DeviceManagerMode.ESCROW_JAM))
+                var escrowJam = dbContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
+                if (escrowJam == null || escrowJam.RecoveryDate.HasValue || DeviceManager.DeviceManagerMode == DeviceManagerMode.ESCROW_JAM)
                     return;
                 DeviceManager_EscrowJamStartEvent(this, EventArgs.Empty);
             }
@@ -579,7 +558,7 @@ namespace CashmereDeposit.ViewModels
                 DeviceManager.OnEscrowJamStartEvent(this, EventArgs.Empty);
             else if (EscrowJam == null)
             {
-                EscrowJam escrowJam = new DepositorDBContext().EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
+                var escrowJam = new DepositorDBContext().EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
                 if (escrowJam != null && !escrowJam.RecoveryDate.HasValue)
                     EscrowJam = escrowJam;
             }
@@ -603,32 +582,23 @@ namespace CashmereDeposit.ViewModels
 
         private void InitialiseScreenList()
         {
-            GUIScreens = new List<GuiScreen>();
+            GUIScreens = new List<GUIScreen>();
             GUIScreens.AddRange(ApplicationModel.dbGUIScreens);
         }
 
-        private void InitialiseLanguageList()
-        {
-            ApplicationModel.GenerateLanguageList();
-        }
+        private void InitialiseLanguageList() => ApplicationModel.GenerateLanguageList();
 
-        private void InitialiseCurrencyList()
-        {
-            ApplicationModel.GenerateCurrencyList();
-        }
+        private void InitialiseCurrencyList() => ApplicationModel.GenerateCurrencyList();
 
-        private void InitialiseTransactionTypeList()
-        {
-            ApplicationModel.GenerateTransactionTypeList();
-        }
+        private void InitialiseTransactionTypeList() => ApplicationModel.GenerateTransactionTypeList();
 
         private void HandleIncompleteTransaction()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Debug(GetType().Name, nameof(HandleIncompleteTransaction), "Transaction", "Checking for and maintaining any incomplete transaction");
-            DbSet<Transaction> transactions = DBContext.Transactions;
+            var transactions = dbContext.Transactions;
             Expression<Func<Transaction, bool>> predicate = x => x.TxCompleted == false;
-            foreach (Transaction transaction in transactions.Where(predicate).ToList())
+            foreach (var transaction in transactions.Where(predicate).ToList())
             {
                 transaction.TxCompleted = true;
                 transaction.TxEndDate = new DateTime?(DateTime.Now);
@@ -636,17 +606,17 @@ namespace CashmereDeposit.ViewModels
                 transaction.TxErrorMessage = "Incomplete transaction aborted";
                 transaction.TxResult = 85;
             }
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
         }
 
         public void HandleIncompleteSession()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             HandleIncompleteTransaction();
-            ApplicationModel.GetDevice(DBContext);
-            DbSet<DepositorSession> depositorSessions = DBContext.DepositorSessions;
+            ApplicationModel.GetDevice(dbContext);
+            var depositorSessions = dbContext.DepositorSessions;
             Expression<Func<DepositorSession, bool>> predicate = x => x.Complete == false;
-            foreach (DepositorSession depositorSession in depositorSessions.Where(predicate).ToList())
+            foreach (var depositorSession in depositorSessions.Where(predicate).ToList())
             {
                 depositorSession.SessionEnd = new DateTime?(DateTime.Now);
                 depositorSession.Complete = true;
@@ -654,13 +624,13 @@ namespace CashmereDeposit.ViewModels
                 depositorSession.ErrorCode = new int?(84);
                 depositorSession.ErrorMessage = "Session is incomplete";
             }
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
         }
 
         private void StartSession()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            _deviceManager.SetCurrency(ApplicationModel.GetDevice(DBContext).CurrencyList.DefaultCurrencyId.ToUpper());
+            using var dbContext = new DepositorDBContext();
+            _deviceManager.SetCurrency(ApplicationModel.GetDevice(dbContext).CurrencyListNavigation.DefaultCurrency.ToUpper());
             CurrentSession = new AppSession(this);
             CurrentSession.TransactionLimitReachedEvent += new EventHandler<EventArgs>(CurrentSession_TransactionLimitReachedEvent);
             CurrentScreenIndex = 1;
@@ -691,25 +661,19 @@ namespace CashmereDeposit.ViewModels
 
         public int CurrentScreenIndex { get; set; }
 
-        public List<GuiScreen> GUIScreens { get; set; }
+        public List<GUIScreen> GUIScreens { get; set; }
 
-        public GuiScreen CurrentGUIScreen
-        {
-            get { return GUIScreens.ElementAtOrDefault(CurrentScreenIndex) ?? null; }
-        }
+        public GUIScreen CurrentGUIScreen => GUIScreens.ElementAtOrDefault(CurrentScreenIndex) ?? null;
 
-        public Screen CurrentScreen { get; set; }
+        public object CurrentScreen { get; set; }
 
-        public Guid? SessionID
-        {
-            get { return CurrentSession?.SessionID; }
-        }
+        public Guid? SessionID => CurrentSession?.SessionID;
 
         public void ShowScreen(int screenIndex, bool generateNewScreen = true)
         {
             try
             {
-                using DepositorDBContext depositorDbContext = new DepositorDBContext();
+                using var depositorDbContext = new DepositorDBContext();
                 if (screenIndex == 0)
                     InitialiseScreenList();
                 if (ApplicationStatus.CashmereDeviceState == CashmereDeviceState.NONE || debugNoDevice)
@@ -719,12 +683,12 @@ namespace CashmereDeposit.ViewModels
                         CurrentScreenIndex = screenIndex < 0 ? 0 : screenIndex;
                         CurrentScreenIndex = screenIndex > GUIScreens.Count - 1 ? 0 : screenIndex;
                         depositorDbContext.GuiScreens.Attach(GUIScreens[CurrentScreenIndex]);
-                        TypeInfo typeInfo = Assembly.GetExecutingAssembly().DefinedTypes.First(x => x.GUID == GUIScreens[CurrentScreenIndex].GuiScreenType.Code);
-                        GuiScreen guiScreen = GUIScreens[CurrentScreenIndex];
-                        bool? required = depositorDbContext.GuiScreenListScreens.Where(x => x.GuiScreen.Id == guiScreen.Id).FirstOrDefault()?.Required;
-                        string str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", CurrentGUIScreen?.GuiScreenText?.ScreenTitleId, "[Translation Error]");
-                        var instance = Activator.CreateInstance(typeInfo, str, this, required) as Screen;
-                        ActivateItemAsync(instance);
+                        var typeInfo = Assembly.GetExecutingAssembly().DefinedTypes.First(x => x.GUID == GUIScreens[CurrentScreenIndex].GUIScreenType.Code);
+                        var guiScreen = GUIScreens[CurrentScreenIndex];
+                        var required = depositorDbContext.GuiScreenListScreens.Include(i=>i.ScreenNavigation).Where(x => x.ScreenNavigation.Id == guiScreen.Id).FirstOrDefault()?.Required;
+                        var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", CurrentGUIScreen?.GUIScreenText?.ScreenTitle, "[Translation Error]");
+                        var instance = Activator.CreateInstance(typeInfo, str, this, required);
+                        this.ActivateItemAsync(instance);
                         Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
                         if (CurrentScreen is DepositorCustomerScreenBaseViewModel)
                         {
@@ -735,7 +699,7 @@ namespace CashmereDeposit.ViewModels
                         CurrentScreen = instance;
                     }
                     else
-                        ActivateItemAsync(CurrentScreen);
+                        this.ActivateItemAsync(CurrentScreen);
                 }
                 else
                     ShowErrorDialog(new OutOfOrderScreenViewModel(this));
@@ -747,15 +711,9 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        public void ShowScreen()
-        {
-            ShowScreen(CurrentScreenIndex);
-        }
+        public void ShowScreen() => ShowScreen(CurrentScreenIndex);
 
-        public void ShowScreen(bool genScreen)
-        {
-            ShowScreen(CurrentScreenIndex, genScreen);
-        }
+        public void ShowScreen(bool genScreen) => ShowScreen(CurrentScreenIndex, genScreen);
 
         public void NavigateNextScreen()
         {
@@ -783,24 +741,21 @@ namespace CashmereDeposit.ViewModels
             ShowScreen(CurrentScreenIndex);
         }
 
-        public void ShowDialog(Screen screen)
+        public void ShowDialog(object screen)
         {
             if (!AdminMode && ApplicationStatus.CashmereDeviceState != CashmereDeviceState.NONE)
                 return;
-            ActivateItemAsync(screen);
+            this.ActivateItemAsync(screen);
         }
 
-        public void ShowDialogBox(Screen screen)
-        {
-            ActivateItemAsync(screen);
-        }
+        public void ShowDialogBox(object screen) => this.ActivateItemAsync(screen);
 
-        public void ShowErrorDialog(Screen screen)
+        public void ShowErrorDialog(object screen)
         {
             Log.Info(GetType().Name, "ShowDialogScreen", "Screen", screen.GetType().Name);
             if (ApplicationStatus.CashmereDeviceState == CashmereDeviceState.NONE)
                 return;
-            ActivateItemAsync(screen);
+            this.ActivateItemAsync(screen);
         }
 
         public void CloseDialog(bool generateScreen = true)
@@ -814,19 +769,16 @@ namespace CashmereDeposit.ViewModels
                 ShowScreen(false);
         }
 
-        public bool? CanCancelTransaction
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool? CanCancelTransaction => throw new NotImplementedException();
 
         internal void CancelSessionOnUserInput()
         {
             Log.Info(GetType().Name, "cancelSession", "Session", "User has cancelled the session");
-            string message = CashmereTranslationService?.TranslateSystemText("CancelSessionOnUserInput.message", "sys_Dialog_CancelTransaction_MessageText", "Would you like to cancel your current transaction?" + Environment.NewLine + Environment.NewLine + "To delete text, please use the \"Delete\" or \"Backspace\" buttons");
-            string str = CashmereTranslationService?.TranslateSystemText("CancelSessionOnUserInput.message", "sys_Dialog_CancelTransaction_TitleCaption", "Cancel Transaction");
-            DeviceConfiguration deviceConfiguration = DeviceConfiguration;
-            int timeout = deviceConfiguration != null ? deviceConfiguration.USER_SCREEN_TIMEOUT : 15;
-            string title = str;
+            var message = CashmereTranslationService?.TranslateSystemText("CancelSessionOnUserInput.message", "sys_Dialog_CancelTransaction_MessageText", "Would you like to cancel your current transaction?" + Environment.NewLine + Environment.NewLine + "To delete text, please use the \"Delete\" or \"Backspace\" buttons");
+            var str = CashmereTranslationService?.TranslateSystemText("CancelSessionOnUserInput.message", "sys_Dialog_CancelTransaction_TitleCaption", "Cancel Transaction");
+            var deviceConfiguration = DeviceConfiguration;
+            var timeout = deviceConfiguration != null ? deviceConfiguration.USER_SCREEN_TIMEOUT : 15;
+            var title = str;
             if (TimeoutDialogBox.ShowDialog(message, timeout, title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
             try
@@ -879,7 +831,7 @@ namespace CashmereDeposit.ViewModels
 
         internal void CreateTransaction(TransactionTypeListItem value)
         {
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
+            using var depositorDbContext = new DepositorDBContext();
             depositorDbContext.TransactionTypeListItems.Attach(value);
             Log.Info(GetType().Name, "SetTransactionType", "User Input", value.Name);
             GUIScreens.AddRange(ApplicationModel.GetTransactionTypeScreenList(value).ToList());
@@ -891,26 +843,24 @@ namespace CashmereDeposit.ViewModels
         internal async Task<AccountsListResponse> SearchAccountListAsync(
           string searchText,
           TransactionTypeListItem txType,
-          string currency,
-          int PageNumber = 0,
-          int PageSize = 1000)
+          string Currency,
+          int pageNumber = 0,
+          int pageSize = 1000)
         {
-            ApplicationViewModel applicationViewModel = this;
+            var applicationViewModel = this;
             AccountsListResponse accountsListResponse1;
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Info(applicationViewModel.GetType().Name, "GetAccountList", "User Input", txType.Name);
-            AccountsListResponse response = new AccountsListResponse();
-            Guid guid = Guid.NewGuid();
-            string str1 = guid.ToString();
+            var response = new AccountsListResponse();
+            var guid = Guid.NewGuid();
+            var str1 = guid.ToString();
             if (applicationViewModel.debugNoCoreBanking)
             {
-                AccountsListResponse accountsListResponse2 = new AccountsListResponse
-                {
-                    RequestID = str1,
-                    MessageDateTime = DateTime.Now,
-                    ServerErrorCode = "0",
-                    IsSuccess = true
-                };
+                var accountsListResponse2 = new AccountsListResponse();
+                accountsListResponse2.RequestID = str1;
+                accountsListResponse2.MessageDateTime = DateTime.Now;
+                accountsListResponse2.ServerErrorCode = "0";
+                accountsListResponse2.IsSuccess = true;
                 guid = Guid.NewGuid();
                 accountsListResponse2.MessageID = guid.ToString();
                 accountsListResponse2.Accounts = new List<Account>()
@@ -982,16 +932,14 @@ namespace CashmereDeposit.ViewModels
             {
                 try
                 {
-                    Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Request", "TxType = {0} Currency = {1}", txType.Name, currency);
-                    Device device = GetDevice(DBContext);
-                    DateTime now = DateTime.Now;
-                    GUIControlServiceClient controlServiceClient = new GUIControlServiceClient(DeviceConfiguration.API_CDM_GUI_URI, device.AppId, device.AppKey, null);
-                    AccountsListRequest accountsListRequest = new AccountsListRequest
-                    {
-                        Currency = applicationViewModel.CurrentTransaction?.CurrencyCode,
-                        Language = applicationViewModel.CurrentLanguage
-                    };
-                    AppSession currentSession = applicationViewModel.CurrentSession;
+                    Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Request", "TxType = {0} Currency = {1}", txType.Name, Currency);
+                    var device = GetDevice(dbContext);
+                    var now = DateTime.Now;
+                    var controlServiceClient = new GUIControlServiceClient(DeviceConfiguration.API_CDM_GUI_URI, device.AppId, device.AppKey, null);
+                    var accountsListRequest = new AccountsListRequest();
+                    accountsListRequest.Currency = applicationViewModel.CurrentTransaction?.CurrencyCode;
+                    accountsListRequest.Language = applicationViewModel.CurrentLanguage;
+                    var currentSession = applicationViewModel.CurrentSession;
                     string str2;
                     if (currentSession == null)
                     {
@@ -1010,17 +958,17 @@ namespace CashmereDeposit.ViewModels
                     accountsListRequest.TransactionType = applicationViewModel.CurrentTransaction.TransactionType.Id;
                     accountsListRequest.AppID = device.AppId;
                     accountsListRequest.DeviceID = device.Id;
-                    accountsListRequest.PageNumber = PageNumber;
-                    accountsListRequest.PageSize = PageSize;
+                    accountsListRequest.PageNumber = pageNumber;
+                    accountsListRequest.PageSize = pageSize;
                     accountsListRequest.SearchText = searchText;
-                    AccountsListRequest request = accountsListRequest;
+                    var request = accountsListRequest;
                     response = await controlServiceClient.SearchAccountAsync(request);
                     applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     if (response.IsSuccess)
                     {
                         Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Response", "{0}", response.ToString());
                         if (!DeviceConfiguration.ALLOW_CROSS_CURRENCY_TX)
-                            response.Accounts.RemoveAll(p => !p.currency.Equals(currency));
+                            response.Accounts.RemoveAll(p => !p.currency.Equals(Currency));
                     }
                     if (applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
                         applicationViewModel.UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
@@ -1039,29 +987,27 @@ namespace CashmereDeposit.ViewModels
 
         internal async Task<AccountsListResponse> GetAccountListAsync(
           TransactionTypeListItem txType,
-          string currency,
-          int PageNumber = 0,
-          int PageSize = 1000)
+          string Currency,
+          int pageNumber = 0,
+          int pageSize = 1000)
         {
-            ApplicationViewModel applicationViewModel = this;
-            AccountsListResponse accountsListResponse1;
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            var applicationViewModel = this;
+            AccountsListResponse accountListAsync;
+            using var dbContext = new DepositorDBContext();
             Log.Info(applicationViewModel.GetType().Name, "GetAccountList", "User Input", txType.Name);
-            AccountsListResponse response = new AccountsListResponse();
-            Guid guid = Guid.NewGuid();
-            string str1 = guid.ToString();
+            var response = new AccountsListResponse();
+            var guid = Guid.NewGuid();
+            var str1 = guid.ToString();
             if (applicationViewModel.debugNoCoreBanking)
             {
-                AccountsListResponse accountsListResponse2 = new AccountsListResponse
-                {
-                    RequestID = str1,
-                    MessageDateTime = DateTime.Now,
-                    ServerErrorCode = "0",
-                    IsSuccess = true
-                };
+                var accountsListResponse = new AccountsListResponse();
+                accountsListResponse.RequestID = str1;
+                accountsListResponse.MessageDateTime = DateTime.Now;
+                accountsListResponse.ServerErrorCode = "0";
+                accountsListResponse.IsSuccess = true;
                 guid = Guid.NewGuid();
-                accountsListResponse2.MessageID = guid.ToString();
-                accountsListResponse2.Accounts = new List<Account>()
+                accountsListResponse.MessageID = guid.ToString();
+                accountsListResponse.Accounts = new List<Account>()
                 {
                     new Account()
                     {
@@ -1124,22 +1070,20 @@ namespace CashmereDeposit.ViewModels
                         account_name = "Account12"
                     }
                 };
-                response = accountsListResponse2;
+                response = accountsListResponse;
             }
             else
             {
                 try
                 {
-                    Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Request", "TxType = {0} Currency = {1}", txType.Name, currency);
-                    Device device = GetDevice(DBContext);
-                    DateTime now = DateTime.Now;
-                    GUIControlServiceClient controlServiceClient = new GUIControlServiceClient(DeviceConfiguration.API_CDM_GUI_URI, device.AppId, device.AppKey, null);
-                    AccountsListRequest accountsListRequest = new AccountsListRequest
-                    {
-                        Currency = applicationViewModel.CurrentTransaction?.CurrencyCode,
-                        Language = applicationViewModel.CurrentLanguage
-                    };
-                    AppSession currentSession = applicationViewModel.CurrentSession;
+                    Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Request", "TxType = {0} Currency = {1}", txType.Name, Currency);
+                    var device = GetDevice(dbContext);
+                    var now = DateTime.Now;
+                    var controlServiceClient = new GUIControlServiceClient(DeviceConfiguration.API_CDM_GUI_URI, device.AppId, device.AppKey, null);
+                    var accountsListRequest = new AccountsListRequest();
+                    accountsListRequest.Currency = applicationViewModel.CurrentTransaction?.CurrencyCode;
+                    accountsListRequest.Language = applicationViewModel.CurrentLanguage;
+                    var currentSession = applicationViewModel.CurrentSession;
                     string str2;
                     if (currentSession == null)
                     {
@@ -1158,16 +1102,16 @@ namespace CashmereDeposit.ViewModels
                     accountsListRequest.TransactionType = applicationViewModel.CurrentTransaction.TransactionType.Id;
                     accountsListRequest.AppID = device.AppId;
                     accountsListRequest.DeviceID = device.Id;
-                    accountsListRequest.PageNumber = PageNumber;
-                    accountsListRequest.PageSize = PageSize;
-                    AccountsListRequest request = accountsListRequest;
+                    accountsListRequest.PageNumber = pageNumber;
+                    accountsListRequest.PageSize = pageSize;
+                    var request = accountsListRequest;
                     response = await controlServiceClient.GetAccountsListAsync(request);
                     applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     if (response.IsSuccess)
                     {
                         Log.InfoFormat(applicationViewModel.GetType().Name, "GetAccountList", "Validation Response", "{0}", response.ToString());
                         if (!DeviceConfiguration.ALLOW_CROSS_CURRENCY_TX)
-                            response.Accounts.RemoveAll(p => !p.currency.Equals(currency));
+                            response.Accounts.RemoveAll(p => !p.currency.Equals(Currency));
                     }
                     if (applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
                         applicationViewModel.UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
@@ -1180,31 +1124,29 @@ namespace CashmereDeposit.ViewModels
                     response.IsSuccess = false;
                 }
             }
-            accountsListResponse1 = response;
-            return accountsListResponse1;
+            accountListAsync = response;
+            return accountListAsync;
         }
 
         internal async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(
           string accountNumber,
-          string currency,
+          string Currency,
           int txType)
         {
-            ApplicationViewModel applicationViewModel = this;
+            var applicationViewModel = this;
             AccountNumberValidationResponse validationResponse1;
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Info(applicationViewModel.GetType().Name, "ValidateAccountNumber", "User Input", accountNumber);
-            AccountNumberValidationResponse response = new AccountNumberValidationResponse();
+            var response = new AccountNumberValidationResponse();
             if (applicationViewModel.debugNoCoreBanking)
             {
                 if (accountNumber == "1234")
                 {
-                    AccountNumberValidationResponse validationResponse2 = new AccountNumberValidationResponse
-                    {
-                        AccountName = "",
-                        CanTransact = false,
-                        MessageDateTime = DateTime.Now
-                    };
-                    Guid guid = Guid.NewGuid();
+                    var validationResponse2 = new AccountNumberValidationResponse();
+                    validationResponse2.AccountName = "";
+                    validationResponse2.CanTransact = false;
+                    validationResponse2.MessageDateTime = DateTime.Now;
+                    var guid = Guid.NewGuid();
                     validationResponse2.RequestID = guid.ToString().ToUpper();
                     guid = Guid.NewGuid();
                     validationResponse2.MessageID = guid.ToString().ToUpper();
@@ -1215,44 +1157,40 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    AccountNumberValidationResponse validationResponse2 = new AccountNumberValidationResponse
-                    {
-                        AccountName = "Test Account",
-                        CanTransact = true,
-                        MessageDateTime = DateTime.Now
-                    };
-                    Guid guid = Guid.NewGuid();
-                    validationResponse2.RequestID = guid.ToString().ToUpper();
+                    var validationResponse3 = new AccountNumberValidationResponse();
+                    validationResponse3.AccountName = "Test Account";
+                    validationResponse3.CanTransact = true;
+                    validationResponse3.MessageDateTime = DateTime.Now;
+                    var guid = Guid.NewGuid();
+                    validationResponse3.RequestID = guid.ToString().ToUpper();
                     guid = Guid.NewGuid();
-                    validationResponse2.MessageID = guid.ToString().ToUpper();
-                    validationResponse2.IsSuccess = true;
-                    validationResponse2.PublicErrorCode = 200.ToString() ?? "";
-                    validationResponse2.PublicErrorMessage = "Validated Successfully";
-                    response = validationResponse2;
+                    validationResponse3.MessageID = guid.ToString().ToUpper();
+                    validationResponse3.IsSuccess = true;
+                    validationResponse3.PublicErrorCode = 200.ToString() ?? "";
+                    validationResponse3.PublicErrorMessage = "Validated Successfully";
+                    response = validationResponse3;
                 }
             }
             else
             {
                 try
                 {
-                    Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Request", "Account = {0} Currency = {1}", accountNumber, currency);
-                    Device device = GetDevice(DBContext);
-                    IntegrationServiceClient integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
-                    AccountNumberValidationRequest request = new AccountNumberValidationRequest
-                    {
-                        AccountNumber = accountNumber,
-                        AppID = device.AppId,
-                        AppName = device.MachineName,
-                        MessageID = Guid.NewGuid().ToString(),
-                        MessageDateTime = DateTime.Now,
-                        SessionID = applicationViewModel.SessionID.Value.ToString(),
-                        DeviceID = device.Id,
-                        Currency = currency,
-                        Language = applicationViewModel.CurrentLanguage,
-                        TransactionType = txType
-                    };
+                    Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Request", "Account = {0} Currency = {1}", accountNumber, Currency);
+                    var device = GetDevice(dbContext);
+                    var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                    var request = new AccountNumberValidationRequest();
+                    request.AccountNumber = accountNumber;
+                    request.AppID = device.AppId;
+                    request.AppName = device.MachineName;
+                    request.MessageID = Guid.NewGuid().ToString();
+                    request.MessageDateTime = DateTime.Now;
+                    request.SessionID = applicationViewModel.SessionID.Value.ToString();
+                    request.DeviceID = device.Id;
+                    request.Currency = Currency;
+                    request.Language = applicationViewModel.CurrentLanguage;
+                    request.TransactionType = txType;
                     // ISSUE: explicit non-virtual call
-                    response = await integrationServiceClient.ValidateAccountNumberAsync(request);
+                    response = await (integrationServiceClient.ValidateAccountNumberAsync(request));
                     applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     if (response.IsSuccess)
                     {
@@ -1264,11 +1202,11 @@ namespace CashmereDeposit.ViewModels
                                 case null:
                                     break;
                                 default:
-                                    if (response?.AccountCurrency?.ToUpper() != currency.ToUpper())
+                                    if (response?.AccountCurrency?.ToUpper() != Currency.ToUpper())
                                     {
-                                        Log.InfoFormat(applicationViewModel.GetType().Name, "Transaction", "Cross Currency Not Allowed", "Cannot deposit {2} into {1} Account {0}.", accountNumber, response.AccountCurrency, currency);
+                                        Log.InfoFormat(applicationViewModel.GetType().Name, "Transaction", "Cross Currency Not Allowed", "Cannot deposit {2} into {1} Account {0}.", accountNumber, response.AccountCurrency, Currency);
                                         response.IsSuccess = false;
-                                        response.PublicErrorMessage = string.Format("account indicated is a {0} account kindly enter the correct currency account", response.AccountCurrency);
+                                        response.PublicErrorMessage = string.Format("account indicated is a {0} account kindly enter the correct Currency account", response.AccountCurrency);
                                         break;
                                     }
                                     break;
@@ -1297,42 +1235,38 @@ namespace CashmereDeposit.ViewModels
           string refAccountNumber,
           string transactionType)
         {
-            ApplicationViewModel applicationViewModel = this;
+            var applicationViewModel = this;
             ReferenceAccountNumberValidationResponse validationResponse1;
             using (new DepositorDBContext())
             {
-                ReferenceAccountNumberValidationResponse response = new ReferenceAccountNumberValidationResponse();
+                var response = new ReferenceAccountNumberValidationResponse();
                 if (applicationViewModel.debugNoCoreBanking)
                 {
                     if (refAccountNumber == "1234")
                     {
-                        ReferenceAccountNumberValidationResponse validationResponse2 = new ReferenceAccountNumberValidationResponse
-                            {
-                                AccountName = "",
-                                CanTransact = false,
-                                MessageDateTime = DateTime.Now,
-                                RequestID = Guid.NewGuid().ToString().ToUpper(),
-                                MessageID = Guid.NewGuid().ToString().ToUpper(),
-                                IsSuccess = false,
-                                PublicErrorCode = 400.ToString() ?? "",
-                                PublicErrorMessage = "Account Does Not Exist"
-                            };
+                        var validationResponse2 = new ReferenceAccountNumberValidationResponse();
+                        validationResponse2.AccountName = "";
+                        validationResponse2.CanTransact = false;
+                        validationResponse2.MessageDateTime = DateTime.Now;
+                        validationResponse2.RequestID = Guid.NewGuid().ToString().ToUpper();
+                        validationResponse2.MessageID = Guid.NewGuid().ToString().ToUpper();
+                        validationResponse2.IsSuccess = false;
+                        validationResponse2.PublicErrorCode = 400.ToString() ?? "";
+                        validationResponse2.PublicErrorMessage = "Account Does Not Exist";
                         response = validationResponse2;
                     }
                     else
                     {
-                        ReferenceAccountNumberValidationResponse validationResponse2 = new ReferenceAccountNumberValidationResponse
-                            {
-                                AccountName = "Test Account",
-                                CanTransact = true,
-                                MessageDateTime = DateTime.Now,
-                                RequestID = Guid.NewGuid().ToString().ToUpper(),
-                                MessageID = Guid.NewGuid().ToString().ToUpper(),
-                                IsSuccess = true,
-                                PublicErrorCode = 200.ToString() ?? "",
-                                PublicErrorMessage = "Validated Successfully"
-                            };
-                        response = validationResponse2;
+                        var validationResponse3 = new ReferenceAccountNumberValidationResponse();
+                        validationResponse3.AccountName = "Test Account";
+                        validationResponse3.CanTransact = true;
+                        validationResponse3.MessageDateTime = DateTime.Now;
+                        validationResponse3.RequestID = Guid.NewGuid().ToString().ToUpper();
+                        validationResponse3.MessageID = Guid.NewGuid().ToString().ToUpper();
+                        validationResponse3.IsSuccess = true;
+                        validationResponse3.PublicErrorCode = 200.ToString() ?? "";
+                        validationResponse3.PublicErrorMessage = "Validated Successfully";
+                        response = validationResponse3;
                     }
                 }
                 else
@@ -1340,24 +1274,22 @@ namespace CashmereDeposit.ViewModels
                     try
                     {
                         Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateReferenceAccountNumber", "Validation Request", "Account = {0} Type = {1}", refAccountNumber, applicationViewModel.CurrentTransaction.TransactionType.CbTxType);
-                        Device device = applicationViewModel.CurrentSession.Device;
-                        IntegrationServiceClient integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
-                        ReferenceAccountNumberValidationRequest request = new ReferenceAccountNumberValidationRequest
-                            {
-                                AccountNumber = accountNumber,
-                                ReferenceAccountNumber = refAccountNumber,
-                                AppID = device.AppId,
-                                AppName = device.MachineName,
-                                DeviceID = device.Id,
-                                MessageDateTime = DateTime.Now,
-                                MessageID = Guid.NewGuid().ToString(),
-                                SessionID = applicationViewModel.SessionID.Value.ToString(),
-                                Currency = applicationViewModel.CurrentTransaction.CurrencyCode,
-                                Language = applicationViewModel.CurrentLanguage,
-                                TransactionType = applicationViewModel.CurrentTransaction.TransactionType.Id
-                            };
+                        var device = applicationViewModel.CurrentSession.Device;
+                        var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                        var request = new ReferenceAccountNumberValidationRequest();
+                        request.AccountNumber = accountNumber;
+                        request.ReferenceAccountNumber = refAccountNumber;
+                        request.AppID = device.AppId;
+                        request.AppName = device.MachineName;
+                        request.DeviceID = device.Id;
+                        request.MessageDateTime = DateTime.Now;
+                        request.MessageID = Guid.NewGuid().ToString();
+                        request.SessionID = applicationViewModel.SessionID.Value.ToString();
+                        request.Currency = applicationViewModel.CurrentTransaction.CurrencyCode;
+                        request.Language = applicationViewModel.CurrentLanguage;
+                        request.TransactionType = applicationViewModel.CurrentTransaction.TransactionType.Id;
                         // ISSUE: explicit non-virtual call
-                        response = await integrationServiceClient.ValidateReferenceAccountNumberAsync(request);
+                        response = await (integrationServiceClient.ValidateReferenceAccountNumberAsync(request));
                         applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     }
                     catch (Exception ex)
@@ -1373,10 +1305,7 @@ namespace CashmereDeposit.ViewModels
             return validationResponse1;
         }
 
-        internal void ReferencesAccepted(bool success = true)
-        {
-            Log.Info(GetType().Name, "VerifyReferences", nameof(ReferencesAccepted), "User accepted the references");
-        }
+        internal void ReferencesAccepted(bool success = true) => Log.Info(GetType().Name, "VerifyReferences", nameof(ReferencesAccepted), "User accepted the references");
 
         private void DeviceManager_DeviceLockedEvent(object sender, EventArgs e)
         {
@@ -1393,15 +1322,15 @@ namespace CashmereDeposit.ViewModels
 
         private void DeviceManager_StatusReportEvent(object sender, DeviceStatusChangedEventArgs e)
         {
-            using (DepositorDBContext DBContext = new DepositorDBContext())
+            using (var dbContext = new DepositorDBContext())
             {
-                Device device = ApplicationModel.GetDevice(DBContext);
+                var device = ApplicationModel.GetDevice(dbContext);
                 if (device != null)
                 {
-                    DeviceStatus deviceStatu = DBContext.DeviceStatuses.FirstOrDefault(x => x.DeviceId == device.Id);
+                    var deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
                     if (deviceStatu == null)
                     {
-                        DBContext.DeviceStatuses.Add(new DeviceStatus()
+                        dbContext.DeviceStatus.Add(new DeviceStatus()
                         {
                             DeviceId = device.Id,
                             MachineName = Environment.MachineName.ToUpperInvariant(),
@@ -1460,7 +1389,7 @@ namespace CashmereDeposit.ViewModels
                         deviceStatu.SensorsDoor = e.ControllerStatus.Sensor.Door.ToString();
                     }
                 }
-                SaveToDatabase(DBContext);
+                SaveToDatabase(dbContext);
                 if (e.ControllerStatus.Sensor.Door == DeviceSensorDoor.OPEN)
                 {
                     if (debugDisableSafeSensor)
@@ -1483,8 +1412,8 @@ namespace CashmereDeposit.ViewModels
                     }
                     else
                     {
-                        AppSession currentSession = CurrentSession;
-                        bool flag = currentSession == null || !currentSession.CountingStarted;
+                        var currentSession = CurrentSession;
+                        var flag = currentSession == null || !currentSession.CountingStarted;
                         if (!ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.BAG) & flag)
                             SetCashmereDeviceState(CashmereDeviceState.BAG);
                     }
@@ -1505,14 +1434,14 @@ namespace CashmereDeposit.ViewModels
                 {
                     if (e != null)
                     {
-                        ControllerState? controllerState1 = e.ControllerStatus?.ControllerState;
-                        ControllerState controllerState2 = ControllerState.IDLE;
+                        var controllerState1 = e.ControllerStatus?.ControllerState;
+                        var controllerState2 = ControllerState.IDLE;
                         if (controllerState1.GetValueOrDefault() == controllerState2 & controllerState1.HasValue)
                         {
                             if (e != null)
                             {
-                                DeviceTransactionStatus? status = e.ControllerStatus?.Transaction?.Status;
-                                DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
+                                var status = e.ControllerStatus?.Transaction?.Status;
+                                var transactionStatus = DeviceTransactionStatus.NONE;
                                 if (status.GetValueOrDefault() == transactionStatus & status.HasValue)
                                 {
                                     if (DeviceManager.CashAccSysSerialFix.DE50Mode != DE50Mode.NeutralSettingMode)
@@ -1579,17 +1508,17 @@ namespace CashmereDeposit.ViewModels
 
         private void DeviceManager_DoorOpenEvent(object sender, EventArgs e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             if (CurrentApplicationState == ApplicationState.CIT_BAG_CLOSED)
             {
-                AlertManager.SendAlert(new AlertSafeDoorOpen(ApplicationModel.GetDevice(DBContext), DateTime.Now, true));
+                AlertManager.SendAlert(new AlertSafeDoorOpen(ApplicationModel.GetDevice(dbContext), DateTime.Now, true));
                 CurrentApplicationState = ApplicationState.CIT_DOOR_OPENED;
                 Log.Info(GetType().Name, "ApplicationState", "EventHandling", "CIT_DOOR_OPENED");
             }
             else
             {
                 Log.Warning(GetType().Name, "ApplicationState", "EventHandling", "door opened outside of a CIT");
-                AlertManager.SendAlert(new AlertSafeDoorOpen(ApplicationModel.GetDevice(DBContext), DateTime.Now));
+                AlertManager.SendAlert(new AlertSafeDoorOpen(ApplicationModel.GetDevice(dbContext), DateTime.Now));
             }
         }
 
@@ -1597,11 +1526,11 @@ namespace CashmereDeposit.ViewModels
         {
             lock (DoorClosedLock)
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+                using var dbContext = new DepositorDBContext();
                 Log.Debug(GetType().Name, nameof(DeviceManager_DoorClosedEvent), "EventHandling", "DoorClosedEvent");
                 if (CurrentApplicationState == ApplicationState.CIT_BAG_REPLACED)
                 {
-                    AlertManager.SendAlert(new AlertSafeDoorClosed(ApplicationModel.GetDevice(DBContext), DateTime.Now, true));
+                    AlertManager.SendAlert(new AlertSafeDoorClosed(ApplicationModel.GetDevice(dbContext), DateTime.Now, true));
                     if (lastCIT == null || lastCIT.Complete)
                         return;
                     CurrentApplicationState = ApplicationState.CIT_DOOR_CLOSED;
@@ -1611,25 +1540,25 @@ namespace CashmereDeposit.ViewModels
                 else
                 {
                     Log.Warning(GetType().Name, "ApplicationState", "EventHandling", "door closed outside of a CIT");
-                    AlertManager.SendAlert(new AlertSafeDoorClosed(ApplicationModel.GetDevice(DBContext), DateTime.Now));
+                    AlertManager.SendAlert(new AlertSafeDoorClosed(ApplicationModel.GetDevice(dbContext), DateTime.Now));
                 }
             }
         }
 
         private void DeviceManager_BagRemovedEvent(object sender, EventArgs e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Debug(GetType().Name, nameof(DeviceManager_BagRemovedEvent), "EventHandling", "BagRemovedEvent");
             if (CurrentApplicationState == ApplicationState.CIT_DOOR_OPENED)
             {
                 CurrentApplicationState = ApplicationState.CIT_BAG_REMOVED;
                 Log.Info(GetType().Name, "ApplicationState", "EventHandling", "CIT_BAG_REMOVED");
-                AlertManager.SendAlert(new AlertBagRemoved(ApplicationModel.GetDevice(DBContext), DateTime.Now, true));
+                AlertManager.SendAlert(new AlertBagRemoved(ApplicationModel.GetDevice(dbContext), DateTime.Now, true));
             }
             else
             {
                 Log.Warning(GetType().Name, "ApplicationState", "EventHandling", "bag removed outside of a CIT");
-                AlertManager.SendAlert(new AlertBagRemoved(ApplicationModel.GetDevice(DBContext), DateTime.Now));
+                AlertManager.SendAlert(new AlertBagRemoved(ApplicationModel.GetDevice(dbContext), DateTime.Now));
             }
         }
 
@@ -1637,17 +1566,17 @@ namespace CashmereDeposit.ViewModels
         {
             lock (BagReplacedLock)
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+                using var dbContext = new DepositorDBContext();
                 if (lastCIT != null && !lastCIT.Complete)
                 {
                     CurrentApplicationState = ApplicationState.CIT_BAG_REPLACED;
                     Log.Info(GetType().Name, "ApplicationState", "EventHandling", "CIT_BAG_REMOVED");
-                    AlertManager.SendAlert(new AlertBagInserted(ApplicationModel.GetDevice(DBContext), DateTime.Now, true));
+                    AlertManager.SendAlert(new AlertBagInserted(ApplicationModel.GetDevice(dbContext), DateTime.Now, true));
                 }
                 else
                 {
                     Log.Warning(GetType().Name, "ApplicationState", "EventHandling", "bag inserted outside of a CIT");
-                    AlertManager.SendAlert(new AlertBagInserted(ApplicationModel.GetDevice(DBContext), DateTime.Now));
+                    AlertManager.SendAlert(new AlertBagInserted(ApplicationModel.GetDevice(dbContext), DateTime.Now));
                 }
             }
         }
@@ -1656,9 +1585,9 @@ namespace CashmereDeposit.ViewModels
         {
             lock (BagOpenLock)
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
-                CIT last_CIT = DBContext.CITs.Include(y => y.StartUser).Include(z => z.AuthorisingUser).FirstOrDefault(x => x.Id == lastCIT.Id);
-                Device device = ApplicationModel.GetDevice(DBContext);
+                using var dbContext = new DepositorDBContext();
+                var last_CIT = dbContext.CITs.Include(y => y.StartUserNavigation).Include<CIT, ApplicationUser>(z => z.AuthUserNavigation).FirstOrDefault(x => x.Id == lastCIT.Id);
+                var device = ApplicationModel.GetDevice(dbContext);
                 Log.Debug(GetType().Name, nameof(DeviceManager_BagOpenedEvent), "EventHandling", "BagOpenedEvent");
                 if (last_CIT != null && !last_CIT.Complete)
                 {
@@ -1668,11 +1597,11 @@ namespace CashmereDeposit.ViewModels
                     {
                         last_CIT.Complete = true;
                         last_CIT.CITCompleteDate = new DateTime?(DateTime.Now);
-                        SaveToDatabase(DBContext);
-                        Task.Run((Func<Task>)(() => PostCITTransactionsAsync(last_CIT, DBContext)));
-                        DbSet<CIT> ciTs = DBContext.CITs;
+                        SaveToDatabase(dbContext);
+                        Task.Run((Func<Task>)(() => PostCITTransactionsAsync(last_CIT, dbContext)));
+                        var ciTs = dbContext.CITs;
                         Expression<Func<CIT, bool>> predicate = x => x.Id != last_CIT.Id && x.DeviceId == device.Id && x.Complete == false;
-                        foreach (CIT cit in ciTs.Where(predicate).ToList())
+                        foreach (var cit in ciTs.Where(predicate).ToList())
                         {
                             cit.Complete = true;
                             cit.CITCompleteDate = new DateTime?(DateTime.Now);
@@ -1681,7 +1610,7 @@ namespace CashmereDeposit.ViewModels
                             AlertManager.SendAlert(new AlertCITFailed(cit, device, DateTime.Now));
                         }
                     }
-                    SaveToDatabase(DBContext);
+                    SaveToDatabase(dbContext);
                     AlertManager.SendAlert(new AlertCITSuccess(last_CIT, device, DateTime.Now));
                     InitialiseApp();
                     DeviceManager.DeviceManagerMode = DeviceManagerMode.NONE;
@@ -1692,23 +1621,26 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        private async Task PostCITTransactionsAsync(CIT cit, DepositorDBContext DBContext)
+        private async Task PostCITTransactionsAsync(CIT cit, DepositorDBContext dbContext)
         {
             if (DeviceConfiguration.CIT_ALLOW_POST)
             {
+                Log.Info(nameof(ApplicationViewModel), "Processing", nameof(PostCITTransactionsAsync), "DeviceConfig CIT_ALLOW_POST = {0}", new object[1]
+                {
+          DeviceConfiguration.CIT_ALLOW_POST
+                });
                 try
                 {
                     if (cit == null)
                         throw new NullReferenceException("null CIT from DB");
-                    foreach (CITTransaction citTransaction in cit.CITTransactions)
+                    foreach (var CITTransaction in cit.CITTransactions)
                     {
-                        CITTransaction CITTransaction = citTransaction;
                         if (CITTransaction.Amount > 0L)
                         {
                             if (CITTransaction.CIT.Device.GetCITSuspenseAccount(CITTransaction.Currency) != null)
                             {
-                                Log.InfoFormat(nameof(ApplicationViewModel), "Posting CITTransaction", "StartCIT", "Posting CITTransaction id={0}, account={1}, suspense={2}, currency={3}, amount={4:#,##0.##}", CITTransaction.Id, CITTransaction.AccountNumber, CITTransaction.SuspenseAccount, CITTransaction.Currency, CITTransaction.Amount / 100.0);
-                                PostCITTransactionResponse coreBankingAsync = await PostCITTransactionToCoreBankingAsync(cit.Id, CITTransaction);
+                                Log.InfoFormat(nameof(ApplicationViewModel), "Posting CITTransaction", "StartCIT", "Posting CITTransaction Id={0}, account={1}, suspense={2}, Currency={3}, amount={4:#,##0.##}", CITTransaction.Id, CITTransaction.AccountNumber, CITTransaction.SuspenseAccount, CITTransaction.Currency, CITTransaction.Amount / 100.0);
+                                var coreBankingAsync = await PostCITTransactionToCoreBankingAsync(cit.Id, CITTransaction);
                                 CITTransaction.CbDate = new DateTime?(coreBankingAsync.TransactionDateTime);
                                 CITTransaction.CbTxNumber = coreBankingAsync.TransactionID;
                                 CITTransaction.CbTxStatus = coreBankingAsync.PostResponseCode;
@@ -1722,12 +1654,11 @@ namespace CashmereDeposit.ViewModels
                                 });
                             }
                             else
-                                Log.WarningFormat(nameof(ApplicationViewModel), "Posting CITTransaction", "StartCIT", "Error posting CITTransaction id={0}, no CITSuspenseAccount for currency {1}", CITTransaction.Id, CITTransaction.Currency);
+                                Log.WarningFormat(nameof(ApplicationViewModel), "Posting CITTransaction", "StartCIT", "Error posting CITTransaction Id={0}, no CITSuspenseAccount for Currency {1}", CITTransaction.Id, CITTransaction.Currency);
                         }
                         else
                             Log.Warning(nameof(ApplicationViewModel), "CITPost", nameof(PostCITTransactionsAsync), "Skipping CITPost on zero count");
-                        SaveToDatabase(DBContext);
-                        CITTransaction = null;
+                        SaveToDatabase(dbContext);
                     }
                 }
                 catch (Exception ex)
@@ -1737,27 +1668,24 @@ namespace CashmereDeposit.ViewModels
             }
             else
                 Log.Info(nameof(ApplicationViewModel), "CIT_ALLOW_POST", nameof(PostCITTransactionsAsync), "Not allowed by config");
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
             Log.Trace(nameof(ApplicationViewModel), "CITPost", nameof(PostCITTransactionsAsync), "End of Function");
         }
 
-        private void DeviceManager_BagClosedEvent(object sender, EventArgs e)
-        {
-            Log.Info(GetType().Name, nameof(DeviceManager_BagClosedEvent), "EventHandling", "BagClosedEvent");
-        }
+        private void DeviceManager_BagClosedEvent(object sender, EventArgs e) => Log.Info(GetType().Name, nameof(DeviceManager_BagClosedEvent), "EventHandling", "BagClosedEvent");
 
         private void DeviceManager_BagFullAlertEvent(object sender, ControllerStatus e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.WarningFormat(GetType().Name, nameof(DeviceManager_BagFullAlertEvent), "EventHandling", "Percentage={0}%", e.Bag.PercentFull);
-            AlertManager.SendAlert(new AlertBagFull(ApplicationModel.GetDevice(DBContext), DateTime.Now, e.Bag));
+            AlertManager.SendAlert(new AlertBagFull(ApplicationModel.GetDevice(dbContext), DateTime.Now, e.Bag));
         }
 
         private void DeviceManager_BagFullWarningEvent(object sender, ControllerStatus e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.WarningFormat(GetType().Name, nameof(DeviceManager_BagFullWarningEvent), "EventHandling", "Percentage={0}%", e.Bag.PercentFull);
-            AlertManager.SendAlert(new AlertBagFullWarning(ApplicationModel.GetDevice(DBContext), DateTime.Now, e.Bag));
+            AlertManager.SendAlert(new AlertBagFullWarning(ApplicationModel.GetDevice(dbContext), DateTime.Now, e.Bag));
         }
 
         private void CurrentSession_TransactionLimitReachedEvent(object sender, EventArgs e)
@@ -1766,19 +1694,19 @@ namespace CashmereDeposit.ViewModels
 
         private void ApplicationStatus_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            bool flag = ApplicationStatus.CashmereDeviceState == CashmereDeviceState.NONE;
+            using var dbContext = new DepositorDBContext();
+            var flag = ApplicationStatus.CashmereDeviceState == CashmereDeviceState.NONE;
             if (e.PropertyName == "CashmereDeviceState")
             {
                 if (!flag)
                 {
                     if (CurrentSession != null)
                     {
-                        CashAccSysDeviceManager.CashAccSysDeviceManager deviceManager = DeviceManager;
+                        var deviceManager = DeviceManager;
                         if ((deviceManager != null ? (deviceManager.DeviceManagerMode == DeviceManagerMode.NONE ? 1 : 0) : 0) != 0)
                             EndSession(false, (int)ApplicationStatus.CashmereDeviceState, ApplicationErrorConst.ERROR_SYSTEM, ApplicationStatus.CashmereDeviceState.ToString());
                     }
-                    CashAccSysDeviceManager.CashAccSysDeviceManager deviceManager1 = DeviceManager;
+                    var deviceManager1 = DeviceManager;
                     if ((deviceManager1 != null ? (deviceManager1.DeviceManagerMode != DeviceManagerMode.ESCROW_JAM ? 1 : 0) : 1) != 0)
                         ShowErrorDialog(new OutOfOrderScreenViewModel(this));
                 }
@@ -1792,22 +1720,19 @@ namespace CashmereDeposit.ViewModels
                     InitialiseApp();
                 }
             }
-            ParameterExpression parameterExpression1;
-            // ISSUE: method reference
-            // ISSUE: method reference
-            // ISSUE: method reference
-            DeviceStatus deviceStatu = DBContext.DeviceStatuses.FirstOrDefault(x => x.MachineName == Environment.MachineName);
+
+            var deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.MachineName == Environment.MachineName);
             if (deviceStatu == null)
             {
                 ParameterExpression parameterExpression2;
                 // ISSUE: method reference
                 // ISSUE: method reference
                 // ISSUE: method reference
-                deviceStatu = CashmereDepositCommonClasses.GenerateDeviceStatus(DBContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName).Id, DBContext);
+                deviceStatu = CashmereDepositCommonClasses.GenerateDeviceStatus((dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new NullReferenceException("Device null in DB at ApplicationStatus_PropertyChanged")).Id, dbContext);
             }
             deviceStatu.CurrentStatus = (int)ApplicationStatus.CashmereDeviceState;
             deviceStatu.Modified = new DateTime?(DateTime.Now);
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
         }
 
         private void DeviceManager_RaiseDeviceStateChangedEvent(
@@ -1878,10 +1803,7 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        internal void DebugOnTransactionStartedEvent(object sender, DeviceTransaction e)
-        {
-            DeviceManager_TransactionStartedEvent(sender, e);
-        }
+        internal void DebugOnTransactionStartedEvent(object sender, DeviceTransaction e) => DeviceManager_TransactionStartedEvent(sender, e);
 
         private void DeviceManager_TransactionStartedEvent(object sender, DeviceTransaction e)
         {
@@ -1901,17 +1823,17 @@ namespace CashmereDeposit.ViewModels
             Log.InfoFormat(GetType().Name, nameof(DeviceManager_TransactionStatusEvent), "EventHandling", "Escrow Total = {0}, Safe Total = {1}", e?.data?.CurrentTransactionResult?.EscrowTotalDisplayString, e?.data?.CurrentTransactionResult?.TotalDroppedAmountDisplayString);
             if (!InSessionAndTransaction("DeviceManager_TransactionEndEvent()"))
                 return;
-            string sessionId = e?.data?.SessionID;
-            Guid guid = CurrentSession.SessionID;
-            string b1 = guid.ToString();
+            var sessionId = e?.data?.SessionID;
+            var guid = CurrentSession.SessionID;
+            var b1 = guid.ToString();
             if (string.Equals(sessionId, b1, StringComparison.InvariantCultureIgnoreCase))
             {
-                string transactionId = e?.data?.TransactionID;
+                var transactionId = e?.data?.TransactionID;
                 guid = CurrentTransaction.Transaction.Id;
-                string b2 = guid.ToString();
+                var b2 = guid.ToString();
                 if (string.Equals(transactionId, b2, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    AppTransaction currentTransaction1 = CurrentTransaction;
+                    var currentTransaction1 = CurrentTransaction;
                     int num1;
                     if (currentTransaction1 == null)
                     {
@@ -1919,42 +1841,40 @@ namespace CashmereDeposit.ViewModels
                     }
                     else
                     {
-                        AppSession session = currentTransaction1.Session;
+                        var session = currentTransaction1.Session;
                         if (session == null)
                         {
                             num1 = 0;
                         }
                         else
                         {
-                            int num2 = session.CountingStarted ? 1 : 0;
+                            var num2 = session.CountingStarted ? 1 : 0;
                             num1 = 1;
                         }
                     }
                     if (num1 != 0)
                     {
-                        AppTransaction currentTransaction2 = CurrentTransaction;
-                        int num2;
+                        var currentTransaction2 = CurrentTransaction;
+                        int num3;
                         if (currentTransaction2 == null)
                         {
-                            num2 = 0;
+                            num3 = 0;
                         }
                         else
                         {
-                            bool? countingStarted = currentTransaction2.Session?.CountingStarted;
-                            bool flag = true;
-                            num2 = countingStarted.GetValueOrDefault() == flag & countingStarted.HasValue ? 1 : 0;
+                            var countingStarted = currentTransaction2.Session?.CountingStarted;
+                            var flag = true;
+                            num3 = countingStarted.GetValueOrDefault() == flag & countingStarted.HasValue ? 1 : 0;
                         }
-                        if (num2 != 0)
+                        if (num3 != 0)
                         {
                             CurrentSession.HasCounted = true;
                             if (e.level == ErrorLevel.SUCCESS)
                             {
-                                AppTransaction currentTransaction3 = CurrentTransaction;
-                                TransactionStatusResponseResult TransactionResult = new TransactionStatusResponseResult
-                                    {
-                                        level = e.level,
-                                        data = e.data.CurrentTransactionResult
-                                    };
+                                var currentTransaction3 = CurrentTransaction;
+                                var TransactionResult = new TransactionStatusResponseResult();
+                                TransactionResult.level = e.level;
+                                TransactionResult.data = e.data.CurrentTransactionResult;
                                 currentTransaction3.HandleDenominationResult(TransactionResult);
                                 if (TransactionStatusEvent == null)
                                     return;
@@ -1969,9 +1889,9 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    DepositorLogger log = Log;
-                    string name = GetType().Name;
-                    object[] objArray = new object[3]
+                    var log = Log;
+                    var name = GetType().Name;
+                    var objArray = new object[3]
                     {
             e.data?.SessionID,
             e?.data?.TransactionID,
@@ -1985,9 +1905,9 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                DepositorLogger log = Log;
-                string name = GetType().Name;
-                object[] objArray = new object[3]
+                var log = Log;
+                var name = GetType().Name;
+                var objArray = new object[3]
                 {
           e.data?.SessionID,
           e?.data?.SessionID,
@@ -2000,10 +1920,7 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        private void DeviceManager_CashInStartedEvent(object sender, DeviceTransactionResult e)
-        {
-            Count();
-        }
+        private void DeviceManager_CashInStartedEvent(object sender, DeviceTransactionResult e) => Count();
 
         public event EventHandler<DeviceTransactionResult> CountStartedEvent;
 
@@ -2056,17 +1973,17 @@ namespace CashmereDeposit.ViewModels
             Log.InfoFormat(GetType().Name, nameof(DeviceManager_TransactionEndEvent), "EventHandling", "Transaction Result: Currency = {0}, TotalDeposit = {1}, TotalDispense = {2}, Result = {3}", e?.data?.Currency, e?.data?.CurrentTransactionResult?.TotalDroppedAmountDisplayString, e?.data?.CurrentTransactionResult?.DispensedAmountDisplayString, e?.data?.CurrentTransactionResult?.ResultAmountDisplayString);
             if (!InSessionAndTransaction("DeviceManager_TransactionEndEvent()", false))
                 return;
-            string sessionId = e?.data?.SessionID;
-            Guid guid = CurrentSession.SessionID;
-            string b1 = guid.ToString();
+            var sessionId = e?.data?.SessionID;
+            var guid = CurrentSession.SessionID;
+            var b1 = guid.ToString();
             if (string.Equals(sessionId, b1, StringComparison.InvariantCultureIgnoreCase))
             {
-                string transactionId = e?.data?.TransactionID;
+                var transactionId = e?.data?.TransactionID;
                 guid = CurrentTransaction.Transaction.Id;
-                string b2 = guid.ToString();
+                var b2 = guid.ToString();
                 if (string.Equals(transactionId, b2, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    AppTransaction currentTransaction1 = CurrentTransaction;
+                    var currentTransaction1 = CurrentTransaction;
                     int num1;
                     if (currentTransaction1 == null)
                     {
@@ -2074,32 +1991,32 @@ namespace CashmereDeposit.ViewModels
                     }
                     else
                     {
-                        AppSession session = currentTransaction1.Session;
+                        var session = currentTransaction1.Session;
                         if (session == null)
                         {
                             num1 = 0;
                         }
                         else
                         {
-                            int num2 = session.CountingEnded ? 1 : 0;
+                            var num2 = session.CountingEnded ? 1 : 0;
                             num1 = 1;
                         }
                     }
                     if (num1 != 0)
                     {
-                        AppTransaction currentTransaction2 = CurrentTransaction;
-                        int num2;
+                        var currentTransaction2 = CurrentTransaction;
+                        int num3;
                         if (currentTransaction2 == null)
                         {
-                            num2 = 1;
+                            num3 = 1;
                         }
                         else
                         {
-                            bool? countingEnded = currentTransaction2.Session?.CountingEnded;
-                            bool flag = true;
-                            num2 = !(countingEnded.GetValueOrDefault() == flag & countingEnded.HasValue) ? 1 : 0;
+                            var countingEnded = currentTransaction2.Session?.CountingEnded;
+                            var flag = true;
+                            num3 = !(countingEnded.GetValueOrDefault() == flag & countingEnded.HasValue) ? 1 : 0;
                         }
-                        if (num2 != 0)
+                        if (num3 != 0)
                         {
                             CurrentTransaction.Session.CountingEnded = true;
                             CurrentSession.HasCounted = true;
@@ -2107,12 +2024,10 @@ namespace CashmereDeposit.ViewModels
                             {
                                 if (CurrentTransaction != null)
                                 {
-                                    AppTransaction currentTransaction3 = CurrentTransaction;
-                                    TransactionStatusResponseResult TransactionResult = new TransactionStatusResponseResult
-                                        {
-                                            level = e.level,
-                                            data = e.data.CurrentTransactionResult
-                                        };
+                                    var currentTransaction3 = CurrentTransaction;
+                                    var TransactionResult = new TransactionStatusResponseResult();
+                                    TransactionResult.level = e.level;
+                                    TransactionResult.data = e.data.CurrentTransactionResult;
                                     currentTransaction3.HandleDenominationResult(TransactionResult);
                                     ValidateTransactedAmount();
                                     return;
@@ -2128,9 +2043,9 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    DepositorLogger log = Log;
-                    string name = GetType().Name;
-                    object[] objArray = new object[3]
+                    var log = Log;
+                    var name = GetType().Name;
+                    var objArray = new object[3]
                     {
             e.data?.SessionID,
             e?.data?.TransactionID,
@@ -2144,9 +2059,9 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                DepositorLogger log = Log;
-                string name = GetType().Name;
-                object[] objArray = new object[3]
+                var log = Log;
+                var name = GetType().Name;
+                var objArray = new object[3]
                 {
           e.data?.SessionID,
           e?.data?.SessionID,
@@ -2161,13 +2076,13 @@ namespace CashmereDeposit.ViewModels
 
         private void DeviceManager_CITResultEvent(object sender, CITResult e)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Debug(GetType().Name, "OnCITResultEvent", "EventHandling", "CIT Result");
             if (CurrentApplicationState != ApplicationState.CIT_START || e.level != ErrorLevel.SUCCESS)
                 return;
             CurrentApplicationState = ApplicationState.CIT_BAG_CLOSED;
             Log.Info(GetType().Name, "ApplicationState", "EventHandling", "CIT_BAG_CLOSED");
-            PrintCITReceipt(DBContext.CITs.FirstOrDefault(x => x.Id == lastCIT.Id), DBContext);
+            PrintCITReceipt(dbContext.CITs.FirstOrDefault(x => x.Id == lastCIT.Id), dbContext);
         }
 
         private void Printer_StatusChangedEvent(
@@ -2201,9 +2116,9 @@ namespace CashmereDeposit.ViewModels
           string errorMessage)
         {
             Log.ErrorFormat(GetType().Name, (int)e, e.ToString(), "{0:G}: {1}", e, errorMessage);
-            using (DepositorDBContext DBContext = new DepositorDBContext())
+            using (var dbContext = new DepositorDBContext())
             {
-                Device device = ApplicationModel.GetDevice(DBContext);
+                var device = ApplicationModel.GetDevice(dbContext);
                 if (AlertManager != null)
                 {
                     if (device != null)
@@ -2221,12 +2136,10 @@ namespace CashmereDeposit.ViewModels
             Log.Debug(GetType().Name, nameof(ConnectToDevice), "EventHandling", "Connecting to the device");
             if (debugNoDevice)
             {
-                StringResult e = new StringResult
-                {
-                    resultCode = 0,
-                    extendedResult = "ACCEPTED",
-                    level = ErrorLevel.SUCCESS
-                };
+                var e = new StringResult();
+                e.resultCode = 0;
+                e.extendedResult = "ACCEPTED";
+                e.level = ErrorLevel.SUCCESS;
                 DeviceManager_ConnectionEvent(this, e);
             }
             else
@@ -2243,10 +2156,10 @@ namespace CashmereDeposit.ViewModels
                 return;
             try
             {
-                CashAccSysDeviceManager.CashAccSysDeviceManager deviceManager = DeviceManager;
-                string currencyCode = CurrentTransaction.CurrencyCode;
-                string accountNumber = CurrentTransaction?.AccountNumber;
-                AppSession currentSession = CurrentSession;
+                var deviceManager = DeviceManager;
+                var currencyCode = CurrentTransaction.CurrencyCode;
+                var accountNumber = CurrentTransaction?.AccountNumber;
+                var currentSession = CurrentSession;
                 Guid guid;
                 string sessionID;
                 if (currentSession == null)
@@ -2258,7 +2171,7 @@ namespace CashmereDeposit.ViewModels
                     guid = currentSession.SessionID;
                     sessionID = guid.ToString().ToUpperInvariant();
                 }
-                AppTransaction currentTransaction = CurrentTransaction;
+                var currentTransaction = CurrentTransaction;
                 string transactionID;
                 if (currentTransaction == null)
                 {
@@ -2269,8 +2182,8 @@ namespace CashmereDeposit.ViewModels
                     guid = currentTransaction.Transaction.Id;
                     transactionID = guid.ToString().ToUpperInvariant();
                 }
-                long transactionLimitCents1 = transactionLimitCents;
-                long transactionValueCents1 = transactionValueCents;
+                var transactionLimitCents1 = transactionLimitCents;
+                var transactionValueCents1 = transactionValueCents;
                 deviceManager.TransactionStart(currencyCode, accountNumber, sessionID, transactionID, transactionLimitCents1, transactionValueCents1);
             }
             catch (InvalidOperationException ex)
@@ -2290,7 +2203,7 @@ namespace CashmereDeposit.ViewModels
         internal void CashInStart()
         {
             Log.Info(GetType().Name, "Count", "Device Management", "CashInStart()");
-            AppTransaction currentTransaction = CurrentTransaction;
+            var currentTransaction = CurrentTransaction;
             int num1;
             if (currentTransaction == null)
             {
@@ -2298,14 +2211,14 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                AppSession session = currentTransaction.Session;
+                var session = currentTransaction.Session;
                 if (session == null)
                 {
                     num1 = 0;
                 }
                 else
                 {
-                    int num2 = session.CountingStarted ? 1 : 0;
+                    var num2 = session.CountingStarted ? 1 : 0;
                     num1 = 1;
                 }
             }
@@ -2317,10 +2230,7 @@ namespace CashmereDeposit.ViewModels
             DeviceManager.CashInStart();
         }
 
-        public bool CanCount
-        {
-            get { return DeviceManager.CanCount && InSessionAndTransaction("ApplicationViewModel.CanCount()", false); }
-        }
+        public bool CanCount => DeviceManager.CanCount && InSessionAndTransaction("ApplicationViewModel.CanCount()", false);
 
         internal void Count(bool countNotes = true)
         {
@@ -2348,20 +2258,13 @@ namespace CashmereDeposit.ViewModels
             {
                 if (!InSessionAndTransaction("ApplicationViewModel.CanEscrowDrop()", false) || !DeviceManager.CanEscrowDrop)
                     return false;
-                long? droppedAmountCents1 = CurrentTransaction?.DroppedAmountCents;
-                long? droppedAmountCents2 = DeviceManager?.DroppedAmountCents;
+                var droppedAmountCents1 = CurrentTransaction?.DroppedAmountCents;
+                var droppedAmountCents2 = DeviceManager?.DroppedAmountCents;
                 return droppedAmountCents1.GetValueOrDefault() == droppedAmountCents2.GetValueOrDefault() & droppedAmountCents1.HasValue == droppedAmountCents2.HasValue;
             }
         }
 
-        public bool CanEndCount
-        {
-            get
-            {
-                return InSessionAndTransaction("ApplicationViewModel.CanEndCount()", false) &&
-                       DeviceManager.CanEndCount;
-            }
-        }
+        public bool CanEndCount => InSessionAndTransaction("ApplicationViewModel.CanEndCount()", false) && DeviceManager.CanEndCount;
 
         internal void EscrowDrop()
         {
@@ -2373,14 +2276,7 @@ namespace CashmereDeposit.ViewModels
             DeviceManager.EscrowDrop();
         }
 
-        public bool CanEscrowReject
-        {
-            get
-            {
-                return InSessionAndTransaction("ApplicationViewModel.CanEscrowReject()", false) &&
-                       DeviceManager.CanEscrowReject;
-            }
-        }
+        public bool CanEscrowReject => InSessionAndTransaction("ApplicationViewModel.CanEscrowReject()", false) && DeviceManager.CanEscrowReject;
 
         internal void EscrowReject()
         {
@@ -2392,14 +2288,7 @@ namespace CashmereDeposit.ViewModels
             DeviceManager.EscrowReject();
         }
 
-        public bool CanTransactionEnd
-        {
-            get
-            {
-                return InSessionAndTransaction("ApplicationViewModel.CanTransactionEnd", false) &&
-                       DeviceManager.CanTransactionEnd;
-            }
-        }
+        public bool CanTransactionEnd => InSessionAndTransaction("ApplicationViewModel.CanTransactionEnd", false) && DeviceManager.CanTransactionEnd;
 
         internal void DeviceTransactionEnd()
         {
@@ -2410,22 +2299,22 @@ namespace CashmereDeposit.ViewModels
         internal void ValidateTransactedAmount()
         {
             Log.Info(GetType().Name, "Count", "Device Management", "ValidateTransactedAmount()");
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             if (CurrentTransaction == null)
                 return;
             var transactionLimits1 = CurrentTransaction.TransactionLimits;
             long? nullable1;
             if ((transactionLimits1 != null ? (transactionLimits1.ShowFundsSource ? 1 : 0) : 0) != 0)
             {
-                Decimal droppedDisplayAmount = CurrentTransaction.DroppedDisplayAmount;
+                var droppedDisplayAmount = CurrentTransaction.DroppedDisplayAmount;
                 nullable1 = CurrentTransaction.TransactionLimits?.FundsSourceAmount;
-                Decimal? nullable2 = nullable1.HasValue ? new Decimal?(nullable1.GetValueOrDefault()) : new Decimal?();
-                Decimal valueOrDefault = nullable2.GetValueOrDefault();
+                var nullable2 = nullable1.HasValue ? new Decimal?(nullable1.GetValueOrDefault()) : new Decimal?();
+                var valueOrDefault = nullable2.GetValueOrDefault();
                 if (droppedDisplayAmount > valueOrDefault & nullable2.HasValue)
                 {
-                    DepositorLogger log = Log;
-                    string name = GetType().Name;
-                    object[] objArray = new object[2]
+                    var log = Log;
+                    var name = GetType().Name;
+                    var objArray = new object[2]
                     {
                         CurrentTransaction.DroppedDenomination.TotalValue / 100L,
                         null
@@ -2441,70 +2330,70 @@ namespace CashmereDeposit.ViewModels
                         nullable3 = new long?(transactionLimits2.FundsSourceAmount);
                     objArray[1] = nullable3;
                     log.InfoFormat(name, "Count", "Device Management", "Transaction of {0} is above value limit of {1}, insert FundsSource screen", objArray);
-                    ShowFundsSourceScreen(DBContext);
+                    ShowFundsSourceScreen(dbContext);
                     return;
                 }
             }
             var transactionLimits3 = CurrentTransaction.TransactionLimits;
             if ((transactionLimits3 != null ? (transactionLimits3.PreventOverdeposit ? 1 : 0) : 0) != 0 && CurrentTransaction.IsOverDeposit)
             {
-                string title = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Title", "Transaction Limit Exceeded");
-                string format = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Message", "Transaction limit of {0} {1} has been exceeded. Please visit your nearest branch to finish the deposit.");
-                string upper = CurrentTransaction.CurrencyCode.ToUpper();
-                var transactionLimits2 = CurrentTransaction.TransactionLimits;
-                long? nullable2;
-                if (transactionLimits2 == null)
-                {
-                    nullable1 = new long?();
-                    nullable2 = nullable1;
-                }
-                else
-                    nullable2 = new long?(transactionLimits2.OverdepositAmount);
-                // ISSUE: variable of a boxed type
-                long? local = nullable2;
-                string message = string.Format(format, upper, (object)local);
-                ShowUserMessageScreen(title, message);
-                DepositorLogger log = Log;
-                string name = GetType().Name;
-                string ErrorName = ApplicationErrorConst.ERROR_TRANSACTION_LIMIT_EXCEEDED.ToString();
-                object[] objArray1 = new object[5];
-                Guid id = CurrentTransaction.Transaction.Id;
-                objArray1[0] = id.ToString().ToUpper();
-                objArray1[1] = CurrentTransaction?.CurrencyCode?.ToUpper();
-                objArray1[2] = CurrentTransaction?.DroppedDisplayAmount;
-                objArray1[3] = CurrentTransaction?.TransactionType?.DefaultAccountCurrencyId?.ToUpper();
+                var title = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Title", "Transaction Limit Exceeded");
+                var format = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Message", "Transaction limit of {0} {1} has been exceeded. Please visit your nearest branch to finish the deposit.");
+                var upper = CurrentTransaction.CurrencyCode.ToUpper();
                 var transactionLimits4 = CurrentTransaction.TransactionLimits;
-                long? nullable3;
-                if (transactionLimits4 == null)
-                {
-                    nullable1 = new long?();
-                    nullable3 = nullable1;
-                }
-                else
-                    nullable3 = new long?(transactionLimits4.OverdepositAmount);
-                objArray1[4] = nullable3;
-                log.ErrorFormat(name, 27, ErrorName, "Credit Blocked: Transaction [{0}] of Amount {1} {2:###,##0.00} is over the limit of {3} {4:###,##0.00}.", objArray1);
-                object[] objArray2 = new object[5];
-                id = CurrentTransaction.Transaction.Id;
-                objArray2[0] = id.ToString().ToUpper();
-                objArray2[1] = CurrentTransaction?.CurrencyCode?.ToUpper();
-                objArray2[2] = CurrentTransaction?.DroppedDisplayAmount;
-                objArray2[3] = CurrentTransaction?.TransactionType?.DefaultAccountCurrencyId?.ToUpper();
-                var transactionLimits5 = CurrentTransaction.TransactionLimits;
                 long? nullable4;
-                if (transactionLimits5 == null)
+                if (transactionLimits4 == null)
                 {
                     nullable1 = new long?();
                     nullable4 = nullable1;
                 }
                 else
-                    nullable4 = new long?(transactionLimits5.OverdepositAmount);
-                objArray2[4] = nullable4;
+                    nullable4 = new long?(transactionLimits4.OverdepositAmount);
+                // ISSUE: variable of a boxed type
+                var local = (ValueType)nullable4;
+                var message = string.Format(format, upper, (object)local);
+                ShowUserMessageScreen(title, message);
+                var log = Log;
+                var name = GetType().Name;
+                var ErrorName = ApplicationErrorConst.ERROR_TRANSACTION_LIMIT_EXCEEDED.ToString();
+                var objArray1 = new object[5];
+                var Id = CurrentTransaction.Transaction.Id;
+                objArray1[0] = Id.ToString().ToUpper();
+                objArray1[1] = CurrentTransaction?.CurrencyCode?.ToUpper();
+                objArray1[2] = CurrentTransaction?.DroppedDisplayAmount;
+                objArray1[3] = CurrentTransaction?.TransactionType?.DefaultAccountCurrency?.ToUpper();
+                var transactionLimits5 = CurrentTransaction.TransactionLimits;
+                long? nullable5;
+                if (transactionLimits5 == null)
+                {
+                    nullable1 = new long?();
+                    nullable5 = nullable1;
+                }
+                else
+                    nullable5 = new long?(transactionLimits5.OverdepositAmount);
+                objArray1[4] = nullable5;
+                log.ErrorFormat(name, 27, ErrorName, "Credit Blocked: Transaction [{0}] of Amount {1} {2:###,##0.00} is over the limit of {3} {4:###,##0.00}.", objArray1);
+                var objArray2 = new object[5];
+                Id = CurrentTransaction.Transaction.Id;
+                objArray2[0] = Id.ToString().ToUpper();
+                objArray2[1] = CurrentTransaction?.CurrencyCode?.ToUpper();
+                objArray2[2] = CurrentTransaction?.DroppedDisplayAmount;
+                objArray2[3] = CurrentTransaction?.TransactionType?.DefaultAccountCurrency?.ToUpper();
+                var transactionLimits6 = CurrentTransaction.TransactionLimits;
+                long? nullable6;
+                if (transactionLimits6 == null)
+                {
+                    nullable1 = new long?();
+                    nullable6 = nullable1;
+                }
+                else
+                    nullable6 = new long?(transactionLimits6.OverdepositAmount);
+                objArray2[4] = nullable6;
                 EndTransaction(ApplicationErrorConst.ERROR_TRANSACTION_LIMIT_EXCEEDED, string.Format("Credit Blocked: Transaction [{0}] of Amount {1} {2:###,##0.00} is over the limit of {3} {4:###,##0.00}.", objArray2));
             }
             else
             {
-                AppTransaction currentTransaction = CurrentTransaction;
+                var currentTransaction = CurrentTransaction;
                 if ((currentTransaction != null ? (currentTransaction.NoteJamDetected ? 1 : 0) : 0) != 0)
                 {
                     EndTransaction(ApplicationErrorConst.ERROR_DEVICE_NOTEJAM, ApplicationErrorConst.ERROR_DEVICE_NOTEJAM.ToString());
@@ -2522,11 +2411,11 @@ namespace CashmereDeposit.ViewModels
         {
             if ((bool)!CurrentTransaction?.TransactionLimits?.ShowFundsSource)
                 return;
-
-            GuiScreen guiScreen = DBContext.GuiScreens.Where(x => x.GuiScreenType.Code == new Guid("33EC330E-FB51-4626-906D-1A3F77AAA5E2")).OrderBy(y => y.Id).FirstOrDefault();
-            if (guiScreen != null)
+            var entity = DBContext.GuiScreens.Where(x => x.GUIScreenType.Code == new Guid("33EC330E-FB51-4626-906D-1A3F77AAA5E2")).OrderBy(y => y.Id).FirstOrDefault();
+            if (entity != null)
             {
-                GUIScreens.Insert(CurrentScreenIndex + 1, guiScreen);
+                GUIScreens.Insert(CurrentScreenIndex + 1, entity);
+                //((IObjectContextAdapter) DBContext).ObjectContext.Detach((object) entity);
                 NavigateNextScreen();
             }
             else
@@ -2536,21 +2425,17 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        internal void ShowUserMessageScreen(string title, string message, bool required = false)
+        internal void ShowUserMessageScreen(string title, string message, bool required = false) => this.ActivateItemAsync((object)new UserMessageScreenViewModel(title, this, DeviceConfiguration.USER_SCREEN_TIMEOUT, required)
         {
-            ActivateItemAsync(
-                new UserMessageScreenViewModel(title, this, DeviceConfiguration.USER_SCREEN_TIMEOUT, required)
-                {
-                    Message = message
-                });
-        }
+            Message = message
+        });
 
         internal void EndTransaction(ApplicationErrorConst result = ApplicationErrorConst.ERROR_NONE, string ErrorMessage = null)
         {
             Log.InfoFormat(GetType().Name, nameof(EndTransaction), "Device Management", "EndTransaction with result {0}", result.ToString());
             if (CurrentTransaction == null)
                 return;
-            if (result == ApplicationErrorConst.ERROR_NONE || result == ApplicationErrorConst.ERROR_DEVICE_NOTEJAM && DeviceConfiguration.POST_ON_NOTEJAM || (result == ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM && DeviceConfiguration.POST_ON_ESCROWJAM || result == ApplicationErrorConst.WARN_DEPOSIT_TIMEOUT))
+            if (result == ApplicationErrorConst.ERROR_NONE || result == ApplicationErrorConst.ERROR_DEVICE_NOTEJAM && DeviceConfiguration.POST_ON_NOTEJAM || result == ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM && DeviceConfiguration.POST_ON_ESCROWJAM || result == ApplicationErrorConst.WARN_DEPOSIT_TIMEOUT)
             {
                 CurrentTransaction.EndDate = DateTime.Now;
                 if (CurrentTransaction.DroppedAmountCents > 0L)
@@ -2563,15 +2448,15 @@ namespace CashmereDeposit.ViewModels
                             {
                                 if (!CurrentTransaction.hasPosted)
                                 {
-                                    Log.InfoFormat(GetType().Name, "Attempt", "Posting", "Transaction [{0}] of Amount {1} {2:###,##0.00} is NOT over the limit of {3} {4:###,##0.00} or overdeposit is disabled.", CurrentTransaction.Transaction.Id.ToString().ToUpper(), CurrentTransaction?.CurrencyCode?.ToUpper(), CurrentTransaction?.DroppedDisplayAmount, CurrentTransaction?.TransactionType?.DefaultAccountCurrencyId?.ToUpper(), CurrentTransaction.TransactionLimits?.OverdepositAmount);
+                                    Log.InfoFormat(GetType().Name, "Attempt", "Posting", "Transaction [{0}] of Amount {1} {2:###,##0.00} is NOT over the limit of {3} {4:###,##0.00} or overdeposit is disabled.", CurrentTransaction.Transaction.Id.ToString().ToUpper(), CurrentTransaction?.CurrencyCode?.ToUpper(), CurrentTransaction?.DroppedDisplayAmount, CurrentTransaction?.TransactionType?.DefaultAccountCurrency?.ToUpper(), CurrentTransaction.TransactionLimits?.OverdepositAmount);
                                     CurrentTransaction.isPosting = true;
                                     CurrentTransaction.hasPosted = true;
-                                    PostTransactionResponse result1 = Task.Run((Func<Task<PostTransactionResponse>>)(() => PostToCoreBankingAsync(SessionID.Value, CurrentTransaction.Transaction))).Result;
+                                    var result1 = Task.Run((Func<Task<PostTransactionResponse>>)(() => PostToCoreBankingAsync(SessionID.Value, CurrentTransaction.Transaction))).Result;
                                     CurrentTransaction.Transaction.CbDate = new DateTime?(result1.TransactionDateTime);
                                     CurrentTransaction.Transaction.CbTxNumber = result1.TransactionID;
                                     CurrentTransaction.Transaction.CbTxStatus = result1.PostResponseCode;
                                     CurrentTransaction.Transaction.CbStatusDetail = result1.PostResponseMessage;
-                                    EscrowJam escrowJam = CurrentTransaction.Transaction.EscrowJams.FirstOrDefault();
+                                    var escrowJam = CurrentTransaction.Transaction.EscrowJams.FirstOrDefault();
                                     if (escrowJam != null)
                                         escrowJam.PostedAmount = CurrentTransaction.Transaction.TxAmount.GetValueOrDefault();
                                     if (result1.IsSuccess)
@@ -2637,34 +2522,32 @@ namespace CashmereDeposit.ViewModels
             CurrentApplicationState = ApplicationState.CIT_START;
             if (debugNoDevice)
             {
-                CITResult e = new CITResult
+                var e = new CITResult();
+                e.level = ErrorLevel.SUCCESS;
+                e.extendedResult = "";
+                e.resultCode = 0;
+                e.data = new CITResultBody()
                 {
-                    level = ErrorLevel.SUCCESS,
-                    extendedResult = "",
-                    resultCode = 0,
-                    data = new CITResultBody()
+                    BagNumber = lastCIT?.NewBagNumber,
+                    Currency = "KES",
+                    CurrencyCount = 1,
+                    DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                    DeviceSerialNumber = "wfsdfsd",
+                    Name = "Harrold",
+                    TotalValue = 3000L,
+                    TransactionCount = 3,
+                    denomination = new Denomination()
                     {
-                        BagNumber = lastCIT?.NewBagNumber,
-                        Currency = "KES",
-                        CurrencyCount = 1,
-                        DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-                        DeviceSerialNumber = "wfsdfsd",
-                        Name = "Harrold",
-                        TotalValue = 3000L,
-                        TransactionCount = 3,
-                        denomination = new Denomination()
-                        {
-                            denominationItems = new List<DenominationItem>()
-                            {
-                                new DenominationItem()
-                                {
-                                    Currency = "KES",
-                                    denominationValue = 1000,
-                                    count = 3L,
-                                    type = DenominationItemType.NOTE
-                                }
-                            }
-                        }
+                        denominationItems = new List<DenominationItem>()
+            {
+              new DenominationItem()
+              {
+                Currency = "KES",
+                denominationValue = 1000,
+                count = 3L,
+                type = DenominationItemType.NOTE
+              }
+            }
                     }
                 };
                 DeviceManager_CITResultEvent(this, e);
@@ -2684,14 +2567,14 @@ namespace CashmereDeposit.ViewModels
 
         internal void LockDevice(bool lockedByDevice, ApplicationErrorConst error, string errorMessage)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            Device device = ApplicationModel.GetDevice(DBContext);
+            using var dbContext = new DepositorDBContext();
+            var device = ApplicationModel.GetDevice(dbContext);
             Log.WarningFormat(GetType().Name, nameof(LockDevice), "Device Lock", "LockedByDevice = {0}: Error: {1}>>{2}", lockedByDevice ? "TRUE" : (object)"FALSE", error.ToString(), errorMessage);
             device.Enabled = false;
             Log.Debug(GetType().Name, nameof(LockDevice), "Device Lock", "AlertManager.SendAlert(new AlertDeviceLocked(errorMessage, device, DateTime.Now));");
             AlertManager.SendAlert(new AlertDeviceLocked(errorMessage, device, DateTime.Now));
             Log.Debug(GetType().Name, nameof(LockDevice), "Device Lock", "DBContext.DeviceLocks.Add(new DeviceLock");
-            DBContext.DeviceLocks.Add(new DeviceLock()
+            dbContext.DeviceLocks.Add(new DeviceLock()
             {
                 Id = Guid.NewGuid(),
                 DeviceId = device.Id,
@@ -2701,51 +2584,45 @@ namespace CashmereDeposit.ViewModels
                 LockedByDevice = lockedByDevice,
                 WebLockingUser = null
             });
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
             SetCashmereDeviceState(CashmereDeviceState.DEVICE_LOCK);
         }
 
         internal void UnLockDevice(bool lockedByDevice, string lockMessage = null)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            Device device = ApplicationModel.GetDevice(DBContext);
+            using var dbContext = new DepositorDBContext();
+            var device = ApplicationModel.GetDevice(dbContext);
             Log.Info(GetType().Name, nameof(UnLockDevice), "Device Lock", lockMessage);
             device.Enabled = true;
             AlertManager.SendAlert(new AlertDeviceUnLocked(lockMessage, device, DateTime.Now));
-            DBContext.DeviceLocks.Add(new DeviceLock()
+            dbContext.DeviceLocks.Add(new DeviceLock()
             {
                 Id = Guid.NewGuid(),
                 DeviceId = device.Id,
-                Locked = false,
+                Locked = true,
                 LockingUser = CurrentUser?.Id,
                 LockDate = DateTime.Now,
                 LockedByDevice = lockedByDevice,
                 WebLockingUser = null
             });
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
             if (!ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.DEVICE_LOCK))
                 return;
             UnSetCashmereDeviceState(CashmereDeviceState.DEVICE_LOCK);
         }
 
-        internal void ClearEscrowJam()
-        {
-            DeviceManager.ClearEscrowJam();
-        }
+        internal void ClearEscrowJam() => DeviceManager.ClearEscrowJam();
 
-        internal void EndEscrowJam()
-        {
-            DeviceManager.EndEscrowJam();
-        }
+        internal void EndEscrowJam() => DeviceManager.EndEscrowJam();
 
         internal void LogoffUsers(bool forced = false)
         {
             try
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+                using var dbContext = new DepositorDBContext();
                 if (CurrentUser != null)
                 {
-                    DeviceLogin deviceLogin = DBContext.DeviceLogins.Where(x => x.UserId == CurrentUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
+                    var deviceLogin = dbContext.DeviceLogins.Where(x => x.User == CurrentUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
                     if (deviceLogin != null)
                     {
                         deviceLogin.LogoutDate = new DateTime?(DateTime.Now);
@@ -2754,14 +2631,14 @@ namespace CashmereDeposit.ViewModels
                 }
                 if (ValidatingUser != null)
                 {
-                    DeviceLogin deviceLogin = DBContext.DeviceLogins.Where(x => x.UserId == ValidatingUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
+                    var deviceLogin = dbContext.DeviceLogins.Where(x => x.User == ValidatingUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
                     if (deviceLogin != null)
                     {
                         deviceLogin.LogoutDate = new DateTime?(DateTime.Now);
                         deviceLogin.ForcedLogout = new bool?(forced);
                     }
                 }
-                SaveToDatabase(DBContext);
+                SaveToDatabase(dbContext);
             }
             catch (Exception ex)
             {
@@ -2779,42 +2656,42 @@ namespace CashmereDeposit.ViewModels
           ApplicationErrorConst error,
           string errorMessage)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.WarningFormat(GetType().Name, nameof(LockUser), "User Locked by device", "Error {0} {1} {2}", error, error.ToString(), errorMessage);
-            ApplicationUser applicationUser = DBContext.ApplicationUsers.First(x => x.Id == user.Id);
+            var applicationUser = dbContext.ApplicationUsers.First(x => x.Id == user.Id);
             applicationUser.DepositorEnabled = new bool?(false);
             applicationUser.IsActive = new bool?(false);
-            AlertManager.SendAlert(new AlertUserLocked(user, ApplicationModel.GetDevice(DBContext), errorMessage, DateTime.Now));
-            DBContext.UserLocks.Add(new UserLock()
+            AlertManager.SendAlert(new AlertUserLocked(user, ApplicationModel.GetDevice(dbContext), errorMessage, DateTime.Now));
+            dbContext.UserLocks.Add(new UserLock()
             {
                 Id = Guid.NewGuid(),
-                ApplicationUserLoginDetailId = user.ApplicationUserLoginDetailId,
+                ApplicationUserLoginDetail = user.ApplicationUserLoginDetail,
                 LockType = new int?(0),
-                InitiatingUserId = CurrentUser?.Id,
+                InitiatingUser = CurrentUser?.Id,
                 LogDate = new DateTime?(DateTime.Now),
                 WebPortalInitiated = new bool?(false)
             });
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
         }
 
         internal void UnLockUser(ApplicationUser user, bool lockedByUser, string lockMessage = null)
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             Log.Info(GetType().Name, nameof(UnLockUser), "User Lock", lockMessage);
-            ApplicationUser applicationUser = DBContext.ApplicationUsers.First(x => x.Id == user.Id);
+            var applicationUser = dbContext.ApplicationUsers.First(x => x.Id == user.Id);
             applicationUser.DepositorEnabled = new bool?(true);
             applicationUser.IsActive = new bool?(true);
-            AlertManager.SendAlert(new AlertUserUnLocked(user, ApplicationModel.GetDevice(DBContext), lockMessage, DateTime.Now));
-            DBContext.UserLocks.Add(new UserLock()
+            AlertManager.SendAlert(new AlertUserUnLocked(user, ApplicationModel.GetDevice(dbContext), lockMessage, DateTime.Now));
+            dbContext.UserLocks.Add(new UserLock()
             {
                 Id = Guid.NewGuid(),
-                ApplicationUserLoginDetailId = user.ApplicationUserLoginDetailId,
+                ApplicationUserLoginDetail = user.ApplicationUserLoginDetail,
                 LockType = new int?(1),
-                InitiatingUserId = CurrentUser?.Id,
+                InitiatingUser = CurrentUser?.Id,
                 LogDate = new DateTime?(DateTime.Now),
                 WebPortalInitiated = new bool?(false)
             });
-            SaveToDatabase(DBContext);
+            SaveToDatabase(dbContext);
         }
 
         internal bool UserPermissionAllowed(
@@ -2844,8 +2721,8 @@ namespace CashmereDeposit.ViewModels
                 return null;
             if (string.IsNullOrWhiteSpace(activity))
                 return null;
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
-            Activity Activity = depositorDbContext.Activities.FirstOrDefault(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase));
+            using var depositorDbContext = new DepositorDBContext();
+            var Activity = depositorDbContext.Activities.FirstOrDefault(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase));
             if (Activity == null)
                 return null;
             return depositorDbContext.Permissions.FirstOrDefault(x => x.RoleId == user.RoleId && x.ActivityId == Activity.Id && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
@@ -2853,7 +2730,7 @@ namespace CashmereDeposit.ViewModels
 
         internal void TimeoutSession(string screen, double timeout, string message = null)
         {
-            Log.InfoFormat(GetType().Name, nameof(TimeoutSession), "Session", "Screen {0} has timed out after {1:0.###} seconds with message {2}", screen, timeout, message);
+            Log.InfoFormat(GetType().Name, nameof(TimeoutSession), "Session", "Screen {0} has timed out after {1:0.###} millisecond(s) with message {2}", screen, timeout, message);
             AlertManager.SendAlert(new AlertTransactionTimedout(CurrentTransaction, ApplicationModel.GetDevice(new DepositorDBContext()), DateTime.Now));
             if (CurrentSession != null)
                 CurrentSession.CountingEnded = true;
@@ -2869,9 +2746,12 @@ namespace CashmereDeposit.ViewModels
                 Log.Info(GetType().Name, nameof(StartCountingProcess), "Device Management", "BeginCount");
                 CurrentApplicationState = ApplicationState.COUNT_STARTED;
                 ReferencesAccepted();
-                long transactionLimitCents = (long)(CurrentTransaction?.TransactionType?.TxLimitList?.Get_prevent_overdeposit(CurrentTransaction.Currency) != null ? CurrentTransaction?.TransactionType?.TxLimitList?.Get_overdeposit_amount(CurrentTransaction.Currency) : long.MaxValue);
-                AppTransaction currentTransaction = CurrentTransaction;
-                long transactionValueCents = currentTransaction != null ? currentTransaction.TransactionValue : 0L;
+                var transactionLimitCents =
+                    (long)((bool)CurrentTransaction?.TransactionType?.TxLimitListNavigation?.Get_prevent_overdeposit(CurrentTransaction.Currency)
+                        ? CurrentTransaction?.TransactionType?.TxLimitListNavigation?.Get_overdeposit_amount(CurrentTransaction.Currency)
+                        : long.MaxValue);
+                var currentTransaction = CurrentTransaction;
+                var transactionValueCents = currentTransaction != null ? currentTransaction.TransactionValue : 0L;
                 DeviceTransactionStart(transactionLimitCents, transactionValueCents);
             }
             else
@@ -2882,61 +2762,60 @@ namespace CashmereDeposit.ViewModels
         {
             if (debugDisablePrinter)
                 return;
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
+            using var depositorDbContext = new DepositorDBContext();
             txDBContext = txDBContext ?? depositorDbContext;
-            Log.InfoFormat(GetType().Name, nameof(PrintReceipt), "Commands", "Transaction code = {0}, Reprint = {1}", transaction.Id, reprint);
+            Log.InfoFormat(GetType().Name, nameof(PrintReceipt), "Commands", "Transaction Code = {0}, Reprint = {1}", transaction.Id, reprint);
             Printer.PrintTransaction(transaction, txDBContext, reprint);
         }
 
-        public void PrintCITReceipt(CIT cit, DepositorDBContext DBContext, bool reprint = false)
+        public void PrintCITReceipt(CIT cit, DepositorDBContext dbContext, bool reprint = false)
         {
             if (debugDisablePrinter)
                 return;
-            Log.InfoFormat(GetType().Name, nameof(PrintCITReceipt), "Commands", "CIT code = {0}, Reprint = {1}", cit.Id, reprint);
-            Printer.PrintCIT(cit, DBContext, reprint);
+            Log.InfoFormat(GetType().Name, nameof(PrintCITReceipt), "Commands", "CIT Code = {0}, Reprint = {1}", cit.Id, reprint);
+            Printer.PrintCIT(cit, dbContext, reprint);
         }
 
         public async Task<PostTransactionResponse> PostToCoreBankingAsync(
           Guid requestID,
           Transaction transaction)
         {
-            ApplicationViewModel applicationViewModel = this;
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            int num1 = 0;
-            if (num1 != 0 && applicationViewModel.debugNoCoreBanking)
+            var applicationViewModel = this;
+            using var dbContext = new DepositorDBContext();
+            if (applicationViewModel.debugNoCoreBanking)
             {
-                DepositorLogger log = Log;
-                string name = applicationViewModel.GetType().Name;
-                object[] objArray = new object[4]
+                var log = Log;
+                var name = applicationViewModel.GetType().Name;
+                var objArray = new object[4]
                 {
                     requestID,
                     transaction.TxAccountNumber,
                     transaction.TxCurrency,
                     null
                 };
-                long? txAmount = transaction.TxAmount;
+                var txAmount = transaction.TxAmount;
                 long num2 = 100;
                 objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", objArray);
-                PostTransactionResponse transactionResponse = new PostTransactionResponse();
-                Guid guid = Guid.NewGuid();
-                transactionResponse.MessageID = guid.ToString().ToUpper();
+                var coreBankingAsync = new PostTransactionResponse();
+                var guid = Guid.NewGuid();
+                coreBankingAsync.MessageID = guid.ToString().ToUpper();
                 guid = Guid.NewGuid();
-                transactionResponse.RequestID = guid.ToString().ToUpper();
-                transactionResponse.PostResponseCode = 200.ToString() ?? "";
-                transactionResponse.PostResponseMessage = "Posted";
-                transactionResponse.MessageDateTime = DateTime.Now;
-                transactionResponse.IsSuccess = true;
-                transactionResponse.TransactionDateTime = DateTime.Now;
+                coreBankingAsync.RequestID = guid.ToString().ToUpper();
+                coreBankingAsync.PostResponseCode = 200.ToString() ?? "";
+                coreBankingAsync.PostResponseMessage = "Posted";
+                coreBankingAsync.MessageDateTime = DateTime.Now;
+                coreBankingAsync.IsSuccess = true;
+                coreBankingAsync.TransactionDateTime = DateTime.Now;
                 guid = Guid.NewGuid();
-                transactionResponse.TransactionID = guid.ToString().ToUpper();
-                return transactionResponse;
+                coreBankingAsync.TransactionID = guid.ToString().ToUpper();
+                return coreBankingAsync;
             }
             try
             {
                 Log.InfoFormat(applicationViewModel.GetType().Name, "Posting to live core banking", "Integation", "posting transaction {0}", transaction.ToString());
-                TransactionTypeListItem transactionTypeListItem = DBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == transaction.TxType.Value);
-                ApplicationModel applicationModel = applicationViewModel.ApplicationModel;
+                var transactionTypeListItem = dbContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == transaction.TxType.Value);
+                var applicationModel = applicationViewModel.ApplicationModel;
                 string str1;
                 if (applicationModel == null)
                 {
@@ -2944,13 +2823,13 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    ICollection<DeviceSuspenseAccount> suspenseAccounts = applicationModel.GetDevice(DBContext).DeviceCITSuspenseAccounts;
+                    var suspenseAccounts = applicationModel.GetDevice(dbContext).DeviceSuspenseAccounts;
                     str1 = suspenseAccounts != null ? suspenseAccounts.FirstOrDefault(x => x.Enabled && string.Equals(x.CurrencyCode, CurrentTransaction?.CurrencyCode, StringComparison.InvariantCultureIgnoreCase))?.AccountNumber : null;
                 }
-                string str2 = str1;
-                DepositorLogger log = Log;
-                string name = applicationViewModel.GetType().Name;
-                object[] objArray = new object[5]
+                var str2 = str1;
+                var log = Log;
+                var name = applicationViewModel.GetType().Name;
+                var objArray = new object[5]
                 {
                     requestID,
                     transaction.TxAccountNumber,
@@ -2958,49 +2837,44 @@ namespace CashmereDeposit.ViewModels
                     null,
                     null
                 };
-                long? txAmount = transaction.TxAmount;
-                long num2 = 100;
-                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
+                var txAmount = transaction.TxAmount;
+                long num3 = 100;
+                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num3) : new long?();
                 objArray[4] = str2;
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", objArray);
-                Device device = applicationViewModel.CurrentSession.Device;
-                IntegrationServiceClient integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
-                Guid guid = Guid.NewGuid();
+                var device = applicationViewModel.CurrentSession.Device;
+                var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                var request = new PostTransactionRequest();
+                request.AppID = device.AppId;
+                request.AppName = device.MachineName;
+                request.MessageDateTime = DateTime.Now;
+                var guid = Guid.NewGuid();
+                request.MessageID = guid.ToString();
+                request.Language = applicationViewModel.CurrentLanguage;
+                request.DeviceID = device.Id;
                 guid = applicationViewModel.SessionID.Value;
-
-                PostTransactionRequest request = new PostTransactionRequest
+                request.SessionID = guid.ToString();
+                request.FundsSource = transaction.FundsSource;
+                request.RefAccountName = transaction.CbRefAccountName;
+                request.RefAccountNumber = transaction.TxRefAccount;
+                request.DeviceReferenceNumber = string.Format("{0:#}", transaction.TxRandomNumber);
+                request.DepositorIDNumber = transaction.TxIdNumber;
+                request.DepositorName = transaction.TxDepositorName;
+                request.DepositorPhone = transaction.TxPhone;
+                request.TransactionType = transactionTypeListItem?.CbTxType;
+                request.TransactionTypeID = transactionTypeListItem.Id;
+                var postTransactionData = new PostTransactionData();
+                postTransactionData.TransactionID = transaction.Id;
+                postTransactionData.DebitAccount = new PostBankAccount()
                 {
-                    AppID = device.AppId,
-                    AppName = device.MachineName,
-                    MessageDateTime = DateTime.Now,
-                    MessageID = guid.ToString(),
-                    Language = applicationViewModel.CurrentLanguage,
-                    DeviceID = device.Id,
-                    SessionID = guid.ToString(),
-                    FundsSource = transaction.FundsSource,
-                    RefAccountName = transaction.CbRefAccountName,
-                    RefAccountNumber = transaction.TxRefAccount,
-                    DeviceReferenceNumber = string.Format("{0:#}", transaction.TxRandomNumber),
-                    DepositorIDNumber = transaction.TxIdNumber,
-                    DepositorName = transaction.TxDepositorName,
-                    DepositorPhone = transaction.TxPhone,
-                    TransactionType = transactionTypeListItem?.CbTxType,
-                    TransactionTypeID = transactionTypeListItem.Id
+                    AccountNumber = transaction.TxSuspenseAccount,
+                    Currency = transaction.TxCurrency.ToUpper()
                 };
-                PostTransactionData postTransactionData = new PostTransactionData
+                postTransactionData.CreditAccount = new PostBankAccount()
                 {
-                    TransactionID = transaction.Id,
-                    DebitAccount = new PostBankAccount()
-                    {
-                        AccountNumber = transaction.TxSuspenseAccount,
-                        Currency = transaction.TxCurrency.ToUpper()
-                    },
-                    CreditAccount = new PostBankAccount()
-                    {
-                        AccountName = transaction.CbAccountName,
-                        AccountNumber = transaction.TxAccountNumber,
-                        Currency = transaction.TxCurrency.ToUpper()
-                    }
+                    AccountName = transaction.CbAccountName,
+                    AccountNumber = transaction.TxAccountNumber,
+                    Currency = transaction.TxCurrency.ToUpper()
                 };
                 txAmount = transaction.TxAmount;
                 postTransactionData.Amount = txAmount.Value / 100.0M;
@@ -3010,109 +2884,103 @@ namespace CashmereDeposit.ViewModels
                 postTransactionData.Narration = transaction.TxNarration;
                 request.Transaction = postTransactionData;
                 // ISSUE: explicit non-virtual call
-                PostTransactionResponse transactionResponse = await (integrationServiceClient.PostTransactionAsync(request));
-                applicationViewModel.CheckIntegrationResponseMessageDateTime(transactionResponse.MessageDateTime);
-                return transactionResponse;
+                var coreBankingAsync = await (integrationServiceClient.PostTransactionAsync(request));
+                applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
+                return coreBankingAsync;
             }
             catch (Exception ex)
             {
-                string ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
+                var ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
                 Log.Error(applicationViewModel.GetType().Name, 91, ApplicationErrorConst.ERROR_TRANSACTION_POST_FAILURE.ToString(), ErrorDetail);
-                PostTransactionResponse transactionResponse = new PostTransactionResponse
-                {
-                    MessageDateTime = DateTime.Now,
-                    PostResponseCode = "-1",
-                    PostResponseMessage = ErrorDetail,
-                    RequestID = requestID.ToString().ToUpperInvariant(),
-                    ServerErrorCode = "-1",
-                    ServerErrorMessage = ErrorDetail,
-                    IsSuccess = false
-                };
-                return transactionResponse;
+                var coreBankingAsync = new PostTransactionResponse();
+                coreBankingAsync.MessageDateTime = DateTime.Now;
+                coreBankingAsync.PostResponseCode = "-1";
+                coreBankingAsync.PostResponseMessage = ErrorDetail;
+                coreBankingAsync.RequestID = requestID.ToString().ToUpperInvariant();
+                coreBankingAsync.ServerErrorCode = "-1";
+                coreBankingAsync.ServerErrorMessage = ErrorDetail;
+                coreBankingAsync.IsSuccess = false;
+                return coreBankingAsync;
             }
         }
 
         public async Task<PostCITTransactionResponse> PostCITTransactionToCoreBankingAsync(
-          Guid requestID,
-          CITTransaction CITTransaction)
+          Guid requestId,
+          CITTransaction citTransaction)
         {
-            ApplicationViewModel applicationViewModel = this;
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            var applicationViewModel = this;
+            using var dbContext = new DepositorDBContext();
             if (applicationViewModel.debugNoCoreBanking)
             {
-                Log.InfoFormat(applicationViewModel.GetType().Name, "PostCITTransactionToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", requestID, CITTransaction.AccountNumber, CITTransaction.Currency, CITTransaction.Amount / 100L);
-                PostCITTransactionResponse transactionResponse = new PostCITTransactionResponse
-                {
-                    MessageID = Guid.NewGuid().ToString().ToUpper(),
-                    RequestID = Guid.NewGuid().ToString().ToUpper(),
-                    PostResponseCode = 200.ToString() ?? "",
-                    PostResponseMessage = "Posted",
-                    MessageDateTime = DateTime.Now,
-                    IsSuccess = true
-                };
-                return transactionResponse;
+                Log.InfoFormat(applicationViewModel.GetType().Name, "PostCITTransactionToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", requestId, citTransaction.AccountNumber, citTransaction.Currency, citTransaction.Amount / 100L);
+                var coreBankingAsync = new PostCITTransactionResponse();
+                coreBankingAsync.MessageID = Guid.NewGuid().ToString().ToUpper();
+                coreBankingAsync.RequestID = Guid.NewGuid().ToString().ToUpper();
+                coreBankingAsync.PostResponseCode = 200.ToString() ?? "";
+                coreBankingAsync.PostResponseMessage = "Posted";
+                coreBankingAsync.MessageDateTime = DateTime.Now;
+                coreBankingAsync.IsSuccess = true;
+                return coreBankingAsync;
             }
-            Device device = GetDevice(DBContext);
+            var device = GetDevice(dbContext);
             try
             {
-                Log.InfoFormat(applicationViewModel.GetType().Name, "Posting to live core banking", "Integation", "posting CITTransaction {0}", CITTransaction.ToString());
-                Log.InfoFormat(applicationViewModel.GetType().Name, "PostCITTransactionToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", requestID, CITTransaction.AccountNumber, CITTransaction.Currency, CITTransaction.Amount / 100L, CITTransaction.SuspenseAccount);
-                IntegrationServiceClient integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
-                PostCITTransactionRequest request = new PostCITTransactionRequest
+                Log.InfoFormat(applicationViewModel.GetType().Name, "Posting to live core banking", "Integation", "posting CITTransaction {0}", citTransaction.ToString());
+                Log.InfoFormat(applicationViewModel.GetType().Name, "PostCITTransactionToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", requestId, citTransaction.AccountNumber, citTransaction.Currency, citTransaction.Amount / 100L, citTransaction.SuspenseAccount);
+                var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                var request = new PostCITTransactionRequest();
+                request.SessionID = citTransaction.Id.ToString();
+                request.AppID = device.AppId;
+                request.AppName = device.MachineName;
+                request.MessageDateTime = DateTime.Now;
+                request.MessageID = Guid.NewGuid().ToString();
+                request.Language = applicationViewModel.CurrentLanguage;
+                request.DeviceID = device.Id;
+                request.Transaction = new PostTransactionData()
                 {
-                    SessionID = CITTransaction.Id.ToString(),
-                    AppID = device.AppId,
-                    AppName = device.MachineName,
-                    MessageDateTime = DateTime.Now,
-                    MessageID = Guid.NewGuid().ToString(),
-                    Language = applicationViewModel.CurrentLanguage,
+                    TransactionID = citTransaction.Id,
+                    Amount = citTransaction.Amount / 100.0M,
+                    DateTime = citTransaction.Datetime,
                     DeviceID = device.Id,
-                    Transaction = new PostTransactionData()
+                    DeviceNumber = device.DeviceNumber,
+                    Narration = citTransaction.Narration,
+                    DebitAccount = new PostBankAccount()
                     {
-                        TransactionID = CITTransaction.Id,
-                        Amount = CITTransaction.Amount / 100.0M,
-                        DateTime = CITTransaction.Datetime,
-                        DeviceID = device.Id,
-                        DeviceNumber = device.DeviceNumber,
-                        Narration = CITTransaction.Narration,
-                        DebitAccount = new PostBankAccount()
-                        {
-                            AccountNumber = CITTransaction.AccountNumber,
-                            Currency = CITTransaction.Currency.ToUpper()
-                        },
-                        CreditAccount = new PostBankAccount()
-                        {
-                            AccountNumber = CITTransaction.SuspenseAccount,
-                            Currency = CITTransaction.Currency.ToUpper()
-                        }
+                        AccountNumber = citTransaction.AccountNumber,
+                        Currency = citTransaction.Currency.ToUpper()
+                    },
+                    CreditAccount = new PostBankAccount()
+                    {
+                        AccountNumber = citTransaction.SuspenseAccount,
+                        Currency = citTransaction.Currency.ToUpper()
                     }
                 };
                 // ISSUE: explicit non-virtual call
-                PostCITTransactionResponse transactionResponse = await (integrationServiceClient.PostCITTransactionAsync(request));
-                applicationViewModel.CheckIntegrationResponseMessageDateTime(transactionResponse.MessageDateTime);
-                return transactionResponse;
+                var coreBankingAsync = await (integrationServiceClient.PostCITTransactionAsync(request));
+                applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
+                return coreBankingAsync;
             }
             catch (Exception ex)
             {
-                string ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
+                var ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
                 Log.Error(applicationViewModel.GetType().Name, 113, ApplicationErrorConst.ERROR_CIT_POST_FAILURE.ToString(), ErrorDetail);
-                PostCITTransactionResponse transactionResponse = new PostCITTransactionResponse();
-                Guid guid = applicationViewModel.SessionID.Value;
-                transactionResponse.SessionID = guid.ToString();
-                transactionResponse.AppID = device.AppId;
-                transactionResponse.AppName = device.MachineName;
-                transactionResponse.MessageDateTime = DateTime.Now;
+                var coreBankingAsync = new PostCITTransactionResponse();
+                var guid = applicationViewModel.SessionID.Value;
+                coreBankingAsync.SessionID = guid.ToString();
+                coreBankingAsync.AppID = device.AppId;
+                coreBankingAsync.AppName = device.MachineName;
+                coreBankingAsync.MessageDateTime = DateTime.Now;
                 guid = Guid.NewGuid();
-                transactionResponse.MessageID = guid.ToString();
-                transactionResponse.PostResponseCode = "-1";
-                transactionResponse.PostResponseMessage = ErrorDetail;
-                transactionResponse.RequestID = requestID.ToString().ToUpperInvariant();
-                transactionResponse.ServerErrorCode = "-1";
-                transactionResponse.ServerErrorMessage = ErrorDetail;
-                transactionResponse.IsSuccess = false;
-                transactionResponse.PublicErrorCode = "500";
-                transactionResponse.PublicErrorMessage = "System error. Contact administrator";
-                return transactionResponse;
+                coreBankingAsync.MessageID = guid.ToString();
+                coreBankingAsync.PostResponseCode = "-1";
+                coreBankingAsync.PostResponseMessage = ErrorDetail;
+                coreBankingAsync.RequestID = requestId.ToString().ToUpperInvariant();
+                coreBankingAsync.ServerErrorCode = "-1";
+                coreBankingAsync.ServerErrorMessage = ErrorDetail;
+                coreBankingAsync.IsSuccess = false;
+                coreBankingAsync.PublicErrorCode = "500";
+                coreBankingAsync.PublicErrorMessage = "System error. Contact administrator";
+                return coreBankingAsync;
             }
         }
 
@@ -3124,20 +2992,7 @@ namespace CashmereDeposit.ViewModels
             {
                 if (string.IsNullOrEmpty(language))
                     return;
-                IEnumerable<ResourceDictionary> source1 = Application.Current.Resources.MergedDictionaries.Where<ResourceDictionary>(x =>
-                {
-                    bool? nullable;
-                    if (x == null)
-                    {
-                        nullable = new bool?();
-                    }
-                    else
-                    {
-                        Uri source = x.Source;
-                        nullable = (object)source != null ? source.OriginalString?.Contains("Lang_") : new bool?();
-                    }
-                    return nullable.GetValueOrDefault();
-                });
+                var source1 = Application.Current.Resources.MergedDictionaries.Where<ResourceDictionary>(x => (bool)x?.Source?.OriginalString?.Contains("Lang_"));
                 List<ResourceDictionary> resourceDictionaryList;
                 if (source1 == null)
                 {
@@ -3145,85 +3000,43 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    IEnumerable<ResourceDictionary> source2 = source1.Where(y =>
+                    var source2 = source1.Where(y =>
                     {
                         if (y == null)
                             return false;
-                        Uri source1 = y.Source;
+                        var source3 = y.Source;
                         int? nullable1;
-                        if ((object)source1 == null)
+                        if ((object)source3 == null)
                         {
                             nullable1 = new int?();
                         }
                         else
                         {
-                            string originalString = source1.OriginalString;
+                            var originalString = source3.OriginalString;
                             if (originalString == null)
                             {
                                 nullable1 = new int?();
                             }
                             else
                             {
-                                IEnumerable<char> source2 = originalString.Where(z => z == '.');
-                                nullable1 = source2 != null ? new int?(source2.Count()) : new int?();
+                                var source4 = originalString.Where(z => z == '.');
+                                nullable1 = source4 != null ? new int?(source4.Count()) : new int?();
                             }
                         }
-                        int? nullable2 = nullable1;
-                        int num = 1;
+                        var nullable2 = nullable1;
+                        var num = 1;
                         return nullable2.GetValueOrDefault() == num & nullable2.HasValue;
                     });
                     resourceDictionaryList = source2 != null ? source2.ToList() : null;
                 }
-                List<ResourceDictionary> source5 = resourceDictionaryList;
-                foreach (ResourceDictionary resourceDictionary1 in source5)
+                var source5 = resourceDictionaryList;
+                foreach (var resourceDictionary1 in source5)
                 {
-                    string str1;
-                    if (resourceDictionary1 == null)
-                    {
-                        str1 = null;
-                    }
-                    else
-                    {
-                        Uri source2 = resourceDictionary1.Source;
-                        str1 = (object)source2 != null ? source2.OriginalString.Replace(".xaml", "") : null;
-                    }
-                    string str2 = language;
-                    string requestedCulture = string.Format("{0}.{1}.xaml", str1, str2);
-                    ResourceDictionary resourceDictionary2 = null;
-                    foreach (var dictionary in Application.Current.Resources.MergedDictionaries.Where((Func<ResourceDictionary, bool>)(d =>
-                             {
-                                 string a;
-                                 if (d == null)
-                                 {
-                                     a = null;
-                                 }
-                                 else
-                                 {
-                                     Uri source = d.Source;
-                                     a = (object)source != null ? source.OriginalString : null;
-                                 }
-
-                                 string b = requestedCulture;
-                                 return string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase);
-                             })))
-                    {
-                        resourceDictionary2 = dictionary;
-                        break;
-                    }
-
+                    var requestedCulture = string.Format("{0}.{1}.xaml", resourceDictionary1?.Source?.OriginalString.Replace(".xaml", ""), language);
+                    var resourceDictionary2 = Application.Current.Resources.MergedDictionaries.FirstOrDefault<ResourceDictionary>(d => string.Equals(d?.Source?.OriginalString, requestedCulture, StringComparison.InvariantCultureIgnoreCase));
                     if (resourceDictionary2 == null)
                     {
-                        string str3;
-                        if (resourceDictionary1 == null)
-                        {
-                            str3 = null;
-                        }
-                        else
-                        {
-                            Uri source2 = resourceDictionary1.Source;
-                            str3 = (object)source2 != null ? source2.OriginalString : null;
-                        }
-                        requestedCulture = str3;
+                        requestedCulture = resourceDictionary1?.Source?.OriginalString;
                         resourceDictionary2 = source5.FirstOrDefault(d => d.Source.OriginalString == requestedCulture);
                     }
                     if (resourceDictionary2 != null)
@@ -3247,24 +3060,20 @@ namespace CashmereDeposit.ViewModels
             if (CurrentSession == null)
                 return;
             CurrentSession.Language = value.Code;
-            SetLanguage(value.Code);
+            this.SetLanguage(value.Code);
         }
 
         internal static string GetDeviceNumber()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            return GetDevice(DBContext)?.DeviceNumber;
+            using var dbContext = new DepositorDBContext();
+            return GetDevice(dbContext)?.DeviceNumber;
         }
 
         internal static Device GetDevice(DepositorDBContext DBContext)
         {
             try
             {
-                ParameterExpression parameterExpression;
-                // ISSUE: method reference
-                // ISSUE: method reference
-                // ISSUE: method reference
-                Device device = DBContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName);
+                var device = DBContext.Devices.FirstOrDefault(c => c.MachineName == Environment.MachineName);
                 if (device != null)
                     return device;
                 Log.Fatal(nameof(ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Could not get device info from database, terminating");
@@ -3285,7 +3094,7 @@ namespace CashmereDeposit.ViewModels
             }
             catch (ValidationException ex)
             {
-                string ErrorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
+                var ErrorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
                 foreach (var entityValidationError in ex.ValidationResult.MemberNames)
                 {
                     ErrorDetail += ">validation error>";
@@ -3332,7 +3141,7 @@ namespace CashmereDeposit.ViewModels
         internal void ShutdownPC(ShutdownCommand command, string reason, uint time = 0)
         {
             time = time.Clamp(0U, 600U);
-            string str = "";
+            var str = "";
             switch (command)
             {
                 case ShutdownCommand.SHUTDOWN:
@@ -3345,17 +3154,18 @@ namespace CashmereDeposit.ViewModels
                     str = "-l";
                     break;
             }
-            string arguments = string.Format("{0} -f -t {1}  -d p:0:0 -c \"{2}\"", str, time, reason.Substring(0, reason.Length.Clamp(0, 512)));
+            var arguments = string.Format("{0} -f -t {1}  -d p:0:0 -c \"{2}\"", str, time, reason.Substring(0, reason.Length.Clamp(0, 512)));
             Log.InfoFormat(GetType().Name + ".ShutdownPC()", "Running shutdown command", "Diagnostics", "shutdown.exe {0}", arguments);
             Process.Start("shutdown.exe", arguments);
         }
 
         private void CheckIntegrationResponseMessageDateTime(DateTime MessageDateTime)
         {
-            DateTime dateTime1 = DateTime.Now.AddSeconds(DeviceConfiguration.MESSAGEKEEPALIVETIME);
-            DateTime dateTime2 = DateTime.Now.AddSeconds(-DeviceConfiguration.MESSAGEKEEPALIVETIME);
+            var dateTime1 = DateTime.Now.AddSeconds(DeviceConfiguration.MESSAGEKEEPALIVETIME);
+            var dateTime2 = DateTime.Now.AddSeconds(-DeviceConfiguration.MESSAGEKEEPALIVETIME);
             if (!(MessageDateTime < dateTime1) || !(MessageDateTime > dateTime2))
                 throw new Exception(string.Format("Invalid MessageDateTime: value {0:yyyy-MM-dd HH:mm:ss.fff} is NOT between {1:yyyy-MM-dd HH:mm:ss.fff} and {2:yyyy-MM-dd HH:mm:ss.fff}", MessageDateTime, dateTime2, dateTime1));
         }
     }
 }
+

@@ -50,7 +50,7 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        string s = translationService.TranslateUserText(GetType().Name + ".InitialiseScreen TermsAndConditionsText", ApplicationViewModel?.CurrentTransaction?.TransactionText?.TermsId, null);
+        string s = translationService.TranslateUserText(GetType().Name + ".InitialiseScreen TermsAndConditionsText", ApplicationViewModel?.CurrentTransaction?.TransactionText?.Terms, null);
         str = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
       }
       TermsAndConditionsText = str;

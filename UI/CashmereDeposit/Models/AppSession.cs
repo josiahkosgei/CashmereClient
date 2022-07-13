@@ -212,7 +212,7 @@ namespace CashmereDeposit.Models
 
     internal void CreateTransaction(TransactionTypeListItem transactionType)
     {
-      Transaction = new AppTransaction(this, transactionType, transactionType.DefaultAccountCurrencyId);
+      Transaction = new AppTransaction(this, transactionType, transactionType.DefaultAccountCurrency);
       Transaction.TransactionLimitReachedEvent += new EventHandler<EventArgs>(Transaction_TransactionLimitReachedEvent);
       ApplicationViewModel.AlertManager.SendAlert(new AlertTransactionStarted(Transaction, Device, DateTime.Now));
     }

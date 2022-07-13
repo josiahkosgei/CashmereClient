@@ -22,10 +22,10 @@ namespace CashmereDeposit.Utils.AlertClasses
     public const int ALERT_ID = 1302;
     private CIT _cit;
 
-    public AlertCITStarted(CIT cit, Device device, DateTime dateDetected)
+    public AlertCITStarted(CIT CIT, Device device, DateTime dateDetected)
       : base(device, dateDetected)
     {
-      _cit = cit != null ? cit : throw new NullReferenceException("Variable cit cannot be null");
+      _cit = CIT != null ? CIT : throw new NullReferenceException("Variable CIT cannot be null");
       using DepositorDBContext depositorDbContext = new DepositorDBContext();
       AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1302);
     }
@@ -53,7 +53,7 @@ namespace CashmereDeposit.Utils.AlertClasses
               entity.AlertEmails.Add(email);
           AlertSMS sms = GenerateSMS();
           if (sms != null)
-              entity.AlertSMSes.Add(sms);
+              entity.AlertSMS.Add(sms);
           ApplicationViewModel.SaveToDatabase(DBContext);
           return true;
       }
@@ -127,13 +127,13 @@ namespace CashmereDeposit.Utils.AlertClasses
         dateTime = fromDate.Value;
         str1 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff");
       }
-      tokens1.Add("[cit_start]", str1);
+      tokens1.Add("[CIT_start]", str1);
       IDictionary<string, string> tokens2 = Tokens;
       dateTime = _cit.ToDate;
       string str2 = dateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff");
-      tokens2.Add("[cit_end]", str2);
-      Tokens.Add("[user_init]", _cit.StartUser.Username);
-      Tokens.Add("[user_auth]", _cit.AuthorisingUser.Username);
+      tokens2.Add("[CIT_end]", str2);
+      Tokens.Add("[user_init]", _cit.StartUserNavigation.Username);
+      Tokens.Add("[user_auth]", _cit.AuthUserNavigation.Username);
       Tokens.Add("[old_bag_number]", _cit.OldBagNumber);
       Tokens.Add("[new_bag_number]", _cit.NewBagNumber);
       Tokens.Add("[seal_number]", _cit.SealNumber);
@@ -149,7 +149,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         Currency groupKey = source.Key;
         stringBuilder.AppendLine(string.Format("<hr /><h3>Currency: {0}</h3><hr />", groupKey.Code.ToUpper()));
-        stringBuilder.AppendLine(string.Format("Transaction Count:{0}<br />", _cit.Transactions.Where(x => x.Currency.Code == groupKey.Code).Count()));
+        stringBuilder.AppendLine(string.Format("Transaction Count:{0}<br />", _cit.Transactions.Where(x => x.TxCurrencyNavigation.Code == groupKey.Code).Count()));
         stringBuilder.AppendLine("<table style=\"text - align: left\">");
         stringBuilder.AppendLine("<tr><th>Denomination</th><th>Count</th><th>Sub Total</th></tr>");
         foreach (CITDenomination citDenomination in source)
@@ -174,7 +174,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         Currency groupKey = source.Key;
         stringBuilder.AppendLine("----------------------------------------");
         stringBuilder.AppendLine(string.Format("Currency: {0}", groupKey.Code.ToUpper()));
-        stringBuilder.AppendLine(string.Format("Transaction Count:{0}", _cit.Transactions.Where(x => x.Currency.Code == groupKey.Code).Count()));
+        stringBuilder.AppendLine(string.Format("Transaction Count:{0}", _cit.Transactions.Where(x => x.TxCurrencyNavigation.Code == groupKey.Code).Count()));
         stringBuilder.AppendLine("----------------------------------------");
         stringBuilder.AppendLine(string.Format("{0,-10}{1,7}{2,21}", "Denomination", "Count", "Sub Total"));
         stringBuilder.AppendLine("________________________________________");
@@ -200,7 +200,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         Currency groupKey = source.Key;
         stringBuilder.AppendLine("CCY: " + groupKey.Code.ToUpper());
-        stringBuilder.AppendLine(string.Format("Tx: {0}", _cit.Transactions.Where(x => x.Currency == groupKey).Count()));
+        stringBuilder.AppendLine(string.Format("Tx: {0}", _cit.Transactions.Where(x => x.TxCurrencyNavigation == groupKey).Count()));
         stringBuilder.AppendLine("Notes: " + source.Sum(x => x.Count));
         stringBuilder.AppendLine(string.Format("{0} Total: {1:0.##}", groupKey.Code.ToUpper(), source.Sum(x => x.Subtotal) / 100.0));
       }

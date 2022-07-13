@@ -1,56 +1,24 @@
 ﻿{
    "CodeGenerationMode": 2,
-   "ContextClassName": "DepositorProductionBackupContext",
-   "ContextNamespace": null,
+   "ContextClassName": "DepositorProductionContext",
+   "ContextNamespace": "Data",
    "DefaultDacpacSchema": null,
    "FilterSchemas": false,
    "IncludeConnectionString": true,
-   "ModelNamespace": null,
-   "OutputContextPath": null,
-   "OutputPath": null,
+   "ModelNamespace": "Entities",
+   "OutputContextPath": "Data",
+   "OutputPath": "Entities",
    "ProjectRootNamespace": "Sample",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 0,
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
-         "Name": "[bak].[AlertEmail]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[AlertEvent]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[AlertSMS]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[ApplicationException]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[ApplicationLog]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[CrashEvent]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[SessionException]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[bak].[TransactionException]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[cb].[PingRequest]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AlertAttachmentType]",
          "ObjectType": 0
       },
       {
@@ -58,7 +26,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[AlertEmailResult]",
+         "Name": "[dbo].[AlertEmailAttachment]",
          "ObjectType": 0
       },
       {
@@ -86,23 +54,11 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[ApplicationUserChangePassword]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ApplicationUserLoginDetail]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Bank]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[Branch]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[CashmereCommunicationServiceStatus]",
          "ObjectType": 0
       },
       {
@@ -115,6 +71,10 @@
       },
       {
          "Name": "[dbo].[CITPrintout]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CITTransaction]",
          "ObjectType": 0
       },
       {
@@ -146,10 +106,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[DashboardData]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[DenominationDetail]",
          "ObjectType": 0
       },
@@ -159,6 +115,10 @@
       },
       {
          "Name": "[dbo].[Device]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceCITSuspenseAccount]",
          "ObjectType": 0
       },
       {
@@ -234,14 +194,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[ModelDifference]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ModelDifferenceAspect]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[PasswordHistory]",
          "ObjectType": 0
       },
@@ -251,26 +203,6 @@
       },
       {
          "Name": "[dbo].[Permission]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[PermissionPolicyMemberPermissionsObject]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[PermissionPolicyNavigationPermissionsObject]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[PermissionPolicyObjectPermissionsObject]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[PermissionPolicyRole]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[PermissionPolicyTypePermissionsObject]",
          "ObjectType": 0
       },
       {
@@ -318,6 +250,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[UptimeComponentState]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UptimeMode]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[UserGroup]",
          "ObjectType": 0
       },
@@ -347,30 +287,6 @@
       },
       {
          "Name": "[dbo].[ValidationType]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WebPortalLogin]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WebPortalRole]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WebPortalRoleRoles_ApplicationUserApplicationUsers]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WebUserLoginCount]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WebUserPasswordHistory]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[XPObjectType]",
          "ObjectType": 0
       },
       {
@@ -426,23 +342,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[DenominationView]",
-         "ObjectType": 3
-      },
-      {
          "Name": "[dbo].[ThisDevice]",
-         "ObjectType": 3
-      },
-      {
-         "Name": "[dbo].[TransactionView]",
-         "ObjectType": 3
-      },
-      {
-         "Name": "[dbo].[viewConfig]",
-         "ObjectType": 3
-      },
-      {
-         "Name": "[dbo].[viewPermissions]",
          "ObjectType": 3
       },
       {
@@ -460,28 +360,24 @@
       {
          "Name": "[dbo].[GetDeviceUsersByDevice]",
          "ObjectType": 1
-      },
-      {
-         "Name": "[dbo].[HashTransaction]",
-         "ObjectType": 1
       }
    ],
-   "UiHint": "H3NCHNL\\SQLEXPRESS.DepositorProductionBackup",
+   "UiHint": "H3NCHNL\\SQLEXPRESS.DepositorProduction",
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": false,
    "UseFluentApiOnly": false,
-   "UseHandleBars": true,
+   "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": true,
-   "UseLegacyPluralizer": false,
+   "UseLegacyPluralizer": true,
    "UseManyToManyEntity": true,
    "UseNoConstructor": false,
    "UseNoDefaultConstructor": false,
    "UseNoNavigations": false,
-   "UseNoObjectFilter": false,
+   "UseNoObjectFilter": true,
    "UseNodaTime": false,
-   "UseNullableReferences": false,
+   "UseNullableReferences": true,
    "UseSchemaFolders": false,
    "UseSpatial": false
 }

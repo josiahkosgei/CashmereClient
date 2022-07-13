@@ -17,7 +17,7 @@ namespace CashmereDeposit.ViewModels
 
     GuiScreenListScreen GuiScreenListScreens { get; set; }
 
-    GuiPrepopList GUIPrepopList { get; set; }
+    GUIPrepopList GUIPrepopList { get; set; }
 
     bool AllowFreeText { get; set; }
 

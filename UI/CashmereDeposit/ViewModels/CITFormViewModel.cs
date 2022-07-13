@@ -104,10 +104,10 @@ namespace CashmereDeposit.ViewModels
       int num = FormValidation();
       if (num > 0)
         return string.Format("Form validation failed with {0:0} errors. Kindly correct them and try saving again", num);
-      CIT cit = createCIT();
-      if (cit != null)
+      CIT CIT = createCIT();
+      if (CIT != null)
       {
-        depositorDbContext.CITs.Add(cit);
+        depositorDbContext.CITs.Add(CIT);
         try
         {
           ApplicationViewModel.SaveToDatabase(depositorDbContext);
@@ -170,8 +170,8 @@ namespace CashmereDeposit.ViewModels
       {
         Id = GuidExt.UuidCreateSequential(),
         CITDate = DateTime.Now,
-        StartUserId = ApplicationViewModel.CurrentUser.Id,
-        AuthUserId = new Guid?(ApplicationViewModel.ValidatingUser.Id),
+        StartUser = ApplicationViewModel.CurrentUser.Id,
+        AuthUser = new Guid?(ApplicationViewModel.ValidatingUser.Id),
         FromDate = new DateTime?(thisCITFromDate),
         ToDate = thisCITToDate,
         DeviceId = Device.Id,
@@ -185,27 +185,27 @@ namespace CashmereDeposit.ViewModels
       Expression<Func<Transaction, bool>> predicate = x => x.CITId == new Guid?() && x.DeviceId == Device.Id && x.TxStartDate >= CIT.FromDate && x.TxStartDate <= CIT.ToDate;
       foreach (Transaction transaction in transactions.Where(predicate).ToList())
         transaction.CIT = CIT;
-      foreach (GetCITDenominationByDatesResult denominationByDatesResult in depositorContextProcedures.GetCITDenominationByDatesAsync(new DateTime?(thisCITFromDate), new DateTime?(thisCITToDate)).Result.OrderBy((Func<GetCITDenominationByDatesResult, int>) (x => x.Denom)).ToList())
+      foreach (GetCITDenominationByDatesResult denominationByDatesResult in depositorContextProcedures.GetCITDenominationByDatesAsync(new DateTime?(thisCITFromDate), new DateTime?(thisCITToDate)).Result.OrderBy((Func<GetCITDenominationByDatesResult, int>) (x => x.denom)).ToList())
         CIT.CITDenominations.Add(new CITDenomination()
         {
           Id = GuidExt.UuidCreateSequential(),
-          CurrencyId = denominationByDatesResult.Txcurrency,
+          CurrencyId = denominationByDatesResult.tx_currency,
           Datetime = new DateTime?(thisCITToDate),
-          Denom = denominationByDatesResult.Denom,
-          Count = denominationByDatesResult.Count.Value,
-          Subtotal = denominationByDatesResult.SubTotal.Value
+          Denom = denominationByDatesResult.denom,
+          Count = denominationByDatesResult.count.Value,
+          Subtotal = denominationByDatesResult.subtotal.Value
         });
       CreateCITTransactions(CIT);
       return CIT;
     }
 
-    private void CreateCITTransactions(CIT cit)
+    private void CreateCITTransactions(CIT CIT)
     {
       try
       {
-        ApplicationViewModel.Log.DebugFormat("ApplicationViewModel", "Generate CITTransaction", nameof (CreateCITTransactions), "Generating CITTransactions for CIT id={0}", cit.Id);
+        ApplicationViewModel.Log.DebugFormat("ApplicationViewModel", "Generate CITTransaction", nameof (CreateCITTransactions), "Generating CITTransactions for CIT id={0}", CIT.Id);
         List<CITTransaction> citTransactionList = new List<CITTransaction>(5);
-        foreach (IGrouping<string, CITDenomination> grouping in cit.CITDenominations.GroupBy(denom => denom.CurrencyId))
+        foreach (IGrouping<string, CITDenomination> grouping in CIT.CITDenominations.GroupBy(denom => denom.CurrencyId))
         {
           IGrouping<string, CITDenomination> currency = grouping;
           long num = currency.Sum(x => x.Subtotal);
@@ -213,13 +213,13 @@ namespace CashmereDeposit.ViewModels
             citTransactionList.Add(new CITTransaction()
             {
               Id = Guid.NewGuid(),
-              CITId = cit.Id,
-              AccountNumber = (depositorDbContext.DeviceCITSuspenseAccounts.FirstOrDefault(x => x.DeviceId == cit.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid CITSuspenseAccount found for currency {0}", currency))).AccountNumber,
-              SuspenseAccount = (depositorDbContext.DeviceSuspenseAccounts.FirstOrDefault(x => x.DeviceId == cit.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid DeviceSuspenseAccount found for currency {0}", currency))).AccountNumber,
+              CITId = CIT.Id,
+              AccountNumber = (depositorDbContext.DeviceCITSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid CITSuspenseAccount found for currency {0}", currency))).AccountNumber,
+              SuspenseAccount = (depositorDbContext.DeviceSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid DeviceSuspenseAccount found for currency {0}", currency))).AccountNumber,
               Datetime = DateTime.Now,
               Amount = num,
               Currency = currency.Key,
-              Narration = string.Format("CIT {0} on {1:yyyyMMddTHHmmss}", Device.DeviceNumber, cit.CITDate)
+              Narration = string.Format("CIT {0} on {1:yyyyMMddTHHmmss}", Device.DeviceNumber, CIT.CITDate)
             });
         }
         depositorDbContext.CITTransactions.AddRange(citTransactionList);
@@ -227,7 +227,7 @@ namespace CashmereDeposit.ViewModels
       }
       catch (Exception ex)
       {
-        ApplicationViewModel.Log.ErrorFormat("ApplicationViewModel.CreateCITTransactions", 113, ApplicationErrorConst.ERROR_CIT_POST_FAILURE.ToString(), "Error posting CIT {0}: {1}", cit.Id, ex.MessageString());
+        ApplicationViewModel.Log.ErrorFormat("ApplicationViewModel.CreateCITTransactions", 113, ApplicationErrorConst.ERROR_CIT_POST_FAILURE.ToString(), "Error posting CIT {0}: {1}", CIT.Id, ex.MessageString());
         throw;
       }
     }

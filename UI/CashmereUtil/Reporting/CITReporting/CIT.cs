@@ -11,9 +11,9 @@ namespace CashmereUtil.Reporting.CITReporting
   {
     public string device { get; set; }
 
-    public DateTime cit_date { get; set; }
+    public DateTime CIT_date { get; set; }
 
-    public DateTime? cit_complete_date { get; set; }
+    public DateTime? CIT_complete_date { get; set; }
 
     public string InitiatingUser { get; set; }
 

@@ -232,8 +232,10 @@ namespace CashmereDeposit.Models
                     else
                         _log.Warning(nameof(DepositorCommunicationService), "Attachments Disabled", "GenerateEmail", "Email attachment sending is disabled in config");
                     _log.Debug(nameof(DepositorCommunicationService), nameof(ProcessEmail), nameof(ProcessEmail), "get the recipients");
-                    var depositorContextProcedures = new DepositorContextProcedures(depositorDbContext);
-                    var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroupId).Result;
+                    var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
+                    //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
+
+                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv =>dv.UserGroupNavigation.ApplicationUsers.ToList());
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)
                     {
@@ -241,14 +243,14 @@ namespace CashmereDeposit.Models
                     }
                     else
                     {
-                        var list2 = deviceUsersByDevice.ToList();
+                        List<ApplicationUser> list2 = deviceUsersByDevice.ToList<ApplicationUser>();
                         if (list2 == null)
                         {
                             applicationUserList = null;
                         }
                         else
                         {
-                            var source = list2.Where(deviceUser => deviceUser.EmailEnabled && !string.IsNullOrEmpty(deviceUser.Email) && deviceUser.Role.AlertMessageRegistries.FirstOrDefault(alertMessageRegistryItem => alertMessageRegistryItem.AlertTypeId == alertEvent.AlertTypeId) != null);
+                            var source = list2.Where(deviceUser => (bool)deviceUser.DepositorEnabled && (bool)!string.IsNullOrEmpty(deviceUser.Email) && deviceUser.Role.AlertMessageRegistries.FirstOrDefault(alertMessageRegistryItem => alertMessageRegistryItem.AlertTypeId == alertEvent.AlertTypeId) != null);
                             applicationUserList = source != null ? source.ToList() : null;
                         }
                     }
@@ -318,8 +320,10 @@ namespace CashmereDeposit.Models
                 try
                 {
                     _log.Debug(nameof(DepositorCommunicationService), nameof(ProcessSms), nameof(ProcessSms), "get the recipients");
-                    var depositorContextProcedures = new DepositorContextProcedures(depositorDbContext);
-                    var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroupId).Result;
+                    var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
+                    //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
+                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv =>dv.UserGroupNavigation.ApplicationUsers.ToList());
+
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)
                     {
@@ -334,7 +338,7 @@ namespace CashmereDeposit.Models
                         }
                         else
                         {
-                            IEnumerable<ApplicationUser> source = list2.Where(deviceUser => deviceUser.EmailEnabled && !string.IsNullOrEmpty(deviceUser.Email) && deviceUser.Role.AlertMessageRegistries.FirstOrDefault(alertMessageRegistryItem => alertMessageRegistryItem.AlertTypeId == alertEvent.AlertTypeId) != null);
+                            IEnumerable<ApplicationUser> source = list2.Where(deviceUser => (bool)deviceUser.EmailEnabled && (bool)!string.IsNullOrEmpty(deviceUser.Email) && deviceUser.Role.AlertMessageRegistries.FirstOrDefault(alertMessageRegistryItem => alertMessageRegistryItem.AlertTypeId == alertEvent.AlertTypeId) != null);
                             applicationUserList = source != null ? source.ToList() : null;
 
                         }

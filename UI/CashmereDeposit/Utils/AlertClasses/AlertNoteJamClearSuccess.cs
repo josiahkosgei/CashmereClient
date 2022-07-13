@@ -55,7 +55,7 @@ namespace CashmereDeposit.Utils.AlertClasses
               entity.AlertEmails.Add(email);
           AlertSMS sms = GenerateSMS();
           if (sms != null)
-              entity.AlertSMSes.Add(sms);
+              entity.AlertSMS.Add(sms);
           ApplicationViewModel.SaveToDatabase(DBContext);
           return true;
       }
@@ -146,7 +146,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         _transaction.TxStartDate,
         _transaction.TxEndDate,
-        _transaction.TransactionTypeListItem.Name,
+        _transaction.TxTypeNavigation.Name,
         _transaction.TxAccountNumber,
         _transaction.CbAccountName,
         _transaction.TxRefAccount,
@@ -196,7 +196,7 @@ namespace CashmereDeposit.Utils.AlertClasses
       {
         _transaction.TxStartDate,
         _transaction.TxEndDate,
-        _transaction.TransactionTypeListItem.Name,
+        _transaction.TxTypeNavigation.Name,
         _transaction.TxAccountNumber,
         _transaction.CbAccountName,
         _transaction.TxRefAccount,

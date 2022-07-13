@@ -42,6 +42,7 @@ namespace CashmereDeposit.ViewModels
 
         public StartupViewModel()
         {
+            ApplicationViewModel = new ApplicationViewModel(this);
 
             using (new DepositorDBContext())
             {
@@ -117,12 +118,12 @@ namespace CashmereDeposit.ViewModels
                     if (dbContext == null)
                         deviceStatu = null;
                     else
-                        deviceStatu = dbContext.DeviceStatuses.FirstOrDefault(x => x.DeviceId == device.Id);
+                        deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
                     DeviceStatus entity = deviceStatu;
                     if (entity == null)
                     {
                         entity = CashmereDepositCommonClasses.GenerateDeviceStatus(device.Id, dbContext);
-                        dbContext.DeviceStatuses.Add(entity);
+                        dbContext.DeviceStatus.Add(entity);
                     }
                     entity.CurrentStatus |= 1024;
                     entity.Modified = new DateTime?(DateTime.Now);

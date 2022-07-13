@@ -188,11 +188,15 @@ namespace CashmereDeposit.ViewModels
                     return 4;
                 }
             }
-            var depositorContextProcedures = new DepositorContextProcedures(depositorDbContext);
+            var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
+            ApplicationUser dbApplicationUser = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).Select(dv =>
+                dv.UserGroupNavigation.ApplicationUsers.FirstOrDefault(x =>!(bool)x.UserDeleted && (bool)x.Username.Equals(Username, StringComparison.InvariantCultureIgnoreCase))).FirstOrDefault();
 
-            var dbApplicationUser = depositorContextProcedures
-                .GetDeviceUsersByDeviceAsync(device.UserGroupId).Result
-                .FirstOrDefault(x => !x.UserDeleted && x.Username.Equals(Username, StringComparison.InvariantCultureIgnoreCase));
+            //var dbApplicationUser = depositorContextProcedures
+            //    .GetDeviceUsersByDeviceAsync(device.UserGroup).Result
+            //    .FirstOrDefault(x =>
+            //        !(bool)x.UserDeleted &&
+            //        (bool)x.username.Equals(Username, StringComparison.InvariantCultureIgnoreCase));
             int num1;
             if (dbApplicationUser == null)
             {
@@ -206,7 +210,7 @@ namespace CashmereDeposit.ViewModels
                 DeviceLogin entity = new DeviceLogin()
                 {
                     Id = Guid.NewGuid(),
-                    UserId = dbApplicationUser.Id,
+                    User = dbApplicationUser.Id,
                     LoginDate = DateTime.Now,
                     DeviceId = device.Id
                 };
