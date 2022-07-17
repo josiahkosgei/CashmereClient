@@ -24,7 +24,7 @@ namespace CashmereDeposit.Models
         private DepositorLogger Log;
         private PrinterState _state;
         private SerialPort _port;
-        private DispatcherTimer dispTimer = new DispatcherTimer(DispatcherPriority.Send);
+        private DispatcherTimer dispTimer = new(DispatcherPriority.Send);
         private bool _CTSHolding;
 
         public PrinterState State => _state;
@@ -57,7 +57,7 @@ namespace CashmereDeposit.Models
             set => _port = value;
         }
 
-        public object PrintCITReceiptLock { get; set; } = new object();
+        public object PrintCITReceiptLock { get; set; } = new();
 
         public bool CTSHolding
         {
@@ -488,7 +488,7 @@ namespace CashmereDeposit.Models
 
         public class PrinterStateChangedEventArgs : EventArgs
         {
-            public PrinterState state = new PrinterState()
+            public PrinterState state = new()
             {
                 CoverOpen = false,
                 HasPaper = true,

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DropStatusResult
+﻿// DropStatusResult
 
 
 namespace Cashmere.Library.Standard.Statuses

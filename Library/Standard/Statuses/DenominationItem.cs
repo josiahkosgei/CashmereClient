@@ -1,6 +1,7 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DenominationItem
+﻿// DenominationItem
 
+
+using System;
 
 namespace Cashmere.Library.Standard.Statuses
 {
@@ -16,24 +17,28 @@ namespace Cashmere.Library.Standard.Statuses
 
     public string Currency
     {
-      get => currency;
+      get => this.currency;
       set
       {
         if ((value != null ? value.Length : 0) == 3 && !int.TryParse(value, out int _))
-          currency = value;
+          this.currency = value;
         else
-          currency = "KES";
+          this.currency = "KES";
       }
     }
 
-    public long Total => denominationValue * count;
+    public long Total => (long) this.denominationValue * this.count;
 
-    public string DisplayValue => (denominationValue / 100.0).ToString("N2");
+    public Decimal MajorValue => (Decimal) this.denominationValue / 100.0M;
 
-    public string DisplayCount => count.ToString("N0");
+    public string DisplayValue => this.MajorValue.ToString("N2");
 
-    public string DisplayTotal => (Total / 100.0).ToString("N2");
+    public string DisplayCount => this.count.ToString("N0");
 
-    public string DisplayDenominationString => string.Format("{0,7} X {1,-3} {2,-13} = {3,20}", DisplayCount, Currency.Substring(0, 3).ToUpper(), DisplayValue, DisplayTotal);
+    public Decimal MajorTotal => (Decimal) this.Total / 100.0M;
+
+    public string DisplayTotal => this.MajorTotal.ToString("N2");
+
+    public string DisplayDenominationString => string.Format("{0,7} X {1,-3} {2,-13} = {3,20}", (object) this.DisplayCount, (object) this.Currency.Substring(0, 3).ToUpper(), (object) this.DisplayValue, (object) this.DisplayTotal);
   }
 }

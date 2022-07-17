@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.KeyboardType
+﻿// KeyboardType
 
 
 namespace Cashmere.Library.Standard.Statuses

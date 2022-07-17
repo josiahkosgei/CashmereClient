@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DCErrorConst
+﻿// DCErrorConst
 
 
 namespace Cashmere.Library.Standard.Statuses

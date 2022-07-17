@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceStatusChangedEventArgs
+﻿// DeviceStatusChangedEventArgs
 
 
 using System;
@@ -14,12 +13,12 @@ namespace Cashmere.Library.Standard.Statuses
       ControllerStatus data,
       DeviceManagerState deviceManagerState = DeviceManagerState.NONE)
     {
-      DeviceManagerState = deviceManagerState;
-      _controllerStatus = data;
+      this.DeviceManagerState = deviceManagerState;
+      this._controllerStatus = data;
     }
 
     public DeviceManagerState DeviceManagerState { get; set; }
 
-    public ControllerStatus ControllerStatus => _controllerStatus;
+    public ControllerStatus ControllerStatus => this._controllerStatus;
   }
 }

@@ -9,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("ValidationItem")]
-    // [Index("TypeId", Name = "itype_id_ValidationItem")]
-    // [Index("ValidationTextId", Name = "ivalidation_text_id_ValidationItem")]
     public partial class ValidationItem
     {
         public ValidationItem()
@@ -42,16 +40,12 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid? ValidationTextId { get; set; }
 
         [ForeignKey("TypeId")]
-        //[InverseProperty("ValidationItems")]
         public virtual ValidationType ValidationType { get; set; } = null!;
+
         [ForeignKey("ValidationTextId")]
-        //[InverseProperty("ValidationItems")]
         public virtual ValidationText? ValidationText { get; set; }
-        //[InverseProperty("ValidationItem")]
         public virtual ICollection<ValidationItemValue> ValidationItemValues { get; set; }
-        //[InverseProperty("ValidationItem")]
         public virtual ICollection<ValidationListValidationItem> ValidationListValidationItems { get; set; }
-        //[InverseProperty("ValidationItem")]
         public virtual ICollection<ValidationText> ValidationTexts { get; set; }
     }
 }

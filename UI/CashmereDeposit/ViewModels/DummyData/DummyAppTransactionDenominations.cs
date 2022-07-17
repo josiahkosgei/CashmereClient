@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.ViewModels.DummyData.DummyAppTransactionDenominations
-
-// MVID: F63D4D22-EE07-4205-A184-9ED72F588748
-
-
-using Cashmere.Library.Standard.Statuses;
+﻿using Cashmere.Library.Standard.Statuses;
 using System.Collections.Generic;
 
 namespace CashmereDeposit.ViewModels.DummyData
@@ -15,7 +9,7 @@ namespace CashmereDeposit.ViewModels.DummyData
 
     public Denomination TotalDenominationResult { get; internal set; } = new()
     {
-      denominationItems = new List<DenominationItem>()
+      DenominationItems = new List<DenominationItem>()
       {
         new()
         {
@@ -59,7 +53,7 @@ namespace CashmereDeposit.ViewModels.DummyData
 
     public Denomination CountedDenominationResult { get; internal set; } = new()
     {
-      denominationItems = new List<DenominationItem>()
+        DenominationItems = new List<DenominationItem>()
       {
         new()
         {
@@ -103,7 +97,7 @@ namespace CashmereDeposit.ViewModels.DummyData
 
     public Denomination DroppedDenomination { get; internal set; } = new()
     {
-      denominationItems = new List<DenominationItem>()
+      DenominationItems = new List<DenominationItem>()
       {
         new()
         {

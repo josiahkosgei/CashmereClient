@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.Denomination
+﻿// Denomination
 
 
 using System;
@@ -9,103 +8,105 @@ using System.Text;
 
 namespace Cashmere.Library.Standard.Statuses
 {
-  public class Denomination
-  {
-    public List<DenominationItem> denominationItems { get; set; }
-
-    public long TotalValue => denominationItems.Sum(X => X.denominationValue * X.count);
-
-    public long TotalCount => denominationItems.Sum(X => X.count);
-
-    public Denomination() => denominationItems = new List<DenominationItem>();
-
-    public override string ToString()
+    public class Denomination
     {
-      StringBuilder stringBuilder = new StringBuilder();
-      foreach (DenominationItem denominationItem in denominationItems)
-        stringBuilder.Append(string.Format("{0}x {1} {2} = {1} {3}>>", denominationItem.count, denominationItem.Currency, denominationItem.DisplayValue, denominationItem.DisplayTotal));
-      return stringBuilder.ToString();
-    }
+        public List<DenominationItem> DenominationItems { get; set; }
 
-    public static Denomination operator +(Denomination left, Denomination right)
-    {
-      if (left == null && right != null)
-        return right;
-      if (right == null && left != null)
-        return left;
-      int? nullable1 = left?.denominationItems?.Count;
-      int? nullable2 = right?.denominationItems?.Count;
-      if (!(nullable1.GetValueOrDefault() == nullable2.GetValueOrDefault() & nullable1.HasValue == nullable2.HasValue))
-        return null;
-      Denomination denomination = new Denomination();
-      for (int index = 0; index < right.denominationItems.Count; ++index)
-      {
-        List<DenominationItem> denominationItems = denomination.denominationItems;
-        DenominationItem denominationItem1 = new DenominationItem();
-        DenominationItemType? nullable3;
-        DenominationItemType? nullable4;
-        if (left == null)
+        public long TotalValue => this.DenominationItems.Sum<DenominationItem>((Func<DenominationItem, long>)(X => (long)X.denominationValue * X.count));
+
+        public long TotalCount => this.DenominationItems.Sum<DenominationItem>((Func<DenominationItem, long>)(X => X.count));
+
+        public Denomination() => this.DenominationItems = new List<DenominationItem>();
+
+        public override string ToString()
         {
-          nullable3 = new DenominationItemType?();
-          nullable4 = nullable3;
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (DenominationItem denominationItem in this.DenominationItems)
+                stringBuilder.Append(string.Format("{0}x {1} {2} = {1} {3}>>", (object)denominationItem.count, (object)denominationItem.Currency, (object)denominationItem.DisplayValue, (object)denominationItem.DisplayTotal));
+            return stringBuilder.ToString();
         }
-        else
+
+        public static Denomination operator +(Denomination left, Denomination right)
         {
-          DenominationItem denominationItem2 = left.denominationItems[index];
-          if (denominationItem2 == null)
-          {
-            nullable3 = new DenominationItemType?();
-            nullable4 = nullable3;
-          }
-          else
-            nullable4 = new DenominationItemType?(denominationItem2.type);
+            if (left == null && right == null)
+                return (Denomination)null;
+            int num;
+            if (left != null)
+            {
+                List<DenominationItem> denominationItems = left.DenominationItems;
+                if ((denominationItems != null ? (!denominationItems.Any() ? 1 : 0) : 0) == 0)
+                {
+                    num = 0;
+                    goto label_6;
+                }
+            }
+            num = right == null ? 0 : (right.DenominationItems.Count > 0 ? 1 : 0);
+        label_6:
+            if (num != 0)
+                return right;
+            if ((right == null || !right.DenominationItems.Any()) && left != null && left.DenominationItems.Count > 0)
+                return left;
+            int? denominationItemsCount = left?.DenominationItems?.Count;
+            int? itemsCount = right?.DenominationItems?.Count;
+            if (!(denominationItemsCount == itemsCount & denominationItemsCount.HasValue == itemsCount.HasValue))
+                return null as Denomination;
+            Denomination denomination = new Denomination();
+            for (int index = 0; index < right.DenominationItems.Count; ++index)
+            {
+                List<DenominationItem> denominationItems = denomination.DenominationItems;
+                DenominationItem denominationItem1 = new DenominationItem
+                {
+                    type = (DenominationItemType)(left?.DenominationItems[index]?.type ?? right?.DenominationItems[index]?.type),
+                    Currency = left?.DenominationItems[index]?.Currency ?? right?.DenominationItems[index]?.Currency ?? "XER",
+                    count = (long)(left?.DenominationItems[index]?.count + right?.DenominationItems[index]?.count)
+                };
+                int? nullable3;
+                if (left == null)
+                {
+                    denominationItemsCount = new int?();
+                    nullable3 = denominationItemsCount;
+                }
+                else
+                {
+                    DenominationItem denominationItem2 = left.DenominationItems[index];
+                    if (denominationItem2 == null)
+                    {
+                        denominationItemsCount = new int?();
+                        nullable3 = denominationItemsCount;
+                    }
+                    else
+                        nullable3 = new int?(denominationItem2.denominationValue);
+                }
+                itemsCount = nullable3;
+                int valueOrDefault;
+                if (!itemsCount.HasValue)
+                {
+                    int? nullable4;
+                    if (right == null)
+                    {
+                        denominationItemsCount = new int?();
+                        nullable4 = denominationItemsCount;
+                    }
+                    else
+                    {
+                        DenominationItem denominationItem3 = right.DenominationItems[index];
+                        if (denominationItem3 == null)
+                        {
+                            denominationItemsCount = new int?();
+                            nullable4 = denominationItemsCount;
+                        }
+                        else
+                            nullable4 = new int?(denominationItem3.denominationValue);
+                    }
+                    denominationItemsCount = nullable4;
+                    valueOrDefault = (int)denominationItemsCount;
+                }
+                else
+                    valueOrDefault = (int)itemsCount;
+                denominationItem1.denominationValue = valueOrDefault;
+                denominationItems.Add(denominationItem1);
+            }
+            return denomination;
         }
-        DenominationItemType? nullable5 = nullable4;
-        int num1;
-        if (!nullable5.HasValue)
-        {
-          nullable3 = right?.denominationItems[index]?.type;
-          num1 = nullable3.HasValue ? (int) nullable3.GetValueOrDefault() : 0;
-        }
-        else
-          num1 = (int) nullable5.GetValueOrDefault();
-        denominationItem1.type = (DenominationItemType) num1;
-        denominationItem1.Currency = left?.denominationItems[index]?.Currency ?? right?.denominationItems[index]?.Currency ?? "XER";
-        long? count = left?.denominationItems[index]?.count;
-        long num2 = count ?? 0L;
-        count = right?.denominationItems[index]?.count;
-        long num3 = count ?? 0L;
-        denominationItem1.count = num2 + num3;
-        int? nullable6;
-        if (left == null)
-        {
-          nullable1 = new int?();
-          nullable6 = nullable1;
-        }
-        else
-        {
-          DenominationItem denominationItem2 = left.denominationItems[index];
-          if (denominationItem2 == null)
-          {
-            nullable1 = new int?();
-            nullable6 = nullable1;
-          }
-          else
-            nullable6 = new int?(denominationItem2.denominationValue);
-        }
-        nullable2 = nullable6;
-        int num4;
-        if (!nullable2.HasValue)
-        {
-          nullable1 = right?.denominationItems[index]?.denominationValue;
-          num4 = nullable1 ?? 0;
-        }
-        else
-          num4 = nullable2.GetValueOrDefault();
-        denominationItem1.denominationValue = num4;
-        denominationItems.Add(denominationItem1);
-      }
-      return denomination;
     }
-  }
 }

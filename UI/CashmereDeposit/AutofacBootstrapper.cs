@@ -12,9 +12,10 @@ using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.CashmereDataAccess.Repositories;
 using Cashmere.Library.Standard.Security;
-
+using CashmereDeposit.DI;
 using CashmereDeposit.Properties;
 using CashmereDeposit.ViewModels;
+using CashmereDeposit.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +27,8 @@ namespace CashmereDeposit
         #region Properties
 
         protected IContainer Container { get; private set; }
-
+        
+        protected IDictionary<string, object> RootViewDisplaySettings { get; set; }
         /// <summary>
         /// Should the namespace convention be enforced for type registration. The default is true.
         /// For views, this would require a views namespace to end with Views
@@ -104,16 +106,12 @@ namespace CashmereDeposit
               //  always create a new one
               .InstancePerDependency();
 
-            //  register the single window manager for this container
             builder.Register<IWindowManager>(c => CreateWindowManager()).InstancePerLifetimeScope();
-            //  register the single event aggregator for this container
             builder.Register<IEventAggregator>(c => CreateEventAggregator()).InstancePerLifetimeScope();
-
-            //  should we install the auto-subscribe event aggregation handler module?
-            //if (AutoSubscribeEventAggegatorHandlers)
-            //    builder.RegisterModule<EventAggregationAutoSubscriptionModule>();
-
-            //  allow derived classes to add to the container
+            
+            if (AutoSubscribeEventAggegatorHandlers)
+                builder.RegisterModule<EventAggregationAutoSubscriptionModule>();
+            
             ConfigureContainer(builder);
             var serviceCollection = new ServiceCollection();
 
@@ -121,8 +119,6 @@ namespace CashmereDeposit
             builder.Populate(serviceCollection);
 
             Container = builder.Build();
-           // var services = new AutofacServiceProvider(Container);
-           //var _httpClientFactory = services.GetRequiredService<IHttpClientFactory>();
 
         }
 
@@ -155,9 +151,9 @@ namespace CashmereDeposit
         /// </summary>
         /// <param name="service">The service to locate.</param>
         /// <returns>The located services.</returns>
-        protected override IEnumerable<object> GetAllInstances(Type service)
+        protected override IEnumerable<object>? GetAllInstances(Type service)
         {
-            return Container.Resolve(typeof(IEnumerable<>).MakeGenericType(service)) as IEnumerable<object>;
+            return Container.Resolve(typeof(IEnumerable<>).MakeGenericType(new[] { service })) as IEnumerable<object>;
         }
 
         /// <summary>
@@ -190,6 +186,14 @@ namespace CashmereDeposit
             CreateWindowManager = () => new WindowManager();
             //  default event aggregator
             CreateEventAggregator = () => new EventAggregator();
+            
+            var config = new TypeMappingConfiguration
+            {
+                DefaultSubNamespaceForViews = typeof(StartupView).Namespace,
+                DefaultSubNamespaceForViewModels = typeof(StartupViewModel).Namespace
+            };
+            ViewLocator.ConfigureTypeMappings(config);
+            ViewModelLocator.ConfigureTypeMappings(config);
         }
 
         /// <summary>
@@ -200,6 +204,8 @@ namespace CashmereDeposit
         protected virtual void ConfigureContainer(ContainerBuilder containerBuilder)
         {
         }
+        
+        protected virtual void RegisterComponents(ContainerBuilder builder) { }
 
         /// <summary>Override this to add custom behavior on exit.</summary>
         /// <param name="sender">The sender.</param>
@@ -211,42 +217,20 @@ namespace CashmereDeposit
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
-            var dictionary = new Dictionary<string, object>
-            {
-                { "WindowStartupLocation", WindowStartupLocation.CenterScreen },
-                { "Title", "Cashmere Deposit" },
-                { "WindowState", WindowState.Maximized },
-                { "WindowStyle", WindowStyle.None },
-                { "Topmost", Settings.Default.GUI_ALWAYS_ON_TOP }
-            };
-            if (!Settings.Default.GUI_SHOW_MOUSE_CURSOR)
-                dictionary.Add("Cursor", Cursors.None);
-
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*ATMScreenCommandViewModel", "CashmereDeposit.Views.WaitForProcessScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*InputScreenViewModel", "CashmereDeposit.Views.CustomerInputScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*ListScreenViewModel", "CashmereDeposit.Views.CustomerListScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*VerifyDetailsScreenViewModel", "CashmereDeposit.Views.CustomerVerifyDetailsScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*FormViewModel", "CashmereDeposit.Views.FormScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*ATMViewModel", "CashmereDeposit.Views.ATMScreenView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*DialogueBoxViewModel", "CashmereDeposit.Views.DialogueBoxView");
-            ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*SearchScreenViewModel", "CashmereDeposit.Views.CustomerSearchScreenView");
-            DisplayRootViewForAsync<TRootViewModel>(dictionary);
+            base.OnStartup(sender, e);
+           DisplayRootViewForAsync<TRootViewModel>(RootViewDisplaySettings);
         }
         
         private void ConfigureServices(IServiceCollection services)
-        {
-            //services.AddEntityFrameworkSqlServer()
-            //    .AddDbContext<DepositorDBContext>(options =>
-            //        options.UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True",
-            //            x => x.MigrationsAssembly("CashmereDataAccess")));
+        {       
             string connectionString=@"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True";
             services.AddDbContext<DepositorDBContext>(options =>
                 options.UseSqlServer(connectionString));
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
-            //services.AddHttpClient();
-            services.AddHttpClient("CashmereDepositHttpClient", client => { });
-           /* using (new DepositorDBContext())
+        
+            //services.AddHttpClient("CashmereDepositHttpClient", client => { });
+            using (new DepositorDBContext())
             {
                 services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
                 {
@@ -256,12 +240,12 @@ namespace CashmereDeposit
                         device = GetDevice(DBContext);
                     }
 
-                    var handler = new HMACDelegatingHandler(device.app_id, device.app_key);
+                    var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
                     return handler;
                 });
                
             }
-            */
+            
             services.AddHttpClient("CDM_APIClient", client => { }); 
             InitDatabase(services);
         }

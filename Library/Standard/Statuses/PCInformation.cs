@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.PCInformation
+﻿// PCInformation
 
 
 using System;
@@ -22,10 +21,10 @@ namespace Cashmere.Library.Standard.Statuses
       try
       {
         IntPtr BufPtr = IntPtr.Zero;
-        int num = NetStatisticsGet(null, "LanmanWorkstation", 0, 0, out BufPtr);
-        STAT_WORKSTATION_0 statWorkstation0 = new STAT_WORKSTATION_0();
+        int num = PCInformation.NetStatisticsGet((string) null, "LanmanWorkstation", 0, 0, out BufPtr);
+        PCInformation.STAT_WORKSTATION_0 statWorkstation0 = new PCInformation.STAT_WORKSTATION_0();
         if (num == 0)
-          statWorkstation0 = (STAT_WORKSTATION_0) Marshal.PtrToStructure(BufPtr, typeof (STAT_WORKSTATION_0));
+          statWorkstation0 = (PCInformation.STAT_WORKSTATION_0) Marshal.PtrToStructure(BufPtr, typeof (PCInformation.STAT_WORKSTATION_0));
         return new DateTime?(DateTime.FromFileTime(statWorkstation0.StatisticsStartTime));
       }
       catch (Exception ex)

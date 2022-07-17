@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.TransactionStatusResponseData
+﻿// TransactionStatusResponseData
 
 
 using System;
@@ -10,27 +9,27 @@ namespace Cashmere.Library.Standard.Statuses
   {
     public TransactionStatusResponseData(string sessionID, string transactionID)
     {
-      SessionID = sessionID ?? throw new ArgumentNullException(nameof (sessionID));
-      TransactionID = transactionID ?? throw new ArgumentNullException(nameof (transactionID));
+      this.SessionID = sessionID ?? throw new ArgumentNullException(nameof (sessionID));
+      this.TransactionID = transactionID ?? throw new ArgumentNullException(nameof (transactionID));
     }
 
-    public long EscrowPlusDroppedTotalCents => EscrowTotalCents + TotalDroppedAmountCents;
+    public long EscrowPlusDroppedTotalCents => this.EscrowTotalCents + this.TotalDroppedAmountCents;
 
-    public double EscrowPlusDroppedTotalMajorCurrency => EscrowPlusDroppedTotalCents / 100.0;
+    public double EscrowPlusDroppedTotalMajorCurrency => (double) this.EscrowPlusDroppedTotalCents / 100.0;
 
     public DropStatusResult CurrentDropStatus { get; set; }
 
-    public long EscrowTotalCents => CurrentDropStatus?.data?.DenominationResult?.data?.TotalValue ?? 0L;
+    public long EscrowTotalCents => (long)this.CurrentDropStatus?.data?.DenominationResult?.data?.TotalValue;
 
-    public string EscrowTotalDisplayString => (EscrowTotalCents / 100.0).ToString("N2");
+    public string EscrowTotalDisplayString => ((double) this.EscrowTotalCents / 100.0).ToString("N2");
 
-    public Denomination EscrowNotes => CurrentDropStatus?.data?.DenominationResult?.data;
+    public Denomination EscrowNotes => this.CurrentDropStatus?.data?.DenominationResult?.data;
 
-    public TransactionResultStatus Status { get; set; }
+    public TransactionResultStatus Status { get; set; } = TransactionResultStatus.NONE;
 
-    public TransactionResultType Type { get; set; }
+    public TransactionResultType Type { get; set; } = TransactionResultType.NONE;
 
-    public TransactionResultResult Result { get; set; }
+    public TransactionResultResult Result { get; set; } = TransactionResultResult.NONE;
 
     public string SessionID { get; set; }
 
@@ -38,36 +37,32 @@ namespace Cashmere.Library.Standard.Statuses
 
     public long RequestedDropAmount { get; set; }
 
-    public string RequestedDropAmountDisplayString => (RequestedDropAmount / 100.0).ToString("N2");
+    public string RequestedDropAmountDisplayString => ((double) this.RequestedDropAmount / 100.0).ToString("N2");
 
     public long TotalDroppedAmountCents { get; set; }
 
-    public string TotalDroppedAmountDisplayString => (TotalDroppedAmountCents / 100.0).ToString("N2");
+    public string TotalDroppedAmountDisplayString => ((double) this.TotalDroppedAmountCents / 100.0).ToString("N2");
 
     public int NumberOfDrops { get; set; }
 
     public Denomination TotalDroppedNotes { get; set; }
 
-    public long LastDroppedAmountCents { get; set; }
-
-    public string LastDroppedAmountDisplayString => (LastDroppedAmountCents / 100.0).ToString("N2");
-
     public Denomination LastDroppedNotes { get; set; }
 
     public long RequestedDispenseAmount { get; set; }
 
-    public string RequestedDispenseAmountDisplayString => (RequestedDispenseAmount / 100.0).ToString("N2");
+    public string RequestedDispenseAmountDisplayString => ((double) this.RequestedDispenseAmount / 100.0).ToString("N2");
 
     public long DispensedAmountCents { get; set; }
 
-    public string DispensedAmountDisplayString => (DispensedAmountCents / 100.0).ToString("N2");
+    public string DispensedAmountDisplayString => ((double) this.DispensedAmountCents / 100.0).ToString("N2");
 
     public Denomination RequestedDispenseNotes { get; set; }
 
     public Denomination DispensedNotes { get; set; }
 
-    public long ResultAmountCents => TotalDroppedAmountCents - DispensedAmountCents;
+    public long ResultAmountCents => this.TotalDroppedAmountCents - this.DispensedAmountCents;
 
-    public string ResultAmountDisplayString => (ResultAmountCents / 100.0).ToString("N2");
+    public string ResultAmountDisplayString => ((double) this.ResultAmountCents / 100.0).ToString("N2");
   }
 }

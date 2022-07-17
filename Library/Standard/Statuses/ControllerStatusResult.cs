@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.ControllerStatusResult
+﻿// ControllerStatusResult
 
 
 namespace Cashmere.Library.Standard.Statuses

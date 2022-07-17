@@ -17,10 +17,15 @@ namespace CashmereDeposit.Models
     public class ApplicationModel
     {
         private List<GUIScreen> _dbGUIScreens;
+
         private List<Currency> _dbcurrencyList;
+
         private PasswordPolicyItems _passwordPolicy;
+
         public List<Language> _dblanguageList;
+
         public List<TransactionTypeListItem> _txTypeList;
+
         private ApplicationViewModel _applicationViewModel;
 
         public List<GUIScreen> dbGUIScreens => _dbGUIScreens;
@@ -86,13 +91,28 @@ namespace CashmereDeposit.Models
         {
             try
             {
-                ParameterExpression parameterExpression;
-                // ISSUE: method reference
-                // ISSUE: method reference
-                // ISSUE: method reference
-                Device device = DBContext.Devices.Include(x => x.Branch).FirstOrDefault(x => x.MachineName == Environment.MachineName);
+                var device = DBContext.Devices.Include(x => x.Branch).Include(x => x.ConfigGroupNavigation)
+                    .Include(x => x.LanguageListNavigation)
+                    .ThenInclude(x => x.LanguageListLanguages)
+                    //.ThenInclude(x => x.LanguageListNavigation)
+                    //.ThenInclude(x => x.LanguageListLanguages)
+                    .Include(x => x.GUIScreenListNavigation)
+                    .Include(x => x.GUIScreenListNavigation.GuiScreenListScreens)
+                    .ThenInclude(x => x.ScreenNavigation)
+                    .ThenInclude(x => x.GUIScreenType)
+                    //.ThenInclude(x => x.GUIScreenType)
+                    //.Include(x => x.GUIScreenListNavigation.GuiScreenListScreens.Select(q => q.ScreenNavigation))
+                    .Include(x => x.CurrencyListNavigation)
+                    .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
+                    .Include(x => x.ConfigGroupNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .FirstOrDefault(x => x.MachineName == Environment.MachineName);
+
                 if (device != null)
                     return device;
+
                 ApplicationViewModel.Log.Fatal(GetType().Name, 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Could not get device info from database, terminating");
                 throw new InvalidOperationException(string.Format("Device with machine name = {0} does not exists in the local database.", Environment.MachineName));
             }
@@ -124,7 +144,8 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateScreenList), "Initialisation", "Generating Screens List");
-            _dbGUIScreens = GetDevice(DBContext).GUIScreenListNavigation.GuiScreenListScreens.OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).Where(x => x.Enabled).ToList();
+            var device = GetDevice(DBContext);
+            _dbGUIScreens = device.GUIScreenListNavigation.GuiScreenListScreens.Where(x => x.Enabled).OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).ToList();
             if (_dbGUIScreens != null)
             {
                 List<GUIScreen> dbGuiScreens = _dbGUIScreens;
@@ -140,7 +161,10 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateLanguageList), "Initialisation", "Generating Language List");
-            _dblanguageList = GetDevice(DBContext).LanguageListNavigation.LanguageListLanguages.OrderBy(x => x.LanguageOrder).Select(x => x.LanguageItemNavigation).Where(x => x.Enabled).ToList();
+            var device = GetDevice(DBContext);
+            _dblanguageList = device.LanguageListNavigation.LanguageListLanguages
+                .Where(x => (bool)x.LanguageListNavigation.Enabled).OrderBy(x => x.LanguageOrder)
+                .Select(x => x.LanguageItemNavigation).ToList();
             if (_dblanguageList != null)
             {
                 List<Language> dblanguageList = _dblanguageList;
@@ -156,7 +180,8 @@ namespace CashmereDeposit.Models
         {
             using DepositorDBContext DBContext = new DepositorDBContext();
             ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateCurrencyList), "Initialisation", "Generating Currency List");
-            _dbcurrencyList = GetDevice(DBContext).CurrencyListNavigation.CurrencyListCurrencies.OrderBy(x => x.CurrencyOrder).Select(x => x.CurrencyItemNavigation).Skip(1).ToList();
+            var device = GetDevice(DBContext);
+            _dbcurrencyList = device.CurrencyListNavigation.CurrencyListCurrencies.OrderBy(x => x.CurrencyOrder).Select(x => x.CurrencyItemNavigation).Skip(1).ToList();
             if (_dbcurrencyList != null)
             {
                 List<Currency> dbcurrencyList = _dbcurrencyList;
@@ -173,11 +198,13 @@ namespace CashmereDeposit.Models
             try
             {
                 ApplicationViewModel.Log.Debug(GetType().Name, nameof(GenerateTransactionTypeList), "Initialisation", "Generating Transaction Type List");
-                _txTypeList = GetDevice(DBContext).TransactionTypeListNavigation.TransactionTypeListTransactionTypeListItems.OrderBy(x => x.ListOrder).Select(x => x.TxtypeListItemNavigation).Where(x => (bool)x.Enabled).ToList();
+                var device = GetDevice(DBContext);
+                _txTypeList = device.TransactionTypeListNavigation.TransactionTypeListTransactionTypeListItems.Where(x => x.TxtypeListNavigation.Enabled)
+                    .OrderBy(x => x.ListOrder).Select(x => x.TxtypeListItemNavigation)
+                    .ToList();
                 if (_txTypeList != null)
                 {
                     List<TransactionTypeListItem> txTypeList = _txTypeList;
-                    // ISSUE: explicit non-virtual call
                     if ((txTypeList != null ? ((txTypeList.Count) == 0 ? 1 : 0) : 0) == 0)
                         return;
                 }

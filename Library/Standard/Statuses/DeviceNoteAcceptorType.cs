@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceNoteAcceptorType
+﻿// DeviceNoteAcceptorType
 
 
 namespace Cashmere.Library.Standard.Statuses
@@ -16,5 +15,6 @@ namespace Cashmere.Library.Standard.Statuses
     JCM,
     MONIRON,
     NEWTON,
+    LIDIX2P,
   }
 }

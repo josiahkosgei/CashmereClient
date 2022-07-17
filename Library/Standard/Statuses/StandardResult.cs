@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.StandardResult
+﻿// StandardResult
 
 
 using System;

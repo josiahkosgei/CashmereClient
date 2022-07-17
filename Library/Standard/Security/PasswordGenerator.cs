@@ -29,7 +29,7 @@ namespace Cashmere.Library.Standard.Security
       return stringBuilder.ToString().Shuffle();
     }
 
-    public static string GenerateToken(long length, string AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") => new string(GenerateRandom(length).Select(x => AllowedCharacters[x % AllowedCharacters.Length]).ToArray());
+    public static string GenerateToken(long length, string AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") => new(GenerateRandom(length).Select(x => AllowedCharacters[x % AllowedCharacters.Length]).ToArray());
 
     public static string CreatePassword(long length, string valid)
     {

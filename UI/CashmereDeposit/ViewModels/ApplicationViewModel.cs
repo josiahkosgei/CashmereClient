@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,30 +30,33 @@ using Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValid
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
-using CashmereDeposit.Interfaces;
 using CashmereDeposit.Models;
 using CashmereDeposit.Models.Submodule;
 using CashmereDeposit.Utils;
 using CashmereDeposit.Utils.AlertClasses;
-using Activity = Cashmere.Library.CashmereDataAccess.Entities.Activity;
+using DeviceManager;
 
 
 namespace CashmereDeposit.ViewModels
 {
-    [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
-    public class ApplicationViewModel : Conductor<Screen>, IShell
+    /// <summary>
+    /// [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
+    /// </summary>
+    public class ApplicationViewModel : Conductor<Screen>
     {
         private bool _adminMode;
         private ApplicationUser _currentUser;
         private ApplicationUser _validatingUser;
         private CashAccSysDeviceManager.CashAccSysDeviceManager _deviceManager;
         private ApplicationState _currentApplicationState = ApplicationState.STARTUP;
-        private DispatcherTimer statusTimer = new DispatcherTimer(DispatcherPriority.Send);
+        private DispatcherTimer statusTimer = new(DispatcherPriority.Send);
 
-        public bool debugNoDevice { get; }
+        //public bool debugNoDevice { get; }
+        public bool debugNoDevice = true;
 
-        public bool debugNoCoreBanking { get; }
+        //public bool debugNoCoreBanking { get; }
 
+        public bool debugNoCoreBanking = true;
         public bool debugDisableSafeSensor { get; }
 
         public bool debugDisableBagSensor { get; }
@@ -63,13 +65,13 @@ namespace CashmereDeposit.ViewModels
 
         public static CashmereTranslationService CashmereTranslationService { get; set; }
 
-        public object NavigationLock { get; set; } = new object();
+        public object NavigationLock { get; set; } = new();
 
-        public object BagOpenLock { get; private set; } = new object();
+        public object BagOpenLock { get; set; } = new();
 
-        public object BagReplacedLock { get; private set; } = new object();
+        public object BagReplacedLock { get; set; } = new();
 
-        public object DoorClosedLock { get; private set; } = new object();
+        public object DoorClosedLock { get; set; } = new();
 
         internal EscrowJam EscrowJam { get; set; }
 
@@ -176,7 +178,7 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        public CashmereDeviceStatus ApplicationStatus { get; set; } = new CashmereDeviceStatus();
+        public CashmereDeviceStatus ApplicationStatus { get; set; } = new();
 
         public CIT lastCIT
         {
@@ -198,7 +200,7 @@ namespace CashmereDeposit.ViewModels
 
         public ApplicationViewModel(StartupViewModel startupModel)
         {
-            ApplicationStatus.PropertyChanged += new PropertyChangedEventHandler(ApplicationStatus_PropertyChanged);
+            ApplicationStatus.PropertyChanged += ApplicationStatus_PropertyChanged;
             StartupViewModel = startupModel;
             Log = new DepositorLogger(this);
             DeviceConfiguration = DeviceConfiguration.Initialise();
@@ -210,10 +212,10 @@ namespace CashmereDeposit.ViewModels
             dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName);
             InitialiseLicense();
             statusTimer.Interval = TimeSpan.FromSeconds(DeviceConfiguration.SERVER_POLL_INTERVAL);
-            statusTimer.Tick += new EventHandler(statusTimer_Tick);
+            statusTimer.Tick += statusTimer_Tick;
             statusTimer.IsEnabled = true;
             ApplicationModel = new ApplicationModel(this);
-            ApplicationModel.DatabaseStorageErrorEvent += new EventHandler<EventArgs>(ApplicationModel_DatabaseStorageErrorEvent);
+            ApplicationModel.DatabaseStorageErrorEvent += ApplicationModel_DatabaseStorageErrorEvent;
             SetCashmereDeviceState(CashmereDeviceState.DEVICE_MANAGER);
             InitialiseApp();
             Rand = new Random();
@@ -228,7 +230,7 @@ namespace CashmereDeposit.ViewModels
         {
             var backgroundWorker = new BackgroundWorker();
             backgroundWorker.WorkerReportsProgress = false;
-            backgroundWorker.DoWork += new DoWorkEventHandler(statusWorker_DoWork);
+            backgroundWorker.DoWork += statusWorker_DoWork;
             backgroundWorker.RunWorkerAsync();
         }
 
@@ -344,77 +346,74 @@ namespace CashmereDeposit.ViewModels
 
         private async Task InitialiseCoreBankingAsync()
         {
-            var applicationViewModel = this;
-            var dbContext = new DepositorDBContext();
-            try
+            using (DepositorDBContext DBContext = new DepositorDBContext())
             {
-                if (applicationViewModel.debugNoCoreBanking)
+                if (debugNoCoreBanking)
                 {
-                    if (applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
-                        applicationViewModel.UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                    if (ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                        UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
                 }
                 else
                 {
-                    var currentSession = applicationViewModel.CurrentSession;
-                    var allowConnectionError = currentSession == null || !currentSession.CountingStarted;
+                    AppSession currentSession = CurrentSession;
+                    bool allowConnectionError = currentSession == null || !currentSession.CountingStarted;
                     try
                     {
-                        var device = applicationViewModel.ApplicationModel.GetDevice(dbContext);
-                        var Id = device.Id;
-                        var appId = applicationViewModel.ApplicationModel.GetDevice(dbContext).AppId;
-                        var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, appId, device.AppKey, null);
-                        var request = new IntegrationServerPingRequest();
-                        var guid = Guid.NewGuid();
+                        Device device = ApplicationModel.GetDevice(DBContext);
+                        Guid deviceID = device.Id;
+                        Guid app_id = ApplicationModel.GetDevice(DBContext).AppId;
+                        IntegrationServiceClient IntegrationClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, app_id, device.AppKey, null);
+                        IntegrationServiceClient integrationServiceClient = IntegrationClient;
+                        IntegrationServerPingRequest request = new IntegrationServerPingRequest();
+                        Guid guid = Guid.NewGuid();
                         request.SessionID = guid.ToString();
                         guid = Guid.NewGuid();
                         request.MessageID = guid.ToString();
-                        request.AppID = appId;
+                        request.AppID = app_id;
                         request.AppName = device.MachineName;
-                        request.Language = applicationViewModel.CurrentLanguage;
+                        request.Language = CurrentLanguage;
                         request.MessageDateTime = DateTime.Now;
-                        var serverPingResponse = await integrationServiceClient.ServerPingAsync(request);
-                        applicationViewModel.CheckIntegrationResponseMessageDateTime(serverPingResponse.MessageDateTime);
-                        applicationViewModel.ApplicationStatus.CoreBankingStatus = new CoreBankingStatus()
+                        IntegrationServerPingResponse response = await integrationServiceClient.ServerPingAsync(request);
+                        CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
+                        ApplicationStatus.CoreBankingStatus = new CoreBankingStatus()
                         {
-                            ServerOnline = serverPingResponse.ServerOnline
+                            ServerOnline = response.ServerOnline
                         };
-                        if (allowConnectionError && !serverPingResponse.ServerOnline)
+                        int num;
+                        if (allowConnectionError && !response.ServerOnline)
                         {
-                            var applicationStatus = applicationViewModel.ApplicationStatus;
-                            if ((applicationStatus != null ? (applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0) : 0) == 0)
-                            {
-                                Log.ErrorFormat(applicationViewModel.GetType().Name, 92, ApplicationErrorConst.ERROR_CORE_BANKING.ToString(), "Could not connect to core banking with error: {0}>Server Error>{1}", serverPingResponse.PublicErrorMessage, serverPingResponse.ServerErrorMessage);
-                                if (!applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
-                                {
-                                    Log.Debug(applicationViewModel.GetType().Name, "Device", "Device State Changed", "Setting CashmereDeviceState.SERVER_CONNECTION");
-                                    goto label_19;
-                                }
-                                else
-                                    goto label_19;
-                            }
+                            CashmereDeviceStatus applicationStatus = ApplicationStatus;
+                            num = (applicationStatus != null ? (applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0) : 0) == 0 ? 1 : 0;
                         }
-                        if (applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
-                            applicationViewModel.UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                        else
+                            num = 0;
+                        if (num != 0)
+                        {
+                            Log.ErrorFormat(GetType().Name, 92, ApplicationErrorConst.ERROR_CORE_BANKING.ToString(), "Could not connect to core banking with error: {0}>Server Error>{1}", response.PublicErrorMessage, response.ServerErrorMessage);
+                            if (!ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                                Log.Debug(GetType().Name, "Device", "Device State Changed", "Setting CashmereDeviceState.SERVER_CONNECTION");
+                        }
+                        else if (ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                            UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                        device = null;
+                        deviceID = new Guid();
+                        app_id = new Guid();
+                        IntegrationClient = null;
+                        response = null;
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorFormat(applicationViewModel.GetType().Name, 92, ApplicationErrorConst.ERROR_CORE_BANKING.ToString(), "Could not connect to core banking with exception: {0}>>{1}", ex.Message, ex?.InnerException?.Message);
+                        Log.ErrorFormat(GetType().Name, 92, ApplicationErrorConst.ERROR_CORE_BANKING.ToString(), "Could not connect to core banking with exception: {0}>>{1}", ex.Message, ex?.InnerException?.Message);
                         if (allowConnectionError)
                         {
-                            if (!applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
-                                applicationViewModel.SetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                            if (!ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                                SetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
                         }
                         else
-                            Log.DebugFormat(applicationViewModel.GetType().Name, "Device", "Device State Changed", "{0} = {1}. Ignoring Setting CashmereDeviceState.SERVER_CONNECTION", "allowConnectionError", allowConnectionError);
+                            Log.DebugFormat(GetType().Name, "Device", "Device State Changed", "{0} = {1}. Ignoring Setting CashmereDeviceState.SERVER_CONNECTION", "allowConnectionError", allowConnectionError);
                     }
                 }
             }
-            finally
-            {
-                dbContext?.Dispose();
-            }
-        label_19:
-            dbContext = null;
         }
 
         public void InitialiseUsersAndPermissions() => LogoffUsers();
@@ -454,7 +453,7 @@ namespace CashmereDeposit.ViewModels
             try
             {
                 Printer = new DepositorPrinter(this, Log, DeviceConfiguration.RECEIPT_PRINTERPORT);
-                Printer.PrinterStateChangedEvent += new EventHandler<DepositorPrinter.PrinterStateChangedEventArgs>(Printer_StatusChangedEvent);
+                Printer.PrinterStateChangedEvent += Printer_StatusChangedEvent;
                 Log.Info(GetType().Name, "InitialisePrinter Result", "Initialisation", "SUCCESS");
             }
             catch (Exception ex)
@@ -484,36 +483,87 @@ namespace CashmereDeposit.ViewModels
                         device.MacAddress = ExtentionMethods.GetDefaultMacAddress();
                         SaveToDatabase(dbContext);
                     }
-                    _deviceManager = new CashAccSysDeviceManager.CashAccSysDeviceManager(DeviceConfiguration.DEVICECONTROLLER_HOST, DeviceConfiguration.DEVICECONTROLLER_PORT, device?.MacAddress, 1234, DeviceConfiguration.FIX_DEVICE_PORT, DeviceConfiguration.FIX_CONTROLLER_PORT, DeviceConfiguration.BAGFULL_WARN_PERCENT, DeviceConfiguration.SENSOR_INVERT_DOOR, DeviceConfiguration.CONTROLLER_LOG_DIRECTORY);
-                    if (DeviceManager == null)
-                        throw new Exception("Error creating DeviceManager: _deviceManager is null");
-                    DeviceManager.ConnectionEvent += new EventHandler<StringResult>(DeviceManager_ConnectionEvent);
-                    DeviceManager.RaiseControllerStateChangedEvent += new EventHandler<ControllerStateChangedEventArgs>(DeviceManager_RaiseControllerStateChangedEvent);
-                    DeviceManager.RaiseDeviceStateChangedEvent += new EventHandler<DeviceStateChangedEventArgs>(DeviceManager_RaiseDeviceStateChangedEvent);
-                    DeviceManager.StatusReportEvent += new EventHandler<DeviceStatusChangedEventArgs>(DeviceManager_StatusReportEvent);
-                    DeviceManager.NotifyCurrentTransactionStatusChangedEvent += new EventHandler<EventArgs>(DeviceManager_NotifyCurrentTransactionStatusChangedEvent);
-                    DeviceManager.TransactionStartedEvent += new EventHandler<DeviceTransaction>(DeviceManager_TransactionStartedEvent);
-                    DeviceManager.CashInStartedEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_CashInStartedEvent);
-                    DeviceManager.CountStartedEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_CountStartedEvent);
-                    DeviceManager.CountPauseEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_CountPauseEvent);
-                    DeviceManager.CountEndEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_CountEndEvent);
-                    DeviceManager.TransactionStatusEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_TransactionStatusEvent);
-                    DeviceManager.TransactionEndEvent += new EventHandler<DeviceTransactionResult>(DeviceManager_TransactionEndEvent);
-                    DeviceManager.CITResultEvent += new EventHandler<CITResult>(DeviceManager_CITResultEvent);
-                    DeviceManager.BagClosedEvent += new EventHandler<EventArgs>(DeviceManager_BagClosedEvent);
-                    DeviceManager.BagOpenedEvent += new EventHandler<EventArgs>(DeviceManager_BagOpenedEvent);
-                    DeviceManager.BagRemovedEvent += new EventHandler<EventArgs>(DeviceManager_BagRemovedEvent);
-                    DeviceManager.BagPresentEvent += new EventHandler<EventArgs>(DeviceManager_BagPresentEvent);
-                    DeviceManager.DoorClosedEvent += new EventHandler<EventArgs>(DeviceManager_DoorClosedEvent);
-                    DeviceManager.DoorOpenEvent += new EventHandler<EventArgs>(DeviceManager_DoorOpenEvent);
-                    DeviceManager.BagFullAlertEvent += new EventHandler<ControllerStatus>(DeviceManager_BagFullAlertEvent);
-                    DeviceManager.BagFullWarningEvent += new EventHandler<ControllerStatus>(DeviceManager_BagFullWarningEvent);
-                    DeviceManager.DeviceLockedEvent += new EventHandler<EventArgs>(DeviceManager_DeviceLockedEvent);
-                    DeviceManager.DeviceUnlockedEvent += new EventHandler<EventArgs>(DeviceManager_DeviceUnlockedEvent);
-                    DeviceManager.EscrowJamStartEvent += new EventHandler<EventArgs>(DeviceManager_EscrowJamStartEvent);
-                    DeviceManager.EscrowJamClearWaitEvent += new EventHandler<EventArgs>(DeviceManager_EscrowJamClearWaitEvent);
-                    DeviceManager.EscrowJamEndRequestEvent += new EventHandler<EventArgs>(DeviceManager_EscrowJamEndRequestEvent);
-                    DeviceManager.EscrowJamEndEvent += new EventHandler<EventArgs>(DeviceManager_EscrowJamEndEvent);
+
+                    //_deviceManager = new CashAccSysDeviceManager.CashAccSysDeviceManager(
+                    //    DeviceConfiguration.DEVICECONTROLLER_HOST, DeviceConfiguration.DEVICECONTROLLER_PORT,
+                    //    device?.MacAddress, 1234, DeviceConfiguration.FIX_DEVICE_PORT,
+                    //    DeviceConfiguration.FIX_CONTROLLER_PORT, DeviceConfiguration.BAGFULL_WARN_PERCENT,
+                    //    DeviceConfiguration.SENSOR_INVERT_DOOR, DeviceConfiguration.CONTROLLER_LOG_DIRECTORY);
+
+                    if (DeviceConfiguration.CONTROLLER_TYPE == "CashAccSys")
+                        DeviceManager = new CashAccSysDeviceManager.CashAccSysDeviceManager(DeviceConfiguration.DEVICECONTROLLER_HOST, DeviceConfiguration.DEVICECONTROLLER_PORT, device?.MacAddress, 1234, DeviceConfiguration.FIX_DEVICE_PORT, DeviceConfiguration.FIX_CONTROLLER_PORT, DeviceConfiguration.BAGFULL_WARN_PERCENT, DeviceConfiguration.SENSOR_INVERT_DOOR, DeviceConfiguration.CONTROLLER_LOG_DIRECTORY);
+                   
+                        if (DeviceManager == null)
+                            throw new Exception("Error creating DeviceManager: _deviceManager is null");
+
+                    DeviceManager.ConnectionEvent -= DeviceManager_ConnectionEvent;
+                    DeviceManager.RaiseControllerStateChangedEvent -= DeviceManager_RaiseControllerStateChangedEvent;
+                    DeviceManager.RaiseDeviceStateChangedEvent -= DeviceManager_RaiseDeviceStateChangedEvent;
+                    DeviceManager.StatusReportEvent -= DeviceManager_StatusReportEvent;
+                    DeviceManager.NotifyCurrentTransactionStatusChangedEvent -= DeviceManager_NotifyCurrentTransactionStatusChangedEvent;
+                    DeviceManager.TransactionStartedEvent -= DeviceManager_TransactionStartedEvent;
+                    DeviceManager.CashInStartedEvent -= DeviceManager_CashInStartedEvent;
+                    DeviceManager.CountStartedEvent -= DeviceManager_CountStartedEvent;
+                    DeviceManager.CountPauseEvent -= DeviceManager_CountPauseEvent;
+                    DeviceManager.CountEndEvent -= DeviceManager_CountEndEvent;
+                    DeviceManager.TransactionStatusEvent -= DeviceManager_TransactionStatusEvent;
+                    DeviceManager.TransactionEndEvent -= DeviceManager_TransactionEndEvent;
+                    DeviceManager.CITResultEvent -= DeviceManager_CITResultEvent;
+                    DeviceManager.BagClosedEvent -= DeviceManager_BagClosedEvent;
+                    DeviceManager.BagOpenedEvent -= DeviceManager_BagOpenedEvent;
+                    DeviceManager.BagRemovedEvent -= DeviceManager_BagRemovedEvent;
+                    DeviceManager.BagPresentEvent -= DeviceManager_BagPresentEvent;
+                    DeviceManager.DoorClosedEvent -= DeviceManager_DoorClosedEvent;
+                    DeviceManager.DoorOpenEvent -= DeviceManager_DoorOpenEvent;
+                    DeviceManager.BagFullAlertEvent -= DeviceManager_BagFullAlertEvent;
+                    DeviceManager.BagFullWarningEvent -= DeviceManager_BagFullWarningEvent;
+                    DeviceManager.DeviceLockedEvent -= DeviceManager_DeviceLockedEvent;
+                    DeviceManager.DeviceUnlockedEvent -= DeviceManager_DeviceUnlockedEvent;
+                    DeviceManager.EscrowJamStartEvent -= DeviceManager_EscrowJamStartEvent;
+                    DeviceManager.EscrowJamClearWaitEvent -= DeviceManager_EscrowJamClearWaitEvent;
+                    DeviceManager.EscrowJamEndRequestEvent -= DeviceManager_EscrowJamEndRequestEvent;
+                    DeviceManager.EscrowJamEndEvent -= DeviceManager_EscrowJamEndEvent;
+                    //DeviceManager.EscrowRejectEvent -= this.DeviceManager_EscrowRejectEvent;
+                    //DeviceManager.EscrowDropEvent -= this.DeviceManager_EscrowDropEvent;
+                    //DeviceManager.EscrowOperationCompleteEvent -= this.DeviceManager_EscrowOperationCompleteEvent;
+                    //DeviceManager.NoteJamStartEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamStartEvent);
+                    //DeviceManager.NoteJamClearWaitEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamClearWaitEvent);
+                    //DeviceManager.NoteJamEndRequestEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndRequestEvent);
+                    //DeviceManager.NoteJamEndEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndEvent);
+                    DeviceManager.ConnectionEvent += DeviceManager_ConnectionEvent;
+                    DeviceManager.RaiseControllerStateChangedEvent += DeviceManager_RaiseControllerStateChangedEvent;
+                    DeviceManager.RaiseDeviceStateChangedEvent += DeviceManager_RaiseDeviceStateChangedEvent;
+                    DeviceManager.StatusReportEvent += DeviceManager_StatusReportEvent;
+                    DeviceManager.NotifyCurrentTransactionStatusChangedEvent += DeviceManager_NotifyCurrentTransactionStatusChangedEvent;
+                    DeviceManager.TransactionStartedEvent += DeviceManager_TransactionStartedEvent;
+                    DeviceManager.CashInStartedEvent += DeviceManager_CashInStartedEvent;
+                    DeviceManager.CountStartedEvent += DeviceManager_CountStartedEvent;
+                    DeviceManager.CountPauseEvent += DeviceManager_CountPauseEvent;
+                    DeviceManager.CountEndEvent += DeviceManager_CountEndEvent;
+                    DeviceManager.TransactionStatusEvent += DeviceManager_TransactionStatusEvent;
+                    DeviceManager.TransactionEndEvent += DeviceManager_TransactionEndEvent;
+                    DeviceManager.CITResultEvent += DeviceManager_CITResultEvent;
+                    DeviceManager.BagClosedEvent += DeviceManager_BagClosedEvent;
+                    DeviceManager.BagOpenedEvent += DeviceManager_BagOpenedEvent;
+                    DeviceManager.BagRemovedEvent += DeviceManager_BagRemovedEvent;
+                    DeviceManager.BagPresentEvent += DeviceManager_BagPresentEvent;
+                    DeviceManager.DoorClosedEvent += DeviceManager_DoorClosedEvent;
+                    DeviceManager.DoorOpenEvent += DeviceManager_DoorOpenEvent;
+                    DeviceManager.BagFullAlertEvent += DeviceManager_BagFullAlertEvent;
+                    DeviceManager.BagFullWarningEvent += DeviceManager_BagFullWarningEvent;
+                    DeviceManager.DeviceLockedEvent += DeviceManager_DeviceLockedEvent;
+                    DeviceManager.DeviceUnlockedEvent += DeviceManager_DeviceUnlockedEvent;
+                    DeviceManager.EscrowJamStartEvent += DeviceManager_EscrowJamStartEvent;
+                    DeviceManager.EscrowJamClearWaitEvent += DeviceManager_EscrowJamClearWaitEvent;
+                    DeviceManager.EscrowJamEndRequestEvent += DeviceManager_EscrowJamEndRequestEvent;
+                    DeviceManager.EscrowJamEndEvent += DeviceManager_EscrowJamEndEvent;
+                    //DeviceManager.EscrowRejectEvent += this.DeviceManager_EscrowRejectEvent;
+                    //DeviceManager.EscrowDropEvent += this.DeviceManager_EscrowDropEvent;
+                    //DeviceManager.EscrowOperationCompleteEvent += this.DeviceManager_EscrowOperationCompleteEvent;
+                    //DeviceManager.NoteJamStartEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamStartEvent);
+                    //DeviceManager.NoteJamClearWaitEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamClearWaitEvent);
+                    //DeviceManager.NoteJamEndRequestEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndRequestEvent);
+                    //DeviceManager.NoteJamEndEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndEvent);
                 }
                 DeviceManager.Initialise();
                 var escrowJam = dbContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
@@ -533,27 +583,25 @@ namespace CashmereDeposit.ViewModels
             Log?.Error(GetType().Name, 107, "DeviceManager_StorageJamEvent", "Escrow Jam Detected");
             if (CurrentSession != null)
                 CurrentSession.CountingEnded = true;
-            if (CurrentTransaction != null)
+
+            if (CurrentTransaction.Transaction != null)
             {
-                if (CurrentTransaction.Transaction != null)
+                CurrentTransaction.Transaction.EscrowJam = true;
+                EscrowJam = new EscrowJam()
                 {
-                    CurrentTransaction.Transaction.EscrowJam = true;
-                    EscrowJam = new EscrowJam()
-                    {
-                        Id = Guid.NewGuid(),
-                        DateDetected = DateTime.Now,
-                        DroppedAmount = CurrentTransaction.DroppedAmountCents,
-                        EscrowAmount = CurrentTransaction.CountedAmountCents
-                    };
-                    CurrentTransaction.Transaction.EscrowJams.Add(EscrowJam);
-                    CurrentTransaction.DroppedAmountCents = CurrentTransaction.TotalAmountCents;
-                    CurrentTransaction.DroppedDenomination += CurrentTransaction.CountedDenominationResult;
-                    CurrentSession.SaveToDatabase();
-                }
-                AlertManager.SendAlert(new AlertEscrowJam(CurrentTransaction, CurrentSession.Device, DateTime.Now));
-                CurrentTransaction.NoteJamDetected = true;
-                EndTransaction(ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM, ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM.ToString() + ": Escrow Jam detected. DO NOT Post until after CIT");
+                    Id = Guid.NewGuid(),
+                    DateDetected = DateTime.Now,
+                    DroppedAmount = CurrentTransaction.DroppedAmountCents,
+                    EscrowAmount = CurrentTransaction.CountedAmountCents
+                };
+                CurrentTransaction.Transaction.EscrowJams.Add(EscrowJam);
+                CurrentTransaction.DroppedAmountCents = CurrentTransaction.TotalAmountCents;
+                CurrentTransaction.DroppedDenomination += CurrentTransaction.CountedDenominationResult;
+                CurrentSession.SaveToDatabase();
             }
+            AlertManager.SendAlert(new AlertEscrowJam(CurrentTransaction, CurrentSession.Device, DateTime.Now));
+            CurrentTransaction.NoteJamDetected = true;
+            EndTransaction(ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM, ApplicationErrorConst.ERROR_DEVICE_ESCROWJAM.ToString() + ": Escrow Jam detected. DO NOT Post until after CIT");
             if (sender == this && DeviceManager.DeviceManagerMode != DeviceManagerMode.ESCROW_JAM)
                 DeviceManager.OnEscrowJamStartEvent(this, EventArgs.Empty);
             else if (EscrowJam == null)
@@ -632,7 +680,7 @@ namespace CashmereDeposit.ViewModels
             using var dbContext = new DepositorDBContext();
             _deviceManager.SetCurrency(ApplicationModel.GetDevice(dbContext).CurrencyListNavigation.DefaultCurrency.ToUpper());
             CurrentSession = new AppSession(this);
-            CurrentSession.TransactionLimitReachedEvent += new EventHandler<EventArgs>(CurrentSession_TransactionLimitReachedEvent);
+            CurrentSession.TransactionLimitReachedEvent += CurrentSession_TransactionLimitReachedEvent;
             CurrentScreenIndex = 1;
             ShowScreen();
             CurrentApplicationState = ApplicationState.IDLE;
@@ -685,8 +733,9 @@ namespace CashmereDeposit.ViewModels
                         depositorDbContext.GuiScreens.Attach(GUIScreens[CurrentScreenIndex]);
                         var typeInfo = Assembly.GetExecutingAssembly().DefinedTypes.First(x => x.GUID == GUIScreens[CurrentScreenIndex].GUIScreenType.Code);
                         var guiScreen = GUIScreens[CurrentScreenIndex];
-                        var required = depositorDbContext.GuiScreenListScreens.Include(i=>i.ScreenNavigation).Where(x => x.ScreenNavigation.Id == guiScreen.Id).FirstOrDefault()?.Required;
-                        var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", CurrentGUIScreen?.GUIScreenText?.ScreenTitle, "[Translation Error]");
+                        var required = depositorDbContext.GuiScreenListScreens.Include(i => i.ScreenNavigation).FirstOrDefault(x => x.ScreenNavigation.Id == guiScreen.Id)?.Required;
+                        var deviceGuiScreen = GetDeviceGUIScreen(CurrentGUIScreen.Id);
+                        var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", deviceGuiScreen?.GUIScreenText?.ScreenTitle, "[Translation Error]");
                         var instance = Activator.CreateInstance(typeInfo, str, this, required);
                         this.ActivateItemAsync(instance);
                         Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
@@ -865,62 +914,62 @@ namespace CashmereDeposit.ViewModels
                 accountsListResponse2.MessageID = guid.ToString();
                 accountsListResponse2.Accounts = new List<Account>()
                 {
-                    new Account()
+                    new()
                     {
                         account_number = "1234567890",
                         account_name = "Account1"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567891",
                         account_name = "Account2"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567892",
                         account_name = "Account3"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567893",
                         account_name = "Account4"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567894",
                         account_name = "Account5"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567895",
                         account_name = "Account6"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567896",
                         account_name = "Account7"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567897",
                         account_name = "Account8"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567898",
                         account_name = "Account9"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567899",
                         account_name = "Account10"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1122334455",
                         account_name = "Account11"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1112334567",
                         account_name = "Account12"
@@ -1009,62 +1058,62 @@ namespace CashmereDeposit.ViewModels
                 accountsListResponse.MessageID = guid.ToString();
                 accountsListResponse.Accounts = new List<Account>()
                 {
-                    new Account()
+                    new()
                     {
                         account_number = "1234567890",
                         account_name = "Account1"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567891",
                         account_name = "Account2"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567892",
                         account_name = "Account3"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567893",
                         account_name = "Account4"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567894",
                         account_name = "Account5"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567895",
                         account_name = "Account6"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567896",
                         account_name = "Account7"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567897",
                         account_name = "Account8"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567898",
                         account_name = "Account9"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1234567899",
                         account_name = "Account10"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1122334455",
                         account_name = "Account11"
                     },
-                    new Account()
+                    new()
                     {
                         account_number = "1112334567",
                         account_name = "Account12"
@@ -1178,6 +1227,107 @@ namespace CashmereDeposit.ViewModels
                     Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Request", "Account = {0} Currency = {1}", accountNumber, Currency);
                     var device = GetDevice(dbContext);
                     var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                    var request = new AccountNumberValidationRequest();
+                    request.AccountNumber = accountNumber;
+                    request.AppID = device.AppId;
+                    request.AppName = device.MachineName;
+                    request.MessageID = Guid.NewGuid().ToString();
+                    request.MessageDateTime = DateTime.Now;
+                    request.SessionID = applicationViewModel.SessionID.Value.ToString();
+                    request.DeviceID = device.Id;
+                    request.Currency = Currency;
+                    request.Language = applicationViewModel.CurrentLanguage;
+                    request.TransactionType = txType;
+                    // ISSUE: explicit non-virtual call
+                    response = await (integrationServiceClient.ValidateAccountNumberAsync(request));
+                    applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
+                    if (response.IsSuccess)
+                    {
+                        Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Response", "AccountName = {0} ErrorCode = {1}, ErrorMessage = {2}", response.AccountName, response.ServerErrorCode, response.ServerErrorMessage);
+                        if (!DeviceConfiguration.ALLOW_CROSS_CURRENCY_TX)
+                        {
+                            switch (response?.AccountCurrency)
+                            {
+                                case null:
+                                    break;
+                                default:
+                                    if (response?.AccountCurrency?.ToUpper() != Currency.ToUpper())
+                                    {
+                                        Log.InfoFormat(applicationViewModel.GetType().Name, "Transaction", "Cross Currency Not Allowed", "Cannot deposit {2} into {1} Account {0}.", accountNumber, response.AccountCurrency, Currency);
+                                        response.IsSuccess = false;
+                                        response.PublicErrorMessage = string.Format("account indicated is a {0} account kindly enter the correct Currency account", response.AccountCurrency);
+                                        break;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    if (applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                        applicationViewModel.UnSetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorFormat(applicationViewModel.GetType().Name, 3, ApplicationErrorConst.ERROR_SYSTEM.ToString(), "Account Validation Exception: {0}", ex.MessageString());
+                    if (!applicationViewModel.ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION))
+                        applicationViewModel.SetCashmereDeviceState(CashmereDeviceState.SERVER_CONNECTION);
+                    response.IsSuccess = false;
+                    response.PublicErrorMessage = "Validation Error Occurred, please contact an administrator.";
+                }
+            }
+            Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Result", "Result = {0} AccountName = {1} CanTransact={2} Error = {3}", response.IsSuccess, response.AccountName, response.CanTransact, response?.ServerErrorMessage);
+            validationResponse1 = response;
+            return validationResponse1;
+        }
+        internal async Task<AccountNumberValidationResponse> _FinacleValidateAccountNumberAsync(
+        string accountNumber,
+        string Currency,
+        int txType)
+        {
+            var applicationViewModel = this;
+            AccountNumberValidationResponse validationResponse1;
+            using var dbContext = new DepositorDBContext();
+            Log.Info(applicationViewModel.GetType().Name, "ValidateAccountNumber", "User Input", accountNumber);
+            var response = new AccountNumberValidationResponse();
+            if (applicationViewModel.debugNoCoreBanking)
+            {
+                if (accountNumber == "1234")
+                {
+                    var validationResponse2 = new AccountNumberValidationResponse();
+                    validationResponse2.AccountName = "";
+                    validationResponse2.CanTransact = false;
+                    validationResponse2.MessageDateTime = DateTime.Now;
+                    var guid = Guid.NewGuid();
+                    validationResponse2.RequestID = guid.ToString().ToUpper();
+                    guid = Guid.NewGuid();
+                    validationResponse2.MessageID = guid.ToString().ToUpper();
+                    validationResponse2.IsSuccess = false;
+                    validationResponse2.PublicErrorCode = 400.ToString() ?? "";
+                    validationResponse2.PublicErrorMessage = "Account Does Not Exist";
+                    response = validationResponse2;
+                }
+                else
+                {
+                    var validationResponse3 = new AccountNumberValidationResponse();
+                    validationResponse3.AccountName = "Test Account";
+                    validationResponse3.CanTransact = true;
+                    validationResponse3.MessageDateTime = DateTime.Now;
+                    var guid = Guid.NewGuid();
+                    validationResponse3.RequestID = guid.ToString().ToUpper();
+                    guid = Guid.NewGuid();
+                    validationResponse3.MessageID = guid.ToString().ToUpper();
+                    validationResponse3.IsSuccess = true;
+                    validationResponse3.PublicErrorCode = 200.ToString() ?? "";
+                    validationResponse3.PublicErrorMessage = "Validated Successfully";
+                    response = validationResponse3;
+                }
+            }
+            else
+            {
+                try
+                {
+                    Log.InfoFormat(applicationViewModel.GetType().Name, "ValidateAccountNumber", "Validation Request", "Account = {0} Currency = {1}", accountNumber, Currency);
+                    var device = GetDevice(dbContext);
+                    var integrationServiceClient = new FinacleIntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
                     var request = new AccountNumberValidationRequest();
                     request.AccountNumber = accountNumber;
                     request.AppID = device.AppId;
@@ -2136,14 +2286,18 @@ namespace CashmereDeposit.ViewModels
             Log.Debug(GetType().Name, nameof(ConnectToDevice), "EventHandling", "Connecting to the device");
             if (debugNoDevice)
             {
-                var e = new StringResult();
-                e.resultCode = 0;
-                e.extendedResult = "ACCEPTED";
-                e.level = ErrorLevel.SUCCESS;
+                var e = new StringResult
+                {
+                    resultCode = 0,
+                    extendedResult = "ACCEPTED",
+                    level = ErrorLevel.SUCCESS
+                };
                 DeviceManager_ConnectionEvent(this, e);
             }
             else
+            {
                 DeviceManager.Connect();
+            }
         }
 
         internal void DeviceTransactionStart(long transactionLimitCents = 0, long transactionValueCents = 0)
@@ -2538,9 +2692,9 @@ namespace CashmereDeposit.ViewModels
                     TransactionCount = 3,
                     denomination = new Denomination()
                     {
-                        denominationItems = new List<DenominationItem>()
+                        DenominationItems = new List<DenominationItem>()
             {
-              new DenominationItem()
+              new()
               {
                 Currency = "KES",
                 denominationValue = 1000,
@@ -2795,20 +2949,22 @@ namespace CashmereDeposit.ViewModels
                 };
                 var txAmount = transaction.TxAmount;
                 long num2 = 100;
+                var guid = Guid.NewGuid();
+                guid = Guid.NewGuid();
+                guid = Guid.NewGuid();
                 objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", objArray);
-                var coreBankingAsync = new PostTransactionResponse();
-                var guid = Guid.NewGuid();
-                coreBankingAsync.MessageID = guid.ToString().ToUpper();
-                guid = Guid.NewGuid();
-                coreBankingAsync.RequestID = guid.ToString().ToUpper();
-                coreBankingAsync.PostResponseCode = 200.ToString() ?? "";
-                coreBankingAsync.PostResponseMessage = "Posted";
-                coreBankingAsync.MessageDateTime = DateTime.Now;
-                coreBankingAsync.IsSuccess = true;
-                coreBankingAsync.TransactionDateTime = DateTime.Now;
-                guid = Guid.NewGuid();
-                coreBankingAsync.TransactionID = guid.ToString().ToUpper();
+                var coreBankingAsync = new PostTransactionResponse
+                {
+                    MessageID = guid.ToString().ToUpper(),
+                    RequestID = guid.ToString().ToUpper(),
+                    PostResponseCode = 200.ToString() ?? "",
+                    PostResponseMessage = "Posted",
+                    MessageDateTime = DateTime.Now,
+                    IsSuccess = true,
+                    TransactionDateTime = DateTime.Now,
+                    TransactionID = guid.ToString().ToUpper()
+                };
                 return coreBankingAsync;
             }
             try
@@ -2844,46 +3000,49 @@ namespace CashmereDeposit.ViewModels
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", objArray);
                 var device = applicationViewModel.CurrentSession.Device;
                 var integrationServiceClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
-                var request = new PostTransactionRequest();
-                request.AppID = device.AppId;
-                request.AppName = device.MachineName;
-                request.MessageDateTime = DateTime.Now;
                 var guid = Guid.NewGuid();
-                request.MessageID = guid.ToString();
-                request.Language = applicationViewModel.CurrentLanguage;
-                request.DeviceID = device.Id;
                 guid = applicationViewModel.SessionID.Value;
-                request.SessionID = guid.ToString();
-                request.FundsSource = transaction.FundsSource;
-                request.RefAccountName = transaction.CbRefAccountName;
-                request.RefAccountNumber = transaction.TxRefAccount;
-                request.DeviceReferenceNumber = string.Format("{0:#}", transaction.TxRandomNumber);
-                request.DepositorIDNumber = transaction.TxIdNumber;
-                request.DepositorName = transaction.TxDepositorName;
-                request.DepositorPhone = transaction.TxPhone;
-                request.TransactionType = transactionTypeListItem?.CbTxType;
-                request.TransactionTypeID = transactionTypeListItem.Id;
-                var postTransactionData = new PostTransactionData();
-                postTransactionData.TransactionID = transaction.Id;
-                postTransactionData.DebitAccount = new PostBankAccount()
+                var request = new PostTransactionRequest
                 {
-                    AccountNumber = transaction.TxSuspenseAccount,
-                    Currency = transaction.TxCurrency.ToUpper()
-                };
-                postTransactionData.CreditAccount = new PostBankAccount()
-                {
-                    AccountName = transaction.CbAccountName,
-                    AccountNumber = transaction.TxAccountNumber,
-                    Currency = transaction.TxCurrency.ToUpper()
+                    AppID = device.AppId,
+                    AppName = device.MachineName,
+                    MessageDateTime = DateTime.Now,
+                    MessageID = guid.ToString(),
+                    Language = applicationViewModel.CurrentLanguage,
+                    DeviceID = device.Id,
+                    SessionID = guid.ToString(),
+                    FundsSource = transaction.FundsSource,
+                    RefAccountName = transaction.CbRefAccountName,
+                    RefAccountNumber = transaction.TxRefAccount,
+                    DeviceReferenceNumber = string.Format("{0:#}", transaction.TxRandomNumber),
+                    DepositorIDNumber = transaction.TxIdNumber,
+                    DepositorName = transaction.TxDepositorName,
+                    DepositorPhone = transaction.TxPhone,
+                    TransactionType = transactionTypeListItem?.CbTxType,
+                    TransactionTypeID = transactionTypeListItem.Id
                 };
                 txAmount = transaction.TxAmount;
-                postTransactionData.Amount = txAmount.Value / 100.0M;
-                postTransactionData.DateTime = transaction.TxEndDate.Value;
-                postTransactionData.DeviceID = transaction.Device.Id;
-                postTransactionData.DeviceNumber = transaction.Device.DeviceNumber;
-                postTransactionData.Narration = transaction.TxNarration;
+                var postTransactionData = new PostTransactionData
+                {
+                    TransactionID = transaction.Id,
+                    DebitAccount = new PostBankAccount()
+                    {
+                        AccountNumber = transaction.TxSuspenseAccount,
+                        Currency = transaction.TxCurrency.ToUpper()
+                    },
+                    CreditAccount = new PostBankAccount()
+                    {
+                        AccountName = transaction.CbAccountName,
+                        AccountNumber = transaction.TxAccountNumber,
+                        Currency = transaction.TxCurrency.ToUpper()
+                    },
+                    Amount = txAmount.Value / 100.0M,
+                    DateTime = transaction.TxEndDate.Value,
+                    DeviceID = transaction.Device.Id,
+                    DeviceNumber = transaction.Device.DeviceNumber,
+                    Narration = transaction.TxNarration
+                };
                 request.Transaction = postTransactionData;
-                // ISSUE: explicit non-virtual call
                 var coreBankingAsync = await (integrationServiceClient.PostTransactionAsync(request));
                 applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
                 return coreBankingAsync;
@@ -2892,14 +3051,150 @@ namespace CashmereDeposit.ViewModels
             {
                 var ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
                 Log.Error(applicationViewModel.GetType().Name, 91, ApplicationErrorConst.ERROR_TRANSACTION_POST_FAILURE.ToString(), ErrorDetail);
-                var coreBankingAsync = new PostTransactionResponse();
-                coreBankingAsync.MessageDateTime = DateTime.Now;
-                coreBankingAsync.PostResponseCode = "-1";
-                coreBankingAsync.PostResponseMessage = ErrorDetail;
-                coreBankingAsync.RequestID = requestID.ToString().ToUpperInvariant();
-                coreBankingAsync.ServerErrorCode = "-1";
-                coreBankingAsync.ServerErrorMessage = ErrorDetail;
-                coreBankingAsync.IsSuccess = false;
+                var coreBankingAsync = new PostTransactionResponse
+                {
+                    MessageDateTime = DateTime.Now,
+                    PostResponseCode = "-1",
+                    PostResponseMessage = ErrorDetail,
+                    RequestID = requestID.ToString().ToUpperInvariant(),
+                    ServerErrorCode = "-1",
+                    ServerErrorMessage = ErrorDetail,
+                    IsSuccess = false
+                };
+                return coreBankingAsync;
+            }
+        }
+        public async Task<PostTransactionResponse> _FinaclePostToCoreBankingAsync(
+               Guid requestID,
+               Transaction transaction)
+        {
+            var applicationViewModel = this;
+            using var dbContext = new DepositorDBContext();
+            if (applicationViewModel.debugNoCoreBanking)
+            {
+                var log = Log;
+                var name = applicationViewModel.GetType().Name;
+                var objArray = new object[4]
+                {
+                    requestID,
+                    transaction.TxAccountNumber,
+                    transaction.TxCurrency,
+                    null
+                };
+                var txAmount = transaction.TxAmount;
+                long num2 = 100;
+                var guid = Guid.NewGuid();
+                guid = Guid.NewGuid();
+                guid = Guid.NewGuid();
+                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
+                log.InfoFormat(name, "PostToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", objArray);
+                var coreBankingAsync = new PostTransactionResponse
+                {
+                    MessageID = guid.ToString().ToUpper(),
+                    RequestID = guid.ToString().ToUpper(),
+                    PostResponseCode = 200.ToString() ?? "",
+                    PostResponseMessage = "Posted",
+                    MessageDateTime = DateTime.Now,
+                    IsSuccess = true,
+                    TransactionDateTime = DateTime.Now,
+                    TransactionID = guid.ToString().ToUpper()
+                };
+                return coreBankingAsync;
+            }
+            try
+            {
+                Log.InfoFormat(applicationViewModel.GetType().Name, "Posting to live core banking", "Integation", "posting transaction {0}", transaction.ToString());
+                var transactionTypeListItem = dbContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == transaction.TxType.Value);
+                var applicationModel = applicationViewModel.ApplicationModel;
+                string str1;
+                if (applicationModel == null)
+                {
+                    str1 = null;
+                }
+                else
+                {
+                    var suspenseAccounts = applicationModel.GetDevice(dbContext).DeviceSuspenseAccounts;
+                    str1 = suspenseAccounts != null ? suspenseAccounts.FirstOrDefault(x => x.Enabled && string.Equals(x.CurrencyCode, CurrentTransaction?.CurrencyCode, StringComparison.InvariantCultureIgnoreCase))?.AccountNumber : null;
+                }
+                var str2 = str1;
+                var log = Log;
+                var name = applicationViewModel.GetType().Name;
+                var objArray = new object[5]
+                {
+                    requestID,
+                    transaction.TxAccountNumber,
+                    transaction.TxCurrency,
+                    null,
+                    null
+                };
+                var txAmount = transaction.TxAmount;
+                long num3 = 100;
+                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num3) : new long?();
+                objArray[4] = str2;
+                log.InfoFormat(name, "PostToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", objArray);
+                var device = applicationViewModel.CurrentSession.Device;
+                var integrationServiceClient = new FinacleIntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, device.AppId, device.AppKey, null);
+                var guid = Guid.NewGuid();
+                guid = applicationViewModel.SessionID.Value;
+                var request = new PostTransactionRequest
+                {
+                    AppID = device.AppId,
+                    AppName = device.MachineName,
+                    MessageDateTime = DateTime.Now,
+                    MessageID = guid.ToString(),
+                    Language = applicationViewModel.CurrentLanguage,
+                    DeviceID = device.Id,
+                    SessionID = guid.ToString(),
+                    FundsSource = transaction.FundsSource,
+                    RefAccountName = transaction.CbRefAccountName,
+                    RefAccountNumber = transaction.TxRefAccount,
+                    DeviceReferenceNumber = string.Format("{0:#}", transaction.TxRandomNumber),
+                    DepositorIDNumber = transaction.TxIdNumber,
+                    DepositorName = transaction.TxDepositorName,
+                    DepositorPhone = transaction.TxPhone,
+                    TransactionType = transactionTypeListItem?.CbTxType,
+                    TransactionTypeID = transactionTypeListItem.Id
+                };
+                txAmount = transaction.TxAmount;
+                var postTransactionData = new PostTransactionData
+                {
+                    TransactionID = transaction.Id,
+                    DebitAccount = new PostBankAccount()
+                    {
+                        AccountNumber = transaction.TxSuspenseAccount,
+                        Currency = transaction.TxCurrency.ToUpper()
+                    },
+                    CreditAccount = new PostBankAccount()
+                    {
+                        AccountName = transaction.CbAccountName,
+                        AccountNumber = transaction.TxAccountNumber,
+                        Currency = transaction.TxCurrency.ToUpper()
+                    },
+                    Amount = txAmount.Value / 100.0M,
+                    DateTime = transaction.TxEndDate.Value,
+                    DeviceID = transaction.Device.Id,
+                    DeviceNumber = transaction.Device.DeviceNumber,
+                    Narration = transaction.TxNarration
+                };
+                request.Transaction = postTransactionData;
+                var coreBankingAsync = await (integrationServiceClient.PostTransactionAsync(request));
+                applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
+                return coreBankingAsync;
+            }
+            catch (Exception ex)
+            {
+                var ErrorDetail = string.Format("Post failed with error: {0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
+                Log.Error(applicationViewModel.GetType().Name, 91, ApplicationErrorConst.ERROR_TRANSACTION_POST_FAILURE.ToString(), ErrorDetail);
+                var coreBankingAsync = new PostTransactionResponse
+                {
+                    MessageDateTime = DateTime.Now,
+                    PostResponseCode = "-1",
+                    PostResponseMessage = ErrorDetail,
+                    RequestID = requestID.ToString().ToUpperInvariant(),
+                    ServerErrorCode = "-1",
+                    ServerErrorMessage = ErrorDetail,
+                    IsSuccess = false
+                };
                 return coreBankingAsync;
             }
         }
@@ -2992,15 +3287,16 @@ namespace CashmereDeposit.ViewModels
             {
                 if (string.IsNullOrEmpty(language))
                     return;
-                var source1 = Application.Current.Resources.MergedDictionaries.Where<ResourceDictionary>(x => (bool)x?.Source?.OriginalString?.Contains("Lang_"));
+                var resourceDictionaries = Application.Current.Resources.MergedDictionaries
+                    .Where(x => x.Source != null && x.Source.OriginalString.Contains("Lang_")).ToList();
                 List<ResourceDictionary> resourceDictionaryList;
-                if (source1 == null)
+                if (resourceDictionaries == null)
                 {
                     resourceDictionaryList = null;
                 }
                 else
                 {
-                    var source2 = source1.Where(y =>
+                    var source2 = resourceDictionaries.Where(y =>
                     {
                         if (y == null)
                             return false;
@@ -3060,7 +3356,7 @@ namespace CashmereDeposit.ViewModels
             if (CurrentSession == null)
                 return;
             CurrentSession.Language = value.Code;
-            this.SetLanguage(value.Code);
+            SetLanguage(value.Code);
         }
 
         internal static string GetDeviceNumber()
@@ -3073,9 +3369,51 @@ namespace CashmereDeposit.ViewModels
         {
             try
             {
-                var device = DBContext.Devices.FirstOrDefault(c => c.MachineName == Environment.MachineName);
+
+                var device = DBContext.Devices.Include(x => x.Branch).Include(x => x.ConfigGroupNavigation)
+                    .Include(x => x.LanguageListNavigation)
+                        .ThenInclude(x => x.LanguageListLanguages)
+                    .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(x => x.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenType)
+
+                    .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+
+                    .Include(x => x.CurrencyListNavigation)
+                    .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
+                    .Include(x => x.ConfigGroupNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
+                        .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                        .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .FirstOrDefault(x => x.MachineName == Environment.MachineName);
                 if (device != null)
                     return device;
+                Log.Fatal(nameof(ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Could not get device info from database, terminating");
+                throw new InvalidOperationException(string.Format("Device with machine name = {0} does not exists in the local database.", Environment.MachineName));
+            }
+            catch (Exception ex)
+            {
+                Log.FatalFormat(nameof(ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "{0}>>{1}>>{2}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message);
+                throw;
+            }
+        }
+        internal static GUIScreen GetDeviceGUIScreen(int Id)
+        {
+            try
+            {
+                using var depositorDbContext = new DepositorDBContext();
+                var deviceGuiScreen = depositorDbContext.GuiScreens.Include(x => x.GUIScreenText)
+                        .Include(x => x.GUIScreenType)
+                        .Include(x => x.GuiTextNavigation)
+
+                    .FirstOrDefault(x => x.Id == Id);
+                if (deviceGuiScreen != null)
+                    return deviceGuiScreen;
+
                 Log.Fatal(nameof(ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Could not get device info from database, terminating");
                 throw new InvalidOperationException(string.Format("Device with machine name = {0} does not exists in the local database.", Environment.MachineName));
             }

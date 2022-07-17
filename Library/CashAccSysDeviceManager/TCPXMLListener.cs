@@ -14,21 +14,19 @@ namespace CashAccSysDeviceManager
 {
   public class TCPXMLListener
   {
-    private string _host;
-    private int _port;
-    private TcpClient _client;
+      private TcpClient _client;
     private StringBuilder Message;
     private XDocument doc;
     private XmlReader reader;
 
-    public string Host => _host;
+    public string Host { get; }
 
-    public int Port => _port;
+    public int Port { get; }
 
     public TCPXMLListener(string host, int port)
     {
-      _host = host;
-      _port = port;
+      Host = host;
+      Port = port;
       _client = new TcpClient(host, port);
       Task.Run(() => StartListening());
     }

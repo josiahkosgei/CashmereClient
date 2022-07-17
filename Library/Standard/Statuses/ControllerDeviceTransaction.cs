@@ -1,4 +1,4 @@
-﻿
+﻿// Decompiled with JetBrains decompiler
 // Type: Cashmere.Library.Standard.Statuses.ControllerDeviceTransaction
 
 

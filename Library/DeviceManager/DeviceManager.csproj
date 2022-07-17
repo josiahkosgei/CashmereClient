@@ -1,13 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>6.6.5.7</Version>
+		<FileVersion>6.6.5.7</FileVersion>
+		<InformationalVersion>6.6.5.7</InformationalVersion>
+		<Company>Maniwa Technologies Ltd.</Company>
+		<Copyright>Copyright ©  2016-2022  rights reserved.</Copyright>
+		<Description>GUI Application for Cash Handling Devices</Description>
+		<Product>Cashmere Deposit</Product>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Standard\Standard.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Standard\Standard.csproj" />
+	</ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.UptimeModeType
+﻿// UptimeModeType
 
 
 namespace Cashmere.Library.Standard.Statuses

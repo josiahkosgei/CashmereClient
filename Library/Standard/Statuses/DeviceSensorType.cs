@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceSensorType
+﻿// DeviceSensorType
 
 
 namespace Cashmere.Library.Standard.Statuses
@@ -10,5 +9,6 @@ namespace Cashmere.Library.Standard.Statuses
     VIRTUAL,
     NUMATO,
     SITECH,
+    CASHARC,
   }
 }

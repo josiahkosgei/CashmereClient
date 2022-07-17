@@ -6,10 +6,8 @@ namespace DeviceManager
 {
   public class ConnectionEventArgs : EventArgs
   {
-    private StandardResult _data;
+      public ConnectionEventArgs(StandardResult data) => Data = data;
 
-    public ConnectionEventArgs(StandardResult data) => _data = data;
-
-    public StandardResult Data => _data;
+    public StandardResult Data { get; }
   }
 }

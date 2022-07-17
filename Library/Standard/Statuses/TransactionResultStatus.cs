@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.TransactionResultStatus
+﻿// TransactionResultStatus
 
 
 namespace Cashmere.Library.Standard.Statuses

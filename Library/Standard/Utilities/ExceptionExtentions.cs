@@ -14,7 +14,7 @@ namespace Cashmere.Library.Standard.Utilities
       {
         int? nullable = MaxCharacters;
         int num = 0;
-        if (nullable.GetValueOrDefault() > num & nullable.HasValue)
+        if (nullable > num & nullable.HasValue)
           return (ex.Message + ">" + ex.InnerException?.Message + ">" + ex.InnerException?.InnerException?.Message + ">" + ex.InnerException?.InnerException?.InnerException?.Message + ">" + ex.InnerException?.InnerException?.InnerException?.InnerException?.Message).Left(MaxCharacters.Value);
       }
       return ex.Message + ">" + ex.InnerException?.Message + ">" + ex.InnerException?.InnerException?.Message + ">" + ex.InnerException?.InnerException?.InnerException?.Message + ">" + ex.InnerException?.InnerException?.InnerException?.InnerException?.Message;

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceStateChangedEventArgs
+﻿// DeviceStateChangedEventArgs
 
 
 using System;
@@ -10,8 +9,8 @@ namespace Cashmere.Library.Standard.Statuses
   {
     private DeviceState _data;
 
-    public DeviceStateChangedEventArgs(DeviceState data) => _data = data;
+    public DeviceStateChangedEventArgs(DeviceState data) => this._data = data;
 
-    public DeviceState Data => _data;
+    public DeviceState Data => this._data;
   }
 }

@@ -85,6 +85,7 @@ namespace CashmereDeposit.Models
         private string _API_COMMSERV_URI;
         private string _API_INTEGRATION_URI;
         private string _API_AUTH_API_URI;
+        public bool USE_REAR_SCREEN;
 
         private static DeviceConfiguration? deviceConfiguration { get; set; }
 

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceTransaction
+﻿// DeviceTransaction
 
 
 using System;
@@ -17,15 +16,15 @@ namespace Cashmere.Library.Standard.Statuses
       long transactionValueCents)
     {
       if (transactionLimitCents < transactionValueCents)
-        throw new ArgumentOutOfRangeException(string.Format("transactionValueCents of {0} is greater than transactionLimitCents of {1}", transactionValueCents, transactionLimitCents));
-      AccountNumber = accountNumber;
-      SessionID = sessionID;
-      TransactionID = transactionID;
-      Currency = currency;
-      TransactionLimitCents = transactionLimitCents;
-      TransactionValueCents = transactionValueCents;
-      StartDate = DateTime.Now;
-      CurrentTransactionResult = new TransactionStatusResponseData(sessionID, transactionID);
+        throw new ArgumentOutOfRangeException(string.Format("transactionValueCents of {0} is greater than transactionLimitCents of {1}", (object) transactionValueCents, (object) transactionLimitCents));
+      this.AccountNumber = accountNumber;
+      this.SessionID = sessionID;
+      this.TransactionID = transactionID;
+      this.Currency = currency;
+      this.TransactionLimitCents = transactionLimitCents;
+      this.TransactionValueCents = transactionValueCents;
+      this.StartDate = DateTime.Now;
+      this.CurrentTransactionResult = new TransactionStatusResponseData(sessionID, transactionID);
     }
 
     public string Currency { get; set; }
@@ -46,9 +45,9 @@ namespace Cashmere.Library.Standard.Statuses
     {
       get
       {
-        long num = Math.Min(TransactionLimitCents, TransactionValueCents);
-        long? droppedAmountCents = CurrentTransactionResult?.TotalDroppedAmountCents;
-        return (droppedAmountCents.HasValue ? new long?(num - droppedAmountCents.GetValueOrDefault()) : new long?()) ?? 0L;
+        long num = Math.Min(this.TransactionLimitCents, this.TransactionValueCents);
+        long? droppedAmountCents = this.CurrentTransactionResult?.TotalDroppedAmountCents;
+        return (droppedAmountCents.HasValue ? new long?(num - droppedAmountCents.GetValueOrDefault()) : new long?()).GetValueOrDefault();
       }
     }
 

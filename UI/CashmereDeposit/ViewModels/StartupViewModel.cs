@@ -8,7 +8,10 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive.Disposables;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Autofac;
@@ -23,10 +26,13 @@ using CashmereDeposit.Utils;
 using CashmereDeposit.Utils.AlertClasses;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin.Hosting;
+using Caliburn.Micro.ReactiveUI;
+using CashmereDeposit.Startup;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
-    public class StartupViewModel : Conductor<Screen>, IShell
+    public class StartupViewModel : Conductor<Screen>.Collection.OneActive, IDisposable
     {
 
         private DispatcherTimer _startupTimer = new DispatcherTimer(DispatcherPriority.Send);
@@ -42,45 +48,46 @@ namespace CashmereDeposit.ViewModels
 
         public StartupViewModel()
         {
-            ApplicationViewModel = new ApplicationViewModel(this);
+            //ApplicationViewModel = new ApplicationViewModel(this);
 
             using (new DepositorDBContext())
             {
 
                 Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version.ToString(), "CashmereDepositLog", null);
-                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
+                AppDomain.CurrentDomain.UnhandledException += CrashHandler;
                 ApplicationViewModel.DeviceConfiguration = DeviceConfiguration.Initialise();
                 ActivateItemAsync(new StartupImageViewModel());
                 _startupTimer.Interval = TimeSpan.FromSeconds(10.0);
-                _startupTimer.Tick += new EventHandler(StartupTimer_Tick);
+                _startupTimer.Tick += StartupTimer_Tick;
                 _startupTimer.IsEnabled = true;
                 _outOfOrderTimer.Interval = TimeSpan.FromSeconds(11.0);
-                _outOfOrderTimer.Tick += new EventHandler(OutOfOrderTimer_Tick);
+                _outOfOrderTimer.Tick += OutOfOrderTimer_Tick;
                 _outOfOrderTimer.IsEnabled = true;
-                WebAPI_StartOWINHost();
+                WebAPI_StartSelfHost();
             }
         }
 
-        public void WebAPI_StartOWINHost()
+        public sealed override Task ActivateItemAsync(Screen item, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return base.ActivateItemAsync(item, cancellationToken);
+        }
+
+        public async void WebAPI_StartSelfHost()
         {
             try
             {
-                string url = Settings.Default.OWIN_BASE_ADDRESS ?? "http://localhost:9000/";
-                Log.Info(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartOWINHost), "Starting server at {0}", new object[1]
-                {
-          url
-                });
+                var url = Settings.Default.OWIN_BASE_ADDRESS ?? "http://localhost:9000/";
+
+                Log.Info(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartSelfHost), "Starting server at {0}", new { url });
                 DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
-                if ((deviceConfiguration != null ? (deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) : 0) == 0)
-                    return;
-                WebApp.Start<Startup>(url);
+                //if ((deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) == 0)
+                //    return;
+                //WebApp.Start<Startup>(url);
+                await HostBuilder.Start();
             }
             catch (Exception ex)
             {
-                Log.Error(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartOWINHost), "Error starting OWIN server: {0}", new object[1]
-                {
-          ex.MessageString()
-                });
+                Log.Error(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartSelfHost), "Error starting OWIN server: {0}", new { ex.Message });
             }
         }
 
@@ -198,9 +205,49 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        private Device GetDevice(DepositorDBContext dbContext)
+        private static Device GetDevice(DepositorDBContext dbContext)
         {
-            return dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception("Device not set correctly in database. Device is null during start up.");
+            return dbContext.Devices.Include(x => x.Branch).Include(x => x.ConfigGroupNavigation)
+                .Include(x => x.LanguageListNavigation)
+                .ThenInclude(x => x.LanguageListLanguages)
+                //.ThenInclude(x => x.LanguageListNavigation)
+                //.ThenInclude(x => x.LanguageListLanguages)
+                .Include(x => x.GUIScreenListNavigation)
+                .Include(x => x.GUIScreenListNavigation.GuiScreenListScreens)
+                .ThenInclude(x => x.ScreenNavigation)
+                //.Include(x => x.GUIScreenListNavigation.GuiScreenListScreens.Select(q => q.ScreenNavigation))
+                .Include(x => x.CurrencyListNavigation)
+                .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
+                .Include(x => x.ConfigGroupNavigation)
+                .Include(x => x.TransactionTypeListNavigation)
+                .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                .ThenInclude(x => x.TxtypeListItemNavigation)
+                .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception( "Device: "+Environment.MachineName+" not set correctly in database. Device is null during start up.");
+        }
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        private bool _isDisposed = false;
+        // use this in derived class
+        // protected override void Dispose(bool isDisposing)
+        // use this in non-derived class
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (this._isDisposed)
+                return;
+
+            if (isDisposing)
+            {
+                // free managed resources here
+                this._disposables.Dispose();
+            }
+
+            // free unmanaged resources (unmanaged objects) and override a finalizer below.
+            // set large fields to null.
+
+            this._isDisposed = true;
+        }
+        public void Dispose()
+        {
+            this.Dispose(true);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceManagerState
+﻿// DeviceManagerState
 
 
 namespace Cashmere.Library.Standard.Statuses
@@ -37,5 +36,8 @@ namespace Cashmere.Library.Standard.Statuses
     ESCROWJAM_CLEAR_WAIT,
     ESCROWJAM_END_REQUEST,
     ESCROWJAM_END,
+    NOTEJAM_START,
+    NOTEJAM_CLEAR_WAIT,
+    NOTEJAM_END_REQUEST,
   }
 }

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceSensorDoor
+﻿// DeviceSensorDoor
 
 
 namespace Cashmere.Library.Standard.Statuses

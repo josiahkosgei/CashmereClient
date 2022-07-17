@@ -1,4 +1,4 @@
-﻿
+﻿// Decompiled with JetBrains decompiler
 // Type: Cashmere.Library.Standard.Statuses.CashmereException
 
 
@@ -25,11 +25,15 @@ namespace Cashmere.Library.Standard.Statuses
 
     public CashmereException(string message)
       : base(message)
-      => ServerErrorMessage = this.MessageString();
+    {
+      this.ServerErrorMessage = this.MessageString();
+    }
 
     public CashmereException(string message, Exception inner)
       : base(message, inner)
-      => ServerErrorMessage = this.MessageString();
+    {
+      this.ServerErrorMessage = this.MessageString();
+    }
 
     protected CashmereException(SerializationInfo info, StreamingContext context)
       : base(info, context)

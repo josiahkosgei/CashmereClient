@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.ControllerStateChangedEventArgs
+﻿// ControllerStateChangedEventArgs
 
 
 using System;
@@ -10,8 +9,8 @@ namespace Cashmere.Library.Standard.Statuses
   {
     private ControllerState _data;
 
-    public ControllerStateChangedEventArgs(ControllerState data) => _data = data;
+    public ControllerStateChangedEventArgs(ControllerState data) => this._data = data;
 
-    public ControllerState ControllerState => _data;
+    public ControllerState ControllerState => this._data;
   }
 }

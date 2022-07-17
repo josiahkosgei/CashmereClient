@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceEscrow
+﻿// DeviceEscrow
 
 
 namespace Cashmere.Library.Standard.Statuses

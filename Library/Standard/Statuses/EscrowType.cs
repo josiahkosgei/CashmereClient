@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.EscrowType
+﻿// EscrowType
 
 
 namespace Cashmere.Library.Standard.Statuses

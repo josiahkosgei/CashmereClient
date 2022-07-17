@@ -14,7 +14,7 @@ namespace Cashmere.Library.Standard.Utilities
   {
     public static byte[] FromBase64String(this string s) => Convert.FromBase64String(s);
 
-    public static Uri ToURI(this string s) => new Uri(s);
+    public static Uri ToURI(this string s) => new(s);
 
     public static Stream ToStream(this string s) => s.ToStream(Encoding.UTF8);
 

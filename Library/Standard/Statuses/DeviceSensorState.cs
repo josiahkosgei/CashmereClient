@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceSensorState
+﻿// DeviceSensorState
 
 
 namespace Cashmere.Library.Standard.Statuses

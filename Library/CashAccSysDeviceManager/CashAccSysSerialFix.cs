@@ -1,10 +1,7 @@
-﻿
-//CashAccSysSerialFix
-
-
-using System;
-using Cashmere.Library.Standard.Logging;
+﻿using Cashmere.Library.Standard.Logging;
 using Cashmere.Library.Standard.Utilities;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Linq;
@@ -18,22 +15,22 @@ namespace CashAccSysDeviceManager
   public class CashAccSysSerialFix : IDisposable, INotifyPropertyChanged
   {
     private static CashAccSysSerialFix instance;
-    private BackgroundWorker SerialSendingWorker = new BackgroundWorker();
+    private BackgroundWorker SerialSendingWorker = new();
     private bool quitSendingSerial;
     private bool dE50CassetteFull;
     private bool escrowBillPresent;
     private bool hopperBillPresent;
     private DE50Mode dE50Mode;
     private DE50OperatingState dE50Operation;
-    private const string RemoteCancelCommand = "\x00020017\x0003\x0005";
-    private const string StoringErrorRecoveryModeCommand = "\x000200213\x00033";
+    private const string RemoteCancelCommand = "\u00020017\u0003\u0005";
+    private const string StoringErrorRecoveryModeCommand = "\u000200213\u00033";
     private SerialPort DE50Port;
     private SerialPort CashAccSysPort;
     private bool IsInitialised;
     private bool AllowClearEscrowJam;
     private string fromDE50;
-    private CashmereLogger Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version.ToString(), "SerialFix", null);
-    private CashmereLogger DropLog = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version.ToString(), nameof (DropLog), null);
+    private CashmereLogger Log = new(Assembly.GetExecutingAssembly().GetName().Version.ToString(), "SerialFix", null);
+    private CashmereLogger DropLog = new(Assembly.GetExecutingAssembly().GetName().Version.ToString(), nameof (DropLog), null);
     private bool _canDrop;
     private bool _isStorageJam;
     private string lastPartialFrame;
@@ -268,17 +265,17 @@ namespace CashAccSysDeviceManager
           else
           {
             string lastPartialFrame1 = lastPartialFrame;
-            if ((lastPartialFrame1 != null ? (lastPartialFrame1.Contains("\x0002") ? 1 : 0) : 0) != 0)
-              lastPartialFrame = new string(lastPartialFrame.Skip(lastPartialFrame.IndexOf("\x0002")).ToArray());
+            if ((lastPartialFrame1 != null ? (lastPartialFrame1.Contains("\u0002") ? 1 : 0) : 0) != 0)
+              lastPartialFrame = new string(lastPartialFrame.Skip<char>(lastPartialFrame.IndexOf("\u0002")).ToArray<char>());
             string lastPartialFrame2 = lastPartialFrame;
-            if ((lastPartialFrame2 != null ? (lastPartialFrame2.Contains("\x0003") ? 1 : 0) : 0) != 0)
+            if ((lastPartialFrame2 != null ? (lastPartialFrame2.Contains("\u0003") ? 1 : 0) : 0) != 0)
             {
-              int num = lastPartialFrame.LastIndexOf("\x0003") + 1;
+              int num = lastPartialFrame.LastIndexOf("\u0003") + 1;
               int count;
               if (lastPartialFrame.Length + 1 >= (count = num + 1))
               {
-                FromDE50 = new string(lastPartialFrame.Take(count).ToArray());
-                lastPartialFrame = new string(lastPartialFrame.Skip(count).ToArray());
+                FromDE50 = new string(lastPartialFrame.Take<char>(count).ToArray<char>());
+                lastPartialFrame = new string(lastPartialFrame.Skip<char>(count).ToArray<char>());
               }
             }
           }
@@ -295,9 +292,9 @@ namespace CashAccSysDeviceManager
             char ch2 = FromDE50[FromDE50.Length - 14];
             DE50Mode = (DE50Mode) (bytes[bytes.Length - 14] - 64);
             DE50CassetteFull = bytes[bytes.Length - 13].IsBitSet(2);
-            if (FromDE50.IndexOf("\x0003") > 22)
+            if (FromDE50.IndexOf("\u0003") > 22)
               DropLog.Info("DE50", "Store End", "Result", FromDE50, Array.Empty<object>());
-            FromDE50 = FromDE50.Substring(0, FromDE50.IndexOf("\x0003") + 2);
+            FromDE50 = FromDE50.Substring(0, FromDE50.IndexOf("\u0003") + 2);
             switch (ch1)
             {
               case 'E':
@@ -310,10 +307,10 @@ namespace CashAccSysDeviceManager
                   switch (ch2)
                   {
                     case '@':
-                      DE50Port.Write("\x000200213\x00033");
+                      DE50Port.Write("\u000200213\u00033");
                       break;
                     case 'B':
-                      DE50Port.Write("\x00020017\x0003\x0005");
+                      DE50Port.Write("\u00020017\u0003\u0005");
                       break;
                   }
                 }
@@ -323,9 +320,9 @@ namespace CashAccSysDeviceManager
               default:
                 if (!IsInitialised && ch1 == 'H')
                 {
-                  str1 = "\x00020044001\x00032";
+                  str1 = "\u00020044001\u00032";
                   Log.Info(GetType().Name, "process message", "processing", "ToDE50 = u00020044001u0003u0032;", Array.Empty<object>());
-                  FromDE50 = "\x0015";
+                  FromDE50 = "\u0015";
                   Log.Info(GetType().Name, "process message", "processing", "FromDE50 = u0015;", Array.Empty<object>());
                   break;
                 }
@@ -341,9 +338,9 @@ namespace CashAccSysDeviceManager
               Log.Trace(GetType().Name, "process message", "processing", "if ((!CanDrop) && !IsStorageJam)", Array.Empty<object>());
               if (!CanDrop && !IsStorageJam && IsInitialised)
               {
-                str1 = "\x00020015\x0003\a";
+                str1 = "\u00020015\u0003\a";
                 Log.Info(GetType().Name, "process message", "processing", "ToDE50 = u00020015u0003u0007;", Array.Empty<object>());
-                FromDE50 = "\x0015";
+                FromDE50 = "\u0015";
                 Log.Info(GetType().Name, "process message", "processing", "FromDE50 = u0015;", Array.Empty<object>());
               }
             }

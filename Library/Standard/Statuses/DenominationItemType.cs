@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DenominationItemType
+﻿// DenominationItemType
 
 
 namespace Cashmere.Library.Standard.Statuses

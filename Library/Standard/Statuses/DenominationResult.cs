@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DenominationResult
+﻿// DenominationResult
 
 
 namespace Cashmere.Library.Standard.Statuses
@@ -12,6 +11,6 @@ namespace Cashmere.Library.Standard.Statuses
 
     public bool NotesRejected { get; set; }
 
-    public override string ToString() => string.Format("NoteJamDetected={0}\tNotesRejected={1}\tData={2}", NoteJamDetected, NotesRejected, data.ToString());
+    public override string ToString() => string.Format("NoteJamDetected={0}\tNotesRejected={1}\tData={2}", (object) this.NoteJamDetected, (object) this.NotesRejected, (object) this.data.ToString());
   }
 }

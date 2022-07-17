@@ -31,7 +31,7 @@ namespace CashAccSysDeviceManager
             denominationValue = x.Denomination
         }).ToList() : null;
       }
-      denomination.denominationItems = denominationItemList;
+      denomination.DenominationItems = denominationItemList;
       return denomination;
     }
 
@@ -55,7 +55,7 @@ namespace CashAccSysDeviceManager
             denominationValue = x.Denomination
         }).ToList() : null;
       }
-      denomination.denominationItems = denominationItemList;
+      denomination.DenominationItems = denominationItemList;
       return denomination;
     }
 
@@ -79,7 +79,7 @@ namespace CashAccSysDeviceManager
             denominationValue = x.Denomination
         }).ToList() : null;
       }
-      denomination.denominationItems = denominationItemList;
+      denomination.DenominationItems = denominationItemList;
       return denomination;
     }
 
@@ -103,7 +103,7 @@ namespace CashAccSysDeviceManager
             denominationValue = x.Denomination
         }).ToList() : null;
       }
-      denomination.denominationItems = denominationItemList;
+      denomination.DenominationItems = denominationItemList;
       return denomination;
     }
 

@@ -1,7 +1,7 @@
 ﻿
 // Type: CashmereDeposit.Models.AppTransaction
 
-// MVID: F63D4D22-EE07-4205-A184-9ED72F588748
+
 
 
 using System;
@@ -452,7 +452,7 @@ namespace CashmereDeposit.Models
           lock (DroppedDenominationUpdateLock)
           {
             _droppedDenominationResult = value;
-            foreach (var denominationItem in value.denominationItems)
+            foreach (var denominationItem in value.DenominationItems)
             {
               var denom = denominationItem;
               var list = Transaction.DenominationDetails.Where(x => x.Denom == denom.denominationValue).ToList();

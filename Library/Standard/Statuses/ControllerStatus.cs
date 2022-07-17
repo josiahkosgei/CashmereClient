@@ -1,10 +1,9 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.ControllerStatus
+﻿// ControllerStatus
 
 
 namespace Cashmere.Library.Standard.Statuses
 {
-  public class ControllerStatus
+  public class ControllerStatus : IControllerStatus
   {
     public ControllerState ControllerState { get; set; }
 

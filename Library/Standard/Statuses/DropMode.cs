@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DropMode
+﻿// DropMode
 
 
 namespace Cashmere.Library.Standard.Statuses

@@ -9,10 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("TransactionTypeList_TransactionTypeListItem")]
-    //// [Index("TxtypeList", "TxtypeListItem", Name = "UX_TransactionTypeList_TransactionTypeListItem_Item", IsUnique = true)]
-    //// [Index("TxtypeList", "ListOrder", Name = "UX_TransactionTypeList_TransactionTypeListItem_Order", IsUnique = true)]
-    //// [Index("TxtypeList", Name = "itxtype_list_TransactionTypeList_TransactionTypeListItem")]
-    //// [Index("TxtypeListItem", Name = "itxtype_list_item_TransactionTypeList_TransactionTypeListItem")]
     public partial class TransactionTypeListTransactionTypeListItem
     {
         [Key]

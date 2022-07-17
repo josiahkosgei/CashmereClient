@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.ErrorLevel
+﻿// ErrorLevel
 
 
 namespace Cashmere.Library.Standard.Statuses

@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.UserLockType
+﻿// UserLockType
 
 
 namespace Cashmere.Library.Standard.Statuses

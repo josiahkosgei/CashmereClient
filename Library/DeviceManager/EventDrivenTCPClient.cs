@@ -1,11 +1,7 @@
 ﻿using Cashmere.Library.Standard.Logging;
 using Cashmere.Library.Standard.Utilities;
-using System;
-using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
@@ -16,27 +12,18 @@ namespace DeviceManager
   {
     private const int DEFAULTTIMEOUT = 5000;
     private const int RECONNECTINTERVAL = 2000;
-    private string _host = "";
     private ConnectionStatus _ConStat;
     private TcpClient _client;
     private byte[] dataBuffer = new byte[3000];
-    private bool _AutoReconnect = true;
-    private int _Port;
-    private Encoding _encode = Encoding.Default;
-    private object _SyncLock = new object();
-    private System.Timers.Timer tmrReceiveTimeout = new System.Timers.Timer();
-    private System.Timers.Timer tmrSendTimeout = new System.Timers.Timer();
-    private System.Timers.Timer tmrConnectTimeout = new System.Timers.Timer();
+    private System.Timers.Timer tmrReceiveTimeout = new();
+    private System.Timers.Timer tmrSendTimeout = new();
+    private System.Timers.Timer tmrConnectTimeout = new();
 
     protected CashmereLogger Log { get; set; }
 
-    public object SyncLock => _SyncLock;
+    public object SyncLock { get; } = new();
 
-    public Encoding DataEncoding
-    {
-      get => _encode;
-      set => _encode = value;
-    }
+    public Encoding DataEncoding { get; set; } = Encoding.Default;
 
     public ConnectionStatus ConnectionState
     {
@@ -45,25 +32,22 @@ namespace DeviceManager
       {
         if (_ConStat != value)
           Console.WriteLine("Changing Connection State from {0} to {1}", Enum.GetName(typeof (ConnectionStatus), _ConStat), Enum.GetName(typeof (ConnectionStatus), value));
-        bool flag = value != _ConStat;
+        var flag = value != _ConStat;
         _ConStat = value;
         if (!(ConnectionStatusChanged != null & flag))
           return;
-        ConnectionStatusChanged.BeginInvoke(this, _ConStat, new AsyncCallback(cbChangeConnectionStateComplete), this);
+
+        ConnectionStatusChanged?.BeginInvoke(this, _ConStat, cbChangeConnectionStateComplete, this);
       }
     }
 
-    public bool AutoReconnect
-    {
-      get => _AutoReconnect;
-      set => _AutoReconnect = value;
-    }
+    public bool AutoReconnect { get; set; } = true;
 
     public int ReconnectInterval { get; set; }
 
-    public string Host => _host;
+    public string Host { get; } = "";
 
-    public int Port => _Port;
+    public int Port { get; } = 0;
 
     public int ReceiveTimeout
     {
@@ -85,24 +69,29 @@ namespace DeviceManager
 
     public event delConnectionStatusChanged ConnectionStatusChanged;
 
-    public EventDrivenTCPClient(CashmereLogger log, string host, int port, bool autoreconnect = true)
+    public EventDrivenTCPClient(
+      CashmereLogger log,
+      string host,
+      int port,
+      AddressFamily addressFamily,
+      bool autoreconnect = true)
     {
       Log = log;
-      _host = host;
-      _Port = port;
-      _AutoReconnect = autoreconnect;
-      _client = new TcpClient(AddressFamily.InterNetwork);
+      Host = host;
+      Port = port;
+      AutoReconnect = autoreconnect;
+      _client = new TcpClient(addressFamily);
       _client.NoDelay = true;
       ReceiveTimeout = 5000;
       SendTimeout = 5000;
       ConnectTimeout = 5000;
       ReconnectInterval = 2000;
       tmrReceiveTimeout.AutoReset = false;
-      tmrReceiveTimeout.Elapsed += new ElapsedEventHandler(tmrReceiveTimeout_Elapsed);
+      tmrReceiveTimeout.Elapsed += tmrReceiveTimeout_Elapsed;
       tmrConnectTimeout.AutoReset = false;
-      tmrConnectTimeout.Elapsed += new ElapsedEventHandler(tmrConnectTimeout_Elapsed);
+      tmrConnectTimeout.Elapsed += tmrConnectTimeout_Elapsed;
       tmrSendTimeout.AutoReset = false;
-      tmrSendTimeout.Elapsed += new ElapsedEventHandler(tmrSendTimeout_Elapsed);
+      tmrSendTimeout.Elapsed += tmrSendTimeout_Elapsed;
       ConnectionState = ConnectionStatus.NeverConnected;
     }
 
@@ -140,7 +129,7 @@ namespace DeviceManager
       ConnectionState = ConnectionStatus.AutoReconnecting;
       try
       {
-        _client.Client.BeginDisconnect(true, new AsyncCallback(cbDisconnectByHostComplete), _client.Client);
+        _client.Client.BeginDisconnect(true, cbDisconnectByHostComplete, _client.Client);
       }
       catch
       {
@@ -155,7 +144,7 @@ namespace DeviceManager
       tmrConnectTimeout.Start();
       try
       {
-        _client.BeginConnect(_host, _Port, new AsyncCallback(cbConnect), _client.Client);
+        _client.BeginConnect(Host, Port, cbConnect, _client.Client);
       }
       catch (Exception ex)
       {
@@ -166,7 +155,7 @@ namespace DeviceManager
     {
       if (ConnectionState != ConnectionStatus.Connected)
         return;
-      _client.Client.BeginDisconnect(true, new AsyncCallback(cbDisconnectComplete), _client.Client);
+      _client.Client.BeginDisconnect(true, cbDisconnectComplete, _client.Client);
     }
 
     public void Send(string data)
@@ -177,13 +166,13 @@ namespace DeviceManager
       }
       else
       {
-        byte[] bytes = _encode.GetBytes(data);
-        SocketError errorCode = SocketError.Success;
+        var bytes = DataEncoding.GetBytes(data);
+        var errorCode = SocketError.Success;
         tmrSendTimeout.Start();
-        _client.Client.BeginSend(bytes, 0, bytes.Length, SocketFlags.None, out errorCode, new AsyncCallback(cbSendComplete), _client.Client);
-        if (errorCode == SocketError.Success)
+        _client.Client.BeginSend(bytes, 0, bytes.Length, SocketFlags.None, out errorCode, cbSendComplete, _client.Client);
+        if (errorCode == 0)
           return;
-        new Action(DisconnectByHost)();
+        DisconnectByHost();
       }
     }
 
@@ -191,11 +180,11 @@ namespace DeviceManager
     {
       if (ConnectionState != ConnectionStatus.Connected)
         throw new InvalidOperationException("Cannot send data, socket is not connected");
-      SocketError errorCode = SocketError.Success;
-      _client.Client.BeginSend(data, 0, data.Length, SocketFlags.None, out errorCode, new AsyncCallback(cbSendComplete), _client.Client);
-      if (errorCode == SocketError.Success)
+      var errorCode = SocketError.Success;
+      _client.Client.BeginSend(data, 0, data.Length, SocketFlags.None, out errorCode, cbSendComplete, _client.Client);
+      if (errorCode == 0)
         return;
-      new Action(DisconnectByHost)();
+      DisconnectByHost();
     }
 
     public void Dispose()
@@ -237,7 +226,7 @@ namespace DeviceManager
       }
       if (!AutoReconnect)
         return;
-      new Action(Connect)();
+      Connect();
     }
 
     private void cbDisconnectComplete(IAsyncResult result)
@@ -250,7 +239,7 @@ namespace DeviceManager
 
     private void cbConnect(IAsyncResult result)
     {
-      Socket asyncState = result.AsyncState as Socket;
+      var asyncState = result.AsyncState as Socket;
       if (result == null)
         throw new InvalidOperationException("Invalid IAsyncResult - Could not interpret as a socket object");
       if (!asyncState.Connected)
@@ -258,7 +247,7 @@ namespace DeviceManager
         if (!AutoReconnect)
           return;
         Thread.Sleep(ReconnectInterval);
-        new Action(Connect)();
+        Connect();
       }
       else
       {
@@ -270,7 +259,7 @@ namespace DeviceManager
         {
           Console.WriteLine("Error encountered while executing Socket.EndConnect: " + ex.Message + ex.InnerException?.Message + ex.InnerException?.InnerException?.Message);
         }
-        new Action(cbConnectComplete)();
+        cbConnectComplete();
       }
     }
 
@@ -278,11 +267,11 @@ namespace DeviceManager
     {
       if (!(result.AsyncState is Socket asyncState))
         throw new InvalidOperationException("Invalid IAsyncResult - Could not interpret as a socket object");
-      SocketError errorCode = SocketError.Success;
+      var errorCode = SocketError.Success;
       asyncState.EndSend(result, out errorCode);
-      if (errorCode != SocketError.Success)
+      if (errorCode != 0)
       {
-        new Action(DisconnectByHost)();
+        DisconnectByHost();
       }
       else
       {
@@ -303,7 +292,7 @@ namespace DeviceManager
       if (!message.EndsWith("\r"))
         message += "\r";
       Console.WriteLine(GetType().Name + ".SendMessage(): " + message);
-      byte[] bytes = Encoding.ASCII.GetBytes(message);
+      var bytes = Encoding.ASCII.GetBytes(message);
       try
       {
         Send(bytes);
@@ -327,7 +316,7 @@ namespace DeviceManager
 
     private void StartListening()
     {
-      XmlReaderSettings settings = new XmlReaderSettings()
+      var settings = new XmlReaderSettings()
       {
         ConformanceLevel = ConformanceLevel.Fragment,
         IgnoreComments = true,
@@ -341,11 +330,17 @@ namespace DeviceManager
         {
           try
           {
-            int content = (int) xmlReader.MoveToContent();
+            var content = (int) xmlReader.MoveToContent();
+            if (!string.IsNullOrWhiteSpace(xmlReader.Name) && xmlReader.Name != "CCP")
+            {
+              xmlReader.ReadToFollowing("CCP");
+              Thread.Sleep(1);
+              continue;
+            }
             if (!(xmlReader.Name == "CCP"))
               break;
-            XDocument xdocument = XDocument.Load(xmlReader.ReadOuterXml().ToStream());
-            string args = xdocument.ToString();
+            var xdocument = XDocument.Load(xmlReader.ReadOuterXml().ToStream());
+            var args = xdocument.ToString();
             Console.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "]|TCPXMLListener|Data Received|" + args);
             if (xdocument.Root.Attribute("MsgID").Value != "10")
               SendMessage("<CCP MsgID=\"10\" MsgName=\"ACK\" SeqNo=\"" + xdocument.Root.Attribute("SeqNo").Value + "\"><body /></CCP>");

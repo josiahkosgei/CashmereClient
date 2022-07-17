@@ -7,6 +7,7 @@ using Cashmere.API.Messaging.Integration.Transactions;
 using Cashmere.API.Messaging.Integration.Validations.AccountNumberValidations;
 using Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValidations;
 using Cashmere.Library.Standard.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.API.Messaging.Integration.Controllers
 {
@@ -21,8 +22,7 @@ namespace Cashmere.API.Messaging.Integration.Controllers
         {
         }
 
-        public async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(
-          AccountNumberValidationRequest request) => await SendAsync<AccountNumberValidationResponse>("api/Accounts/ValidateAccountNumber", request);
+        public async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(AccountNumberValidationRequest request) => await SendAsync<AccountNumberValidationResponse>("api/Accounts/ValidateAccountNumber", request);
 
         public async Task<ReferenceAccountNumberValidationResponse> ValidateReferenceAccountNumberAsync(
           ReferenceAccountNumberValidationRequest request) => await SendAsync<ReferenceAccountNumberValidationResponse>("api/Accounts/ValidateReferenceAccountNumber", request);

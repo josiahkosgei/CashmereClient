@@ -1,4 +1,4 @@
-﻿
+﻿// Decompiled with JetBrains decompiler
 // Type: Cashmere.Library.Standard.Statuses.ControllerState
 
 
@@ -13,6 +13,7 @@ namespace Cashmere.Library.Standard.Statuses
     DROP_PAUSED,
     ESCROW_DROP,
     ESCROW_REJECT,
+    ESCROW_DONE,
     DISPENSE,
     OUT_OF_ORDER,
     ESCROWJAM_START,

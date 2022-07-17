@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceNoteAcceptor
+﻿// DeviceNoteAcceptor
 
 
 namespace Cashmere.Library.Standard.Statuses

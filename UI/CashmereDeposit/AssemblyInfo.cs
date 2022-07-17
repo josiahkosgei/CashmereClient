@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Resources;
 
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
-[assembly: AssemblyCopyright("Copyright ©  Maniwa Technologies Ltd.  rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("23842ec4-a388-4077-87c4-7d3be095a206")]

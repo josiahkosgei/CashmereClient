@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceTransactionStatus
+﻿// DeviceTransactionStatus
 
 
 namespace Cashmere.Library.Standard.Statuses

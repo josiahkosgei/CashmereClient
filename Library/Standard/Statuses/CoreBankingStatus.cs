@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.CoreBankingStatus
+﻿// CoreBankingStatus
 
 
 namespace Cashmere.Library.Standard.Statuses

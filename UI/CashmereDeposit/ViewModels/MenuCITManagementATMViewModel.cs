@@ -1,7 +1,7 @@
 ﻿
-// Type: CashmereDeposit.ViewModels.MenuCITManagementATMViewModel
+//.MenuCITManagementATMViewModel
 
-// MVID: F63D4D22-EE07-4205-A184-9ED72F588748
+
 
 
 using Caliburn.Micro;
@@ -9,6 +9,7 @@ using CashAccSysDeviceManager;
 using System;
 using System.Windows;
 using CashmereDeposit.Models;
+using DeviceManager;
 
 namespace CashmereDeposit.ViewModels
 {

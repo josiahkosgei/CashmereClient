@@ -8,7 +8,7 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary>
-          <local:MainBootstrapper x:Key="bootstrapper"/>
+          <local:MainBootstrapper x:Key="Bootstrapper"/>
         </ResourceDictionary>
         <ResourceDictionary Source="/Resources/ButtonStyles.xaml"/>
         <ResourceDictionary Source="/Resources/ControlStyles.xaml"/>

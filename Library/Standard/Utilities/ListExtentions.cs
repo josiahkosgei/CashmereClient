@@ -9,7 +9,7 @@ namespace Cashmere.Library.Standard.Utilities
 {
   public static class ListExtentions
   {
-    private static Random rng = new Random();
+    private static Random rng = new();
 
     public static void Shuffle<T>(this IList<T> list)
     {

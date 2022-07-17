@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DeviceDrop
+﻿// DeviceDrop
 
 
 using System.Collections.Generic;
@@ -12,15 +11,14 @@ namespace Cashmere.Library.Standard.Statuses
 
     public string CurrentDropID
     {
-      get => _currentDropID;
+      get => this._currentDropID;
       set
       {
-        if (!(_currentDropID != value))
+        if (!(this._currentDropID != value))
           return;
-        _currentDropID = value;
-        if (value == null)
-          return;
-        Drops.Add(value, null);
+        this._currentDropID = value;
+        if (value != null)
+          this.Drops.Add(value, (DropResultResult) null);
       }
     }
 

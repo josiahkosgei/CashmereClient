@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.EscrowPosition
+﻿// EscrowPosition
 
 
 namespace Cashmere.Library.Standard.Statuses
@@ -10,5 +9,6 @@ namespace Cashmere.Library.Standard.Statuses
     IDLE,
     DROP,
     REJECT,
+    ESCROW_JAM,
   }
 }

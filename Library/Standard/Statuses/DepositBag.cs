@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.DepositBag
+﻿// DepositBag
 
 
 namespace Cashmere.Library.Standard.Statuses

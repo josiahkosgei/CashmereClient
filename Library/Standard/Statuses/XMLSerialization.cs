@@ -1,5 +1,4 @@
-﻿
-// Type: Cashmere.Library.Standard.Statuses.XMLSerialization
+﻿// XMLSerialization
 
 
 using System.IO;
@@ -20,24 +19,28 @@ namespace Cashmere.Library.Standard.Statuses
         NewLineChars = string.Empty,
         NewLineHandling = NewLineHandling.None
       };
-      using StringWriter stringWriter = new StringWriter();
-      using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter, settings))
+      using (StringWriter output = new StringWriter())
       {
+        using (XmlWriter xmlWriter = XmlWriter.Create((TextWriter) output, settings))
+        {
           XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
           namespaces.Add(string.Empty, string.Empty);
-          xmlSerializer.Serialize(xmlWriter, message, namespaces);
-          empty = stringWriter.ToString();
+          xmlSerializer.Serialize(xmlWriter, (object) message, namespaces);
+          empty = output.ToString();
           xmlWriter.Close();
+        }
+        output.Close();
       }
-      stringWriter.Close();
       return empty;
     }
 
     public static string SerializeObject<T>(this T toSerialize)
     {
-        using StringWriter stringWriter = new StringWriter();
-        new XmlSerializer(toSerialize.GetType()).Serialize(stringWriter, toSerialize);
+      using (StringWriter stringWriter = new StringWriter())
+      {
+        new XmlSerializer(toSerialize.GetType()).Serialize((TextWriter) stringWriter, (object) toSerialize);
         return stringWriter.ToString();
+      }
     }
   }
 }
