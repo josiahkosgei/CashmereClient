@@ -22,7 +22,7 @@ namespace CashmereDeposit.ViewModels
 
     protected string AdditionalInfo
     {
-        get { return _additionalInfo; }
+        get => _additionalInfo;
         set
       {
         _additionalInfo = value;
@@ -32,7 +32,7 @@ namespace CashmereDeposit.ViewModels
 
     protected Decimal RetreivedAmount
     {
-        get { return _retreived_amount; }
+        get => _retreived_amount;
         set
       {
         _retreived_amount = value;
@@ -42,7 +42,7 @@ namespace CashmereDeposit.ViewModels
 
     public string RetreivedAmountString
     {
-        get { return _RetreivedAmountString; }
+        get => _RetreivedAmountString;
         set
       {
         _RetreivedAmountString = value;
@@ -119,7 +119,7 @@ namespace CashmereDeposit.ViewModels
 
     public override async Task<string> SaveForm()
     {
-      int num = FormValidation();
+      var num = FormValidation();
       if (num > 0)
         return string.Format("Form validation failed with {0:0} errors. Kindly correct them and try saving again", num);
       if (EscrowJam != null)
@@ -148,11 +148,11 @@ namespace CashmereDeposit.ViewModels
 
     public override int FormValidation()
     {
-      int num = 0;
-      foreach (FormListItem field in Fields)
+      var num = 0;
+      foreach (var field in Fields)
       {
-        Func<string, string> validate = field.Validate;
-        string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+        var validate = field.Validate;
+        var str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
         if (str != null)
         {
           field.ErrorMessageTextBlock = str;

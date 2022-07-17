@@ -15,7 +15,7 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class ATMScreenViewModelBase : Conductor<Screen>, IShell, IATMScreen
+  public class ATMScreenViewModelBase :  Conductor<Screen>, IATMScreen
   {
     public ApplicationViewModel ApplicationViewModel;
     public bool isInitialised;
@@ -25,21 +25,15 @@ namespace CashmereDeposit.ViewModels
     private ATMSelectionItem<object> selected;
     private Conductor<Screen> _conductor;
 
-    public PermissionRequiredResult PermissionRequiredResult
-    {
-        get { return _permissionRequiredResult; }
-    }
+    public PermissionRequiredResult PermissionRequiredResult => _permissionRequiredResult;
 
     private int pageSize { get; set; } = 6;
 
-    public IList<ATMSelectionItem<object>> VisibleOptions
-    {
-        get { return Screens.Skip(CurrentPageIndex * pageSize).Take(pageSize).ToList(); }
-    }
+    public IList<ATMSelectionItem<object>> VisibleOptions => Screens.Skip(CurrentPageIndex * pageSize).Take(pageSize).ToList();
 
     public ATMSelectionItem<object> SelectedVisibleOption
     {
-        get { return selected; }
+        get => selected;
         set
       {
         selected = value;
@@ -51,10 +45,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ScreenTitle { get; set; }
 
-    public Conductor<Screen> Conductor
-    {
-        get { return _conductor; }
-    }
+    public Conductor<Screen> Conductor => _conductor;
 
     protected Screen CallingObject { get; set; }
 
@@ -108,10 +99,7 @@ namespace CashmereDeposit.ViewModels
       GetPage(CurrentPageIndex);
     }
 
-    public bool CanGetNextPage
-    {
-        get { return Screens.Count - (CurrentPageIndex * pageSize + pageSize) > 0; }
-    }
+    public bool CanGetNextPage => Screens.Count - (CurrentPageIndex * pageSize + pageSize) > 0;
 
     public void GetNextPage()
     {
@@ -119,10 +107,7 @@ namespace CashmereDeposit.ViewModels
       GetPage(CurrentPageIndex);
     }
 
-    public bool CanGetPreviousPage
-    {
-        get { return CurrentPageIndex > 0; }
-    }
+    public bool CanGetPreviousPage => CurrentPageIndex > 0;
 
     public void GetPreviousPage()
     {

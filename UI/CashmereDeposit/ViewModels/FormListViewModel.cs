@@ -12,7 +12,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormListViewModel : Conductor<Screen>, IShell
+  public class FormListViewModel :  Conductor<Screen>
   {
     private FormListItem selected;
     private string _nextCaption = "Next";
@@ -26,7 +26,7 @@ namespace CashmereDeposit.ViewModels
 
     public FormListItem SelectedFieldList
     {
-        get { return selected; }
+        get => selected;
         set
       {
         selected = value;
@@ -44,7 +44,7 @@ namespace CashmereDeposit.ViewModels
 
     public string NextCaption
     {
-        get { return _nextCaption; }
+        get => _nextCaption;
         set
       {
         _nextCaption = value;
@@ -54,7 +54,7 @@ namespace CashmereDeposit.ViewModels
 
     public async void Save()
     {
-      string str = await Form.SaveForm();
+      var str = await Form.SaveForm();
       if (str == null)
         Form.FormClose(true);
       else
@@ -63,7 +63,7 @@ namespace CashmereDeposit.ViewModels
 
     public string BackCaption
     {
-        get { return _backCaption; }
+        get => _backCaption;
         set
       {
         _backCaption = value;

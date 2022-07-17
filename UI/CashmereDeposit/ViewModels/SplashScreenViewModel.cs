@@ -13,10 +13,8 @@ namespace CashmereDeposit.ViewModels
   [Guid("3B94AF90-0E62-4D79-89CE-E90DB0610300")]
   public class SplashScreenViewModel : DepositorCustomerScreenBaseViewModel
   {
-    public string splashVideo
-    {
-        get { return ApplicationViewModel.ApplicationModel.SplashVideoPath; }
-    }
+   
+  public string splashVideo => this.ApplicationViewModel.ApplicationModel.SplashVideoPath;
 
     public SplashScreenViewModel(
       string screenTitle,
@@ -37,7 +35,7 @@ namespace CashmereDeposit.ViewModels
     public void AdminButton()
     {
       ApplicationViewModel.AdminMode = true;
-      MenuBackendATMViewModel backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", ApplicationViewModel, ApplicationViewModel, this);
+      var backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", ApplicationViewModel, ApplicationViewModel, this);
     }
 
     public void Close()

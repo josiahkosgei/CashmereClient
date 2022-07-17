@@ -17,11 +17,11 @@ namespace CashmereDeposit.ViewModels
   {
     private string _message;
     private int _timerDuration;
-    private DispatcherTimer dispTimer = new DispatcherTimer(DispatcherPriority.Send, Application.Current.Dispatcher);
+    private DispatcherTimer dispTimer = new(DispatcherPriority.Send, Application.Current.Dispatcher);
 
     public string Message
     {
-        get { return _message; }
+        get => _message;
         set
       {
         _message = value;
@@ -31,8 +31,8 @@ namespace CashmereDeposit.ViewModels
 
     public int TimerDuration
     {
-        get { return _timerDuration; }
-        set { _timerDuration = value; }
+        get => _timerDuration;
+        set => _timerDuration = value;
     }
 
     public UserMessageScreenViewModel(
@@ -65,7 +65,7 @@ namespace CashmereDeposit.ViewModels
           return;
         CanNext = false;
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();

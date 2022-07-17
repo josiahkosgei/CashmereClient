@@ -9,21 +9,21 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public abstract class FormViewModelBase : Conductor<Screen>,IShell, IDepositorForm, IPermissionRequired
+  public abstract class FormViewModelBase : Conductor<Screen>, IDepositorForm, IPermissionRequired
   {
     protected bool isNew;
     public string _formErrorText;
     protected ApplicationViewModel ApplicationViewModel;
-    protected DepositorDBContext depositorDbContext = new DepositorDBContext();
+    protected DepositorDBContext depositorDbContext = new();
     protected DepositorDBContextProcedures depositorContextProcedures;
 
     public string ScreenTitle { get; set; }
 
-    protected List<FormListItem> Fields { get; set; } = new List<FormListItem>();
+    protected List<FormListItem> Fields { get; set; } = new();
 
     public string FormErrorText
     {
-        get { return _formErrorText; }
+        get => _formErrorText;
         set
       {
         _formErrorText = value;

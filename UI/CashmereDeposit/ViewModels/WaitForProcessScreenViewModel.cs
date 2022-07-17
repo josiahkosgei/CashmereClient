@@ -11,7 +11,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class WaitForProcessScreenViewModel : Conductor<Screen>, IShell
+  public class WaitForProcessScreenViewModel :  Conductor<Screen>
   {
     public ApplicationViewModel ApplicationViewModel { get; }
 

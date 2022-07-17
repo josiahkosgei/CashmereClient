@@ -11,7 +11,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormFieldViewModel : Conductor<Screen>, IShell
+  public class FormFieldViewModel :  Conductor<Screen>
   {
     private string _dataEntryLabel;
     private string _textboxText;
@@ -24,14 +24,11 @@ namespace CashmereDeposit.ViewModels
 
     private FormListItem Field { get; set; }
 
-    public string DataEntryLabel
-    {
-        get { return _dataEntryLabel; }
-    }
+    public string DataEntryLabel => _dataEntryLabel;
 
     public string DataEntryTextbox
     {
-        get { return _textboxText; }
+        get => _textboxText;
         set
       {
         _textboxText = value;
@@ -41,7 +38,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ErrorMessageTextBlock
     {
-        get { return _errorMessageTextBlock; }
+        get => _errorMessageTextBlock;
         set
       {
         _errorMessageTextBlock = value;
@@ -51,7 +48,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ValidatedText
     {
-        get { return _validatedText; }
+        get => _validatedText;
         set
       {
         _validatedText = value;
@@ -63,7 +60,7 @@ namespace CashmereDeposit.ViewModels
 
     public string NextButton_Caption
     {
-        get { return _nextButton_Caption; }
+        get => _nextButton_Caption;
         set
       {
         _nextButton_Caption = value;
@@ -73,7 +70,7 @@ namespace CashmereDeposit.ViewModels
 
     public string BackButton_Caption
     {
-        get { return _backButton_Caption; }
+        get => _backButton_Caption;
         set
       {
         _backButton_Caption = value;
@@ -107,7 +104,7 @@ namespace CashmereDeposit.ViewModels
     public void Validate(string s)
     {
       ErrorMessageTextBlock = null;
-      string str = Field.Validate(s);
+      var str = Field.Validate(s);
       if (str == null)
       {
         Field.DataTextBoxLabel = s;

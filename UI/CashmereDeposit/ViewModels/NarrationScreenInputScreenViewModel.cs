@@ -39,7 +39,7 @@ namespace CashmereDeposit.ViewModels
           return;
         CanNext = false;
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();

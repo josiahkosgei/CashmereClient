@@ -10,15 +10,14 @@ using System;
 using System.Timers;
 using System.Windows;
 using CashmereDeposit.Interfaces;
-using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class TimeoutScreenBase : Conductor<Screen>, IShell, IDisposable
+  public class TimeoutScreenBase :  Conductor<Screen>, IDisposable
   {
     private string _screenTitle;
     protected bool EnableIdleTimer;
-    protected Timer idleTimer = new Timer();
+    protected Timer idleTimer = new();
     protected int SnoozeCount;
     protected double TimeOutInterval;
 
@@ -26,7 +25,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ScreenTitle
     {
-        get { return _screenTitle; }
+        get => _screenTitle;
         internal set
       {
         _screenTitle = value;
@@ -47,11 +46,11 @@ namespace CashmereDeposit.ViewModels
         Application.Current.Dispatcher.Invoke(() =>
         {
             StopIdleTimer();
-            string message = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(
+            var message = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(
                 "IdleTimer_Tick.message", "sys_Dialog_ScreenIdleTimeout_DescriptionText", "Would you like more time?");
-            DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
-            int timeout = deviceConfiguration != null ? deviceConfiguration.USER_SCREEN_TIMEOUT : 30;
-            string title = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("IdleTimer_Tick.title",
+            var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
+            var timeout = deviceConfiguration != null ? deviceConfiguration.USER_SCREEN_TIMEOUT : 30;
+            var title = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("IdleTimer_Tick.title",
                 "sys_Dialog_ScreenIdleTimeout_TitleText", "Still there?");
             if (7 == (int)TimeoutDialogBox.ShowDialog(message, timeout, title, MessageBoxButton.YesNo,
                     MessageBoxImage.Question, MessageBoxResult.Yes))

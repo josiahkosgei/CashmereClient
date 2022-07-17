@@ -10,7 +10,6 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
-using Cashmere.Library.CashmereDataAccess.Entities;
 using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
@@ -28,7 +27,7 @@ namespace CashmereDeposit.ViewModels
     private bool _lastCanEscrowDrop;
     private bool _lastCanEscrowReject;
 
-    public object TimeoutLock { get; set; } = new object();
+    public object TimeoutLock { get; set; } = new();
 
     private bool TimeoutMode { get; set; }
 
@@ -42,7 +41,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
+        var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
         return deviceConfiguration == null || deviceConfiguration.AUTODROP_CHANGE_ALLOWED;
       }
     }
@@ -53,14 +52,14 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
+        var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
         return deviceConfiguration == null || deviceConfiguration.AUTOCOUNT_CHANGE_ALLOWED;
       }
     }
 
     public string CountButtonCaption
     {
-        get { return _CountButton_Caption; }
+        get => _CountButton_Caption;
         set
       {
         _CountButton_Caption = value;
@@ -70,7 +69,7 @@ namespace CashmereDeposit.ViewModels
 
     public string EscrowDropButtonCaption
     {
-        get { return _EscrowDropButton_Caption; }
+        get => _EscrowDropButton_Caption;
         set
       {
         _EscrowDropButton_Caption = value;
@@ -80,7 +79,7 @@ namespace CashmereDeposit.ViewModels
 
     public string EscrowRejectButtonCaption
     {
-        get { return _EscrowRejectButton_Caption; }
+        get => _EscrowRejectButton_Caption;
         set
       {
         _EscrowRejectButton_Caption = value;
@@ -90,7 +89,7 @@ namespace CashmereDeposit.ViewModels
 
     public string CountScreenTotalCaption
     {
-        get { return _CountScreenTotal_Caption; }
+        get => _CountScreenTotal_Caption;
         set
       {
         _CountScreenTotal_Caption = value;
@@ -112,9 +111,9 @@ namespace CashmereDeposit.ViewModels
       ApplicationViewModel.NotifyCurrentTransactionStatusChangedEvent += new EventHandler<EventArgs>(ApplicationViewModel_NotifyCurrentTransactionStatusChanged);
       ApplicationViewModel.DeviceManager.PropertyChanged += new PropertyChangedEventHandler(DeviceManager_PropertyChanged);
       ApplicationViewModel.DeviceManager.CashAccSysSerialFix.PropertyChanged += new PropertyChangedEventHandler(CashAccSysSerialFix_PropertyChanged);
-      DeviceConfiguration deviceConfiguration1 = ApplicationViewModel.DeviceConfiguration;
+      var deviceConfiguration1 = ApplicationViewModel.DeviceConfiguration;
       AutoDropChecked = deviceConfiguration1 != null && deviceConfiguration1.AUTODROP_CHECKED;
-      DeviceConfiguration deviceConfiguration2 = ApplicationViewModel.DeviceConfiguration;
+      var deviceConfiguration2 = ApplicationViewModel.DeviceConfiguration;
       AutoCountChecked = deviceConfiguration2 != null && deviceConfiguration2.AUTOCOUNT_CHECKED;
       InitialiseScreen();
     }
@@ -150,10 +149,10 @@ namespace CashmereDeposit.ViewModels
     {
       if (!e.PropertyName.Equals("ClearHopperRequest"))
         return;
-      string str = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.DeviceManager_PropertyChanged", "sys_ClearHopperRequest_Caption", "Kindly remove notes from hopper.", ApplicationViewModel.CurrentLanguage);
+      var str = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.DeviceManager_PropertyChanged", "sys_ClearHopperRequest_Caption", "Kindly remove notes from hopper.", ApplicationViewModel.CurrentLanguage);
       if (ApplicationViewModel.DeviceManager.ClearHopperRequest)
       {
-        string errorText = ErrorText;
+        var errorText = ErrorText;
         ErrorText = ((errorText != null ? (errorText.Length > 0 ? 1 : 0) : 0) != 0 ? "\r\n" : "") + str;
         ApplicationViewModel.Log.Warning(nameof (CountScreenViewModel), "Notes in hopper", "Clear Notes", str);
       }
@@ -178,7 +177,7 @@ namespace CashmereDeposit.ViewModels
 
     private void NotifyCurrentTransactionStatusChanged()
     {
-      int num = (int) IsCountWithinTheLimits();
+      var num = (int) IsCountWithinTheLimits();
       NotifyOfPropertyChange("CurrentTransaction");
       NotifyOfPropertyChange("CanCount");
       NotifyOfPropertyChange("CanPauseCount");
@@ -219,7 +218,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool LastCanNext
     {
-        get { return _lastCanNext; }
+        get => _lastCanNext;
         set
       {
         if (_lastCanNext == value)
@@ -235,7 +234,7 @@ namespace CashmereDeposit.ViewModels
       {
         if (!IsCountWithinTheLimits().HasFlag(CountLimitCheckResult.UNDERDEPOSIT))
         {
-          ApplicationViewModel applicationViewModel = ApplicationViewModel;
+          var applicationViewModel = ApplicationViewModel;
           int num1;
           if (applicationViewModel == null)
           {
@@ -243,7 +242,7 @@ namespace CashmereDeposit.ViewModels
           }
           else
           {
-            long? droppedAmountCents = applicationViewModel.CurrentTransaction?.DroppedAmountCents;
+            var droppedAmountCents = applicationViewModel.CurrentTransaction?.DroppedAmountCents;
             long num2 = 0;
             num1 = droppedAmountCents.GetValueOrDefault() > num2 & droppedAmountCents.HasValue ? 1 : 0;
           }
@@ -259,7 +258,7 @@ namespace CashmereDeposit.ViewModels
       ClearErrorText();
       PrintErrorText("processing, please wait...");
       ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-      BackgroundWorker backgroundWorker = new BackgroundWorker();
+      var backgroundWorker = new BackgroundWorker();
       backgroundWorker.WorkerReportsProgress = false;
       backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
       backgroundWorker.RunWorkerAsync();
@@ -267,7 +266,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool LastCanCancel
     {
-        get { return _lastCanCancel; }
+        get => _lastCanCancel;
         set
       {
         if (_lastCanCancel == value)
@@ -281,7 +280,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        bool flag = !ApplicationViewModel.DeviceManager.HasEscrow ? ApplicationViewModel.CanTransactionEnd : (AutoCountChecked ? CurrentTransaction.CountedAmountCents == 0L && CanEscrowDrop : ApplicationViewModel.CanTransactionEnd && !TimeoutMode && !ApplicationViewModel.DeviceManager.ClearHopperRequest);
+        var flag = !ApplicationViewModel.DeviceManager.HasEscrow ? ApplicationViewModel.CanTransactionEnd : (AutoCountChecked ? CurrentTransaction.CountedAmountCents == 0L && CanEscrowDrop : ApplicationViewModel.CanTransactionEnd && !TimeoutMode && !ApplicationViewModel.DeviceManager.ClearHopperRequest);
         LastCanCancel = flag;
         return flag;
       }
@@ -297,7 +296,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool LastCanCount
     {
-        get { return _lastCanCount; }
+        get => _lastCanCount;
         set
       {
         if (_lastCanCount == value)
@@ -311,8 +310,8 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        CountLimitCheckResult limitCheckResult = IsCountWithinTheLimits() & ~CountLimitCheckResult.OVERDEPOSIT;
-        bool flag = !AutoCountChecked && ApplicationViewModel.CanCount && !TimeoutMode && limitCheckResult == CountLimitCheckResult.OK;
+        var limitCheckResult = IsCountWithinTheLimits() & ~CountLimitCheckResult.OVERDEPOSIT;
+        var flag = !AutoCountChecked && ApplicationViewModel.CanCount && !TimeoutMode && limitCheckResult == CountLimitCheckResult.OK;
         LastCanCount = flag;
         return flag;
       }
@@ -325,7 +324,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool LastCanEscrowDrop
     {
-        get { return _lastCanEscrowDrop; }
+        get => _lastCanEscrowDrop;
         set
       {
         if (_lastCanEscrowDrop == value)
@@ -339,8 +338,8 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        CountLimitCheckResult limitCheckResult = IsCountWithinTheLimits() & ~CountLimitCheckResult.OVERDEPOSIT;
-        bool flag = !AutoDropChecked && ApplicationViewModel.CanEscrowDrop && (!TimeoutMode && limitCheckResult == CountLimitCheckResult.OK) && !limitCheckResult.HasFlag(CountLimitCheckResult.UNDERDEPOSIT);
+        var limitCheckResult = IsCountWithinTheLimits() & ~CountLimitCheckResult.OVERDEPOSIT;
+        var flag = !AutoDropChecked && ApplicationViewModel.CanEscrowDrop && (!TimeoutMode && limitCheckResult == CountLimitCheckResult.OK) && !limitCheckResult.HasFlag(CountLimitCheckResult.UNDERDEPOSIT);
         LastCanEscrowDrop = flag;
         return flag;
       }
@@ -353,7 +352,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool LastCanEscrowReject
     {
-        get { return _lastCanEscrowReject; }
+        get => _lastCanEscrowReject;
         set
       {
         if (_lastCanEscrowReject == value)
@@ -367,7 +366,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        bool flag = ApplicationViewModel.CanEscrowReject && !TimeoutMode;
+        var flag = ApplicationViewModel.CanEscrowReject && !TimeoutMode;
         LastCanEscrowReject = flag;
         return flag;
       }
@@ -380,8 +379,8 @@ namespace CashmereDeposit.ViewModels
 
     public CountLimitCheckResult IsCountWithinTheLimits()
     {
-      CountLimitCheckResult limitCheckResult = CountLimitCheckResult.OK;
-      AppTransaction currentTransaction1 = CurrentTransaction;
+      var limitCheckResult = CountLimitCheckResult.OK;
+      var currentTransaction1 = CurrentTransaction;
       if ((currentTransaction1 != null ? (currentTransaction1.IsUnderDeposit ? 1 : 0) : 0) != 0)
         limitCheckResult |= CountLimitCheckResult.UNDERDEPOSIT;
       long num;
@@ -389,9 +388,9 @@ namespace CashmereDeposit.ViewModels
       {
         if (string.IsNullOrWhiteSpace(ErrorText))
         {
-          string s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_UnderDeposit_ErrorMessage", "Kindly deposit {transaction.currency} {transaction.Underdeposit_amount} or more to continue or cancel the transaction");
-          string format = ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00";
-          AppTransaction currentTransaction2 = CurrentTransaction;
+          var s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_UnderDeposit_ErrorMessage", "Kindly deposit {transaction.currency} {transaction.Underdeposit_amount} or more to continue or cancel the transaction");
+          var format = ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00";
+          var currentTransaction2 = CurrentTransaction;
           string str1;
           if (currentTransaction2 == null)
           {
@@ -410,46 +409,46 @@ namespace CashmereDeposit.ViewModels
               str1 = num.ToString(format);
             }
           }
-          string newValue = str1;
-          string str2 = CustomerInputScreenReplace(s)?.Replace("{transaction.Underdeposit_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
+          var newValue = str1;
+          var str2 = CustomerInputScreenReplace(s)?.Replace("{transaction.Underdeposit_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
           PrintErrorText(string.Format("[{0}] ", 1019) + str2);
         }
       }
       else
       {
-        string errorText = ErrorText;
+        var errorText = ErrorText;
         if ((errorText != null ? (errorText.Contains(string.Format("[{0}]", 1019)) ? 1 : 0) : 0) != 0)
           ClearErrorText();
       }
-      AppTransaction currentTransaction3 = CurrentTransaction;
+      var currentTransaction3 = CurrentTransaction;
       if ((currentTransaction3 != null ? (currentTransaction3.IsOverCount ? 1 : 0) : 0) != 0)
         limitCheckResult |= CountLimitCheckResult.OVERCOUNT;
       if (limitCheckResult.HasFlag(CountLimitCheckResult.OVERCOUNT))
       {
         if (string.IsNullOrWhiteSpace(ErrorText))
         {
-          string s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_OverCount_ErrorMessage", "WARNING: deposits greater than {transaction.currency} {transaction.OverCount_amount} are not allowed.");
-          string newValue = CurrentTransaction?.TransactionLimits?.OvercountAmount.ToString(ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00");
-          string str = CustomerInputScreenReplace(s)?.Replace("{transaction.OverCount_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
+          var s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_OverCount_ErrorMessage", "WARNING: deposits greater than {transaction.currency} {transaction.OverCount_amount} are not allowed.");
+          var newValue = CurrentTransaction?.TransactionLimits?.OvercountAmount.ToString(ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00");
+          var str = CustomerInputScreenReplace(s)?.Replace("{transaction.OverCount_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
           PrintErrorText(string.Format("[{0}] ", 1017) + str);
         }
       }
       else
       {
-        string errorText = ErrorText;
+        var errorText = ErrorText;
         if ((errorText != null ? (errorText.Contains(string.Format("[{0}]", 1017)) ? 1 : 0) : 0) != 0)
           ClearErrorText();
       }
-      AppTransaction currentTransaction4 = CurrentTransaction;
+      var currentTransaction4 = CurrentTransaction;
       if ((currentTransaction4 != null ? (currentTransaction4.IsOverDeposit ? 1 : 0) : 0) != 0)
         limitCheckResult |= CountLimitCheckResult.OVERDEPOSIT;
       if (!limitCheckResult.HasFlag(CountLimitCheckResult.OVERCOUNT) && limitCheckResult.HasFlag(CountLimitCheckResult.OVERDEPOSIT))
       {
         if (string.IsNullOrWhiteSpace(ErrorText))
         {
-          string s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_OverDeposit_ErrorMessage", "WARNING: deposits greater than {transaction.currency} {transaction.Overdeposit_amount} will not be credited.");
-          string format = ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00";
-          AppTransaction currentTransaction2 = CurrentTransaction;
+          var s = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("CountScreenViewModel.IsCountWithinTheLimits", "sys_OverDeposit_ErrorMessage", "WARNING: deposits greater than {transaction.currency} {transaction.Overdeposit_amount} will not be credited.");
+          var format = ApplicationViewModel.DeviceConfiguration?.APPLICATION_MONEY_FORMAT ?? "#,##0.00";
+          var currentTransaction2 = CurrentTransaction;
           string str1;
           if (currentTransaction2 == null)
           {
@@ -468,14 +467,14 @@ namespace CashmereDeposit.ViewModels
               str1 = num.ToString(format);
             }
           }
-          string newValue = str1;
-          string str2 = CustomerInputScreenReplace(s)?.Replace("{transaction.Overdeposit_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
+          var newValue = str1;
+          var str2 = CustomerInputScreenReplace(s)?.Replace("{transaction.Overdeposit_amount}", newValue)?.Replace("{transaction.currency}", CurrentTransaction?.CurrencyCode);
           PrintErrorText(string.Format("[{0}] ", 1016) + str2);
         }
       }
       else
       {
-        string errorText = ErrorText;
+        var errorText = ErrorText;
         if ((errorText != null ? (errorText.Contains(string.Format("[{0}]", 1016)) ? 1 : 0) : 0) != 0)
           ClearErrorText();
       }
@@ -489,14 +488,14 @@ namespace CashmereDeposit.ViewModels
       get
       {
         long num1 = ApplicationViewModel?.DeviceManager?.CurrentDeviceStatus?.Bag?.NoteLevel ?? int.MaxValue;
-        long num2 = ApplicationViewModel?.DeviceManager?.CurrentDeviceStatus?.Bag?.NoteCapacity ?? int.MinValue;
-        DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
-        long num3 = deviceConfiguration != null ? deviceConfiguration.BAGFULL_OVERFLOW_COUNT : 1000L;
-        long num4 = num2 + num3;
-        int num5 = num1 >= num4 ? 1 : 0;
+        var num2 = ApplicationViewModel?.DeviceManager?.CurrentDeviceStatus?.Bag?.NoteCapacity ?? int.MinValue;
+        var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
+        var num3 = deviceConfiguration != null ? deviceConfiguration.BAGFULL_OVERFLOW_COUNT : 1000L;
+        var num4 = num2 + num3;
+        var num5 = num1 >= num4 ? 1 : 0;
         if (num5 != 0)
         {
-          string errorText = ErrorText;
+          var errorText = ErrorText;
           if ((errorText != null ? (!errorText.Contains(string.Format("[{0}]", 1015)) ? 1 : 0) : 0) == 0)
             return num5 != 0;
           if (!(Application.Current.FindResource("Bagfull_Overflow_WarningMessage") is string s))
@@ -504,7 +503,7 @@ namespace CashmereDeposit.ViewModels
           PrintErrorText(string.Format(string.Format("[{0}] {1}", 1015, CustomerInputScreenReplace(s))));
           return num5 != 0;
         }
-        string errorText1 = ErrorText;
+        var errorText1 = ErrorText;
         if ((errorText1 != null ? (errorText1.Contains(string.Format("[{0}]", 1015)) ? 1 : 0) : 0) == 0)
           return num5 != 0;
         ClearErrorText();

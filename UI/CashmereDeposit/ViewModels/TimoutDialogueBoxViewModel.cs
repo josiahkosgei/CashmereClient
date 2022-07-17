@@ -24,7 +24,7 @@ namespace CashmereDeposit.ViewModels
       ApplicationViewModel applicationViewModel,
       int timerDuration = 30)
     {
-        using TimoutDialogueBoxViewModel dialogueBoxViewModel = new TimoutDialogueBoxViewModel(applicationViewModel, timerDuration = 30);
+        using var dialogueBoxViewModel = new TimoutDialogueBoxViewModel(applicationViewModel, timerDuration = 30);
         applicationViewModel.ShowDialogBox(dialogueBoxViewModel);
         while (!dialogueBoxViewModel.HasReturned)
         {

@@ -12,7 +12,6 @@ using Cashmere.Library.Standard.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -67,8 +66,8 @@ namespace CashmereDeposit.ViewModels
             ScreenTitle = ScreenTitle + ": " + User.Username;
             IsAuthorise = isAuthorise;
             LoginSuccessCallBackDelegate = loginSuccessCallBack;
-            List<FormListItem> fields1 = Fields;
-            FormListItem formListItem1 = new FormListItem();
+            var fields1 = Fields;
+            var formListItem1 = new FormListItem();
 
             if (!(Application.Current.FindResource("User_OldPassword_Caption") is string))
                 str = "Old Password";
@@ -78,8 +77,8 @@ namespace CashmereDeposit.ViewModels
             formListItem1.DataTextBoxLabel = OldPassword;
             formListItem1.FormListItemType = FormListItemType.ALPHAPASSWORD;
             fields1.Add(formListItem1);
-            List<FormListItem> fields2 = Fields;
-            FormListItem formListItem2 = new FormListItem();
+            var fields2 = Fields;
+            var formListItem2 = new FormListItem();
             if (!(Application.Current.FindResource("User_NewPassword_Caption") is string))
                 str = "New Password";
             formListItem2.DataLabel = str;
@@ -88,8 +87,8 @@ namespace CashmereDeposit.ViewModels
             formListItem2.DataTextBoxLabel = NewPassword;
             formListItem2.FormListItemType = FormListItemType.ALPHAPASSWORD;
             fields2.Add(formListItem2);
-            List<FormListItem> fields3 = Fields;
-            FormListItem formListItem3 = new FormListItem();
+            var fields3 = Fields;
+            var formListItem3 = new FormListItem();
             if (!(Application.Current.FindResource("User_ConfirmPassword_Caption") is string))
                 str = "Confirm Password";
             formListItem3.DataLabel = str;
@@ -127,7 +126,7 @@ namespace CashmereDeposit.ViewModels
 
         public override async Task<string> SaveForm()
         {
-            int num = FormValidation();
+            var num = FormValidation();
             if (num > 0)
             {
                 FormErrorText = string.Format("Form validation failed with {0} errors. Kindly correct them and try again", num);
@@ -138,7 +137,7 @@ namespace CashmereDeposit.ViewModels
             NewPassword = null;
             OldPassword = null;
             ConfirmPassword = null;
-            foreach (FormListItem field in Fields)
+            foreach (var field in Fields)
             {
                 field.ValidatedText = null;
                 field.DataTextBoxLabel = null;
@@ -148,12 +147,12 @@ namespace CashmereDeposit.ViewModels
 
         public override int FormValidation()
         {
-            int num = 0;
-            foreach (FormListItem field in Fields)
+            var num = 0;
+            foreach (var field in Fields)
             {
                 field.ErrorMessageTextBlock = null;
-                Func<string, string> validate = field.Validate;
-                string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+                var validate = field.Validate;
+                var str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
                 if (str != null)
                 {
                     field.ErrorMessageTextBlock = str;
@@ -169,8 +168,8 @@ namespace CashmereDeposit.ViewModels
             {
                 if (!ApplicationViewModel.DeviceConfiguration.ALLOW_OFFLINE_AUTH)
                 {
-                    Device device = ApplicationViewModel.GetDevice(DBContext);
-                    ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest
+                    var device = ApplicationViewModel.GetDevice(DBContext);
+                    var changePasswordRequest = new ChangePasswordRequest
                     {
                         AppID = device.AppId,
                         AppName = device.MachineName,
@@ -185,10 +184,10 @@ namespace CashmereDeposit.ViewModels
                         NewPassword = NewPassword.Encrypt(device.AppKey),
                         ConfirmPassword = ConfirmPassword.Encrypt(device.AppKey)
                     };
-                    ChangePasswordRequest request = changePasswordRequest;
-                    AuthenticationServiceClient client = new AuthenticationServiceClient(ApplicationViewModel.DeviceConfiguration.API_AUTH_API_URI, device.AppId, device.AppKey, null);
+                    var request = changePasswordRequest;
+                    var client = new AuthenticationServiceClient(ApplicationViewModel.DeviceConfiguration.API_AUTH_API_URI, device.AppId, device.AppKey, null);
                     ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "API", "Sending request {0}", request);
-                    ChangePasswordResponse result = Task.Run((Func<Task<ChangePasswordResponse>>)(() => client.ChangePasswordAsync(request))).Result;
+                    var result = Task.Run((Func<Task<ChangePasswordResponse>>)(() => client.ChangePasswordAsync(request))).Result;
                     ApplicationViewModel.Log.DebugFormat("UserLoginViewModel", nameof(ValidatePassword), "API", "Received response {0}", result);
                     if (result.IsSuccess)
                         ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "SUCCESS", "Change password SUCCESS for request {0}, User {1}", request.MessageID, User.Username);
@@ -198,13 +197,13 @@ namespace CashmereDeposit.ViewModels
                     FormErrorText = result.PublicErrorMessage;
                     return result.IsSuccess ? 0 : 1;
                 }
-                PasswordPolicy passwordPolicy = DBContext.PasswordPolicies.FirstOrDefault();
+                var passwordPolicy = DBContext.PasswordPolicies.FirstOrDefault();
                 if (passwordPolicy == null)
                 {
                     FormErrorText = "error, no password policy defined";
                     return 1;
                 }
-                PasswordPolicyItems Policy = new PasswordPolicyItems()
+                var Policy = new PasswordPolicyItems()
                 {
                     HistorySize = passwordPolicy.HistorySize,
                     LowerCaseLength = passwordPolicy.MinLowercase,
@@ -220,12 +219,12 @@ namespace CashmereDeposit.ViewModels
                     {
                         if (NewPassword.ToUpper() == ConfirmPassword.ToUpper())
                         {
-                            IList<PasswordPolicyResult> passwordPolicyResultList = PasswordPolicyManager.Validate(NewPassword, Policy);
+                            var passwordPolicyResultList = PasswordPolicyManager.Validate(NewPassword, Policy);
                             if (passwordPolicyResultList == null)
                             {
                                 if ((bool)passwordPolicy.UseHistory && (bool)(list != null))
                                 {
-                                    foreach (PasswordHistory passwordHistory in list)
+                                    foreach (var passwordHistory in list)
                                     {
                                         if (PasswordStorage.VerifyPassword(NewPassword, passwordHistory.Password))
                                         {
@@ -234,7 +233,7 @@ namespace CashmereDeposit.ViewModels
                                         }
                                     }
                                 }
-                                string hash = PasswordStorage.CreateHash(NewPassword);
+                                var hash = PasswordStorage.CreateHash(NewPassword);
                                 User.Password = hash;
                                 User.PasswordResetRequired = false;
                                 User.PasswordHistories.Add(new PasswordHistory()
@@ -246,7 +245,7 @@ namespace CashmereDeposit.ViewModels
                                 ApplicationViewModel.SaveToDatabase(DBContext);
                                 return 0;
                             }
-                            StringBuilder stringBuilder = new StringBuilder();
+                            var stringBuilder = new StringBuilder();
                             if (passwordPolicyResultList.Contains(PasswordPolicyResult.MINIMUM_LENGTH))
                                 stringBuilder.AppendLine(string.Format("Password must be at least {0:#} characters long", passwordPolicy.MinLength));
                             if (passwordPolicyResultList.Contains(PasswordPolicyResult.UPPER_CASE_LENGTH))
@@ -290,7 +289,7 @@ namespace CashmereDeposit.ViewModels
             if (success)
             {
                 Conductor.ActivateItemAsync(NextObject);
-                UserLoginViewModel.LoginSuccessCallBack callBackDelegate = LoginSuccessCallBackDelegate;
+                var callBackDelegate = LoginSuccessCallBackDelegate;
                 if (callBackDelegate == null)
                     return;
                 callBackDelegate(User, IsAuthorise);

@@ -16,7 +16,7 @@ namespace CashmereDeposit.ViewModels
 
     public string SelectedItemList
     {
-        get { return selected; }
+        get => selected;
         set
       {
         selected = value;

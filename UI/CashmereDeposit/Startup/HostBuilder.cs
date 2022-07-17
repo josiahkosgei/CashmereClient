@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 
 namespace CashmereDeposit.Startup
@@ -16,7 +12,7 @@ namespace CashmereDeposit.Startup
             if (host == null)
             {
                 var ip = System.Net.IPAddress.Parse("127.0.0.1");
-                var port = 20201;
+                var port = 9000;
 
                 host = new WebHostBuilder()
                     .UseKestrel(options =>

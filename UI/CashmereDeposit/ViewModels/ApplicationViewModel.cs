@@ -346,7 +346,7 @@ namespace CashmereDeposit.ViewModels
 
         private async Task InitialiseCoreBankingAsync()
         {
-            using (DepositorDBContext DBContext = new DepositorDBContext())
+            using (var DBContext = new DepositorDBContext())
             {
                 if (debugNoCoreBanking)
                 {
@@ -355,17 +355,17 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    AppSession currentSession = CurrentSession;
-                    bool allowConnectionError = currentSession == null || !currentSession.CountingStarted;
+                    var currentSession = CurrentSession;
+                    var allowConnectionError = currentSession == null || !currentSession.CountingStarted;
                     try
                     {
-                        Device device = ApplicationModel.GetDevice(DBContext);
-                        Guid deviceID = device.Id;
-                        Guid app_id = ApplicationModel.GetDevice(DBContext).AppId;
-                        IntegrationServiceClient IntegrationClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, app_id, device.AppKey, null);
-                        IntegrationServiceClient integrationServiceClient = IntegrationClient;
-                        IntegrationServerPingRequest request = new IntegrationServerPingRequest();
-                        Guid guid = Guid.NewGuid();
+                        var device = ApplicationModel.GetDevice(DBContext);
+                        var deviceID = device.Id;
+                        var app_id = ApplicationModel.GetDevice(DBContext).AppId;
+                        var IntegrationClient = new IntegrationServiceClient(DeviceConfiguration.API_INTEGRATION_URI, app_id, device.AppKey, null);
+                        var integrationServiceClient = IntegrationClient;
+                        var request = new IntegrationServerPingRequest();
+                        var guid = Guid.NewGuid();
                         request.SessionID = guid.ToString();
                         guid = Guid.NewGuid();
                         request.MessageID = guid.ToString();
@@ -373,7 +373,7 @@ namespace CashmereDeposit.ViewModels
                         request.AppName = device.MachineName;
                         request.Language = CurrentLanguage;
                         request.MessageDateTime = DateTime.Now;
-                        IntegrationServerPingResponse response = await integrationServiceClient.ServerPingAsync(request);
+                        var response = await integrationServiceClient.ServerPingAsync(request);
                         CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                         ApplicationStatus.CoreBankingStatus = new CoreBankingStatus()
                         {
@@ -382,7 +382,7 @@ namespace CashmereDeposit.ViewModels
                         int num;
                         if (allowConnectionError && !response.ServerOnline)
                         {
-                            CashmereDeviceStatus applicationStatus = ApplicationStatus;
+                            var applicationStatus = ApplicationStatus;
                             num = (applicationStatus != null ? (applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0) : 0) == 0 ? 1 : 0;
                         }
                         else
@@ -492,9 +492,9 @@ namespace CashmereDeposit.ViewModels
 
                     if (DeviceConfiguration.CONTROLLER_TYPE == "CashAccSys")
                         DeviceManager = new CashAccSysDeviceManager.CashAccSysDeviceManager(DeviceConfiguration.DEVICECONTROLLER_HOST, DeviceConfiguration.DEVICECONTROLLER_PORT, device?.MacAddress, 1234, DeviceConfiguration.FIX_DEVICE_PORT, DeviceConfiguration.FIX_CONTROLLER_PORT, DeviceConfiguration.BAGFULL_WARN_PERCENT, DeviceConfiguration.SENSOR_INVERT_DOOR, DeviceConfiguration.CONTROLLER_LOG_DIRECTORY);
-                   
-                        if (DeviceManager == null)
-                            throw new Exception("Error creating DeviceManager: _deviceManager is null");
+
+                    if (DeviceManager == null)
+                        throw new Exception("Error creating DeviceManager: _deviceManager is null");
 
                     DeviceManager.ConnectionEvent -= DeviceManager_ConnectionEvent;
                     DeviceManager.RaiseControllerStateChangedEvent -= DeviceManager_RaiseControllerStateChangedEvent;
@@ -882,6 +882,7 @@ namespace CashmereDeposit.ViewModels
         {
             using var depositorDbContext = new DepositorDBContext();
             depositorDbContext.TransactionTypeListItems.Attach(value);
+
             Log.Info(GetType().Name, "SetTransactionType", "User Input", value.Name);
             GUIScreens.AddRange(ApplicationModel.GetTransactionTypeScreenList(value).ToList());
             if (CurrentSession.Transaction == null)
@@ -3382,6 +3383,37 @@ namespace CashmereDeposit.ViewModels
                         .ThenInclude(a => a.GuiScreenListScreens)
                         .ThenInclude(x => x.ScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnAcceptCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnBackCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnCancelCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.FullInstructionsNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleInstructionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleNavigation)
 
                     .Include(x => x.CurrencyListNavigation)
                     .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
@@ -3389,6 +3421,7 @@ namespace CashmereDeposit.ViewModels
                     .Include(x => x.TransactionTypeListNavigation)
                         .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
                         .ThenInclude(x => x.TxtypeListItemNavigation)
+                        .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
                     .FirstOrDefault(x => x.MachineName == Environment.MachineName);
                 if (device != null)
                     return device;
@@ -3505,5 +3538,6 @@ namespace CashmereDeposit.ViewModels
                 throw new Exception(string.Format("Invalid MessageDateTime: value {0:yyyy-MM-dd HH:mm:ss.fff} is NOT between {1:yyyy-MM-dd HH:mm:ss.fff} and {2:yyyy-MM-dd HH:mm:ss.fff}", MessageDateTime, dateTime2, dateTime1));
         }
     }
+
 }
 

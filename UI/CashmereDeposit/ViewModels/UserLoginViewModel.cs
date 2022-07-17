@@ -11,15 +11,11 @@ using Cashmere.Library.Standard.Security;
 using Cashmere.Library.Standard.Statuses;
 using Cashmere.Library.Standard.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
-using CashmereDeposit.Utils;
 using CashmereDeposit.Utils.AlertClasses;
 
 namespace CashmereDeposit.ViewModels
@@ -31,7 +27,7 @@ namespace CashmereDeposit.ViewModels
         public string _password;
         public string Activity;
         public bool IsAuthorise;
-        public PermissionRequiredResult _permissionRequiredResult = new PermissionRequiredResult()
+        public PermissionRequiredResult _permissionRequiredResult = new()
         {
             LoginSuccessful = false,
             ApplicationUser = null
@@ -39,7 +35,7 @@ namespace CashmereDeposit.ViewModels
 
         public string Username
         {
-            get { return _username; }
+            get => _username;
             set
             {
                 _username = value;
@@ -49,7 +45,7 @@ namespace CashmereDeposit.ViewModels
 
         public string Password
         {
-            get { return _password; }
+            get => _password;
             set
             {
                 _password = value;
@@ -61,10 +57,7 @@ namespace CashmereDeposit.ViewModels
 
         public object NextObject { get; set; }
 
-        public PermissionRequiredResult PermissionRequiredResult
-        {
-            get { return _permissionRequiredResult; }
-        }
+        public PermissionRequiredResult PermissionRequiredResult => _permissionRequiredResult;
 
         private bool SplitAuthorise { get; set; }
 
@@ -126,13 +119,13 @@ namespace CashmereDeposit.ViewModels
 
         public override async Task<string> SaveForm()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
+            using var DBContext = new DepositorDBContext();
             try
             {
-                Device device = ApplicationViewModel.ApplicationModel.GetDevice(DBContext);
+                var device = ApplicationViewModel.ApplicationModel.GetDevice(DBContext);
                 ApplicationViewModel.Log.Debug(GetType().Name, nameof(SaveForm), "Form", "Saving form");
                 FormErrorText = "";
-                int num = await FormValidation();
+                var num = await FormValidation();
                 ApplicationViewModel.SaveToDatabase(DBContext);
                 switch (num)
                 {
@@ -173,12 +166,12 @@ namespace CashmereDeposit.ViewModels
 
         public new async Task<int> FormValidation()
         {
-            using DepositorDBContext DBContext = new DepositorDBContext();
-            Device device = ApplicationViewModel.ApplicationModel.GetDevice(DBContext);
-            foreach (FormListItem field in Fields)
+            using var DBContext = new DepositorDBContext();
+            var device = ApplicationViewModel.ApplicationModel.GetDevice(DBContext);
+            foreach (var field in Fields)
             {
-                Func<string, string> validate = field.Validate;
-                string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+                var validate = field.Validate;
+                var str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
                 if (str != null)
                 {
                     field.ErrorMessageTextBlock = str;
@@ -189,7 +182,7 @@ namespace CashmereDeposit.ViewModels
                 }
             }
             var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
-            ApplicationUser dbApplicationUser = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).Select(dv =>
+            var dbApplicationUser = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).Select(dv =>
                 dv.UserGroupNavigation.ApplicationUsers.FirstOrDefault(x =>!(bool)x.UserDeleted && (bool)x.Username.Equals(Username, StringComparison.InvariantCultureIgnoreCase))).FirstOrDefault();
 
             //var dbApplicationUser = depositorContextProcedures
@@ -207,14 +200,14 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                DeviceLogin entity = new DeviceLogin()
+                var entity = new DeviceLogin()
                 {
                     Id = Guid.NewGuid(),
                     User = dbApplicationUser.Id,
                     LoginDate = DateTime.Now,
                     DeviceId = device.Id
                 };
-                DeviceLogin deviceLogin1 = (await DBContext.DeviceLogins.AddAsync(entity)).Entity;
+                var deviceLogin1 = (await DBContext.DeviceLogins.AddAsync(entity)).Entity;
 
                 var applicationUser1 = dbApplicationUser;
                 int num2;
@@ -224,8 +217,8 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    bool? depositorEnabled = applicationUser1.DepositorEnabled;
-                    bool flag = true;
+                    var depositorEnabled = applicationUser1.DepositorEnabled;
+                    var flag = true;
                     num2 = !(depositorEnabled.GetValueOrDefault() == flag & depositorEnabled.HasValue) ? 1 : 0;
                 }
                 if (num2 != 0)
@@ -237,18 +230,18 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    Guid id1 = dbApplicationUser.Id;
-                    Guid? id2 = ApplicationViewModel.CurrentUser?.Id;
+                    var id1 = dbApplicationUser.Id;
+                    var id2 = ApplicationViewModel.CurrentUser?.Id;
                     if ((id2.HasValue ? (id1 == id2.GetValueOrDefault() ? 1 : 0) : 0) != 0)
                     {
                         FormErrorText = "Permission Denied";
-                        string errorMessage = string.Format("User {0} cannot initialise and authenticate permission {1}. Dual custody required. Permission Denied", dbApplicationUser.Username, "BACKEND_MENU_SHOW");
+                        var errorMessage = string.Format("User {0} cannot initialise and authenticate permission {1}. Dual custody required. Permission Denied", dbApplicationUser.Username, "BACKEND_MENU_SHOW");
                         ApplicationViewModel.AlertManager.SendAlert(new AlertLoginFailed(device, DateTime.Now, errorMessage, Username, dbApplicationUser));
                         num1 = 2;
                     }
                     else
                     {
-                        AuthenticationResponse result = Task.Run((Func<Task<AuthenticationResponse>>)(() => AuthenticationAsync(dbApplicationUser, Password))).Result;
+                        var result = Task.Run((Func<Task<AuthenticationResponse>>)(() => AuthenticationAsync(dbApplicationUser, Password))).Result;
                         if (!result.IsSuccess)
                         {
                             if (result.IsInvalidCredentials)
@@ -285,7 +278,7 @@ namespace CashmereDeposit.ViewModels
                         else if (!AuthenticationAndAuthorisation.Authenticate(ApplicationViewModel, dbApplicationUser, Activity, IsAuthorise))
                         {
                             FormErrorText = "Permission Denied";
-                            string errorMessage = string.Format("User {0} does not have the {1} permission. Permission Denied isAuth={2}", dbApplicationUser.Username, Activity, IsAuthorise);
+                            var errorMessage = string.Format("User {0} does not have the {1} permission. Permission Denied isAuth={2}", dbApplicationUser.Username, Activity, IsAuthorise);
                             ApplicationViewModel.AlertManager.SendAlert(new AlertLoginFailed(device, DateTime.Now, errorMessage, Username, dbApplicationUser));
                             num1 = 2;
                         }
@@ -293,7 +286,7 @@ namespace CashmereDeposit.ViewModels
                         {
                             num1 = 0;
                             deviceLogin1.Success = new bool?(true);
-                            string errorMessage = string.Format("User {0} logged in with permission {1} successfully", dbApplicationUser.Username, "BACKEND_MENU_SHOW");
+                            var errorMessage = string.Format("User {0} logged in with permission {1} successfully", dbApplicationUser.Username, "BACKEND_MENU_SHOW");
                             dbApplicationUser.LoginAttempts = 0;
                             device.LoginAttempts = 0;
                             device.LoginCycles = 0;
@@ -307,7 +300,7 @@ namespace CashmereDeposit.ViewModels
                             };
                             if (!dbApplicationUser.IsAdUser)
                             {
-                                ApplicationUser applicationUser2 = dbApplicationUser;
+                                var applicationUser2 = dbApplicationUser;
                                 if ((applicationUser2 != null ? (applicationUser2.PasswordResetRequired ? 1 : 0) : 0) != 0)
                                 {
                                     FormErrorText = "Password reset required. please enter a new password";
@@ -316,10 +309,10 @@ namespace CashmereDeposit.ViewModels
                                 }
                                 else
                                 {
-                                    PasswordPolicy passwordPolicy = DBContext.PasswordPolicies.FirstOrDefault();
+                                    var passwordPolicy = DBContext.PasswordPolicies.FirstOrDefault();
                                     if (passwordPolicy != null)
                                     {
-                                        ApplicationUser applicationUser3 = dbApplicationUser;
+                                        var applicationUser3 = dbApplicationUser;
                                         PasswordHistory passwordHistory;
                                         if (applicationUser3 == null)
                                         {
@@ -327,30 +320,30 @@ namespace CashmereDeposit.ViewModels
                                         }
                                         else
                                         {
-                                            ICollection<PasswordHistory> passwordHistories = applicationUser3.PasswordHistories;
+                                            var passwordHistories = applicationUser3.PasswordHistories;
                                             if (passwordHistories == null)
                                             {
                                                 passwordHistory = null;
                                             }
                                             else
                                             {
-                                                IEnumerable<PasswordHistory> source = passwordHistories.Where(x => x.Password == dbApplicationUser.Password);
+                                                var source = passwordHistories.Where(x => x.Password == dbApplicationUser.Password);
                                                 passwordHistory = source != null ? source.FirstOrDefault() : (PasswordHistory)null;
                                             }
                                         }
-                                        DateTime? logDate = passwordHistory?.LogDate;
-                                        DateTime dateTime1 = DateTime.Now;
-                                        DateTime dateTime2 = dateTime1.AddDays(-passwordPolicy.ExpiryDays);
-                                        DepositorLogger log = ApplicationViewModel.Log;
-                                        string name = GetType().Name;
-                                        object[] objArray = new object[3]
+                                        var logDate = passwordHistory?.LogDate;
+                                        var dateTime1 = DateTime.Now;
+                                        var dateTime2 = dateTime1.AddDays(-passwordPolicy.ExpiryDays);
+                                        var log = ApplicationViewModel.Log;
+                                        var name = GetType().Name;
+                                        var objArray = new object[3]
                                         {
                                             dateTime2,
                                             logDate,
                                             null
                                         };
                                         dateTime1 = dateTime2;
-                                        DateTime? nullable = logDate;
+                                        var nullable = logDate;
                                         objArray[2] = nullable.HasValue ? (dateTime1 >= nullable.GetValueOrDefault() ? 1 : 0) : 0;
                                         log.DebugFormat(name, "Check Password Expiry", "Login", "checkDate {0} >= passwordCreationDate {1} = {2}", objArray);
                                         if (passwordPolicy != null && passwordPolicy.ExpiryDays > 0 && logDate.HasValue)
@@ -372,9 +365,9 @@ namespace CashmereDeposit.ViewModels
                     }
                 }
                 deviceLogin1.Message = FormErrorText;
-                DeviceLogin deviceLogin2 = deviceLogin1;
-                bool? success = deviceLogin1.Success;
-                bool? nullable1 = new bool?(success.HasValue ? success.GetValueOrDefault() : string.IsNullOrEmpty(FormErrorText));
+                var deviceLogin2 = deviceLogin1;
+                var success = deviceLogin1.Success;
+                var nullable1 = new bool?(success.HasValue ? success.GetValueOrDefault() : string.IsNullOrEmpty(FormErrorText));
                 deviceLogin2.Success = nullable1;
                 deviceLogin1.DepositorEnabled = dbApplicationUser.DepositorEnabled;
                 deviceLogin1.ChangePassword = new bool?(!dbApplicationUser.IsAdUser && dbApplicationUser.PasswordResetRequired);
@@ -409,7 +402,7 @@ namespace CashmereDeposit.ViewModels
             }
             if (NextObject is UserChangePasswordFormViewModel)
                 return;
-            LoginSuccessCallBack callBackDelegate = LoginSuccessCallBackDelegate;
+            var callBackDelegate = LoginSuccessCallBackDelegate;
             if (callBackDelegate == null)
                 return;
             callBackDelegate(ApplicationUser, IsAuthorise || SplitAuthorise);
@@ -424,17 +417,17 @@ namespace CashmereDeposit.ViewModels
           ApplicationUser user,
           string password)
         {
-            UserLoginViewModel userLoginViewModel = this;
-            using DepositorDBContext depositorDBContext = new DepositorDBContext();
-            Device device = userLoginViewModel.ApplicationViewModel.ApplicationModel.GetDevice(depositorDBContext);
+            var userLoginViewModel = this;
+            using var depositorDBContext = new DepositorDBContext();
+            var device = userLoginViewModel.ApplicationViewModel.ApplicationModel.GetDevice(depositorDBContext);
             if (user.IsAdUser || !ApplicationViewModel.DeviceConfiguration.ALLOW_OFFLINE_AUTH)
             {
-                AuthenticationRequest authenticationRequest = new AuthenticationRequest
+                var authenticationRequest = new AuthenticationRequest
                 {
                     AppID = device.AppId,
                     AppName = device.MachineName
                 };
-                Guid guid = Guid.NewGuid();
+                var guid = Guid.NewGuid();
                 authenticationRequest.SessionID = guid.ToString();
                 authenticationRequest.Language = userLoginViewModel.ApplicationViewModel.CurrentLanguage;
                 guid = Guid.NewGuid();
@@ -443,10 +436,10 @@ namespace CashmereDeposit.ViewModels
                 authenticationRequest.MessageDateTime = DateTime.Now;
                 authenticationRequest.Username = user.Username;
                 authenticationRequest.Password = password.Encrypt(device.AppKey);
-                AuthenticationRequest request = authenticationRequest;
-                AuthenticationServiceClient authenticationServiceClient = new AuthenticationServiceClient(ApplicationViewModel.DeviceConfiguration.API_AUTH_API_URI, device.AppId, device.AppKey, null);
+                var request = authenticationRequest;
+                var authenticationServiceClient = new AuthenticationServiceClient(ApplicationViewModel.DeviceConfiguration.API_AUTH_API_URI, device.AppId, device.AppKey, null);
                 ApplicationViewModel.Log.InfoFormat(nameof(UserLoginViewModel), nameof(AuthenticationAsync), "Request", "Sending request {0}", request.ToString());
-                AuthenticationResponse authenticationResponse = await authenticationServiceClient.AuthenticateAsync(request);
+                var authenticationResponse = await authenticationServiceClient.AuthenticateAsync(request);
                 ApplicationViewModel.Log.DebugFormat(nameof(UserLoginViewModel), nameof(AuthenticationAsync), "Response", "Received response {0}", authenticationResponse);
                 if (authenticationResponse.IsSuccess)
                     ApplicationViewModel.Log.InfoFormat(nameof(UserLoginViewModel), nameof(AuthenticationAsync), "Login", "Login SUCCESS for request {0}, User {1}", request.MessageID, user.Username);
@@ -455,14 +448,14 @@ namespace CashmereDeposit.ViewModels
                 ApplicationViewModel.SaveToDatabase(depositorDBContext);
                 return authenticationResponse;
             }
-            bool flag = userLoginViewModel.StandardAuthentication(user);
-            AuthenticationResponse authenticationResponse1 = new AuthenticationResponse
+            var flag = userLoginViewModel.StandardAuthentication(user);
+            var authenticationResponse1 = new AuthenticationResponse
             {
                 AppID = device.AppId,
                 AppName = device.MachineName,
                 SessionID = Guid.NewGuid().ToString()
             };
-            Guid guid1 = Guid.NewGuid();
+            var guid1 = Guid.NewGuid();
             authenticationResponse1.RequestID = guid1.ToString();
             guid1 = Guid.NewGuid();
             authenticationResponse1.MessageID = guid1.ToString();

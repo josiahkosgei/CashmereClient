@@ -11,10 +11,10 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class DepositorScreenViewModelBase : Conductor<Screen>, IShell
+  public class DepositorScreenViewModelBase :  Conductor<Screen>
   {
     public ApplicationViewModel ApplicationViewModel;
-    protected DepositorDBContext DBContext = new DepositorDBContext();
+    protected DepositorDBContext DBContext = new();
 
     protected string ScreenTitle { get; set; }
 

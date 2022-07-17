@@ -18,7 +18,7 @@ namespace CashmereDeposit.ViewModels
       string activityString,
       bool isAuthorising)
     {
-        using DepositorDBContext DBContext = new DepositorDBContext();
+        using var DBContext = new DepositorDBContext();
         if (applicationViewModel.UserPermissionAllowed(user, activityString, isAuthorising))
         {
             ApplicationViewModel.SaveToDatabase(DBContext);

@@ -22,7 +22,7 @@ namespace CashmereDeposit.ViewModels
 
     public ApplicationUser ApplicationUser
     {
-        get { return _applicationUser; }
+        get => _applicationUser;
         set
       {
         _applicationUser = value;
@@ -30,14 +30,11 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public ApplicationViewModel ApplicationViewModel
-    {
-        get { return _applicationViewModel; }
-    }
+    public ApplicationViewModel ApplicationViewModel => _applicationViewModel;
 
     public string Username
     {
-        get { return _username; }
+        get => _username;
         set
       {
         _username = value;
@@ -49,7 +46,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Password
     {
-        get { return _password; }
+        get => _password;
         set
       {
         _password = value;
@@ -59,7 +56,7 @@ namespace CashmereDeposit.ViewModels
 
     public string SecondPassword
     {
-        get { return _secondPassword; }
+        get => _secondPassword;
         set
       {
         _secondPassword = value;
@@ -69,7 +66,7 @@ namespace CashmereDeposit.ViewModels
 
     public string FirstName
     {
-        get { return _firstName; }
+        get => _firstName;
         set
       {
         _firstName = value;
@@ -79,7 +76,7 @@ namespace CashmereDeposit.ViewModels
 
     public string LastName
     {
-        get { return _lastName; }
+        get => _lastName;
         set
       {
         _lastName = value;
@@ -89,7 +86,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Email
     {
-        get { return _email; }
+        get => _email;
         set
       {
         _email = value;

@@ -21,7 +21,7 @@ namespace CashmereDeposit.ViewModels
       bool required = false)
       : base(screenTitle, applicationViewModel, required)
     {
-      ApplicationViewModel applicationViewModel1 = ApplicationViewModel;
+      var applicationViewModel1 = ApplicationViewModel;
       List<ATMSelectionItem<object>> atmSelectionItemList;
       if (applicationViewModel1 == null)
       {
@@ -29,14 +29,14 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        List<Language> languagesAvailable = applicationViewModel1.LanguagesAvailable;
+        var languagesAvailable = applicationViewModel1.LanguagesAvailable;
         if (languagesAvailable == null)
         {
           atmSelectionItemList = null;
         }
         else
         {
-          IEnumerable<ATMSelectionItem<object>> source = languagesAvailable.Select(x => new ATMSelectionItem<object>(x.Flag, x.Name, x));
+          var source = languagesAvailable.Select(x => new ATMSelectionItem<object>(x.Flag, x.Name, x));
           atmSelectionItemList = source != null ? source.ToList() : null;
         }
       }

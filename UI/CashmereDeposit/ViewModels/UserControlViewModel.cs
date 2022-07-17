@@ -7,7 +7,6 @@
 using Caliburn.Micro;
 using Cashmere.Library.Standard.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
@@ -28,7 +27,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Username
     {
-        get { return _username; }
+        get => _username;
         set
       {
         _username = value;
@@ -40,7 +39,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Password
     {
-        get { return _password; }
+        get => _password;
         set
       {
         _password = value;
@@ -50,7 +49,7 @@ namespace CashmereDeposit.ViewModels
 
     public string PasswordHash
     {
-        get { return _passwordHash; }
+        get => _passwordHash;
         set
       {
         _passwordHash = value;
@@ -60,7 +59,7 @@ namespace CashmereDeposit.ViewModels
 
     public string SecondPassword
     {
-        get { return _secondPassword; }
+        get => _secondPassword;
         set
       {
         _secondPassword = value;
@@ -70,7 +69,7 @@ namespace CashmereDeposit.ViewModels
 
     public string FirstName
     {
-        get { return _firstName; }
+        get => _firstName;
         set
       {
         _firstName = value;
@@ -80,7 +79,7 @@ namespace CashmereDeposit.ViewModels
 
     public string LastName
     {
-        get { return _lastName; }
+        get => _lastName;
         set
       {
         _lastName = value;
@@ -90,7 +89,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Email
     {
-        get { return _email; }
+        get => _email;
         set
       {
         _email = value;
@@ -100,7 +99,7 @@ namespace CashmereDeposit.ViewModels
 
     public Role Role
     {
-        get { return _role; }
+        get => _role;
         set
       {
         _role = value;
@@ -123,7 +122,7 @@ namespace CashmereDeposit.ViewModels
       Email = ApplicationUser?.Email;
       Role = ApplicationUser?.Role;
       PasswordHash = applicationUser?.Password;
-      List<string> list = depositorDbContext.Roles.Select(x => x.Name).ToList();
+      var list = depositorDbContext.Roles.Select(x => x.Name).ToList();
       Fields.Add(new FormListItem()
       {
         DataLabel = nameof (Username),
@@ -239,7 +238,7 @@ namespace CashmereDeposit.ViewModels
     {
       if (string.IsNullOrWhiteSpace(role))
         return "Please select a role";
-      Role role1 = depositorDbContext.Roles.FirstOrDefault(x => x.Name == role);
+      var role1 = depositorDbContext.Roles.FirstOrDefault(x => x.Name == role);
       if (role1 == null)
         return "Role does not exist";
       Role = role1;
@@ -276,11 +275,11 @@ namespace CashmereDeposit.ViewModels
 
     public override int FormValidation()
     {
-      int num = 0;
-      foreach (FormListItem field in Fields)
+      var num = 0;
+      foreach (var field in Fields)
       {
-        Func<string, string> validate = field.Validate;
-        string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+        var validate = field.Validate;
+        var str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
         if (str != null)
         {
           field.ErrorMessageTextBlock = str;

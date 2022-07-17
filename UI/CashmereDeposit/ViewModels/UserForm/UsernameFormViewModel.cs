@@ -9,7 +9,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels.UserForm
 {
-  internal class UsernameFormViewModel : Conductor<Screen>, IShell
+  internal class UsernameFormViewModel :  Conductor<Screen>
   {
     private string _textboxText;
     private string _errorMessageTextBlock;
@@ -20,7 +20,7 @@ namespace CashmereDeposit.ViewModels.UserForm
 
     public string DataEntryTextbox
     {
-        get { return _textboxText; }
+        get => _textboxText;
         set
       {
         _textboxText = value;
@@ -30,7 +30,7 @@ namespace CashmereDeposit.ViewModels.UserForm
 
     public string ErrorMessageTextBlock
     {
-        get { return _errorMessageTextBlock; }
+        get => _errorMessageTextBlock;
         set
       {
         _errorMessageTextBlock = value;
@@ -45,7 +45,7 @@ namespace CashmereDeposit.ViewModels.UserForm
 
     public void Validate()
     {
-      string str = UserControlViewModel.ValidateUsername(DataEntryTextbox);
+      var str = UserControlViewModel.ValidateUsername(DataEntryTextbox);
       if (str == null)
         TryCloseAsync(new bool?(true));
       else

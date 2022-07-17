@@ -8,7 +8,6 @@ using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
-using CashmereDeposit.Models.Submodule;
 using CashmereDeposit.Utils;
 
 namespace CashmereDeposit.ViewModels
@@ -22,7 +21,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Dialog_OK_Caption
     {
-        get { return _Dialog_OK_Caption; }
+        get => _Dialog_OK_Caption;
         set
       {
         _Dialog_OK_Caption = value;
@@ -42,7 +41,7 @@ namespace CashmereDeposit.ViewModels
     private void InitialiseScreen()
     {
       Dialog_OK_Caption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(GetType().Name + ".InitialiseScreen Dialog_OK_Caption", "sys_Dialog_OK_Caption", "OK");
-      CashmereTranslationService translationService = ApplicationViewModel.CashmereTranslationService;
+      var translationService = ApplicationViewModel.CashmereTranslationService;
       string str;
       if (translationService == null)
       {
@@ -50,7 +49,7 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        string s = translationService.TranslateUserText(GetType().Name + ".InitialiseScreen TermsAndConditionsText", ApplicationViewModel?.CurrentTransaction?.TransactionText?.Terms, null);
+        var s = translationService.TranslateUserText(GetType().Name + ".InitialiseScreen TermsAndConditionsText", ApplicationViewModel?.CurrentTransaction?.TransactionText?.Terms, null);
         str = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
       }
       TermsAndConditionsText = str;
@@ -64,7 +63,7 @@ namespace CashmereDeposit.ViewModels
           return;
         CanNext = false;
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();

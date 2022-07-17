@@ -44,7 +44,7 @@ namespace CashmereDeposit.ViewModels
     {
       if (ApplicationViewModel.EscrowJam == null)
       {
-        Transaction transaction = depositorDbContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
+        var transaction = depositorDbContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
         if (!transaction.TxCompleted || transaction.TxErrorCode == 85)
         {
           ApplicationViewModel.EscrowJam = new EscrowJam()
@@ -72,7 +72,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool CanNext
     {
-        get { return canNext; }
+        get => canNext;
         set
       {
         canNext = value;

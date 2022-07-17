@@ -51,14 +51,14 @@ namespace CashmereDeposit.ViewModels
 
     public ATMSelectionItem<object> SelectedFilteredList
     {
-        get { return selected; }
+        get => selected;
         set
       {
         PrintErrorText("Processing, please wait...");
         selected = value;
         NotifyOfPropertyChange(nameof (SelectedFilteredList));
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();
@@ -67,7 +67,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool SearchButtonIsVisible
     {
-        get { return searchButtonIsVisible; }
+        get => searchButtonIsVisible;
         set
       {
         searchButtonIsVisible = value;
@@ -77,7 +77,7 @@ namespace CashmereDeposit.ViewModels
 
     public string SearchButtonCaption
     {
-        get { return searchButtonCaption; }
+        get => searchButtonCaption;
         set
       {
         searchButtonCaption = value;
@@ -87,7 +87,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool CancelSearchButtonIsVisible
     {
-        get { return cancelSearchButtonIsVisible; }
+        get => cancelSearchButtonIsVisible;
         set
       {
         cancelSearchButtonIsVisible = value;
@@ -97,7 +97,7 @@ namespace CashmereDeposit.ViewModels
 
     public string CancelSearchButtonCaption
     {
-        get { return cancelSearchButtonCaption; }
+        get => cancelSearchButtonCaption;
         set
       {
         cancelSearchButtonCaption = value;
@@ -107,7 +107,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool ScreenFooterIsVisible
     {
-        get { return screenFooterIsVisible; }
+        get => screenFooterIsVisible;
         set
       {
         screenFooterIsVisible = value;
@@ -119,7 +119,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool ScreenHeaderIsVisible
     {
-        get { return screenHeaderIsVisible; }
+        get => screenHeaderIsVisible;
         set
       {
         screenHeaderIsVisible = value;
@@ -129,7 +129,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool KeyboardGridIsVisible
     {
-        get { return keyboardGridIsVisible; }
+        get => keyboardGridIsVisible;
         set
       {
         keyboardGridIsVisible = value;
@@ -139,14 +139,14 @@ namespace CashmereDeposit.ViewModels
 
     protected void ScrollList()
     {
-      List<ATMSelectionItem<object>> list = CreateList(Task.Run((Func<Task<AccountsListResponse>>) (() => ApplicationViewModel.GetAccountListAsync(ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.Currency.Code, PageNumber, PageSize)))?.Result);
+      var list = CreateList(Task.Run((Func<Task<AccountsListResponse>>) (() => ApplicationViewModel.GetAccountListAsync(ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.Currency.Code, PageNumber, PageSize)))?.Result);
       if (FullList == null)
       {
         FullList = new ObservableCollection<ATMSelectionItem<object>>(list);
       }
       else
       {
-        foreach (ATMSelectionItem<object> atmSelectionItem in list)
+        foreach (var atmSelectionItem in list)
           FullList.Add(atmSelectionItem);
       }
     }
@@ -167,7 +167,7 @@ namespace CashmereDeposit.ViewModels
 
     public void ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-      ScrollViewer scrollViewer = (ScrollViewer) sender;
+      var scrollViewer = (ScrollViewer) sender;
       if (scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight)
         return;
       ++PageNumber;

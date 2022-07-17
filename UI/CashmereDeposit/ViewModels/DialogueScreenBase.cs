@@ -15,7 +15,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public abstract class DialogueScreenBase : Conductor<Screen>, IShell, IDisposable
+  public abstract class DialogueScreenBase :  Conductor<Screen>, IDisposable
   {
     private int _timerDuration;
     private string _button1Caption;
@@ -47,7 +47,7 @@ namespace CashmereDeposit.ViewModels
 
     protected MessageBoxButton MessageBoxButton
     {
-        get { return _messageBoxButton; }
+        get => _messageBoxButton;
         set
       {
         _messageBoxButton = value;
@@ -85,7 +85,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ScreenTitle
     {
-        get { return _screenTitle; }
+        get => _screenTitle;
         set
       {
         _screenTitle = value;
@@ -95,7 +95,7 @@ namespace CashmereDeposit.ViewModels
 
     public string DialogImage
     {
-        get { return _dialogImage; }
+        get => _dialogImage;
         set
       {
         _dialogImage = value;
@@ -105,7 +105,7 @@ namespace CashmereDeposit.ViewModels
 
     public string DialogBoxMessage
     {
-        get { return _dialogBoxMessage; }
+        get => _dialogBoxMessage;
         set
       {
         _dialogBoxMessage = value;
@@ -115,7 +115,7 @@ namespace CashmereDeposit.ViewModels
 
     public string HelpText
     {
-        get { return _helpText; }
+        get => _helpText;
         set
       {
         _helpText = value;
@@ -129,69 +129,33 @@ namespace CashmereDeposit.ViewModels
 
     protected MessageBoxResult MessageBoxResult { get; set; }
 
-    public bool CanButton1
-    {
-        get { return Button1IsVisible; }
-    }
+    public bool CanButton1 => Button1IsVisible;
 
-    public bool CanButton2
-    {
-        get { return Button2IsVisible; }
-    }
+    public bool CanButton2 => Button2IsVisible;
 
-    public bool CanButton3
-    {
-        get { return Button3IsVisible; }
-    }
+    public bool CanButton3 => Button3IsVisible;
 
-    public bool CanButton4
-    {
-        get { return Button4IsVisible; }
-    }
+    public bool CanButton4 => Button4IsVisible;
 
-    public bool CanButton5
-    {
-        get { return Button5IsVisible; }
-    }
+    public bool CanButton5 => Button5IsVisible;
 
-    public bool CanHelp
-    {
-        get { return !string.IsNullOrWhiteSpace(HelpText); }
-    }
+    public bool CanHelp => !string.IsNullOrWhiteSpace(HelpText);
 
-    public bool HelpButtonIsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(HelpText); }
-    }
+    public bool HelpButtonIsVisible => !HasReturned && !string.IsNullOrWhiteSpace(HelpText);
 
-    public bool Button1IsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(Button1Caption); }
-    }
+    public bool Button1IsVisible => !HasReturned && !string.IsNullOrWhiteSpace(Button1Caption);
 
-    public bool Button2IsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(Button2Caption); }
-    }
+    public bool Button2IsVisible => !HasReturned && !string.IsNullOrWhiteSpace(Button2Caption);
 
-    public bool Button3IsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(Button3Caption); }
-    }
+    public bool Button3IsVisible => !HasReturned && !string.IsNullOrWhiteSpace(Button3Caption);
 
-    public bool Button4IsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(Button4Caption); }
-    }
+    public bool Button4IsVisible => !HasReturned && !string.IsNullOrWhiteSpace(Button4Caption);
 
-    public bool Button5IsVisible
-    {
-        get { return !HasReturned && !string.IsNullOrWhiteSpace(Button5Caption); }
-    }
+    public bool Button5IsVisible => !HasReturned && !string.IsNullOrWhiteSpace(Button5Caption);
 
     public string Button1Caption
     {
-        get { return _button1Caption; }
+        get => _button1Caption;
         set
       {
         _button1Caption = value;
@@ -203,7 +167,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Button2Caption
     {
-        get { return _button2Caption; }
+        get => _button2Caption;
         set
       {
         _button2Caption = value;
@@ -215,7 +179,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Button3Caption
     {
-        get { return _button3Caption; }
+        get => _button3Caption;
         set
       {
         _button3Caption = value;
@@ -227,7 +191,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Button4Caption
     {
-        get { return _button4Caption; }
+        get => _button4Caption;
         set
       {
         _button4Caption = value;
@@ -239,7 +203,7 @@ namespace CashmereDeposit.ViewModels
 
     public string Button5Caption
     {
-        get { return _button5Caption; }
+        get => _button5Caption;
         set
       {
         _button5Caption = value;
@@ -261,8 +225,8 @@ namespace CashmereDeposit.ViewModels
 
     protected int TimerDuration
     {
-        get { return _timerDuration; }
-        set { _timerDuration = value; }
+        get => _timerDuration;
+        set => _timerDuration = value;
     }
 
     protected DialogueScreenBase(
@@ -270,43 +234,43 @@ namespace CashmereDeposit.ViewModels
       int timerDuration = 30,
       int defaultButton = 0)
     {
-      DialogueButton dialogueButton = new DialogueButton();
-      ref DialogueButton local1 = ref dialogueButton;
+      var dialogueButton = new DialogueButton();
+      ref var local1 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_OK_Caption") is string str))
         str = nameof (OK);
       local1.name = str;
       dialogueButton.type = MessageBoxResult.OK;
       OK = dialogueButton;
       dialogueButton = new DialogueButton();
-      ref DialogueButton local2 = ref dialogueButton;
+      ref var local2 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_Cancel_Caption") is string))
         str = nameof (Cancel);
       local2.name = str;
       dialogueButton.type = MessageBoxResult.Cancel;
       Cancel = dialogueButton;
       dialogueButton = new DialogueButton();
-      ref DialogueButton local3 = ref dialogueButton;
+      ref var local3 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_Yes_Caption") is string))
         str = nameof (Yes);
       local3.name = str;
       dialogueButton.type = MessageBoxResult.Yes;
       Yes = dialogueButton;
       dialogueButton = new DialogueButton();
-      ref DialogueButton local4 = ref dialogueButton;
+      ref var local4 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_No_Caption") is string))
         str = nameof (No);
       local4.name = str;
       dialogueButton.type = MessageBoxResult.No;
       No = dialogueButton;
       dialogueButton = new DialogueButton();
-      ref DialogueButton local5 = ref dialogueButton;
+      ref var local5 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_Accept_Caption") is string))
         str = nameof (Accept);
       local5.name = str;
       dialogueButton.type = MessageBoxResult.Yes;
       Accept = dialogueButton;
       dialogueButton = new DialogueButton();
-      ref DialogueButton local6 = ref dialogueButton;
+      ref var local6 = ref dialogueButton;
       if (!(Application.Current.FindResource("Dialog_Decline_Caption") is string))
         str = nameof (Decline);
       local6.name = str;
@@ -348,7 +312,7 @@ namespace CashmereDeposit.ViewModels
 
     private void TimerUpdater_DoWork(object sender, DoWorkEventArgs e)
     {
-      double d = 0.0;
+      var d = 0.0;
       while (true)
       {
         switch (DefaultButton)
@@ -414,10 +378,10 @@ namespace CashmereDeposit.ViewModels
     {
       if (TimerDuration <= 0)
         return;
-      BackgroundWorker backgroundWorker1 = new BackgroundWorker();
+      var backgroundWorker1 = new BackgroundWorker();
       backgroundWorker1.DoWork += new DoWorkEventHandler(DialogueBoxWorker_DoWork);
       backgroundWorker1.RunWorkerAsync();
-      BackgroundWorker backgroundWorker2 = new BackgroundWorker();
+      var backgroundWorker2 = new BackgroundWorker();
       backgroundWorker2.DoWork += new DoWorkEventHandler(TimerUpdater_DoWork);
       backgroundWorker2.RunWorkerAsync();
     }

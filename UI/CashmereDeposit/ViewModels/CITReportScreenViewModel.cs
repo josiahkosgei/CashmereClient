@@ -17,7 +17,7 @@ namespace CashmereDeposit.ViewModels
 {
     public class CITReportScreenViewModel : DepositorScreenViewModelBase
   {
-    private new DepositorDBContext DBContext = new DepositorDBContext();
+    private new DepositorDBContext DBContext = new();
     private const int txPageSize = 10;
     private int maxPage;
     private int _currentPage;
@@ -43,7 +43,7 @@ namespace CashmereDeposit.ViewModels
 
     public int CurrentTxPage
     {
-        get { return _currentPage; }
+        get => _currentPage;
         set
       {
         _currentPage = value;
@@ -67,7 +67,7 @@ namespace CashmereDeposit.ViewModels
 
     public IEnumerable<CIT> CITTransactions
     {
-        get { return _citTransactionList; }
+        get => _citTransactionList;
         set
       {
         _citTransactionList = value;
@@ -78,7 +78,7 @@ namespace CashmereDeposit.ViewModels
 
     public CIT SelectedCITTransaction
     {
-        get { return selectedCITTransaction; }
+        get => selectedCITTransaction;
         set
       {
         selectedCITTransaction = value;
@@ -92,7 +92,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        CIT selectedCITTransaction = SelectedCITTransaction;
+        var selectedCITTransaction = SelectedCITTransaction;
         return selectedCITTransaction == null ? null : (IEnumerable<CITDenomination>) selectedCITTransaction.CITDenominations.Select(x => new CITDenomination()
         {
             CITId = x.CITId,
@@ -108,15 +108,9 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public string PageNumberText
-    {
-        get { return string.Format("Page {0} of {1}", CurrentTxPage + 1, maxPage + 1); }
-    }
+    public string PageNumberText => string.Format("Page {0} of {1}", CurrentTxPage + 1, maxPage + 1);
 
-    public bool CanPageFirst_Transaction
-    {
-        get { return CurrentTxPage > 0; }
-    }
+    public bool CanPageFirst_Transaction => CurrentTxPage > 0;
 
     public void PageFirst_Transaction()
     {
@@ -124,10 +118,7 @@ namespace CashmereDeposit.ViewModels
       Page_Transaction();
     }
 
-    public bool CanPagePrevious_Transaction
-    {
-        get { return CurrentTxPage > 0; }
-    }
+    public bool CanPagePrevious_Transaction => CurrentTxPage > 0;
 
     public void PagePrevious_Transaction()
     {
@@ -142,10 +133,7 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public bool CanPageNext_Transaction
-    {
-        get { return CurrentTxPage < maxPage; }
-    }
+    public bool CanPageNext_Transaction => CurrentTxPage < maxPage;
 
     public void PageNext_Transaction()
     {
@@ -160,10 +148,7 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public bool CanPageLast_Transaction
-    {
-        get { return CurrentTxPage < maxPage; }
-    }
+    public bool CanPageLast_Transaction => CurrentTxPage < maxPage;
 
     public void PageLast_Transaction()
     {
@@ -176,25 +161,19 @@ namespace CashmereDeposit.ViewModels
         CITTransactions = txQuery.Skip(CurrentTxPage * 10).Take(10).ToList();
     }
 
-    public bool CanEmailCITTransactionList
-    {
-        get { return txQuery.Count() > 0; }
-    }
+    public bool CanEmailCITTransactionList => txQuery.Count() > 0;
 
     public void EmailCITTransactionList()
     {
-      int num = (int) MessageBox.Show("Mail Sent");
+      var num = (int) MessageBox.Show("Mail Sent");
     }
 
-    public bool CanPrintCITReceipt
-    {
-        get { return SelectedCITTransaction != null; }
-    }
+    public bool CanPrintCITReceipt => SelectedCITTransaction != null;
 
     public void PrintCITReceipt()
     {
       ApplicationViewModel.PrintCITReceipt(SelectedCITTransaction, DBContext, true);
-      int num = (int) MessageBox.Show("Printing Complete");
+      var num = (int) MessageBox.Show("Printing Complete");
     }
   }
 }

@@ -6,7 +6,6 @@
 
 using Caliburn.Micro;
 using System;
-using System.Net.Http;
 using Cashmere.Library.CashmereDataAccess;
 
 using CashmereDeposit.Models;

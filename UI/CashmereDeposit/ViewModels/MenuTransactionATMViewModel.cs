@@ -31,7 +31,7 @@ namespace CashmereDeposit.ViewModels
     {
       if (!isInitialised)
       {
-        TransactionReportScreenViewModel reportScreenViewModel = new TransactionReportScreenViewModel(Application.Current.FindResource("TransactionListScreenTitle") as string, ApplicationViewModel, this);
+        var reportScreenViewModel = new TransactionReportScreenViewModel(Application.Current.FindResource("TransactionListScreenTitle") as string, ApplicationViewModel, this);
         object obj = ApplicationViewModel.UserPermissionAllowed(ApplicationViewModel?.CurrentUser, "TRANSACTION_LIST_VIEW") ? reportScreenViewModel : new UserLoginViewModel(ApplicationViewModel, ApplicationViewModel, CallingObject, reportScreenViewModel, "TRANSACTION_LIST_VIEW");
         Screens.Add(new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/coins.png", Application.Current.FindResource("TransactionlistCommand_Caption") as string, obj));
       }

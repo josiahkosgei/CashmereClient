@@ -6,7 +6,6 @@
 
 using Caliburn.Micro;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using CashmereDeposit.Models;
 
@@ -34,15 +33,15 @@ namespace CashmereDeposit.ViewModels
         return;
       if (ApplicationViewModel.UserPermissionAllowed(ApplicationViewModel.CurrentUser, "DEVICE_POWER_RESTART"))
       {
-        IList<ATMSelectionItem<object>> screens = Screens;
+        var screens = Screens;
         if (!(Application.Current.FindResource("DevicePowerRestartCommand_Caption") is string selectionText))
           selectionText = "Restart PC";
         if (!(Application.Current.FindResource("DevicePowerRestartCommand_Caption") is string screenTitle))
           screenTitle = "Restart PC";
-        ApplicationViewModel applicationViewModel = ApplicationViewModel;
-        Conductor<Screen> conductor = Conductor;
-        AdminButtonCommandATMScreenCommandViewModel commandViewModel = new AdminButtonCommandATMScreenCommandViewModel(ATMMenuCommandButton.Shutdown_PC_Restart, screenTitle, applicationViewModel, conductor, this);
-        ATMSelectionItem<object> atmSelectionItem = new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/pie-chart-5.png", selectionText, commandViewModel);
+        var applicationViewModel = ApplicationViewModel;
+        var conductor = Conductor;
+        var commandViewModel = new AdminButtonCommandATMScreenCommandViewModel(ATMMenuCommandButton.Shutdown_PC_Restart, screenTitle, applicationViewModel, conductor, this);
+        var atmSelectionItem = new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/pie-chart-5.png", selectionText, commandViewModel);
         screens.Add(atmSelectionItem);
       }
       isInitialised = true;

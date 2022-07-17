@@ -5,7 +5,6 @@
 
 
 using Caliburn.Micro;
-using CashAccSysDeviceManager;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -39,7 +38,7 @@ namespace CashmereDeposit.ViewModels
             {
                 if (ApplicationViewModel.UserPermissionAllowed(ApplicationViewModel?.CurrentUser, "ESCROWJAM_INITIALISER"))
                 {
-                    UserLoginViewModel userLoginViewModel = new UserLoginViewModel(ApplicationViewModel,
+                    var userLoginViewModel = new UserLoginViewModel(ApplicationViewModel,
                         ApplicationViewModel, CallingObject,
                         new EscrowJamStatusReportScreenViewModel(ApplicationViewModel, Conductor, this, true),
                         "ESCROWJAM_AUTHORISER",splitAuthorise: true);
@@ -56,8 +55,8 @@ namespace CashmereDeposit.ViewModels
                     Screens.Add(new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/safebox.png", ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_CITManagementScreenTitle", "CIT Management", ApplicationViewModel.CurrentLanguage), new MenuCITManagementATMViewModel(ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_CITManagementScreenTitle", "CIT Management", ApplicationViewModel.CurrentLanguage), ApplicationViewModel, Conductor, this)));
                 if (ApplicationViewModel.UserPermissionAllowed(ApplicationViewModel.CurrentUser, "USER_MANAGEMENT_MENU_SHOW"))
                 {
-                    MenuUserManagementATMViewModel managementAtmViewModel = new MenuUserManagementATMViewModel(ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_UserManagementScreenTitle_Caption", "User Management", ApplicationViewModel.CurrentLanguage), ApplicationViewModel, Conductor, this);
-                    ATMSelectionItem<object> atmSelectionItem = new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/users-1.png", ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_UserManagementScreenTitle_Caption", "User Management", ApplicationViewModel.CurrentLanguage), managementAtmViewModel);
+                    var managementAtmViewModel = new MenuUserManagementATMViewModel(ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_UserManagementScreenTitle_Caption", "User Management", ApplicationViewModel.CurrentLanguage), ApplicationViewModel, Conductor, this);
+                    var atmSelectionItem = new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/users-1.png", ApplicationViewModel.CashmereTranslationService.TranslateSystemText(nameof(MenuBackendATMViewModel_Activated), "sys_UserManagementScreenTitle_Caption", "User Management", ApplicationViewModel.CurrentLanguage), managementAtmViewModel);
                     if (managementAtmViewModel.Screens.Count() > 0)
                         Screens.Add(atmSelectionItem);
                 }

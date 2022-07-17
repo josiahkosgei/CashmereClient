@@ -10,11 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
-using CashmereDeposit.Interfaces;
 using CashmereDeposit.Utils;
 
 namespace CashmereDeposit.ViewModels
@@ -59,7 +56,7 @@ namespace CashmereDeposit.ViewModels
 
         public GUIScreenText CurrentGUIScreenText
         {
-            get { return _currentGUIScreenText; }
+            get => _currentGUIScreenText;
             set
             {
                 _currentGUIScreenText = value;
@@ -69,7 +66,7 @@ namespace CashmereDeposit.ViewModels
 
         public string CustomerInput
         {
-            get { return _customerInput; }
+            get => _customerInput;
             set
             {
                 _customerInput = !string.IsNullOrWhiteSpace(value) ? value : ApplicationViewModel?.CurrentGUIScreen?.PrefillText;
@@ -79,7 +76,7 @@ namespace CashmereDeposit.ViewModels
 
         public string CancelCaption
         {
-            get { return _cancelCaption; }
+            get => _cancelCaption;
             set
             {
                 _cancelCaption = value;
@@ -89,7 +86,7 @@ namespace CashmereDeposit.ViewModels
 
         public string NextCaption
         {
-            get { return _nextCaption; }
+            get => _nextCaption;
             set
             {
                 _nextCaption = value;
@@ -99,7 +96,7 @@ namespace CashmereDeposit.ViewModels
 
         public string BackCaption
         {
-            get { return _backCaption; }
+            get => _backCaption;
             set
             {
                 _backCaption = value;
@@ -109,7 +106,7 @@ namespace CashmereDeposit.ViewModels
 
         public string GetPreviousPageCaption
         {
-            get { return _GetPreviousPage_Caption; }
+            get => _GetPreviousPage_Caption;
             set
             {
                 _GetPreviousPage_Caption = value;
@@ -119,7 +116,7 @@ namespace CashmereDeposit.ViewModels
 
         public string GetNextPageCaption
         {
-            get { return _GetNextPageButton_Caption; }
+            get => _GetNextPageButton_Caption;
             set
             {
                 _GetNextPageButton_Caption = value;
@@ -129,7 +126,7 @@ namespace CashmereDeposit.ViewModels
 
         public bool FullInstructionsExpanderIsVisible
         {
-            get { return _fullInstructionsExpanderIsVisible; }
+            get => _fullInstructionsExpanderIsVisible;
             set
             {
                 _fullInstructionsExpanderIsVisible = value;
@@ -139,7 +136,7 @@ namespace CashmereDeposit.ViewModels
 
         public string FullInstructions
         {
-            get { return _fullInstructions; }
+            get => _fullInstructions;
             set
             {
                 _fullInstructions = value;
@@ -149,7 +146,7 @@ namespace CashmereDeposit.ViewModels
 
         public string ScreenTitleInstruction
         {
-            get { return _screenTitleInstruction; }
+            get => _screenTitleInstruction;
             set
             {
                 _screenTitleInstruction = value;
@@ -159,7 +156,7 @@ namespace CashmereDeposit.ViewModels
 
         public string ShowFullInstructionsCaption
         {
-            get { return _ShowFullInstructions_Caption; }
+            get => _ShowFullInstructions_Caption;
             set
             {
                 _ShowFullInstructions_Caption = value;
@@ -169,7 +166,7 @@ namespace CashmereDeposit.ViewModels
 
         public string HideFullInstructionsCaption
         {
-            get { return _HideFullInstructions_Caption; }
+            get => _HideFullInstructions_Caption;
             set
             {
                 _HideFullInstructions_Caption = value;
@@ -179,7 +176,7 @@ namespace CashmereDeposit.ViewModels
 
         public string FullInstructionsTitle
         {
-            get { return _FullInstructionsTitle; }
+            get => _FullInstructionsTitle;
             set
             {
                 _FullInstructionsTitle = value;
@@ -187,24 +184,15 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        public bool AlphanumericKeyboardIsVisible
-        {
-            get { return Keyboard == KeyboardType.ALPHANUMERIC; }
-        }
+        public bool AlphanumericKeyboardIsVisible => Keyboard == KeyboardType.ALPHANUMERIC;
 
-        public bool FullAlphanumericKeyboardIsVisible
-        {
-            get { return Keyboard == KeyboardType.FULLALPHANUMERIC; }
-        }
+        public bool FullAlphanumericKeyboardIsVisible => Keyboard == KeyboardType.FULLALPHANUMERIC;
 
-        public bool NumericKeypadIsVisible
-        {
-            get { return Keyboard == KeyboardType.NUMERIC; }
-        }
+        public bool NumericKeypadIsVisible => Keyboard == KeyboardType.NUMERIC;
 
         public KeyboardType Keyboard
         {
-            get { return _keyboard; }
+            get => _keyboard;
             set
             {
                 _keyboard = value;
@@ -214,7 +202,7 @@ namespace CashmereDeposit.ViewModels
 
         public bool CanNext
         {
-            get { return _canNext; }
+            get => _canNext;
             set
             {
                 _canNext = value;
@@ -224,7 +212,7 @@ namespace CashmereDeposit.ViewModels
 
         public bool CanCancel
         {
-            get { return _canCancel; }
+            get => _canCancel;
             set
             {
                 _canCancel = value;
@@ -234,7 +222,7 @@ namespace CashmereDeposit.ViewModels
 
         public bool CanShowFullInstructions
         {
-            get { return _canShowFullInstructions; }
+            get => _canShowFullInstructions;
             set
             {
                 _canShowFullInstructions = value;
@@ -246,7 +234,7 @@ namespace CashmereDeposit.ViewModels
 
         public string ErrorText
         {
-            get { return _errorText; }
+            get => _errorText;
             set
             {
                 _errorText = value;
@@ -257,7 +245,7 @@ namespace CashmereDeposit.ViewModels
         private void InitialiseScreen()
         {
             CurrentGUIScreenText = ApplicationViewModel?.CurrentGUIScreen?.GUIScreenText;
-            ApplicationViewModel applicationViewModel1 = ApplicationViewModel;
+            var applicationViewModel1 = ApplicationViewModel;
             int? nullable1;
             int num1;
             if (applicationViewModel1 == null)
@@ -266,7 +254,7 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                GUIScreen currentGuiScreen = applicationViewModel1.CurrentGUIScreen;
+                var currentGuiScreen = applicationViewModel1.CurrentGUIScreen;
                 if (currentGuiScreen == null)
                 {
                     num1 = 0;
@@ -284,7 +272,7 @@ namespace CashmereDeposit.ViewModels
             }
             else
             {
-                ApplicationViewModel applicationViewModel2 = ApplicationViewModel;
+                var applicationViewModel2 = ApplicationViewModel;
                 int? nullable2;
                 if (applicationViewModel2 == null)
                 {
@@ -293,7 +281,7 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    GUIScreen currentGuiScreen = applicationViewModel2.CurrentGUIScreen;
+                    var currentGuiScreen = applicationViewModel2.CurrentGUIScreen;
                     if (currentGuiScreen == null)
                     {
                         nullable1 = new int?();
@@ -357,9 +345,9 @@ namespace CashmereDeposit.ViewModels
                     return false;
                 }
 
-                using DepositorDBContext depositorDbContext = new DepositorDBContext();
-                GUIScreen guiScreen = depositorDbContext.GuiScreens.Where(z => z.Id == ApplicationViewModel.CurrentGUIScreen.Id).FirstOrDefault();
-                ValidationList validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenList == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlist).FirstOrDefault()?.ValidationList : null;
+                using var depositorDbContext = new DepositorDBContext();
+                var guiScreen = depositorDbContext.GuiScreens.Where(z => z.Id == ApplicationViewModel.CurrentGUIScreen.Id).FirstOrDefault();
+                var validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenList == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlist).FirstOrDefault()?.ValidationList : null;
                 if (validationList != null)
                 {
                     List<ValidationListValidationItem> listValidationItemList;
@@ -369,10 +357,10 @@ namespace CashmereDeposit.ViewModels
                     }
                     else
                     {
-                        ICollection<ValidationListValidationItem> listValidationItem = validationList.ValidationListValidationItems;
+                        var listValidationItem = validationList.ValidationListValidationItems;
                         listValidationItemList = listValidationItem != null ? listValidationItem.ToList() : null;
                     }
-                    foreach (ValidationListValidationItem listValidationItem in listValidationItemList)
+                    foreach (var listValidationItem in listValidationItemList)
                     {
                         if ((bool)listValidationItem.Enabled && listValidationItem.ValidationItem.Enabled && (listValidationItem.ValidationItem.ValidationType.Enabled && listValidationItem.ValidationItem.ValidationType.Name == "Regex") && (listValidationItem.ValidationItem.ValidationItemValues.Count <= 0 || !ClientValidationRules.RegexValidation(valueToValidate, listValidationItem.ValidationItem.ValidationItemValues.OrderBy(x => x.Order).ToList()[0].Value.Replace("\r\n", "\n").Replace("\n", ""))))
                         {

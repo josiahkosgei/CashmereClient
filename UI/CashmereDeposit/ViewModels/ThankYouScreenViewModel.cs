@@ -15,7 +15,7 @@ namespace CashmereDeposit.ViewModels
   [Guid("E9A4A910-EAFC-4C1B-946B-4BBFBA1E6188")]
   public class ThankYouScreenViewModel : DepositorCustomerScreenBaseViewModel
   {
-    private DispatcherTimer dispTimer = new DispatcherTimer(DispatcherPriority.Send, Application.Current.Dispatcher);
+    private DispatcherTimer dispTimer = new(DispatcherPriority.Send, Application.Current.Dispatcher);
 
     public ThankYouScreenViewModel(
       string screenTitle,
@@ -42,7 +42,7 @@ namespace CashmereDeposit.ViewModels
         if (!CanNext)
           return;
         CanNext = false;
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();

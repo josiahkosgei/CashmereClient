@@ -11,7 +11,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  internal class NoteJamScreenViewModel : Conductor<Screen>, IShell
+  internal class NoteJamScreenViewModel :  Conductor<Screen>
   {
     private string _NoteJamErrorTitleText;
     private string _NoteJamErrorDescriptionText;
@@ -20,7 +20,7 @@ namespace CashmereDeposit.ViewModels
 
     public string NoteJamErrorTitleText
     {
-        get { return _NoteJamErrorTitleText; }
+        get => _NoteJamErrorTitleText;
         set
       {
         _NoteJamErrorTitleText = value;
@@ -30,7 +30,7 @@ namespace CashmereDeposit.ViewModels
 
     public string NoteJamErrorDescriptionText
     {
-        get { return _NoteJamErrorDescriptionText; }
+        get => _NoteJamErrorDescriptionText;
         set
       {
         _NoteJamErrorDescriptionText = value;

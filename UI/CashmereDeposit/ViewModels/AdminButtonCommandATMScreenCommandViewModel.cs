@@ -14,7 +14,7 @@ namespace CashmereDeposit.ViewModels
   {
     private bool _singleActivation = true;
     private bool isActivated;
-    private BackgroundWorker statusWorker = new BackgroundWorker()
+    private BackgroundWorker statusWorker = new()
     {
       WorkerReportsProgress = false
     };

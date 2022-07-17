@@ -62,28 +62,28 @@ namespace Cashmere.API.Messaging.APIClients
 
                 Log.Trace(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "Generate Json", nameof(SendAsync), "Converting APIMessage to Json");
 
-                string stringWithHidden = message.ToStringWithHidden();
-                string Message = message.ToString();
+                var stringWithHidden = message.ToStringWithHidden();
+                var Message = message.ToString();
 
                 Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "Generate Json", nameof(SendAsync), Message);
                 Log.Trace(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "Generate HTTPMessage content", nameof(SendAsync), "Generating string content");
 
-                Encoding unicode = Encoding.UTF8;
-                StringContent stringContent = new StringContent(stringWithHidden, unicode, "application/json");
+                var unicode = Encoding.UTF8;
+                var stringContent = new StringContent(stringWithHidden, unicode, "application/json");
 
                 stringContent.Headers.Add("SessionID", message.SessionID);
                 stringContent.Headers.Add("MessageID", message.MessageID);
                 stringContent.Headers.Add("AppName", message.AppName);
                 Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "API TX", nameof(SendAsync), "Sending to {0} >> {1}", APIBaseAddress + endpoint, Message);
-                HttpResponseMessage response = await _httpClient.PostAsync(APIBaseAddress + endpoint, stringContent);
+                var response = await _httpClient.PostAsync(APIBaseAddress + endpoint, stringContent);
                 Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "API Rx", nameof(SendAsync), "Received http response {0}", response.ToString());
                 if (response.IsSuccessStatusCode)
                 {
-                    string str = await response.Content.ReadAsStringAsync();
+                    var str = await response.Content.ReadAsStringAsync();
                     Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "API Rx", nameof(SendAsync), "Received http response {0}", str);
-                    T responseObject = JsonConvert.DeserializeObject<T>(str);
-                    Guid? nullable = responseObject is APIMessageBase apiMessageBase ? new Guid?(apiMessageBase.AppID) : new Guid?();
-                    Guid appId = message.AppID;
+                    var responseObject = JsonConvert.DeserializeObject<T>(str);
+                    var nullable = responseObject is APIMessageBase apiMessageBase ? new Guid?(apiMessageBase.AppID) : new Guid?();
+                    var appId = message.AppID;
                     if ((nullable.HasValue ? (nullable.HasValue ? (nullable.GetValueOrDefault() != appId ? 1 : 0) : 0) : 1) != 0)
                         throw new Exception("Invalid response app id");
                     await ValidateResponse(response, JsonConvert.SerializeObject(responseObject));
@@ -105,19 +105,19 @@ namespace Cashmere.API.Messaging.APIClients
 
         private async Task ValidateResponse(HttpResponseMessage response, string responseString)
         {
-            string rawAuthzHeader = response.Headers.GetValues("hmacauth").FirstOrDefault();
-            string[] strArray = !string.IsNullOrEmpty(rawAuthzHeader) ? GetAutherizationHeaderValues(rawAuthzHeader) : throw new Exception("Invalid Response");
-            string app_id = strArray != null ? strArray[0] : throw new Exception("Invalid Response");
-            string incomingBase64Signature = strArray[1];
-            string nonce = strArray[2];
-            string requestTimeStamp = strArray[3];
+            var rawAuthzHeader = response.Headers.GetValues("hmacauth").FirstOrDefault();
+            var strArray = !string.IsNullOrEmpty(rawAuthzHeader) ? GetAutherizationHeaderValues(rawAuthzHeader) : throw new Exception("Invalid Response");
+            var app_id = strArray != null ? strArray[0] : throw new Exception("Invalid Response");
+            var incomingBase64Signature = strArray[1];
+            var nonce = strArray[2];
+            var requestTimeStamp = strArray[3];
             if (!await IsValidResponseAsync(response, responseString, app_id, incomingBase64Signature, nonce, requestTimeStamp))
                 throw new Exception("Invalid Response");
         }
 
         private string[] GetAutherizationHeaderValues(string rawAuthzHeader)
         {
-            string[] strArray = rawAuthzHeader.Split(':');
+            var strArray = rawAuthzHeader.Split(':');
             return strArray.Length == 4 ? strArray : null;
         }
 
@@ -129,14 +129,14 @@ namespace Cashmere.API.Messaging.APIClients
           string nonce,
           string requestTimeStamp)
         {
-            string absoluteUri = response.RequestMessage.RequestUri.AbsoluteUri;
-            string method = response.RequestMessage.Method.Method;
-            string str = CashmereHashing.SHA256WithEncode(responseString, Encoding.Unicode);
-            string s = string.Format("{0}{1}{2}{3}{4}{5}", app_id, method, absoluteUri, requestTimeStamp, nonce, str);
-            byte[] apiKey = API_Key;
-            byte[] bytes = Encoding.UTF8.GetBytes(s);
+            var absoluteUri = response.RequestMessage.RequestUri.AbsoluteUri;
+            var method = response.RequestMessage.Method.Method;
+            var str = CashmereHashing.SHA256WithEncode(responseString, Encoding.Unicode);
+            var s = string.Format("{0}{1}{2}{3}{4}{5}", app_id, method, absoluteUri, requestTimeStamp, nonce, str);
+            var apiKey = API_Key;
+            var bytes = Encoding.UTF8.GetBytes(s);
             bool flag;
-            using HMACSHA256 hmacshA256 = new HMACSHA256(apiKey);
+            using var hmacshA256 = new HMACSHA256(apiKey);
             flag = incomingBase64Signature.Equals(hmacshA256.ComputeHash(bytes).ToBase64String(), StringComparison.Ordinal);
             return flag;
         }

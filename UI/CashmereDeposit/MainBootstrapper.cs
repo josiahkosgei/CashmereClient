@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,7 +36,7 @@ namespace CashmereDeposit
                 { "Topmost", Settings.Default.GUI_ALWAYS_ON_TOP }
             };
             if (!Settings.Default.GUI_SHOW_MOUSE_CURSOR)
-                this.RootViewDisplaySettings.Add("Cursor", Cursors.None);
+                this.RootViewDisplaySettings.Add("Cursor", Cursors.Arrow);
         }
         protected override void OnStartup(object sender, StartupEventArgs e)
         {

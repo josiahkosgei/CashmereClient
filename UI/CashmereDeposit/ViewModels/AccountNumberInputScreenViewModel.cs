@@ -2,9 +2,6 @@
 //.AccountNumberInputScreenViewModel
 
 
-
-
-using Cashmere.API.Messaging.Integration.Validations.AccountNumberValidations;
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -32,7 +29,7 @@ namespace CashmereDeposit.ViewModels
           return;
         CanNext = false;
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();
@@ -65,10 +62,10 @@ namespace CashmereDeposit.ViewModels
 
     public async Task<bool> ValidateAsync(string accountNumber)
     {
-      AccountNumberInputScreenViewModel inputScreenViewModel = this;
+      var inputScreenViewModel = this;
       if (!inputScreenViewModel.ClientValidation(accountNumber))
         return false;
-      AccountNumberValidationResponse validationResponse = await inputScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(inputScreenViewModel.CustomerInput, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), inputScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+      var validationResponse = await inputScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(inputScreenViewModel.CustomerInput, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), inputScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
       if (validationResponse != null && validationResponse.IsSuccess && validationResponse.CanTransact)
       {
         inputScreenViewModel.ApplicationViewModel.CurrentTransaction.AccountNumber = inputScreenViewModel.CustomerInput;

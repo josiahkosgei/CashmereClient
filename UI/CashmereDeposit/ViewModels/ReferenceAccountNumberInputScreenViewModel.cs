@@ -2,14 +2,10 @@
 //.ReferenceAccountNumberInputScreenViewModel
 
 
-
-
-using Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValidations;
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -42,7 +38,7 @@ namespace CashmereDeposit.ViewModels
           return;
         CanNext = false;
         ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        BackgroundWorker backgroundWorker = new BackgroundWorker();
+        var backgroundWorker = new BackgroundWorker();
         backgroundWorker.WorkerReportsProgress = false;
         backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
         backgroundWorker.RunWorkerAsync();
@@ -75,11 +71,11 @@ namespace CashmereDeposit.ViewModels
 
     public async Task<bool> ValidateAsync(string refAaccountNumber)
     {
-      ReferenceAccountNumberInputScreenViewModel inputScreenViewModel = this;
+      var inputScreenViewModel = this;
       if (!inputScreenViewModel.ClientValidation(refAaccountNumber))
         return false;
       inputScreenViewModel.ApplicationViewModel.CurrentTransaction.ReferenceAccount = refAaccountNumber;
-      AppTransaction currentTransaction = inputScreenViewModel.ApplicationViewModel.CurrentTransaction;
+      var currentTransaction = inputScreenViewModel.ApplicationViewModel.CurrentTransaction;
       int num;
       if (currentTransaction == null)
       {
@@ -87,13 +83,13 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        bool? referenceAccount = currentTransaction.TransactionType?.ValidateReferenceAccount;
-        bool flag = true;
+        var referenceAccount = currentTransaction.TransactionType?.ValidateReferenceAccount;
+        var flag = true;
         num = referenceAccount.GetValueOrDefault() == flag & referenceAccount.HasValue ? 1 : 0;
       }
       if (num == 0)
         return true;
-      ReferenceAccountNumberValidationResponse validationResponse = await inputScreenViewModel.ApplicationViewModel.ValidateReferenceAccountNumberAsync(inputScreenViewModel.ApplicationViewModel.CurrentTransaction.AccountNumber, refAaccountNumber, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.TransactionType?.CbTxType);
+      var validationResponse = await inputScreenViewModel.ApplicationViewModel.ValidateReferenceAccountNumberAsync(inputScreenViewModel.ApplicationViewModel.CurrentTransaction.AccountNumber, refAaccountNumber, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.TransactionType?.CbTxType);
       if (validationResponse != null && validationResponse.IsSuccess && validationResponse.CanTransact)
       {
         inputScreenViewModel.ApplicationViewModel.CurrentTransaction.ReferenceAccountName = validationResponse.AccountName;

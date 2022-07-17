@@ -12,7 +12,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormListItem : Conductor<Screen>, IShell
+  public class FormListItem :  Conductor<Screen>
   {
     private string _errorMessageTextBlock;
 
@@ -24,7 +24,7 @@ namespace CashmereDeposit.ViewModels
 
     public string ErrorMessageTextBlock
     {
-        get { return _errorMessageTextBlock; }
+        get => _errorMessageTextBlock;
         set
       {
         _errorMessageTextBlock = value;

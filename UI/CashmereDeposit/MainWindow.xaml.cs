@@ -2,9 +2,6 @@
 // Type: CashmereDeposit.MainWindow
 
 
-
-
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Markup;
 

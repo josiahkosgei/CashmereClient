@@ -7,26 +7,18 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reactive.Disposables;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
-using CashmereDeposit.Interfaces;
 using CashmereDeposit.Models;
 using CashmereDeposit.Properties;
 using CashmereDeposit.Utils;
 using CashmereDeposit.Utils.AlertClasses;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Owin.Hosting;
-using Caliburn.Micro.ReactiveUI;
 using CashmereDeposit.Startup;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,8 +27,8 @@ namespace CashmereDeposit.ViewModels
     public class StartupViewModel : Conductor<Screen>.Collection.OneActive, IDisposable
     {
 
-        private DispatcherTimer _startupTimer = new DispatcherTimer(DispatcherPriority.Send);
-        private DispatcherTimer _outOfOrderTimer = new DispatcherTimer(DispatcherPriority.Send);
+        private DispatcherTimer _startupTimer = new(DispatcherPriority.Send);
+        private DispatcherTimer _outOfOrderTimer = new(DispatcherPriority.Send);
 
         public CashmereLogger Log { get; set; }
 
@@ -67,7 +59,7 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        public sealed override Task ActivateItemAsync(Screen item, CancellationToken cancellationToken = new CancellationToken())
+        public sealed override Task ActivateItemAsync(Screen item, CancellationToken cancellationToken = new())
         {
             return base.ActivateItemAsync(item, cancellationToken);
         }
@@ -79,7 +71,7 @@ namespace CashmereDeposit.ViewModels
                 var url = Settings.Default.OWIN_BASE_ADDRESS ?? "http://localhost:9000/";
 
                 Log.Info(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartSelfHost), "Starting server at {0}", new { url });
-                DeviceConfiguration deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
+                var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
                 //if ((deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) == 0)
                 //    return;
                 //WebApp.Start<Startup>(url);
@@ -106,10 +98,10 @@ namespace CashmereDeposit.ViewModels
         {
             _outOfOrderTimer.Stop();
             _outOfOrderTimer = null;
-            using DepositorDBContext dbContext = new DepositorDBContext();
+            using var dbContext = new DepositorDBContext();
             try
             {
-                Device device = GetDevice(dbContext);
+                var device = GetDevice(dbContext);
                 try
                 {
                     AlertManager = new AlertManager(new DepositorLogger(null), DeviceConfiguration.Initialise().API_COMMSERV_URI, device.AppId, device.AppKey, device.MachineName);
@@ -126,7 +118,7 @@ namespace CashmereDeposit.ViewModels
                         deviceStatu = null;
                     else
                         deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
-                    DeviceStatus entity = deviceStatu;
+                    var entity = deviceStatu;
                     if (entity == null)
                     {
                         entity = CashmereDepositCommonClasses.GenerateDeviceStatus(device.Id, dbContext);
@@ -145,7 +137,7 @@ namespace CashmereDeposit.ViewModels
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
         {
-            Exception exceptionObject = (Exception)args.ExceptionObject;
+            var exceptionObject = (Exception)args.ExceptionObject;
             try
             {
                 Console.WriteLine(string.Format("Crash Handler caught : {0}", exceptionObject.MessageString()));
@@ -153,8 +145,8 @@ namespace CashmereDeposit.ViewModels
                 {
           exceptionObject.MessageString()
                 });
-                using DepositorDBContext dbContext = new DepositorDBContext();
-                Device device = GetDevice(dbContext);
+                using var dbContext = new DepositorDBContext();
+                var device = GetDevice(dbContext);
                 SaveToDatabase(dbContext);
                 AlertManager?.SendAlert(new AlertApplicationCrash(device, exceptionObject.Message, DateTime.Now, exceptionObject.StackTrace));
             }
@@ -180,7 +172,7 @@ namespace CashmereDeposit.ViewModels
             }
             catch (ValidationException ex)
             {
-                string errorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
+                var errorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
                 foreach (var entityValidationError in ex.ValidationResult.MemberNames)
                 {
                     errorDetail += ">validation error>";
@@ -208,23 +200,59 @@ namespace CashmereDeposit.ViewModels
         private static Device GetDevice(DepositorDBContext dbContext)
         {
             return dbContext.Devices.Include(x => x.Branch).Include(x => x.ConfigGroupNavigation)
-                .Include(x => x.LanguageListNavigation)
-                .ThenInclude(x => x.LanguageListLanguages)
-                //.ThenInclude(x => x.LanguageListNavigation)
-                //.ThenInclude(x => x.LanguageListLanguages)
-                .Include(x => x.GUIScreenListNavigation)
-                .Include(x => x.GUIScreenListNavigation.GuiScreenListScreens)
-                .ThenInclude(x => x.ScreenNavigation)
-                //.Include(x => x.GUIScreenListNavigation.GuiScreenListScreens.Select(q => q.ScreenNavigation))
-                .Include(x => x.CurrencyListNavigation)
-                .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
-                .Include(x => x.ConfigGroupNavigation)
-                .Include(x => x.TransactionTypeListNavigation)
-                .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
-                .ThenInclude(x => x.TxtypeListItemNavigation)
-                .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception( "Device: "+Environment.MachineName+" not set correctly in database. Device is null during start up.");
+                    .Include(x => x.LanguageListNavigation)
+                        .ThenInclude(x => x.LanguageListLanguages)
+                    .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(x => x.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenType)
+
+                    .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnAcceptCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnBackCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnCancelCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.FullInstructionsNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleInstructionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleNavigation)
+
+                    .Include(x => x.CurrencyListNavigation)
+                    .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
+                    .Include(x => x.ConfigGroupNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
+                        .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                        .ThenInclude(x => x.TxtypeListItemNavigation)
+                        .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
+                    .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception( "Device: "+Environment.MachineName+" not set correctly in database. Device is null during start up.");
         }
-        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        private readonly CompositeDisposable _disposables = new();
         private bool _isDisposed = false;
         // use this in derived class
         // protected override void Dispose(bool isDisposing)

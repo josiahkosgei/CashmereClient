@@ -112,6 +112,7 @@ namespace CashmereDeposit.Models.Submodule
           {
               if (!textItem.HasValue)
                   throw new ArgumentNullException(nameof (textItem));
+
               TextItem textItem1 = depositorDbContext.TextItems.FirstOrDefault(x => x.Id == textItem);
               if (textItem1 == null)
               {

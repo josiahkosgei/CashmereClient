@@ -10,30 +10,20 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using Caliburn.Micro;
-using CashmereDeposit.Utils;
 
 namespace CashmereDeposit.ViewModels
 {
   public class DeviceStatusReportScreenViewModel : DepositorScreenViewModelBase
   {
-    private DispatcherTimer dispTimer = new DispatcherTimer(DispatcherPriority.Send, Application.Current.Dispatcher);
+    private DispatcherTimer dispTimer = new(DispatcherPriority.Send, Application.Current.Dispatcher);
 
-    public string MachineName
-    {
-        get { return Environment.MachineName; }
-    }
+    public string MachineName => Environment.MachineName;
 
-    public string CashmereGUIVersion
-    {
-        get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
-    }
+    public string CashmereGUIVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
     public string DeviceManagerVersion { get; set; }
 
-    public string CashmereUtilVersion
-    {
-        get { return Assembly.GetAssembly(typeof(XMLSerialization)).GetName().Version.ToString(); }
-    }
+    public string CashmereUtilVersion => Assembly.GetAssembly(typeof(XMLSerialization)).GetName().Version.ToString();
 
     public string ControllerStatus { get; set; }
 
@@ -119,21 +109,21 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        CashmereDeviceStatus applicationStatus = applicationViewModel.ApplicationStatus;
+        var applicationStatus = applicationViewModel.ApplicationStatus;
         if (applicationStatus == null)
         {
           str1 = null;
         }
         else
         {
-          ControllerStatus controllerStatus = applicationStatus.ControllerStatus;
+          var controllerStatus = applicationStatus.ControllerStatus;
           if (controllerStatus == null)
           {
             str1 = null;
           }
           else
           {
-            DeviceBag bag = controllerStatus.Bag;
+            var bag = controllerStatus.Bag;
             if (bag == null)
             {
               str1 = null;
@@ -154,21 +144,21 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        CashmereDeviceStatus applicationStatus = applicationViewModel.ApplicationStatus;
+        var applicationStatus = applicationViewModel.ApplicationStatus;
         if (applicationStatus == null)
         {
           str2 = null;
         }
         else
         {
-          ControllerStatus controllerStatus = applicationStatus.ControllerStatus;
+          var controllerStatus = applicationStatus.ControllerStatus;
           if (controllerStatus == null)
           {
             str2 = null;
           }
           else
           {
-            DeviceBag bag = controllerStatus.Bag;
+            var bag = controllerStatus.Bag;
             if (bag == null)
             {
               str2 = null;

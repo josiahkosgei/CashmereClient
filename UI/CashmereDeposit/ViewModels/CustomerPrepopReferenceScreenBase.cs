@@ -33,7 +33,7 @@ namespace CashmereDeposit.ViewModels
 
     public string SelectedCustomerComboBoxInput
     {
-        get { return CustomerInput; }
+        get => CustomerInput;
         set
       {
         if (value != null)
@@ -44,7 +44,7 @@ namespace CashmereDeposit.ViewModels
 
     public GuiScreenListScreen GuiScreenListScreens
     {
-        get { return _GuiScreenListScreens; }
+        get => _GuiScreenListScreens;
         set
       {
         _GuiScreenListScreens = value;
@@ -54,7 +54,7 @@ namespace CashmereDeposit.ViewModels
 
     public GUIPrepopList GUIPrepopList
     {
-        get { return _GUIPrepopList; }
+        get => _GUIPrepopList;
         set
       {
         _GUIPrepopList = value;
@@ -64,7 +64,7 @@ namespace CashmereDeposit.ViewModels
 
     public string EditComboBoxButtonCaption
     {
-        get { return _EditComboBoxButtonCaption; }
+        get => _EditComboBoxButtonCaption;
         set
       {
         _EditComboBoxButtonCaption = value;
@@ -74,7 +74,7 @@ namespace CashmereDeposit.ViewModels
 
     public string CancelEditComboBoxButtonCaption
     {
-        get { return _CancelEditComboBoxButtonCaption; }
+        get => _CancelEditComboBoxButtonCaption;
         set
       {
         _CancelEditComboBoxButtonCaption = value;
@@ -84,7 +84,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool ComboBoxGridIsVisible
     {
-        get { return _ComboBoxGridIsVisible; }
+        get => _ComboBoxGridIsVisible;
         set
       {
         _ComboBoxGridIsVisible = value;
@@ -94,7 +94,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool TextBoxGridIsVisible
     {
-        get { return _TextBoxGridIsVisible; }
+        get => _TextBoxGridIsVisible;
         set
       {
         _TextBoxGridIsVisible = value;
@@ -104,7 +104,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool KeyboardGridIsVisible
     {
-        get { return _KeyboardGridIsVisible; }
+        get => _KeyboardGridIsVisible;
         set
       {
         _KeyboardGridIsVisible = value;
@@ -116,7 +116,7 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        GUIPrepopList guiPrepopList = GUIPrepopList;
+        var guiPrepopList = GUIPrepopList;
         return guiPrepopList == null || guiPrepopList.AllowFreeText;
       }
       set
@@ -129,7 +129,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool IsComboBoxEditMode
     {
-        get { return _IsComboBoxEditMode; }
+        get => _IsComboBoxEditMode;
         set
       {
         _IsComboBoxEditMode = value;
@@ -144,7 +144,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool EditComboBoxIsVisible
     {
-        get { return _EditComboBoxIsVisible; }
+        get => _EditComboBoxIsVisible;
         set
       {
         if (_EditComboBoxIsVisible == value)
@@ -156,7 +156,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool ComboBoxButtonsIsVisible
     {
-        get { return _ComboBoxButtonsIsVisible; }
+        get => _ComboBoxButtonsIsVisible;
         set
       {
         if (_ComboBoxButtonsIsVisible == value)
@@ -168,7 +168,7 @@ namespace CashmereDeposit.ViewModels
 
     public bool CancelEditComboBoxIsVisible
     {
-        get { return _CancelEditComboBoxIsVisible; }
+        get => _CancelEditComboBoxIsVisible;
         set
       {
         if (_CancelEditComboBoxIsVisible == value)
@@ -187,7 +187,7 @@ namespace CashmereDeposit.ViewModels
       double timeoutInterval = 0.0)
       : base(screenTitle, applicationViewModel, required, enableIdleTimer, timeoutInterval)
     {
-      CustomerPrepopReferenceScreenBase referenceScreenBase = this;
+      var referenceScreenBase = this;
       IsComboBoxEditMode = true;
       CustomerInput = customerInput;
       GuiScreenListScreens = applicationViewModel.CurrentGUIScreen.GuiScreenListScreens.FirstOrDefault(x => x.GuiScreenList == applicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlistNavigation.Id);
@@ -195,7 +195,7 @@ namespace CashmereDeposit.ViewModels
       CancelEditComboBoxButtonCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(nameof (CancelEditComboBoxButtonCaption), "sys_CancelEditComboBoxButtonCaption", "Choose");
       if ((bool)!GuiScreenListScreens?.GUIPrepopList?.Enabled)
         return;
-      GuiScreenListScreen screenListScreen = GuiScreenListScreens;
+      var screenListScreen = GuiScreenListScreens;
       int num1;
       if (screenListScreen == null)
       {
@@ -203,14 +203,14 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        int? count = screenListScreen.GUIPrepopList?.GUIPrepopListItems?.Count;
-        int num2 = 0;
+        var count = screenListScreen.GUIPrepopList?.GUIPrepopListItems?.Count;
+        var num2 = 0;
         num1 = count.GetValueOrDefault() > num2 & count.HasValue ? 1 : 0;
       }
       if (num1 == 0)
         return;
       GUIPrepopList = GuiScreenListScreens.GUIPrepopList;
-      GUIPrepopList guiPrepopList = GUIPrepopList;
+      var guiPrepopList = GUIPrepopList;
       List<string> list;
       if (guiPrepopList == null)
       {
@@ -218,21 +218,21 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        ICollection<GUIPrepopListItem> guiPrepopListItem = guiPrepopList.GUIPrepopListItems;
+        var guiPrepopListItem = guiPrepopList.GUIPrepopListItems;
         if (guiPrepopListItem == null)
         {
           list = null;
         }
         else
         {
-          IEnumerable<GUIPrepopListItem> source1 = guiPrepopListItem.Where(x => (bool)x.GUIPrepopItem.Enabled);
+          var source1 = guiPrepopListItem.Where(x => (bool)x.GUIPrepopItem.Enabled);
           if (source1 == null)
           {
             list = null;
           }
           else
           {
-            IOrderedEnumerable<GUIPrepopListItem> source2 = source1.OrderBy(x => x.ListOrder);
+            var source2 = source1.OrderBy(x => x.ListOrder);
             list = source2 != null ? source2.Select(x => ApplicationViewModel.CashmereTranslationService.TranslateUserText("CustomerPrepopReferenceScreenBase.CustomerComboBoxInput", new Guid?(x.GUIPrepopItem.Value), "Empty ListItem")).ToList() : null;
           }
         }
@@ -243,7 +243,7 @@ namespace CashmereDeposit.ViewModels
       int num3;
       if (!IsInputNull(CustomerInput))
       {
-        ObservableCollection<string> customerComboBoxInput = CustomerComboBoxInput;
+        var customerComboBoxInput = CustomerComboBoxInput;
         // ISSUE: explicit non-virtual call
         num3 = customerComboBoxInput != null ? (! (customerComboBoxInput.Contains(CustomerInput)) ? 1 : 0) : 0;
       }
@@ -256,16 +256,13 @@ namespace CashmereDeposit.ViewModels
 
     protected void SetComboBoxDefault(bool overrideWithDefault = false)
     {
-      GUIPrepopList guiPrepopList = GUIPrepopList;
+      var guiPrepopList = GUIPrepopList;
       if ((guiPrepopList != null ? ((bool)guiPrepopList.UseDefault ? 1 : 0) : 0) == 0 || !overrideWithDefault && !string.IsNullOrWhiteSpace(CustomerInput))
         return;
       SelectedCustomerComboBoxInput = CustomerComboBoxInput[GUIPrepopList.DefaultIndex.Clamp(0, GUIPrepopList.GUIPrepopListItems.Count - 1)];
     }
 
-    public bool CanEditComboBox
-    {
-        get { return AllowFreeText && !IsComboBoxEditMode; }
-    }
+    public bool CanEditComboBox => AllowFreeText && !IsComboBoxEditMode;
 
     public void EditComboBox()
     {
@@ -274,10 +271,7 @@ namespace CashmereDeposit.ViewModels
       NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanCancelEditComboBox));
     }
 
-    public bool CanCancelEditComboBox
-    {
-        get { return AllowFreeText && IsComboBoxEditMode; }
-    }
+    public bool CanCancelEditComboBox => AllowFreeText && IsComboBoxEditMode;
 
     public void CancelEditComboBox()
     {

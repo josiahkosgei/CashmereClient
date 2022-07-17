@@ -40,7 +40,7 @@ namespace CashmereDeposit.ViewModels
 
     public int CurrentTxPage
     {
-        get { return _currentPage; }
+        get => _currentPage;
         set
       {
         _currentPage = value;
@@ -64,7 +64,7 @@ namespace CashmereDeposit.ViewModels
 
     public IEnumerable<Transaction> Transactions
     {
-        get { return _transactionList; }
+        get => _transactionList;
         set
       {
         _transactionList = value;
@@ -75,7 +75,7 @@ namespace CashmereDeposit.ViewModels
 
     public Transaction SelectedTransaction
     {
-        get { return selectedTransaction; }
+        get => selectedTransaction;
         set
       {
         selectedTransaction = value;
@@ -89,20 +89,14 @@ namespace CashmereDeposit.ViewModels
     {
       get
       {
-        Transaction selectedTransaction = SelectedTransaction;
+        var selectedTransaction = SelectedTransaction;
         return selectedTransaction == null ? null : (IEnumerable<DenominationDetail>) selectedTransaction.DenominationDetails;
       }
     }
 
-    public string PageNumberText
-    {
-        get { return string.Format("Page {0} of {1}", CurrentTxPage + 1, maxPage + 1); }
-    }
+    public string PageNumberText => string.Format("Page {0} of {1}", CurrentTxPage + 1, maxPage + 1);
 
-    public bool CanPageFirst_Transaction
-    {
-        get { return CurrentTxPage > 0; }
-    }
+    public bool CanPageFirst_Transaction => CurrentTxPage > 0;
 
     public void PageFirst_Transaction()
     {
@@ -110,10 +104,7 @@ namespace CashmereDeposit.ViewModels
       Page_Transaction();
     }
 
-    public bool CanPagePrevious_Transaction
-    {
-        get { return CurrentTxPage > 0; }
-    }
+    public bool CanPagePrevious_Transaction => CurrentTxPage > 0;
 
     public void PagePrevious_Transaction()
     {
@@ -128,10 +119,7 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public bool CanPageNext_Transaction
-    {
-        get { return CurrentTxPage < maxPage; }
-    }
+    public bool CanPageNext_Transaction => CurrentTxPage < maxPage;
 
     public void PageNext_Transaction()
     {
@@ -146,10 +134,7 @@ namespace CashmereDeposit.ViewModels
       }
     }
 
-    public bool CanPageLast_Transaction
-    {
-        get { return CurrentTxPage < maxPage; }
-    }
+    public bool CanPageLast_Transaction => CurrentTxPage < maxPage;
 
     public void PageLast_Transaction()
     {
@@ -162,25 +147,19 @@ namespace CashmereDeposit.ViewModels
         Transactions = txQuery.Skip(CurrentTxPage * 10).Take(10).ToList();
     }
 
-    public bool CanEmailTransactionList
-    {
-        get { return txQuery.Count() > 0; }
-    }
+    public bool CanEmailTransactionList => txQuery.Count() > 0;
 
     public void EmailTransactionList()
     {
-      int num = (int) MessageBox.Show("Mail Sent");
+      var num = (int) MessageBox.Show("Mail Sent");
     }
 
-    public bool CanPrintReceipt
-    {
-        get { return SelectedTransaction != null; }
-    }
+    public bool CanPrintReceipt => SelectedTransaction != null;
 
     public void PrintReceipt()
     {
       ApplicationViewModel.PrintReceipt(SelectedTransaction, true);
-      int num = (int) MessageBox.Show("Sent to printer");
+      var num = (int) MessageBox.Show("Sent to printer");
     }
   }
 }

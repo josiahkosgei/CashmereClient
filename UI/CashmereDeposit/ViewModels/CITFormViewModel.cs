@@ -14,8 +14,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.StoredProcs;
-using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -26,7 +24,7 @@ namespace CashmereDeposit.ViewModels
 
     protected string NewBagNumber
     {
-        get { return _bagNumber; }
+        get => _bagNumber;
         set
       {
         _bagNumber = value;
@@ -36,7 +34,7 @@ namespace CashmereDeposit.ViewModels
 
     protected string SealNumber
     {
-        get { return _sealNumber; }
+        get => _sealNumber;
         set
       {
         _sealNumber = value;
@@ -101,10 +99,10 @@ namespace CashmereDeposit.ViewModels
 
     public override async Task<string> SaveForm()
     {
-      int num = FormValidation();
+      var num = FormValidation();
       if (num > 0)
         return string.Format("Form validation failed with {0:0} errors. Kindly correct them and try saving again", num);
-      CIT CIT = createCIT();
+      var CIT = createCIT();
       if (CIT != null)
       {
         depositorDbContext.CITs.Add(CIT);
@@ -129,11 +127,11 @@ namespace CashmereDeposit.ViewModels
 
     public override int FormValidation()
     {
-      int num = 0;
-      foreach (FormListItem field in Fields)
+      var num = 0;
+      foreach (var field in Fields)
       {
-        Func<string, string> validate = field.Validate;
-        string str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
+        var validate = field.Validate;
+        var str = validate != null ? validate((field.FormListItemType & FormListItemType.PASSWORD) > FormListItemType.NONE ? field.DataTextBoxLabel : field.ValidatedText) : null;
         if (str != null)
         {
           field.ErrorMessageTextBlock = str;
@@ -153,7 +151,7 @@ namespace CashmereDeposit.ViewModels
       {
         ApplicationViewModel.Log.WarningFormat("CITFormViewModel.createCIT()", "Error closing incomplete sessions", "System", "{0}>>{1}>>{2}", ex?.Message, ex?.InnerException?.Message, ex?.InnerException?.InnerException?.Message);
       }
-      CIT lastCIT = ApplicationViewModel.lastCIT;
+      var lastCIT = ApplicationViewModel.lastCIT;
       int num;
       if (lastCIT == null)
       {
@@ -161,7 +159,7 @@ namespace CashmereDeposit.ViewModels
       }
       else
       {
-        DateTime toDate = lastCIT.ToDate;
+        var toDate = lastCIT.ToDate;
         num = 0;
       }
       thisCITFromDate = num != 0 ? DateTime.MinValue : lastCIT.ToDate;
@@ -181,11 +179,11 @@ namespace CashmereDeposit.ViewModels
         CITError = 0,
         Complete = false
       };
-      DbSet<Transaction> transactions = depositorDbContext.Transactions;
+      var transactions = depositorDbContext.Transactions;
       Expression<Func<Transaction, bool>> predicate = x => x.CITId == new Guid?() && x.DeviceId == Device.Id && x.TxStartDate >= CIT.FromDate && x.TxStartDate <= CIT.ToDate;
-      foreach (Transaction transaction in transactions.Where(predicate).ToList())
+      foreach (var transaction in transactions.Where(predicate).ToList())
         transaction.CIT = CIT;
-      foreach (GetCITDenominationByDatesResult denominationByDatesResult in depositorContextProcedures.GetCITDenominationByDatesAsync(new DateTime?(thisCITFromDate), new DateTime?(thisCITToDate)).Result.OrderBy((Func<GetCITDenominationByDatesResult, int>) (x => x.denom)).ToList())
+      foreach (var denominationByDatesResult in depositorContextProcedures.GetCITDenominationByDatesAsync(new DateTime?(thisCITFromDate), new DateTime?(thisCITToDate)).Result.OrderBy((Func<GetCITDenominationByDatesResult, int>) (x => x.denom)).ToList())
         CIT.CITDenominations.Add(new CITDenomination()
         {
           Id = GuidExt.UuidCreateSequential(),
@@ -204,11 +202,11 @@ namespace CashmereDeposit.ViewModels
       try
       {
         ApplicationViewModel.Log.DebugFormat("ApplicationViewModel", "Generate CITTransaction", nameof (CreateCITTransactions), "Generating CITTransactions for CIT id={0}", CIT.Id);
-        List<CITTransaction> citTransactionList = new List<CITTransaction>(5);
-        foreach (IGrouping<string, CITDenomination> grouping in CIT.CITDenominations.GroupBy(denom => denom.CurrencyId))
+        var citTransactionList = new List<CITTransaction>(5);
+        foreach (var grouping in CIT.CITDenominations.GroupBy(denom => denom.CurrencyId))
         {
-          IGrouping<string, CITDenomination> currency = grouping;
-          long num = currency.Sum(x => x.Subtotal);
+          var currency = grouping;
+          var num = currency.Sum(x => x.Subtotal);
           if (num > 0L)
             citTransactionList.Add(new CITTransaction()
             {

@@ -3,9 +3,7 @@ using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Windows;
-using System.Windows.Input;
 using Autofac.Extensions.DependencyInjection;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
@@ -13,11 +11,9 @@ using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.CashmereDataAccess.Repositories;
 using Cashmere.Library.Standard.Security;
 using CashmereDeposit.DI;
-using CashmereDeposit.Properties;
 using CashmereDeposit.ViewModels;
 using CashmereDeposit.Views;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CashmereDeposit

@@ -12,7 +12,7 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class OutOfOrderScreenViewModel : Conductor<Screen>, IShell
+  public class OutOfOrderScreenViewModel :  Conductor<Screen>
   {
     public ApplicationViewModel ApplicationViewModel { get; }
 
@@ -65,7 +65,7 @@ namespace CashmereDeposit.ViewModels
     public void AdminButton()
     {
       ApplicationViewModel.AdminMode = true;
-      MenuBackendATMViewModel backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", ApplicationViewModel, ApplicationViewModel, this);
+      var backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", ApplicationViewModel, ApplicationViewModel, this);
       //MenuBackendATMViewModel backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", this.ApplicationViewModel, (Conductor<Screen>) this.ApplicationViewModel, (object) this);
     }
   }

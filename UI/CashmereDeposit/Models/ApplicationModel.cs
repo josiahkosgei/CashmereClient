@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.Standard.Security;
@@ -91,23 +90,58 @@ namespace CashmereDeposit.Models
         {
             try
             {
+               
                 var device = DBContext.Devices.Include(x => x.Branch).Include(x => x.ConfigGroupNavigation)
                     .Include(x => x.LanguageListNavigation)
-                    .ThenInclude(x => x.LanguageListLanguages)
-                    //.ThenInclude(x => x.LanguageListNavigation)
-                    //.ThenInclude(x => x.LanguageListLanguages)
+                        .ThenInclude(x => x.LanguageListLanguages)
                     .Include(x => x.GUIScreenListNavigation)
-                    .Include(x => x.GUIScreenListNavigation.GuiScreenListScreens)
-                    .ThenInclude(x => x.ScreenNavigation)
-                    .ThenInclude(x => x.GUIScreenType)
-                    //.ThenInclude(x => x.GUIScreenType)
-                    //.Include(x => x.GUIScreenListNavigation.GuiScreenListScreens.Select(q => q.ScreenNavigation))
+                        .ThenInclude(x => x.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenType)
+
+                    .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnAcceptCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnBackCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.BtnCancelCaptionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.FullInstructionsNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleInstructionNavigation)
+
+              .Include(x => x.GUIScreenListNavigation)
+                        .ThenInclude(a => a.GuiScreenListScreens)
+                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenText)
+                        .ThenInclude(x => x.ScreenTitleNavigation)
+
                     .Include(x => x.CurrencyListNavigation)
                     .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
                     .Include(x => x.ConfigGroupNavigation)
                     .Include(x => x.TransactionTypeListNavigation)
-                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
-                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                        .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                        .ThenInclude(x => x.TxtypeListItemNavigation)
+                        .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
                     .FirstOrDefault(x => x.MachineName == Environment.MachineName);
 
                 if (device != null)
@@ -218,8 +252,11 @@ namespace CashmereDeposit.Models
             }
         }
 
-        public List<GUIScreen> GetTransactionTypeScreenList(
-          TransactionTypeListItem transactionChosen) => transactionChosen.TxTypeGUIScreenlistNavigation.GuiScreenListScreens.Where(x => x.Enabled).OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).Where(x => x.Enabled).ToList();
+        public List<GUIScreen> GetTransactionTypeScreenList(TransactionTypeListItem transactionChosen)
+        {
+            return transactionChosen.TxTypeGUIScreenlistNavigation.GuiScreenListScreens.Where(x => x.Enabled)
+                .OrderBy(x => x.ScreenOrder).Select(x => x.ScreenNavigation).Where(x => x.Enabled).ToList();
+        }
 
         public event EventHandler<EventArgs> DatabaseStorageErrorEvent;
 

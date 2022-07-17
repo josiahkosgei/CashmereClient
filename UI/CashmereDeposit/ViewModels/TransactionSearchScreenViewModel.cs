@@ -38,16 +38,16 @@ namespace CashmereDeposit.ViewModels
 
     public override void PerformSelection()
     {
-      Account SelectedTransactionListItem = SelectedFilteredList.Value as Account;
+      var SelectedTransactionListItem = SelectedFilteredList.Value as Account;
       if (SelectedTransactionListItem == null)
         throw new NullReferenceException(GetType().Name + ".PerformSelection SelectedTransactionListItem");
       using (new DepositorDBContext())
       {
-        string str1 = SelectedTransactionListItem?.account_name ?? "";
-        string str2 = SelectedTransactionListItem?.account_number ?? "";
+        var str1 = SelectedTransactionListItem?.account_name ?? "";
+        var str2 = SelectedTransactionListItem?.account_number ?? "";
         if (ApplicationViewModel.CurrentTransaction.TransactionType.ValidateDefaultAccount)
         {
-          AccountNumberValidationResponse result = Task.Run((Func<Task<AccountNumberValidationResponse>>) (() => ValidateAsync(SelectedTransactionListItem.account_number, SelectedTransactionListItem.currency))).Result;
+          var result = Task.Run((Func<Task<AccountNumberValidationResponse>>) (() => ValidateAsync(SelectedTransactionListItem.account_number, SelectedTransactionListItem.currency))).Result;
           if (result == null || !result.IsSuccess || !result.CanTransact)
           {
             ErrorText = result != null ? result?.PublicErrorMessage : "Transaction Type is offline. Please try again later";
@@ -68,7 +68,7 @@ namespace CashmereDeposit.ViewModels
       string accountNumber,
       string currency)
     {
-      TransactionSearchScreenViewModel searchScreenViewModel = this;
+      var searchScreenViewModel = this;
       return await searchScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(accountNumber, currency, searchScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
     }
   }

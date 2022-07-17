@@ -11,7 +11,7 @@ namespace CashmereDeposit.ViewModels
 {
   public abstract class TimedScreenBase
   {
-    protected DispatcherTimer idleTimer = new DispatcherTimer();
+    protected DispatcherTimer idleTimer = new();
 
     protected TimeSpan TimeSpan { get; }
 

@@ -15,7 +15,7 @@ namespace CashmereDeposit.ViewModels
 
     public string PasswordLabel_Caption
     {
-        get { return _passwordLabel_Caption; }
+        get => _passwordLabel_Caption;
         private set
       {
         _passwordLabel_Caption = value;
