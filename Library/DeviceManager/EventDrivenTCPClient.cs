@@ -36,13 +36,9 @@ namespace DeviceManager
                 _ConStat = value;
                 if (!(ConnectionStatusChanged != null & flag))
                     return;
-
-                //ConnectionStatusChanged?.BeginInvoke(this, _ConStat, cbChangeConnectionStateComplete, this);
-                //this.ConnectionStatusChanged.BeginInvoke(this, this._ConStat, new AsyncCallback(this.cbChangeConnectionStateComplete), (object) this);
+                
                 var workTask = Task.Run(() => ConnectionStatusChanged.Invoke(this, _ConStat));
-                var followUpTask = workTask.ContinueWith(new Action<Task>(cbChangeConnectionStateComplete));
-                //workTask.WaitAsync();
-                //followUpTask.Wait();
+                workTask.ContinueWith(new Action<Task>(cbChangeConnectionStateComplete));
             }
         }
 

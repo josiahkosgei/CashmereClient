@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:local="clr-namespace:CashmereDeposit.Resources"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <system:String x:Key="GeneralErrorTitleText">Kosa imegunduliwa</system:String>
     <system:String x:Key="GeneralErrorDescriptionText">Hitilafu imetokea wakati wa shughuli ya mashine. Tafadhali ondoa noti ambazo zimekwama ukitumia maelekezo hapa chini au wasiliana na kuwasaidia wateja ama mfanyikazi wa msaada.</system:String>

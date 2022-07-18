@@ -100,7 +100,7 @@ namespace CashmereDeposit.Models.Submodule
       string defaultText,
       string languageCode = null)
     {
-      languageCode = languageCode ?? ApplicationViewModel?.CurrentLanguage ?? "en-gb";
+      languageCode ??= ApplicationViewModel?.CurrentLanguage ?? "en-gb";
       if (string.IsNullOrWhiteSpace(languageCode))
       {
         ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, "TranslateSystemText", "Caller = {0}: Error Language.IsNullOrWhiteSpace()", caller);

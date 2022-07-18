@@ -6,14 +6,14 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class StartupImageView : UserControl, IComponentConnector
-  {
-      public string CopyrightInfo { get; }
-
-    public StartupImageView()
+    public partial class StartupImageView : UserControl, IComponentConnector
     {
-        InitializeComponent();
-        CopyrightInfo = $"Copyright © 2018 - {DateTime.Now:yyyy} Maniwa Technologies Ltd. All rights reserved.";
+        public string CopyrightInfo { get; }
+
+        public StartupImageView()
+        {
+            InitializeComponent();
+            CopyrightInfo = $"Copyright © 2018 - {DateTime.Now:yyyy} Maniwa Technologies Ltd. All rights reserved.";
+        }
     }
-  }
 }

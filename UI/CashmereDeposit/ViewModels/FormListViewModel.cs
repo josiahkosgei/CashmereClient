@@ -12,7 +12,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormListViewModel :  Conductor<Screen>
+  public class FormListViewModel :  Conductor<Screen> , IShell
   {
     private FormListItem selected;
     private string _nextCaption = "Next";

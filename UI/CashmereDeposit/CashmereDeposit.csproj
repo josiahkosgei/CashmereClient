@@ -15,6 +15,7 @@
 		<Description>GUI Application for Cash Handling Devices</Description>
 		<Product>Cashmere Deposit</Product>
 		<AssemblyTitle>Cashmere Deposit GUI</AssemblyTitle>
+		<ApplicationIcon>Resources\Cashmere.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -270,6 +271,10 @@
 		<Page Remove="Resources\Lang_ErrorStrings.xaml" />
 		<Page Remove="Resources\lang_strings.sw-ke.xaml" />
 		<Page Remove="Resources\lang_strings.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Resources\Cashmere.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -12,7 +12,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormListItem :  Conductor<Screen>
+  public class FormListItem : Conductor<Screen>, IShell
   {
     private string _errorMessageTextBlock;
 

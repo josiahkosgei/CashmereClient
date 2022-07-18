@@ -78,31 +78,28 @@ namespace CashmereDeposit
 
             //  register view models
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
-              //  must be a type with a name that ends with ViewModel
               .Where(type => type.Name.EndsWith("ViewModel"))
-              //  must be in a namespace ending with ViewModels
-              .Where(type => EnforceNamespaceConvention ? (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("ViewModels")) : true)
-              //  must implement INotifyPropertyChanged (deriving from PropertyChangedBase will statisfy this)
+              .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("ViewModels")))
               .Where(type => type.GetInterface(ViewModelBaseType.Name, false) != null)
-              //  registered as Implemented Interfaces
-              .AsImplementedInterfaces()
-              //  registered as self
+              //.AsImplementedInterfaces()
               .AsSelf()
-              //  always create a new one
               .InstancePerDependency();
 
             //  register views
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
-              //  must be a type with a name that ends with View
               .Where(type => type.Name.EndsWith("View"))
-              //  must be in a namespace that ends in Views
-              .Where(type => EnforceNamespaceConvention ? (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("Views")) : true)
-              //  registered as self
+              .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("Views")))
               .AsSelf()
-              //  always create a new one
               .InstancePerDependency();
 
-            builder.Register<IWindowManager>(c => CreateWindowManager()).InstancePerLifetimeScope();
+            //  register userControls
+            //builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
+            //    .Where(type => type.Name.EndsWith("View"))
+            //    .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("Views")))
+            //    .AsSelf()
+            //    .InstancePerDependency();
+
+            builder.Register(c => CreateWindowManager()).InstancePerLifetimeScope();
             builder.Register<IEventAggregator>(c => CreateEventAggregator()).InstancePerLifetimeScope();
             
             if (AutoSubscribeEventAggegatorHandlers)

@@ -7,5 +7,5 @@
         xmlns:views="clr-namespace:CashmereDeposit.Views"
         Title="MainWindow" Height="600" Width="874" WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterScreen">
-  <ContentControl x:Name="MainContentControl"/>
+    <ContentControl x:Name="MainContentControl"/>
 </Window>

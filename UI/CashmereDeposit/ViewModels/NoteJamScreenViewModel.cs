@@ -11,7 +11,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  internal class NoteJamScreenViewModel :  Conductor<Screen>
+  internal class NoteJamScreenViewModel : Conductor<Screen>, IShell
   {
     private string _NoteJamErrorTitleText;
     private string _NoteJamErrorDescriptionText;

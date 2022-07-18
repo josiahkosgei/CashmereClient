@@ -294,20 +294,24 @@ namespace CashmereDeposit.ViewModels
                 num2 = nullable1.Value;
             }
             Keyboard = (KeyboardType)num2;
-            ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) :this.ScreenTitle;
-            CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
-            BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
-            NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
-            GetPreviousPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetPreviousPageCaption", "sys_GetPreviousPage_Caption", "Prev");
-            GetNextPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetNextPageCaption", "sys_GetNextPage_Caption", "Next");
-            FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructions, null));
-            ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstruction, null));
-            ShowFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("ShowFullInstructionsCaption", "sys_ShowFullInstructions_Caption", "Help");
-            HideFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("HideFullInstructionsCaption", "sys_Dialog_OK_Caption", "OK");
-            FullInstructionsTitle = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("FullInstructionsTitle", "sys_FullInstructionsExpander_TitleCaption", "Instructions");
-            if (!string.IsNullOrWhiteSpace(FullInstructions))
-                return;
-            CanShowFullInstructions = false;
+            //if (CurrentGUIScreenText != null)
+            //{
+                ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) : this.ScreenTitle;
+                CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
+                BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
+                NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
+                GetPreviousPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetPreviousPageCaption", "sys_GetPreviousPage_Caption", "Prev");
+                GetNextPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetNextPageCaption", "sys_GetNextPage_Caption", "Next");
+                FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructions, null));
+                ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstruction, null));
+                ShowFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("ShowFullInstructionsCaption", "sys_ShowFullInstructions_Caption", "Help");
+                HideFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("HideFullInstructionsCaption", "sys_Dialog_OK_Caption", "OK");
+                FullInstructionsTitle = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("FullInstructionsTitle", "sys_FullInstructionsExpander_TitleCaption", "Instructions");
+                if (!string.IsNullOrWhiteSpace(FullInstructions))
+                    return;
+                CanShowFullInstructions = false;
+
+            //}
         }
 
         protected string CustomerInputScreenReplace(string s)

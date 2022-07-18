@@ -15,7 +15,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public abstract class DialogueScreenBase :  Conductor<Screen>, IDisposable
+  public abstract class DialogueScreenBase : Conductor<Screen>, IShell, IDisposable
   {
     private int _timerDuration;
     private string _button1Caption;

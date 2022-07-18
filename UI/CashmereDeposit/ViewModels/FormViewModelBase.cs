@@ -9,7 +9,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public abstract class FormViewModelBase : Conductor<Screen>, IDepositorForm, IPermissionRequired
+  public abstract class FormViewModelBase : Conductor<Screen>, IShell, IDepositorForm, IPermissionRequired
   {
     protected bool isNew;
     public string _formErrorText;

@@ -15,7 +15,7 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class ATMScreenViewModelBase :  Conductor<Screen>, IATMScreen
+  public class ATMScreenViewModelBase: Conductor<Screen>, IShell, IATMScreen
   {
     public ApplicationViewModel ApplicationViewModel;
     public bool isInitialised;

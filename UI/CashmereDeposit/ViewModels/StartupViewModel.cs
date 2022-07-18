@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using CashmereDeposit.Interfaces;
 using CashmereDeposit.Models;
 using CashmereDeposit.Properties;
 using CashmereDeposit.Utils;
@@ -24,7 +25,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
-    public class StartupViewModel : Conductor<Screen>.Collection.OneActive, IDisposable
+    public class StartupViewModel : Conductor<Screen>, IShell,  IDisposable
     {
 
         private DispatcherTimer _startupTimer = new(DispatcherPriority.Send);
@@ -35,17 +36,13 @@ namespace CashmereDeposit.ViewModels
         public AlertManager AlertManager { get; set; }
 
         private ApplicationViewModel ApplicationViewModel { get; set; }
-
-        //
-
         public StartupViewModel()
         {
-            //ApplicationViewModel = new ApplicationViewModel(this);
 
             using (new DepositorDBContext())
             {
 
-                Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version.ToString(), "CashmereDepositLog", null);
+                Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version?.ToString(), "CashmereDepositLog", null);
                 AppDomain.CurrentDomain.UnhandledException += CrashHandler;
                 ApplicationViewModel.DeviceConfiguration = DeviceConfiguration.Initialise();
                 ActivateItemAsync(new StartupImageViewModel());
@@ -72,9 +69,8 @@ namespace CashmereDeposit.ViewModels
 
                 Log.Info(nameof(StartupViewModel), "OWIN Start", nameof(WebAPI_StartSelfHost), "Starting server at {0}", new { url });
                 var deviceConfiguration = ApplicationViewModel.DeviceConfiguration;
-                //if ((deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) == 0)
-                //    return;
-                //WebApp.Start<Startup>(url);
+                if ((deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) == 0)
+                    return;
                 await HostBuilder.Start();
             }
             catch (Exception ex)
@@ -113,19 +109,14 @@ namespace CashmereDeposit.ViewModels
                     ActivateItemAsync(new OutOfOrderFatalScreenViewModel());
                     AlertManager?.SendAlert(new AlertDeviceStartupFailed(ex?.Message, device, DateTime.Now));
                     CrashHandler(this, new UnhandledExceptionEventArgs(ex, false));
-                    DeviceStatus deviceStatu;
-                    if (dbContext == null)
-                        deviceStatu = null;
-                    else
-                        deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
-                    var entity = deviceStatu;
-                    if (entity == null)
+                    var deviceStatus = dbContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
+                    if (deviceStatus == null)
                     {
-                        entity = CashmereDepositCommonClasses.GenerateDeviceStatus(device.Id, dbContext);
-                        dbContext.DeviceStatus.Add(entity);
+                        deviceStatus = CashmereDepositCommonClasses.GenerateDeviceStatus(device.Id, dbContext);
+                        dbContext.DeviceStatus.Add(deviceStatus);
                     }
-                    entity.CurrentStatus |= 1024;
-                    entity.Modified = new DateTime?(DateTime.Now);
+                    deviceStatus.CurrentStatus |= 1024;
+                    deviceStatus.Modified = DateTime.Now;
                 }
             }
             catch (Exception ex)
@@ -176,7 +167,6 @@ namespace CashmereDeposit.ViewModels
                 foreach (var entityValidationError in ex.ValidationResult.MemberNames)
                 {
                     errorDetail += ">validation error>";
-                    //foreach (ValidationError validationError in (IEnumerable<ValidationError>) entityValidationError)
                     errorDetail = errorDetail + "ErrorMessage=>" + entityValidationError;
                 }
                 Console.WriteLine(errorDetail);
@@ -250,7 +240,7 @@ namespace CashmereDeposit.ViewModels
                         .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
                         .ThenInclude(x => x.TxtypeListItemNavigation)
                         .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
-                    .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception( "Device: "+Environment.MachineName+" not set correctly in database. Device is null during start up.");
+                    .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
         }
         private readonly CompositeDisposable _disposables = new();
         private bool _isDisposed = false;

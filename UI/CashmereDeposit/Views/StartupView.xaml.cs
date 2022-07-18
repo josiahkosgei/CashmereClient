@@ -1,9 +1,4 @@
 ﻿
-// Type: CashmereDeposit.Views.StartupView
-
-
-
-
 using System.Windows.Controls;
 using System.Windows.Markup;
 

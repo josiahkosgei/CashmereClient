@@ -11,7 +11,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class FormFieldViewModel :  Conductor<Screen>
+  public class FormFieldViewModel : Conductor<Screen>, IShell
   {
     private string _dataEntryLabel;
     private string _textboxText;

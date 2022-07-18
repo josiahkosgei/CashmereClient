@@ -29,6 +29,7 @@ using Cashmere.API.Messaging.Integration.Validations.AccountNumberValidations;
 using Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValidations;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using CashmereDeposit.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CashmereDeposit.Models;
 using CashmereDeposit.Models.Submodule;
@@ -735,17 +736,20 @@ namespace CashmereDeposit.ViewModels
                         var guiScreen = GUIScreens[CurrentScreenIndex];
                         var required = depositorDbContext.GuiScreenListScreens.Include(i => i.ScreenNavigation).FirstOrDefault(x => x.ScreenNavigation.Id == guiScreen.Id)?.Required;
                         var deviceGuiScreen = GetDeviceGUIScreen(CurrentGUIScreen.Id);
-                        var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", deviceGuiScreen?.GUIScreenText?.ScreenTitle, "[Translation Error]");
-                        var instance = Activator.CreateInstance(typeInfo, str, this, required);
-                        this.ActivateItemAsync(instance);
-                        Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
-                        if (CurrentScreen is DepositorCustomerScreenBaseViewModel)
-                        {
-                            if (CurrentScreen is DepositorCustomerScreenBaseViewModel currentScreen)
-                                currentScreen.Dispose();
-                            CurrentScreen = null;
-                        }
-                        CurrentScreen = instance;
+                        //if (deviceGuiScreen?.GuiTextNavigation?.ScreenTitle != null)
+                        //{
+                            var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", deviceGuiScreen?.GuiTextNavigation?.ScreenTitle, "[Translation Error]");
+                            var instance = Activator.CreateInstance(typeInfo, str, this, required);
+                            this.ActivateItemAsync(instance);
+                            Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
+                            if (CurrentScreen is DepositorCustomerScreenBaseViewModel)
+                            {
+                                if (CurrentScreen is DepositorCustomerScreenBaseViewModel currentScreen)
+                                    currentScreen.Dispose();
+                                CurrentScreen = null;
+                            }
+                            CurrentScreen = instance;
+                        //}
                     }
                     else
                         this.ActivateItemAsync(CurrentScreen);
