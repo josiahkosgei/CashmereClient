@@ -1,26 +1,21 @@
-﻿
-// Type: CashmereDeposit.Models.Submodule.CashmereTranslationService
-
-
-
-
+﻿using Cashmere.Library.Standard.Statuses;
+using CashmereDeposit.ViewModels;
+using CashmereUtil.Licensing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.Standard.Statuses;
-
-using CashmereDeposit.ViewModels;
-using CashmereUtil.Licensing;
 
 namespace CashmereDeposit.Models.Submodule
 {
   [Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE")]
   public class CashmereTranslationService : SubmoduleBase
   {
-    public bool isMultiLanguage { get; }
+    public bool isMultiLanguage { get; } = false;
+
     public CashmereTranslationService(ApplicationViewModel applicationViewModel, CDMLicense license)
       : base(applicationViewModel, license, new Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE"), nameof (CashmereTranslationService))
     {
@@ -57,38 +52,40 @@ namespace CashmereDeposit.Models.Submodule
         }
         else
         {
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
+          using (DepositorDBContext depositorDbContext = new DepositorDBContext())
+          {
             try
             {
-                SysTextItem sysTextItem = depositorDbContext.SysTextItems.FirstOrDefault(x => x.Token == tokenID);
-                if (sysTextItem == null)
+              SysTextItem sysTextItem = depositorDbContext.SysTextItems.FirstOrDefault<SysTextItem>(x => x.Token == tokenID);
+              if (sysTextItem == null)
+              {
+                ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof (TranslateSystemText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
+              }
+              else
+              {
+                ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateSystemText), "Translating", "Caller = {0}: Translating item {1} into language {2}", caller, sysTextItem.Name, languageCode);
+                string str;
+                if (!isMultiLanguage)
+                  str = sysTextItem?.DefaultTranslation;
+                else if (sysTextItem == null)
                 {
-                    ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof (TranslateSystemText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
+                  str = null;
                 }
                 else
                 {
-                    ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateSystemText), "Translating", "Caller = {0}: Translating item {1} into language {2}", caller, sysTextItem.Name, languageCode);
-                    string str;
-                    if (!isMultiLanguage)
-                        str = sysTextItem?.DefaultTranslation;
-                    else if (sysTextItem == null)
-                    {
-                        str = null;
-                    }
-                    else
-                    {
-                        ICollection<SysTextTranslation> textTranslations = sysTextItem.SysTextTranslations;
-                        str = textTranslations != null ? textTranslations.FirstOrDefault(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationSysText : null;
-                    }
-                    if (str == null)
-                        str = sysTextItem?.DefaultTranslation ?? defaultText;
-                    defaultText = str;
+                  ICollection<SysTextTranslation> textTranslations = sysTextItem.SysTextTranslations;
+                  str = textTranslations != null ? textTranslations.FirstOrDefault(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationSysText : null;
                 }
+                if (str == null)
+                  str = sysTextItem?.DefaultTranslation ?? defaultText;
+                defaultText = str;
+              }
             }
             catch (Exception ex)
             {
-                ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof (TranslateSystemText), "Caller = {0}: Error translating text [{1}] into language {2}: {3}>>{4}", caller, tokenID, languageCode, ex?.Message, ex?.InnerException?.Message);
+              ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof (TranslateSystemText), "Caller = {0}: Error translating text [{1}] into language {2}: {3}>>{4}", caller, tokenID, languageCode, ex?.Message, ex?.InnerException?.Message);
             }
+          }
         }
       }
       return TokenReplace(defaultText);
@@ -100,53 +97,55 @@ namespace CashmereDeposit.Models.Submodule
       string defaultText,
       string languageCode = null)
     {
-      languageCode ??= ApplicationViewModel?.CurrentLanguage ?? "en-gb";
+      languageCode = languageCode ?? ApplicationViewModel?.CurrentLanguage ?? "en-gb";
       if (string.IsNullOrWhiteSpace(languageCode))
       {
         ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, "TranslateSystemText", "Caller = {0}: Error Language.IsNullOrWhiteSpace()", caller);
       }
       else
       {
-          using DepositorDBContext depositorDbContext = new DepositorDBContext();
+        using (DepositorDBContext depositorDbContext = new DepositorDBContext())
+        {
           try
           {
-              if (!textItem.HasValue)
-                  throw new ArgumentNullException(nameof (textItem));
-
-              TextItem textItem1 = depositorDbContext.TextItems.FirstOrDefault(x => x.Id == textItem);
-              if (textItem1 == null)
+            if (!textItem.HasValue)
+              throw new ArgumentNullException(nameof (textItem));
+            TextItem textItem1 = depositorDbContext.TextItems.FirstOrDefault<TextItem>(x => x.Id == textItem);
+            if (textItem1 == null)
+            {
+              ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof (TranslateUserText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
+            }
+            else
+            {
+              ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateUserText), "Translating", "Caller = {0}: Translating item [{1}] into language {2}", caller, textItem1.Name, languageCode);
+              string str;
+              if (!isMultiLanguage)
+                str = textItem1?.DefaultTranslation;
+              else if (textItem1 == null)
               {
-                  ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof (TranslateUserText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
+                str = null;
               }
               else
               {
-                  ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateUserText), "Translating", "Caller = {0}: Translating item [{1}] into language {2}", caller, textItem1.Name, languageCode);
-                  string str;
-                  if (!isMultiLanguage)
-                      str = textItem1?.DefaultTranslation;
-                  else if (textItem1 == null)
-                  {
-                      str = null;
-                  }
-                  else
-                  {
-                      ICollection<TextTranslation> textTranslations = textItem1.TextTranslations;
-                      str = textTranslations != null ? textTranslations.FirstOrDefault(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationText : null;
-                  }
-                  if (str == null)
-                      str = textItem1?.DefaultTranslation ?? defaultText;
-                  defaultText = str;
+                ICollection<TextTranslation> textTranslations = textItem1.TextTranslations;
+                str = textTranslations != null ? textTranslations.FirstOrDefault<TextTranslation>(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationText : null;
               }
-              int num = defaultText == "[Translation Error]" ? 1 : 0;
+              if (str == null)
+                str = textItem1?.DefaultTranslation ?? defaultText;
+              defaultText = str;
+            }
+            if (!(defaultText == "[Translation Error]"))
+              ;
           }
           catch (ArgumentNullException ex)
           {
-              ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateUserText), ApplicationErrorConst.TEXTTRANSLATIONERROR.ToString(), "Caller = {0}: Error translating text {1} into language {2}: {3}>>{4}", caller, textItem, languageCode, ex?.Message, ex?.InnerException?.Message);
+            ApplicationViewModel.Log.TraceFormat(GetType().Name, nameof (TranslateUserText), ApplicationErrorConst.TEXTTRANSLATIONERROR.ToString(), "Caller = {0}: Error translating text {1} into language {2}: {3}>>{4}", caller, textItem, languageCode, ex?.Message, ex?.InnerException?.Message);
           }
           catch (Exception ex)
           {
-              ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof (TranslateUserText), "Caller = {0}: Error translating text {1} into language {2}: {3}>>{4}", caller, textItem, languageCode, ex?.Message, ex?.InnerException?.Message);
+            ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof (TranslateUserText), "Caller = {0}: Error translating text {1} into language {2}: {3}>>{4}", caller, textItem, languageCode, ex?.Message, ex?.InnerException?.Message);
           }
+        }
       }
       return TokenReplace(defaultText);
     }

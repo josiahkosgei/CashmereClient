@@ -103,6 +103,8 @@
             Style="{StaticResource ButtonBase}">K</Button>
     <Button Click="Key_Pressed" x:Name="keyl" Grid.Row="2" Grid.Column="18" Grid.ColumnSpan="2"
             Style="{StaticResource ButtonBase}">L</Button>
+    <Button Click="Key_Pressed" x:Name="key_colon" Grid.Row="2" Grid.Column="20" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">:</Button>
     <Button Click="Key_Pressed" x:Name="keyz" Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2"
             Style="{StaticResource ButtonBase}">Z</Button>
     <Button Click="Key_Pressed" x:Name="keyx" Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2"
@@ -117,9 +119,15 @@
             Style="{StaticResource ButtonBase}">N</Button>
     <Button Click="Key_Pressed" x:Name="keym" Grid.Row="3" Grid.Column="15" Grid.ColumnSpan="2"
             Style="{StaticResource ButtonBase}">M</Button>
+    <Button Click="Key_Pressed" x:Name="key_comma" Grid.Row="3" Grid.Column="17" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">,</Button>
+    <Button Click="Key_Pressed" x:Name="key_period" Grid.Row="3" Grid.Column="19" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">.</Button>
+    <Button Click="Key_Pressed" x:Name="key_bslash" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">\</Button>
     <Button Click="key_space_Click" x:Name="key_space" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="14"
             Style="{StaticResource ButtonBase}" Content="{StaticResource Key_Space_Caption}"/>
-    <Button Click="Key_Pressed" x:Name="key_period" Grid.Row="3" Grid.Column="17" Grid.ColumnSpan="2"
-            Style="{StaticResource ButtonBase}">.</Button>
+    <Button Click="Key_Pressed" x:Name="key_fslash" Grid.Row="4" Grid.Column="18" Grid.ColumnSpan="2"
+            Style="{StaticResource ButtonBase}">/</Button>
   </Grid>
 </UserControl>

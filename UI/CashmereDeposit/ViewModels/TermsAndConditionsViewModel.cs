@@ -25,7 +25,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _Dialog_OK_Caption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => Dialog_OK_Caption));
+         NotifyOfPropertyChange( () => Dialog_OK_Caption);
       }
     }
 

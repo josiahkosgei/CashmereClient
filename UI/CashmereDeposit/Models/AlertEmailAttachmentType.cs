@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.AlertEmailAttachmentType
-
-
-
-
-namespace CashmereDeposit.Models
+﻿namespace CashmereDeposit.Models
 {
   public static class AlertEmailAttachmentType
   {

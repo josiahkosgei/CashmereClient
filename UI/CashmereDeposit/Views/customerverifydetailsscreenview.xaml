@@ -41,13 +41,13 @@
         </Grid.RowDefinitions>
         <ScrollViewer Grid.ColumnSpan="9" Margin="10" Style="{StaticResource ScrollViewerBase}"
                       HorizontalContentAlignment="Center">
-          <ItemsControl x:Name="SummaryList" Margin="10">
+          <ItemsControl x:Name="SummaryList" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="10">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Grid Margin="4 0" Width="auto">
+                <Grid IsSharedSizeScope="true" Margin="4 0" Width="auto">
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition MinWidth="300" SharedSizeGroup="A"/>
+                    <ColumnDefinition Width="auto" SharedSizeGroup="B"/>
                   </Grid.ColumnDefinitions>
                   <TextBlock Style="{StaticResource Heading3}" HorizontalAlignment="Left" Text="{Binding Path=Title}"/>
                   <TextBlock Grid.Column="1" Style="{StaticResource Heading3}" HorizontalAlignment="Left"

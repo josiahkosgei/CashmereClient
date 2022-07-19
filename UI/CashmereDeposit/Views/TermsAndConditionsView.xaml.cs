@@ -1,9 +1,8 @@
-﻿
-// Type: CashmereDeposit.Views.TermsAndConditionsView
-
-
-
-
+﻿using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 
@@ -11,9 +10,6 @@ namespace CashmereDeposit.Views
 {
   public partial class TermsAndConditionsView : UserControl, IComponentConnector
   {
-      public TermsAndConditionsView()
-      {
-          InitializeComponent();
-      }
+    public TermsAndConditionsView() => InitializeComponent();
   }
 }

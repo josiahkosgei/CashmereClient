@@ -1,10 +1,4 @@
-﻿
-//.UserControlViewModel
-
-
-
-
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Cashmere.Library.Standard.Utilities;
 using System;
 using System.Linq;

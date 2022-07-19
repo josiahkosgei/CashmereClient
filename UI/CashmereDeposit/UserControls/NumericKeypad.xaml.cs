@@ -1,5 +1,7 @@
-﻿
-using System;
+﻿using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
@@ -8,12 +10,13 @@ namespace CashmereDeposit.UserControls
 {
   public partial class NumericKeypad : UserControl, IComponentConnector
   {
+      public NumericKeypad() => InitializeComponent();
 
     private void btnDigits_Click(object sender, RoutedEventArgs e)
     {
-      Button originalSource = e.OriginalSource as Button;
-      TextBox dataContext = DataContext as TextBox;
-      int caretIndex = dataContext.CaretIndex;
+      var originalSource = e.OriginalSource as Button;
+      var dataContext = DataContext as TextBox;
+      var caretIndex = dataContext.CaretIndex;
       if (dataContext.SelectedText.Length > 0)
         deleteText();
       dataContext.Text = dataContext.Text.Insert(dataContext.CaretIndex, originalSource.Content as string);
@@ -24,8 +27,8 @@ namespace CashmereDeposit.UserControls
 
     private void deleteText()
     {
-      TextBox dataContext = DataContext as TextBox;
-      int startIndex = dataContext.CaretIndex;
+      var dataContext = DataContext as TextBox;
+      var startIndex = dataContext.CaretIndex;
       if (dataContext.SelectedText.Length > 0)
       {
         dataContext.Text = dataContext.Text.Remove(dataContext.SelectionStart, dataContext.SelectionLength);
@@ -46,10 +49,11 @@ namespace CashmereDeposit.UserControls
     {
       if (!(DataContext is TextBox dataContext))
         return;
-      TextBox textBox = dataContext;
-      string text = dataContext.Text;
-      int num = text != null ? text.Length : 0;
+      var textBox = dataContext;
+      var text = dataContext.Text;
+      var num = text != null ? text.Length : 0;
       textBox.CaretIndex = num;
     }
+        
   }
 }

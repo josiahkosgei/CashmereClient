@@ -43,26 +43,25 @@ namespace CashmereDeposit.ViewModels
     /// <summary>
     /// [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
     /// </summary>
-    public class ApplicationViewModel : Conductor<Screen>
+    public class ApplicationViewModel : Conductor<Screen>, IShell
     {
         private bool _adminMode;
         private ApplicationUser _currentUser;
         private ApplicationUser _validatingUser;
         private CashAccSysDeviceManager.CashAccSysDeviceManager _deviceManager;
         private ApplicationState _currentApplicationState = ApplicationState.STARTUP;
-        private DispatcherTimer statusTimer = new(DispatcherPriority.Send);
+        private readonly DispatcherTimer statusTimer = new(DispatcherPriority.Send);
 
-        //public bool debugNoDevice { get; }
-        public bool debugNoDevice = true;
+        public bool debugNoDevice { get; } = true;
 
-        //public bool debugNoCoreBanking { get; }
+        public bool debugNoCoreBanking { get; } = true;
 
-        public bool debugNoCoreBanking = true;
-        public bool debugDisableSafeSensor { get; }
+        //public bool debugNoCoreBanking = true;
+        public bool debugDisableSafeSensor { get; } = true;
 
-        public bool debugDisableBagSensor { get; }
+        public bool debugDisableBagSensor { get; } = true;
 
-        public bool debugDisablePrinter { get; }
+        public bool debugDisablePrinter { get; } = true;
 
         public static CashmereTranslationService CashmereTranslationService { get; set; }
 
@@ -248,8 +247,8 @@ namespace CashmereDeposit.ViewModels
                 catch (Exception ex)
                 {
                     SetCashmereDeviceState(CashmereDeviceState.LICENSE);
-                    NotifyOfPropertyChange((Expression<Func<CashmereDeviceStatus>>)(() => ApplicationStatus));
-                    NotifyOfPropertyChange((Expression<Func<ApplicationState>>)(() => CurrentApplicationState));
+                    NotifyOfPropertyChange(() => ApplicationStatus);
+                    NotifyOfPropertyChange(() => CurrentApplicationState);
                 }
             }
         }
@@ -384,7 +383,7 @@ namespace CashmereDeposit.ViewModels
                         if (allowConnectionError && !response.ServerOnline)
                         {
                             var applicationStatus = ApplicationStatus;
-                            num = (applicationStatus != null ? (applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0) : 0) == 0 ? 1 : 0;
+                            num = (applicationStatus != null ? applicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.SERVER_CONNECTION) ? 1 : 0 : 0) == 0 ? 1 : 0;
                         }
                         else
                             num = 0;
@@ -524,13 +523,6 @@ namespace CashmereDeposit.ViewModels
                     DeviceManager.EscrowJamClearWaitEvent -= DeviceManager_EscrowJamClearWaitEvent;
                     DeviceManager.EscrowJamEndRequestEvent -= DeviceManager_EscrowJamEndRequestEvent;
                     DeviceManager.EscrowJamEndEvent -= DeviceManager_EscrowJamEndEvent;
-                    //DeviceManager.EscrowRejectEvent -= this.DeviceManager_EscrowRejectEvent;
-                    //DeviceManager.EscrowDropEvent -= this.DeviceManager_EscrowDropEvent;
-                    //DeviceManager.EscrowOperationCompleteEvent -= this.DeviceManager_EscrowOperationCompleteEvent;
-                    //DeviceManager.NoteJamStartEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamStartEvent);
-                    //DeviceManager.NoteJamClearWaitEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamClearWaitEvent);
-                    //DeviceManager.NoteJamEndRequestEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndRequestEvent);
-                    //DeviceManager.NoteJamEndEvent -= new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndEvent);
                     DeviceManager.ConnectionEvent += DeviceManager_ConnectionEvent;
                     DeviceManager.RaiseControllerStateChangedEvent += DeviceManager_RaiseControllerStateChangedEvent;
                     DeviceManager.RaiseDeviceStateChangedEvent += DeviceManager_RaiseDeviceStateChangedEvent;
@@ -558,13 +550,6 @@ namespace CashmereDeposit.ViewModels
                     DeviceManager.EscrowJamClearWaitEvent += DeviceManager_EscrowJamClearWaitEvent;
                     DeviceManager.EscrowJamEndRequestEvent += DeviceManager_EscrowJamEndRequestEvent;
                     DeviceManager.EscrowJamEndEvent += DeviceManager_EscrowJamEndEvent;
-                    //DeviceManager.EscrowRejectEvent += this.DeviceManager_EscrowRejectEvent;
-                    //DeviceManager.EscrowDropEvent += this.DeviceManager_EscrowDropEvent;
-                    //DeviceManager.EscrowOperationCompleteEvent += this.DeviceManager_EscrowOperationCompleteEvent;
-                    //DeviceManager.NoteJamStartEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamStartEvent);
-                    //DeviceManager.NoteJamClearWaitEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamClearWaitEvent);
-                    //DeviceManager.NoteJamEndRequestEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndRequestEvent);
-                    //DeviceManager.NoteJamEndEvent += new EventHandler<EventArgs>(this.DeviceManager_NoteJamEndEvent);
                 }
                 DeviceManager.Initialise();
                 var escrowJam = dbContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
@@ -597,7 +582,7 @@ namespace CashmereDeposit.ViewModels
                 };
                 CurrentTransaction.Transaction.EscrowJams.Add(EscrowJam);
                 CurrentTransaction.DroppedAmountCents = CurrentTransaction.TotalAmountCents;
-                CurrentTransaction.DroppedDenomination += CurrentTransaction.CountedDenominationResult;
+                CurrentTransaction.DroppedDenomination += CurrentTransaction.CountedDenomination;
                 CurrentSession.SaveToDatabase();
             }
             AlertManager.SendAlert(new AlertEscrowJam(CurrentTransaction, CurrentSession.Device, DateTime.Now));
@@ -608,7 +593,7 @@ namespace CashmereDeposit.ViewModels
             else if (EscrowJam == null)
             {
                 var escrowJam = new DepositorDBContext().EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
-                if (escrowJam != null && !escrowJam.RecoveryDate.HasValue)
+                if (escrowJam is { RecoveryDate: null })
                     EscrowJam = escrowJam;
             }
             ShowErrorDialog(new OutOfOrderScreenViewModel(this));
@@ -650,7 +635,7 @@ namespace CashmereDeposit.ViewModels
             foreach (var transaction in transactions.Where(predicate).ToList())
             {
                 transaction.TxCompleted = true;
-                transaction.TxEndDate = new DateTime?(DateTime.Now);
+                transaction.TxEndDate = DateTime.Now;
                 transaction.TxErrorCode = 85;
                 transaction.TxErrorMessage = "Incomplete transaction aborted";
                 transaction.TxResult = 85;
@@ -667,10 +652,10 @@ namespace CashmereDeposit.ViewModels
             Expression<Func<DepositorSession, bool>> predicate = x => x.Complete == false;
             foreach (var depositorSession in depositorSessions.Where(predicate).ToList())
             {
-                depositorSession.SessionEnd = new DateTime?(DateTime.Now);
+                depositorSession.SessionEnd = DateTime.Now;
                 depositorSession.Complete = true;
                 depositorSession.CompleteSuccess = false;
-                depositorSession.ErrorCode = new int?(84);
+                depositorSession.ErrorCode = 84;
                 depositorSession.ErrorMessage = "Session is incomplete";
             }
             SaveToDatabase(dbContext);
@@ -734,22 +719,18 @@ namespace CashmereDeposit.ViewModels
                         depositorDbContext.GuiScreens.Attach(GUIScreens[CurrentScreenIndex]);
                         var typeInfo = Assembly.GetExecutingAssembly().DefinedTypes.First(x => x.GUID == GUIScreens[CurrentScreenIndex].GUIScreenType.Code);
                         var guiScreen = GUIScreens[CurrentScreenIndex];
-                        var required = depositorDbContext.GuiScreenListScreens.Include(i => i.ScreenNavigation).FirstOrDefault(x => x.ScreenNavigation.Id == guiScreen.Id)?.Required;
+                        var required = depositorDbContext.GuiScreenListScreens.Include(i => i.GUIScreenNavigation).FirstOrDefault(x => x.GUIScreenNavigation.Id == guiScreen.Id)?.Required;
                         var deviceGuiScreen = GetDeviceGUIScreen(CurrentGUIScreen.Id);
-                        //if (deviceGuiScreen?.GuiTextNavigation?.ScreenTitle != null)
-                        //{
-                            var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", deviceGuiScreen?.GuiTextNavigation?.ScreenTitle, "[Translation Error]");
-                            var instance = Activator.CreateInstance(typeInfo, str, this, required);
-                            this.ActivateItemAsync(instance);
-                            Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
-                            if (CurrentScreen is DepositorCustomerScreenBaseViewModel)
-                            {
-                                if (CurrentScreen is DepositorCustomerScreenBaseViewModel currentScreen)
-                                    currentScreen.Dispose();
-                                CurrentScreen = null;
-                            }
-                            CurrentScreen = instance;
-                        //}
+                        var str = CashmereTranslationService.TranslateUserText("ShowScreen().screenTitle", deviceGuiScreen?.GuiTextNavigation?.ScreenTitle, "[Translation Error]");
+                        CurrentScreen = Activator.CreateInstance(typeInfo, str, this, required);
+                        this.ActivateItemAsync(CurrentScreen);
+                        Log.InfoFormat(GetType().Name, nameof(ShowScreen), "Navigation", "Showing screen: {0}", GUIScreens[CurrentScreenIndex]?.Name);
+                        if (CurrentScreen is DepositorCustomerScreenBaseViewModel)
+                        {
+                            if (CurrentScreen is DepositorCustomerScreenBaseViewModel currentScreen)
+                                currentScreen.Dispose();
+                            CurrentScreen = null;
+                        }
                     }
                     else
                         this.ActivateItemAsync(CurrentScreen);
@@ -1244,7 +1225,7 @@ namespace CashmereDeposit.ViewModels
                     request.Language = applicationViewModel.CurrentLanguage;
                     request.TransactionType = txType;
                     // ISSUE: explicit non-virtual call
-                    response = await (integrationServiceClient.ValidateAccountNumberAsync(request));
+                    response = await integrationServiceClient.ValidateAccountNumberAsync(request);
                     applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     if (response.IsSuccess)
                     {
@@ -1345,7 +1326,7 @@ namespace CashmereDeposit.ViewModels
                     request.Language = applicationViewModel.CurrentLanguage;
                     request.TransactionType = txType;
                     // ISSUE: explicit non-virtual call
-                    response = await (integrationServiceClient.ValidateAccountNumberAsync(request));
+                    response = await integrationServiceClient.ValidateAccountNumberAsync(request);
                     applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     if (response.IsSuccess)
                     {
@@ -1444,7 +1425,7 @@ namespace CashmereDeposit.ViewModels
                         request.Language = applicationViewModel.CurrentLanguage;
                         request.TransactionType = applicationViewModel.CurrentTransaction.TransactionType.Id;
                         // ISSUE: explicit non-virtual call
-                        response = await (integrationServiceClient.ValidateReferenceAccountNumberAsync(request));
+                        response = await integrationServiceClient.ValidateReferenceAccountNumberAsync(request);
                         applicationViewModel.CheckIntegrationResponseMessageDateTime(response.MessageDateTime);
                     }
                     catch (Exception ex)
@@ -1496,8 +1477,8 @@ namespace CashmereDeposit.ViewModels
                             BagNumber = e.ControllerStatus.Bag.BagNumber,
                             BagPercentFull = e.ControllerStatus.Bag.PercentFull,
                             BagStatus = e.ControllerStatus.Bag.BagState.ToString() ?? "",
-                            BagValueCapacity = new long?(e.ControllerStatus.Bag.ValueCapacity),
-                            BagValueLevel = new long?(e.ControllerStatus.Bag.ValueLevel),
+                            BagValueCapacity = e.ControllerStatus.Bag.ValueCapacity,
+                            BagValueLevel = e.ControllerStatus.Bag.ValueLevel,
                             BaCurrency = e.ControllerStatus.NoteAcceptor.Currency,
                             BaStatus = e.ControllerStatus.NoteAcceptor.Status.ToString(),
                             BaType = e.ControllerStatus.NoteAcceptor.Type.ToString(),
@@ -1507,7 +1488,7 @@ namespace CashmereDeposit.ViewModels
                             EscrowStatus = e.ControllerStatus.Escrow.Status.ToString(),
                             EscrowType = e.ControllerStatus.Escrow.Type.ToString(),
                             Id = Guid.NewGuid(),
-                            Modified = new DateTime?(DateTime.Now),
+                            Modified = DateTime.Now,
                             SensorsStatus = e.ControllerStatus.Sensor.Status.ToString(),
                             SensorsType = e.ControllerStatus.Sensor.Type.ToString(),
                             SensorsValue = e.ControllerStatus.Sensor.Value,
@@ -1526,8 +1507,8 @@ namespace CashmereDeposit.ViewModels
                         deviceStatu.BagNumber = e.ControllerStatus.Bag.BagNumber;
                         deviceStatu.BagPercentFull = e.ControllerStatus.Bag.PercentFull;
                         deviceStatu.BagStatus = e.ControllerStatus.Bag.BagState.ToString() ?? "";
-                        deviceStatu.BagValueCapacity = new long?(e.ControllerStatus.Bag.ValueCapacity);
-                        deviceStatu.BagValueLevel = new long?(e.ControllerStatus.Bag.ValueLevel);
+                        deviceStatu.BagValueCapacity = e.ControllerStatus.Bag.ValueCapacity;
+                        deviceStatu.BagValueLevel = e.ControllerStatus.Bag.ValueLevel;
                         deviceStatu.BaCurrency = e.ControllerStatus.NoteAcceptor.Currency;
                         deviceStatu.BaStatus = e.ControllerStatus.NoteAcceptor.Status.ToString();
                         deviceStatu.BaType = e.ControllerStatus.NoteAcceptor.Type.ToString();
@@ -1536,7 +1517,7 @@ namespace CashmereDeposit.ViewModels
                         deviceStatu.EscrowPosition = e.ControllerStatus.Escrow.Position.ToString();
                         deviceStatu.EscrowStatus = e.ControllerStatus.Escrow.Status.ToString();
                         deviceStatu.EscrowType = e.ControllerStatus.Escrow.Type.ToString();
-                        deviceStatu.Modified = new DateTime?(DateTime.Now);
+                        deviceStatu.Modified = DateTime.Now;
                         deviceStatu.SensorsStatus = e.ControllerStatus.Sensor.Status.ToString();
                         deviceStatu.SensorsType = e.ControllerStatus.Sensor.Type.ToString();
                         deviceStatu.SensorsValue = e.ControllerStatus.Sensor.Value;
@@ -1578,7 +1559,7 @@ namespace CashmereDeposit.ViewModels
                         CurrentApplicationState = ApplicationState.CIT_BAG_CLOSED;
                     }
                 }
-                if ((e != null ? (e.DeviceManagerState != DeviceManagerState.OUT_OF_ORDER ? 1 : 0) : 1) != 0)
+                if ((e != null ? e.DeviceManagerState != DeviceManagerState.OUT_OF_ORDER ? 1 : 0 : 1) != 0)
                 {
                     if (ApplicationStatus.CashmereDeviceState.HasFlag(CashmereDeviceState.DEVICE_MANAGER))
                         UnSetCashmereDeviceState(CashmereDeviceState.DEVICE_MANAGER);
@@ -1751,7 +1732,7 @@ namespace CashmereDeposit.ViewModels
                     if (last_CIT != null)
                     {
                         last_CIT.Complete = true;
-                        last_CIT.CITCompleteDate = new DateTime?(DateTime.Now);
+                        last_CIT.CITCompleteDate = DateTime.Now;
                         SaveToDatabase(dbContext);
                         Task.Run((Func<Task>)(() => PostCITTransactionsAsync(last_CIT, dbContext)));
                         var ciTs = dbContext.CITs;
@@ -1759,7 +1740,7 @@ namespace CashmereDeposit.ViewModels
                         foreach (var cit in ciTs.Where(predicate).ToList())
                         {
                             cit.Complete = true;
-                            cit.CITCompleteDate = new DateTime?(DateTime.Now);
+                            cit.CITCompleteDate = DateTime.Now;
                             cit.CITError = 95;
                             cit.CITErrorMessage = "Incomplete CIT completed by a newer CIT";
                             AlertManager.SendAlert(new AlertCITFailed(cit, device, DateTime.Now));
@@ -1796,7 +1777,7 @@ namespace CashmereDeposit.ViewModels
                             {
                                 Log.InfoFormat(nameof(ApplicationViewModel), "Posting CITTransaction", "StartCIT", "Posting CITTransaction Id={0}, account={1}, suspense={2}, Currency={3}, amount={4:#,##0.##}", CITTransaction.Id, CITTransaction.AccountNumber, CITTransaction.SuspenseAccount, CITTransaction.Currency, CITTransaction.Amount / 100.0);
                                 var coreBankingAsync = await PostCITTransactionToCoreBankingAsync(cit.Id, CITTransaction);
-                                CITTransaction.CbDate = new DateTime?(coreBankingAsync.TransactionDateTime);
+                                CITTransaction.CbDate = coreBankingAsync.TransactionDateTime;
                                 CITTransaction.CbTxNumber = coreBankingAsync.TransactionID;
                                 CITTransaction.CbTxStatus = coreBankingAsync.PostResponseCode;
                                 CITTransaction.CbStatusDetail = coreBankingAsync.PostResponseMessage;
@@ -1858,11 +1839,11 @@ namespace CashmereDeposit.ViewModels
                     if (CurrentSession != null)
                     {
                         var deviceManager = DeviceManager;
-                        if ((deviceManager != null ? (deviceManager.DeviceManagerMode == DeviceManagerMode.NONE ? 1 : 0) : 0) != 0)
+                        if ((deviceManager != null ? deviceManager.DeviceManagerMode == DeviceManagerMode.NONE ? 1 : 0 : 0) != 0)
                             EndSession(false, (int)ApplicationStatus.CashmereDeviceState, ApplicationErrorConst.ERROR_SYSTEM, ApplicationStatus.CashmereDeviceState.ToString());
                     }
                     var deviceManager1 = DeviceManager;
-                    if ((deviceManager1 != null ? (deviceManager1.DeviceManagerMode != DeviceManagerMode.ESCROW_JAM ? 1 : 0) : 1) != 0)
+                    if ((deviceManager1 != null ? deviceManager1.DeviceManagerMode != DeviceManagerMode.ESCROW_JAM ? 1 : 0 : 1) != 0)
                         ShowErrorDialog(new OutOfOrderScreenViewModel(this));
                 }
                 else if (CurrentSession != null)
@@ -1876,17 +1857,13 @@ namespace CashmereDeposit.ViewModels
                 }
             }
 
-            var deviceStatu = dbContext.DeviceStatus.FirstOrDefault(x => x.MachineName == Environment.MachineName);
-            if (deviceStatu == null)
+            var deviceStatus = dbContext.DeviceStatus.FirstOrDefault(x => x.MachineName == Environment.MachineName);
+            if (deviceStatus == null)
             {
-                ParameterExpression parameterExpression2;
-                // ISSUE: method reference
-                // ISSUE: method reference
-                // ISSUE: method reference
-                deviceStatu = CashmereDepositCommonClasses.GenerateDeviceStatus((dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new NullReferenceException("Device null in DB at ApplicationStatus_PropertyChanged")).Id, dbContext);
+                deviceStatus = CashmereDepositCommonClasses.GenerateDeviceStatus((dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new NullReferenceException("Device null in DB at ApplicationStatus_PropertyChanged")).Id, dbContext);
             }
-            deviceStatu.CurrentStatus = (int)ApplicationStatus.CashmereDeviceState;
-            deviceStatu.Modified = new DateTime?(DateTime.Now);
+            deviceStatus.CurrentStatus = (int)ApplicationStatus.CashmereDeviceState;
+            deviceStatus.Modified = DateTime.Now;
             SaveToDatabase(dbContext);
         }
 
@@ -2463,11 +2440,11 @@ namespace CashmereDeposit.ViewModels
                 return;
             var transactionLimits1 = CurrentTransaction.TransactionLimits;
             long? nullable1;
-            if ((transactionLimits1 != null ? (transactionLimits1.ShowFundsSource ? 1 : 0) : 0) != 0)
+            if ((transactionLimits1 != null ? transactionLimits1.ShowFundsSource ? 1 : 0 : 0) != 0)
             {
                 var droppedDisplayAmount = CurrentTransaction.DroppedDisplayAmount;
                 nullable1 = CurrentTransaction.TransactionLimits?.FundsSourceAmount;
-                var nullable2 = nullable1.HasValue ? new Decimal?(nullable1.GetValueOrDefault()) : new Decimal?();
+                var nullable2 = nullable1.HasValue ? nullable1.GetValueOrDefault() : new Decimal?();
                 var valueOrDefault = nullable2.GetValueOrDefault();
                 if (droppedDisplayAmount > valueOrDefault & nullable2.HasValue)
                 {
@@ -2486,7 +2463,7 @@ namespace CashmereDeposit.ViewModels
                         nullable3 = nullable1;
                     }
                     else
-                        nullable3 = new long?(transactionLimits2.FundsSourceAmount);
+                        nullable3 = transactionLimits2.FundsSourceAmount;
                     objArray[1] = nullable3;
                     log.InfoFormat(name, "Count", "Device Management", "Transaction of {0} is above value limit of {1}, insert FundsSource screen", objArray);
                     ShowFundsSourceScreen(dbContext);
@@ -2494,7 +2471,7 @@ namespace CashmereDeposit.ViewModels
                 }
             }
             var transactionLimits3 = CurrentTransaction.TransactionLimits;
-            if ((transactionLimits3 != null ? (transactionLimits3.PreventOverdeposit ? 1 : 0) : 0) != 0 && CurrentTransaction.IsOverDeposit)
+            if ((transactionLimits3 != null ? transactionLimits3.PreventOverdeposit ? 1 : 0 : 0) != 0 && CurrentTransaction.IsOverDeposit)
             {
                 var title = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Title", "Transaction Limit Exceeded");
                 var format = CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_Transaction_Limit_Exceeded_Message", "Transaction limit of {0} {1} has been exceeded. Please visit your nearest branch to finish the deposit.");
@@ -2507,7 +2484,7 @@ namespace CashmereDeposit.ViewModels
                     nullable4 = nullable1;
                 }
                 else
-                    nullable4 = new long?(transactionLimits4.OverdepositAmount);
+                    nullable4 = transactionLimits4.OverdepositAmount;
                 // ISSUE: variable of a boxed type
                 var local = (ValueType)nullable4;
                 var message = string.Format(format, upper, (object)local);
@@ -2529,7 +2506,7 @@ namespace CashmereDeposit.ViewModels
                     nullable5 = nullable1;
                 }
                 else
-                    nullable5 = new long?(transactionLimits5.OverdepositAmount);
+                    nullable5 = transactionLimits5.OverdepositAmount;
                 objArray1[4] = nullable5;
                 log.ErrorFormat(name, 27, ErrorName, "Credit Blocked: Transaction [{0}] of Amount {1} {2:###,##0.00} is over the limit of {3} {4:###,##0.00}.", objArray1);
                 var objArray2 = new object[5];
@@ -2546,14 +2523,14 @@ namespace CashmereDeposit.ViewModels
                     nullable6 = nullable1;
                 }
                 else
-                    nullable6 = new long?(transactionLimits6.OverdepositAmount);
+                    nullable6 = transactionLimits6.OverdepositAmount;
                 objArray2[4] = nullable6;
                 EndTransaction(ApplicationErrorConst.ERROR_TRANSACTION_LIMIT_EXCEEDED, string.Format("Credit Blocked: Transaction [{0}] of Amount {1} {2:###,##0.00} is over the limit of {3} {4:###,##0.00}.", objArray2));
             }
             else
             {
                 var currentTransaction = CurrentTransaction;
-                if ((currentTransaction != null ? (currentTransaction.NoteJamDetected ? 1 : 0) : 0) != 0)
+                if ((currentTransaction != null ? currentTransaction.NoteJamDetected ? 1 : 0 : 0) != 0)
                 {
                     EndTransaction(ApplicationErrorConst.ERROR_DEVICE_NOTEJAM, ApplicationErrorConst.ERROR_DEVICE_NOTEJAM.ToString());
                 }
@@ -2611,7 +2588,7 @@ namespace CashmereDeposit.ViewModels
                                     CurrentTransaction.isPosting = true;
                                     CurrentTransaction.hasPosted = true;
                                     var result1 = Task.Run((Func<Task<PostTransactionResponse>>)(() => PostToCoreBankingAsync(SessionID.Value, CurrentTransaction.Transaction))).Result;
-                                    CurrentTransaction.Transaction.CbDate = new DateTime?(result1.TransactionDateTime);
+                                    CurrentTransaction.Transaction.CbDate = result1.TransactionDateTime;
                                     CurrentTransaction.Transaction.CbTxNumber = result1.TransactionID;
                                     CurrentTransaction.Transaction.CbTxStatus = result1.PostResponseCode;
                                     CurrentTransaction.Transaction.CbStatusDetail = result1.PostResponseMessage;
@@ -2784,8 +2761,8 @@ namespace CashmereDeposit.ViewModels
                     var deviceLogin = dbContext.DeviceLogins.Where(x => x.User == CurrentUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
                     if (deviceLogin != null)
                     {
-                        deviceLogin.LogoutDate = new DateTime?(DateTime.Now);
-                        deviceLogin.ForcedLogout = new bool?(forced);
+                        deviceLogin.LogoutDate = DateTime.Now;
+                        deviceLogin.ForcedLogout = forced;
                     }
                 }
                 if (ValidatingUser != null)
@@ -2793,8 +2770,8 @@ namespace CashmereDeposit.ViewModels
                     var deviceLogin = dbContext.DeviceLogins.Where(x => x.User == ValidatingUser.Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
                     if (deviceLogin != null)
                     {
-                        deviceLogin.LogoutDate = new DateTime?(DateTime.Now);
-                        deviceLogin.ForcedLogout = new bool?(forced);
+                        deviceLogin.LogoutDate = DateTime.Now;
+                        deviceLogin.ForcedLogout = forced;
                     }
                 }
                 SaveToDatabase(dbContext);
@@ -2818,17 +2795,17 @@ namespace CashmereDeposit.ViewModels
             using var dbContext = new DepositorDBContext();
             Log.WarningFormat(GetType().Name, nameof(LockUser), "User Locked by device", "Error {0} {1} {2}", error, error.ToString(), errorMessage);
             var applicationUser = dbContext.ApplicationUsers.First(x => x.Id == user.Id);
-            applicationUser.DepositorEnabled = new bool?(false);
-            applicationUser.IsActive = new bool?(false);
+            applicationUser.DepositorEnabled = false;
+            applicationUser.IsActive = false;
             AlertManager.SendAlert(new AlertUserLocked(user, ApplicationModel.GetDevice(dbContext), errorMessage, DateTime.Now));
             dbContext.UserLocks.Add(new UserLock()
             {
                 Id = Guid.NewGuid(),
                 ApplicationUserLoginDetail = user.ApplicationUserLoginDetail,
-                LockType = new int?(0),
+                LockType = 0,
                 InitiatingUser = CurrentUser?.Id,
-                LogDate = new DateTime?(DateTime.Now),
-                WebPortalInitiated = new bool?(false)
+                LogDate = DateTime.Now,
+                WebPortalInitiated = false
             });
             SaveToDatabase(dbContext);
         }
@@ -2838,17 +2815,17 @@ namespace CashmereDeposit.ViewModels
             using var dbContext = new DepositorDBContext();
             Log.Info(GetType().Name, nameof(UnLockUser), "User Lock", lockMessage);
             var applicationUser = dbContext.ApplicationUsers.First(x => x.Id == user.Id);
-            applicationUser.DepositorEnabled = new bool?(true);
-            applicationUser.IsActive = new bool?(true);
+            applicationUser.DepositorEnabled = true;
+            applicationUser.IsActive = true;
             AlertManager.SendAlert(new AlertUserUnLocked(user, ApplicationModel.GetDevice(dbContext), lockMessage, DateTime.Now));
             dbContext.UserLocks.Add(new UserLock()
             {
                 Id = Guid.NewGuid(),
                 ApplicationUserLoginDetail = user.ApplicationUserLoginDetail,
-                LockType = new int?(1),
+                LockType = 1,
                 InitiatingUser = CurrentUser?.Id,
-                LogDate = new DateTime?(DateTime.Now),
-                WebPortalInitiated = new bool?(false)
+                LogDate = DateTime.Now,
+                WebPortalInitiated = false
             });
             SaveToDatabase(dbContext);
         }
@@ -2957,7 +2934,7 @@ namespace CashmereDeposit.ViewModels
                 var guid = Guid.NewGuid();
                 guid = Guid.NewGuid();
                 guid = Guid.NewGuid();
-                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
+                objArray[3] = txAmount.HasValue ? txAmount.GetValueOrDefault() / num2 : new long?();
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", objArray);
                 var coreBankingAsync = new PostTransactionResponse
                 {
@@ -3000,7 +2977,7 @@ namespace CashmereDeposit.ViewModels
                 };
                 var txAmount = transaction.TxAmount;
                 long num3 = 100;
-                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num3) : new long?();
+                objArray[3] = txAmount.HasValue ? txAmount.GetValueOrDefault() / num3 : new long?();
                 objArray[4] = str2;
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", objArray);
                 var device = applicationViewModel.CurrentSession.Device;
@@ -3048,7 +3025,7 @@ namespace CashmereDeposit.ViewModels
                     Narration = transaction.TxNarration
                 };
                 request.Transaction = postTransactionData;
-                var coreBankingAsync = await (integrationServiceClient.PostTransactionAsync(request));
+                var coreBankingAsync = await integrationServiceClient.PostTransactionAsync(request);
                 applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
                 return coreBankingAsync;
             }
@@ -3091,7 +3068,7 @@ namespace CashmereDeposit.ViewModels
                 var guid = Guid.NewGuid();
                 guid = Guid.NewGuid();
                 guid = Guid.NewGuid();
-                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num2) : new long?();
+                objArray[3] = txAmount.HasValue ? txAmount.GetValueOrDefault() / num2 : new long?();
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "DebugPosting: RequestID = {0}, AccountNumber = {1}, Currency = {2}, Amount = {3:N2}", objArray);
                 var coreBankingAsync = new PostTransactionResponse
                 {
@@ -3134,7 +3111,7 @@ namespace CashmereDeposit.ViewModels
                 };
                 var txAmount = transaction.TxAmount;
                 long num3 = 100;
-                objArray[3] = txAmount.HasValue ? new long?(txAmount.GetValueOrDefault() / num3) : new long?();
+                objArray[3] = txAmount.HasValue ? txAmount.GetValueOrDefault() / num3 : new long?();
                 objArray[4] = str2;
                 log.InfoFormat(name, "PostToCoreBanking", "Commands", "RequestID = {0}, AccountNumber = {1}, Suspense Account {4}, Currency = {2}, Amount = {3:N2}", objArray);
                 var device = applicationViewModel.CurrentSession.Device;
@@ -3182,7 +3159,7 @@ namespace CashmereDeposit.ViewModels
                     Narration = transaction.TxNarration
                 };
                 request.Transaction = postTransactionData;
-                var coreBankingAsync = await (integrationServiceClient.PostTransactionAsync(request));
+                var coreBankingAsync = await integrationServiceClient.PostTransactionAsync(request);
                 applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
                 return coreBankingAsync;
             }
@@ -3256,7 +3233,7 @@ namespace CashmereDeposit.ViewModels
                     }
                 };
                 // ISSUE: explicit non-virtual call
-                var coreBankingAsync = await (integrationServiceClient.PostCITTransactionAsync(request));
+                var coreBankingAsync = await integrationServiceClient.PostCITTransactionAsync(request);
                 applicationViewModel.CheckIntegrationResponseMessageDateTime(coreBankingAsync.MessageDateTime);
                 return coreBankingAsync;
             }
@@ -3321,7 +3298,7 @@ namespace CashmereDeposit.ViewModels
                             else
                             {
                                 var source4 = originalString.Where(z => z == '.');
-                                nullable1 = source4 != null ? new int?(source4.Count()) : new int?();
+                                nullable1 = source4 != null ? source4.Count() : new int?();
                             }
                         }
                         var nullable2 = nullable1;
@@ -3380,42 +3357,42 @@ namespace CashmereDeposit.ViewModels
                         .ThenInclude(x => x.LanguageListLanguages)
                     .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(x => x.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenType)
 
                     .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnAcceptCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnBackCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnCancelCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.FullInstructionsNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.ScreenTitleInstructionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.ScreenTitleNavigation)
 
@@ -3423,9 +3400,144 @@ namespace CashmereDeposit.ViewModels
                     .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
                     .Include(x => x.ConfigGroupNavigation)
                     .Include(x => x.TransactionTypeListNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
                         .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
                         .ThenInclude(x => x.TxtypeListItemNavigation)
                         .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TransactionTextNav)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.DisclaimerNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AccountNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.DepositorNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.FullInstructionsNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.FundsSourceCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.IdNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ListItemCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.NarrationCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.PhoneNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReceiptTemplateNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReferenceAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReferenceAccountNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.TermsNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ValidationTextErrorMessageNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ValidationTextSuccessMessageNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.TxItemNavigation)
                     .FirstOrDefault(x => x.MachineName == Environment.MachineName);
                 if (device != null)
                     return device;

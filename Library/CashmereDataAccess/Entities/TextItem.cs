@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("TextItem", Schema = "xlns")]
-    // [Index("Name", "Category", Name = "UX_UI_TextItem_name", IsUnique = true)]
-    // [Index("Category", Name = "iCategory_xlns_TextItem_CDE8C5ED")]
-    // [Index("TextItemTypeId", Name = "iTextItemTypeID_xlns_TextItem_2A2E0516")]
     public partial class TextItem
     {
         public TextItem()
@@ -55,58 +52,32 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid? TextItemTypeId { get; set; }
 
         [ForeignKey("Category")]
-        //[InverseProperty("TextItems")]
         public virtual TextItemCategory CategoryNavigation { get; set; } = null!;
         [ForeignKey("TextItemTypeId")]
-        //[InverseProperty("TextItems")]
         public virtual TextItemType? TextItemType { get; set; }
-        //[InverseProperty("ValueNavigation")]
         public virtual ICollection<GUIPrepopItem> GUIPrepopItems { get; set; }
-        //[InverseProperty("BtnAcceptCaptionNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextBtnAcceptCaptions { get; set; }
-        //[InverseProperty("BtnBackCaptionNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextBtnBackCaptions { get; set; }
-        //[InverseProperty("BtnCancelCaptionNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextBtnCancelCaptions { get; set; }
-        //[InverseProperty("FullInstructionsNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextFullInstructionss { get; set; }
-        //[InverseProperty("ScreenTitleInstructionNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextScreenTitleInstructions { get; set; }
-        //[InverseProperty("ScreenTitleNavigation")]
         public virtual ICollection<GUIScreenText> GUIScreenTextScreenTitles { get; set; }
-        //[InverseProperty("TextItem")]
         public virtual ICollection<TextTranslation> TextTranslations { get; set; }
-        //[InverseProperty("AccountNameCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextAccountNameCaptions { get; set; }
-        //[InverseProperty("AccountNumberCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextAccountNumberCaptions { get; set; }
-        //[InverseProperty("AliasAccountNameCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextAliasAccountNameCaptions { get; set; }
-        //[InverseProperty("AliasAccountNumberCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextAliasAccountNumberCaptions { get; set; }
-        //[InverseProperty("DepositorNameCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextDepositorNameCaptions { get; set; }
-        //[InverseProperty("DisclaimerNavigation")]
         public virtual ICollection<TransactionText> TransactionTextDisclaimers { get; set; }
-        //[InverseProperty("FullInstructionsNavigation")]
         public virtual ICollection<TransactionText> TransactionTextFullInstructionss { get; set; }
-        //[InverseProperty("FundsSourceCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextFundsSourceCaptions { get; set; }
-        //[InverseProperty("IdNumberCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextIdNumberCaptions { get; set; }
-        //[InverseProperty("ListItemCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextListItemCaptions { get; set; }
-        //[InverseProperty("NarrationCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextNarrationCaptions { get; set; }
-        //[InverseProperty("PhoneNumberCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextPhoneNumberCaptions { get; set; }
-        //[InverseProperty("ReceiptTemplateNavigation")]
         public virtual ICollection<TransactionText> TransactionTextReceiptTemplates { get; set; }
-        //[InverseProperty("ReferenceAccountNameCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextReferenceAccountNameCaptions { get; set; }
-        //[InverseProperty("ReferenceAccountNumberCaptionNavigation")]
         public virtual ICollection<TransactionText> TransactionTextReferenceAccountNumberCaptions { get; set; }
-        //[InverseProperty("TermsNavigation")]
         public virtual ICollection<TransactionText> TransactionTextTerms { get; set; }
     }
 }

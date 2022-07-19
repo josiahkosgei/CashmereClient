@@ -232,7 +232,7 @@ namespace CashmereDeposit.ViewModels
                 {
                     var id1 = dbApplicationUser.Id;
                     var id2 = ApplicationViewModel.CurrentUser?.Id;
-                    if ((id2.HasValue ? (id1 == id2.GetValueOrDefault() ? 1 : 0) : 0) != 0)
+                    if ((id2.HasValue ? id1 == id2.GetValueOrDefault() ? 1 : 0 : 0) != 0)
                     {
                         FormErrorText = "Permission Denied";
                         var errorMessage = string.Format("User {0} cannot initialise and authenticate permission {1}. Dual custody required. Permission Denied", dbApplicationUser.Username, "BACKEND_MENU_SHOW");
@@ -301,7 +301,7 @@ namespace CashmereDeposit.ViewModels
                             if (!dbApplicationUser.IsAdUser)
                             {
                                 var applicationUser2 = dbApplicationUser;
-                                if ((applicationUser2 != null ? (applicationUser2.PasswordResetRequired ? 1 : 0) : 0) != 0)
+                                if ((applicationUser2 != null ? applicationUser2.PasswordResetRequired ? 1 : 0 : 0) != 0)
                                 {
                                     FormErrorText = "Password reset required. please enter a new password";
                                     ApplicationViewModel.Log.Warning(GetType().Name, "Login OK", "Login", "Password reset required.");
@@ -344,13 +344,13 @@ namespace CashmereDeposit.ViewModels
                                         };
                                         dateTime1 = dateTime2;
                                         var nullable = logDate;
-                                        objArray[2] = nullable.HasValue ? (dateTime1 >= nullable.GetValueOrDefault() ? 1 : 0) : 0;
+                                        objArray[2] = nullable.HasValue ? dateTime1 >= nullable.GetValueOrDefault() ? 1 : 0 : 0;
                                         log.DebugFormat(name, "Check Password Expiry", "Login", "checkDate {0} >= passwordCreationDate {1} = {2}", objArray);
                                         if (passwordPolicy != null && passwordPolicy.ExpiryDays > 0 && logDate.HasValue)
                                         {
                                             dateTime1 = dateTime2;
                                             nullable = logDate;
-                                            if ((nullable.HasValue ? (dateTime1 >= nullable.GetValueOrDefault() ? 1 : 0) : 0) != 0)
+                                            if ((nullable.HasValue ? dateTime1 >= nullable.GetValueOrDefault() ? 1 : 0 : 0) != 0)
                                             {
                                                 FormErrorText = "Password has expired please enter a new password in web app";
                                                 ApplicationViewModel.Log.Warning(GetType().Name, "Login Denied", "Login", FormErrorText);

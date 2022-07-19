@@ -16,9 +16,12 @@
         <TextBlock x:Name="NextCaption" Text="Finish"/>
       </Button>
     </Grid>
-    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}" Text="Thank You"/>
+    <TextBlock x:Name="ScreenTitle" DockPanel.Dock="Top" Style="{StaticResource Heading1}"
+               Text="[XML] Thank You for banking with us"/>
     <ScrollViewer Margin="50 20" Style="{StaticResource Instructions_ScrollViewer}" Background="White">
-      <TextBlock x:Name="FullInstructions" Style="{StaticResource Heading2}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="FullInstructions" Margin="20" MaxWidth="1000" HorizontalAlignment="Center"
+                 Style="{StaticResource Heading2}" TextWrapping="Wrap"
+                 Text="[XML] Your deposit has been received.                                                Receipt: Hold bottom right edge and pull up to tear the receipt."/>
     </ScrollViewer>
   </DockPanel>
 </UserControl>

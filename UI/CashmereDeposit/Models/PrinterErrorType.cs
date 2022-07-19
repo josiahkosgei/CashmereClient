@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.PrinterErrorType
-
-
-
-
-namespace CashmereDeposit.Models
+﻿namespace CashmereDeposit.Models
 {
   public enum PrinterErrorType
   {

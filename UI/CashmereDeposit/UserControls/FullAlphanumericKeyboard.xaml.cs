@@ -1,22 +1,19 @@
-﻿
-// Type: CashmereDeposit.UserControls.FullAlphanumericKeyboard
-
-
-
-
+﻿using CashmereDeposit.Utils;
 using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Markup;
-using CashmereDeposit.Utils;
 
 namespace CashmereDeposit.UserControls
 {
   public partial class FullAlphanumericKeyboard : UserControl, IComponentConnector
   {
-    private bool _capsLockDown;
+    private bool _capsLockDown = false;
     public bool CapsLockDown
     {
       get => _capsLockDown;
@@ -27,12 +24,14 @@ namespace CashmereDeposit.UserControls
       }
     }
 
-    public bool ShiftDown { get; set; }
-        
-    private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[2]
+    public bool ShiftDown { get; set; } = false;
+
+    public FullAlphanumericKeyboard() => InitializeComponent();
+
+    private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke((object) passwordBox, new object[2]
     {
-      start,
-      length
+      (object) start,
+      (object) length
     });
 
     private void pressKey(string s)
@@ -97,18 +96,7 @@ namespace CashmereDeposit.UserControls
     {
       if (!(sender is ToggleButton toggleButton))
         return;
-      bool? isChecked = toggleButton.IsChecked;
-      int num;
-      if (!isChecked.HasValue)
-      {
-        num = 0;
-      }
-      else
-      {
-        isChecked = toggleButton.IsChecked;
-        num = isChecked.Value ? 1 : 0;
-      }
-      CapsLockDown = num != 0;
+      CapsLockDown = toggleButton.IsChecked.HasValue && toggleButton.IsChecked.Value;
     }
 
     private void keyShift_Click(object sender, RoutedEventArgs e)
@@ -124,15 +112,14 @@ namespace CashmereDeposit.UserControls
 
     private void RenderButtonText()
     {
-      foreach (Button visualChild in UtilExtentionMethods.FindVisualChildren<Button>(this))
+      foreach (Button visualChild in UtilExtentionMethods.FindVisualChildren<Button>((DependencyObject) this))
       {
         string content = visualChild.Content as string;
         if (content.Length == 1)
-          visualChild.Content = CapsLockDown ? content.ToUpperInvariant() : (object) content.ToLowerInvariant();
+          visualChild.Content = CapsLockDown ? (object) content.ToUpperInvariant() : (object) content.ToLowerInvariant();
       }
     }
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e) => RenderButtonText();
-
   }
 }

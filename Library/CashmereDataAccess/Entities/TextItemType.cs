@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("TextItemType", Schema = "xlns")]
-    // [Index("Token", Name = "UX_UI_TextItemType", IsUnique = true)]
     public partial class TextItemType
     {
         public TextItemType()

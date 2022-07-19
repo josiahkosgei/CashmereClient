@@ -42,7 +42,7 @@ namespace CashmereDeposit
         }
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
-
+            base.OnStartup(sender, e);
             ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*ATMScreenCommandViewModel", "CashmereDeposit.Views.WaitForProcessScreenView");
             ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*InputScreenViewModel", "CashmereDeposit.Views.CustomerInputScreenView");
             ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*ListScreenViewModel", "CashmereDeposit.Views.CustomerListScreenView");
@@ -52,7 +52,6 @@ namespace CashmereDeposit
             ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*DialogueBoxViewModel", "CashmereDeposit.Views.DialogueBoxView");
             ViewLocator.NameTransformer.AddRule("^CashmereDeposit.ViewModels.*SearchScreenViewModel", "CashmereDeposit.Views.CustomerSearchScreenView");
 
-            base.OnStartup(sender, e);
         }
 
         /// <summary>
@@ -81,8 +80,8 @@ namespace CashmereDeposit
         protected override void ConfigureContainer(ContainerBuilder containerBuilder)
         {
 
-            containerBuilder.RegisterType<StartupViewModel>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<ApplicationViewModel>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<StartupViewModel>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<ApplicationViewModel>().AsSelf().InstancePerLifetimeScope();
             containerBuilder.RegisterType<BusyIndicator>().AsSelf().InstancePerLifetimeScope();
             containerBuilder.RegisterType<FullAlphanumericKeyboard>().AsSelf().InstancePerLifetimeScope();
             containerBuilder.RegisterType<NumericKeypad>().AsSelf().InstancePerLifetimeScope();

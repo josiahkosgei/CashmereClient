@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("TextTranslation", Schema = "xlns")]
-    // [Index("LanguageCode", "TextItemId", Name = "UX_UI_Translation_Language_Pair", IsUnique = true)]
-    // [Index("LanguageCode", Name = "iLanguageCode_xlns_TextTranslation_0EDE47B6")]
-    // [Index("TextItemId", Name = "iTextItemID_xlns_TextTranslation_00B6C5AC")]
     public partial class TextTranslation
     {
         [Key]
@@ -25,10 +22,8 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public string TranslationText { get; set; } = null!;
 
         [ForeignKey("LanguageCode")]
-        //[InverseProperty("TextTranslations")]
         public virtual Language LanguageCodeNavigation { get; set; } = null!;
         [ForeignKey("TextItemId")]
-        //[InverseProperty("TextTranslations")]
         public virtual TextItem TextItem { get; set; } = null!;
     }
 }

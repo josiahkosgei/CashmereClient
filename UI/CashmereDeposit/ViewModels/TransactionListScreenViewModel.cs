@@ -112,14 +112,15 @@ namespace CashmereDeposit.ViewModels
                 ApplicationViewModel.CurrentTransaction.Transaction.InitUser = ApplicationViewModel.CurrentUser?.Id;
                 ApplicationViewModel.CurrentTransaction.Transaction.AuthUser = ApplicationViewModel.ValidatingUser?.Id;
                 var translationService = ApplicationViewModel.CashmereTranslationService;
-                string str3;
+                string? str3;
                 if (translationService == null)
                 {
                     str3 = null;
                 }
                 else
                 {
-                    var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", ApplicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText?.Disclaimer, null);
+                    var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
+                    var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimer, null);
                     str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
                 }
                 var message = str3;

@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.PrinterState
-
-
-
-
-namespace CashmereDeposit.Models
+﻿namespace CashmereDeposit.Models
 {
   public class PrinterState
   {

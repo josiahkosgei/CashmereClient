@@ -1,21 +1,14 @@
-﻿
-// Type: CashmereDeposit.Models.AppSession
-
-
-
-
+﻿using Caliburn.Micro;
+using Cashmere.Library.Standard.Statuses;
+using Cashmere.Library.Standard.Utilities;
+using CashmereDeposit.Utils.AlertClasses;
+using CashmereDeposit.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq.Expressions;
-using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.Standard.Statuses;
-using Cashmere.Library.Standard.Utilities;
-
-using CashmereDeposit.Utils.AlertClasses;
-using CashmereDeposit.ViewModels;
 
 namespace CashmereDeposit.Models
 {
@@ -30,11 +23,11 @@ namespace CashmereDeposit.Models
       Device = ApplicationViewModel.ApplicationModel.GetDevice(DBContext);
       DepositorSession = new DepositorSession()
       {
-        Id = GuidExt.UuidCreateSequential(),
-        DeviceId = Device.Id,
-        SessionStart = DateTime.Now,
-        SessionEnd = new DateTime?(),
-        LanguageCode = "en-gb"
+          Id = GuidExt.UuidCreateSequential(),
+          DeviceId = Device.Id,
+          SessionStart = DateTime.Now,
+          SessionEnd = new DateTime?(),
+          LanguageCode = "en-gb"
       };
       SessionID = DepositorSession.Id;
       TermsAccepted = false;
@@ -100,11 +93,11 @@ namespace CashmereDeposit.Models
       {
         ApplicationViewModel.Log.InfoFormat(GetType().Name, "Language Changed", "Tx Property Changed", "Language changed from {0} to {1}", DepositorSession.LanguageCode, value);
         DepositorSession.LanguageCode = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => Language));
+        NotifyOfPropertyChange<string>((Expression<Func<string>>) (() => Language));
         Culture = new CultureInfo(Language);
-        NotifyOfPropertyChange((Expression<Func<CultureInfo>>) (() => Culture));
+        NotifyOfPropertyChange<CultureInfo>((Expression<Func<CultureInfo>>) (() => Culture));
         UICulture = new CultureInfo(Language);
-        NotifyOfPropertyChange((Expression<Func<CultureInfo>>) (() => UICulture));
+        NotifyOfPropertyChange<CultureInfo>((Expression<Func<CultureInfo>>) (() => UICulture));
       }
     }
 
@@ -185,11 +178,11 @@ namespace CashmereDeposit.Models
       }
     }
 
-    internal bool HasCounted { get; set; }
+    internal bool HasCounted { get; set; } = false;
 
-    internal bool CountingStarted { get; set; }
+    internal bool CountingStarted { get; set; } = false;
 
-    internal bool CountingEnded { get; set; }
+    internal bool CountingEnded { get; set; } = false;
 
     public ApplicationViewModel ApplicationViewModel => _applicationViewModel;
 
@@ -203,9 +196,7 @@ namespace CashmereDeposit.Models
     {
       Guid? nullable = obj is AppSession appSession ? new Guid?(appSession.SessionID) : new Guid?();
       Guid sessionId = SessionID;
-      if (!nullable.HasValue)
-        return false;
-      return !nullable.HasValue || nullable.GetValueOrDefault() == sessionId;
+      return nullable.HasValue && (!nullable.HasValue || nullable.GetValueOrDefault() == sessionId);
     }
 
     public override int GetHashCode() => SessionID.GetHashCode();
@@ -234,7 +225,7 @@ namespace CashmereDeposit.Models
       ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof (EndSession), "Session", "Session Result = {0}, transaction result = {1},errorcode = {2}, errormessage={3}", success, result, errorCode, errorMessage);
       SessionComplete = true;
       SessionCompleteSuccess = success;
-      if (result != ApplicationErrorConst.ERROR_NONE)
+      if (result != 0)
         LogSessionError(result, errorMessage);
       SessionEnd = DateTime.Now;
       if (Transaction != null && !Transaction.Completed)

@@ -71,7 +71,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         searchButtonIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => SearchButtonIsVisible));
+        NotifyOfPropertyChange( () => SearchButtonIsVisible);
       }
     }
 
@@ -81,7 +81,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         searchButtonCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => SearchButtonCaption));
+         NotifyOfPropertyChange( () => SearchButtonCaption);
       }
     }
 
@@ -91,7 +91,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         cancelSearchButtonIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => CancelSearchButtonIsVisible));
+        NotifyOfPropertyChange( () => CancelSearchButtonIsVisible);
       }
     }
 
@@ -101,7 +101,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         cancelSearchButtonCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => CancelSearchButtonCaption));
+         NotifyOfPropertyChange( () => CancelSearchButtonCaption);
       }
     }
 
@@ -111,7 +111,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         screenFooterIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => ScreenFooterIsVisible));
+        NotifyOfPropertyChange( () => ScreenFooterIsVisible);
       }
     }
 
@@ -123,7 +123,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         screenHeaderIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => ScreenHeaderIsVisible));
+        NotifyOfPropertyChange( () => ScreenHeaderIsVisible);
       }
     }
 
@@ -133,7 +133,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         keyboardGridIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => KeyboardGridIsVisible));
+        NotifyOfPropertyChange( () => KeyboardGridIsVisible);
       }
     }
 

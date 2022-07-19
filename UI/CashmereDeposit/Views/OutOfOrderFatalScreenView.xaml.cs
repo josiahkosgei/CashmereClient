@@ -1,19 +1,16 @@
-﻿
-// Type: CashmereDeposit.Views.OutOfOrderFatalScreenView
-
-
-
-
+﻿using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class OutOfOrderFatalScreenView : UserControl, IComponentConnector
-  {
-      public OutOfOrderFatalScreenView()
-      {
-          InitializeComponent();
-      }
-  }
+    public partial class OutOfOrderFatalScreenView : UserControl, IComponentConnector
+    {
+        public OutOfOrderFatalScreenView() => InitializeComponent();
+        
+    }
 }

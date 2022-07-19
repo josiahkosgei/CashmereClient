@@ -34,7 +34,7 @@
         <TextBlock x:Name="Credits" FontSize="15" Margin="0,5" TextWrapping="Wrap"/>
       </StackPanel>
       <StackPanel Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-        <TextBlock x:Name="Copyright" FontSize="20" Margin="20" Text="Copyright Maniwa Technologies Ltd. 2022. All rights reserved"/>
+        <TextBlock x:Name="Copyright" FontSize="20" Margin="20" Text="Copyright Kamau Thuo 2018. All rights reserved"/>
       </StackPanel>
     </Grid>
   </Grid>

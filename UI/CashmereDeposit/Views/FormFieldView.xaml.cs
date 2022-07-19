@@ -1,9 +1,9 @@
-﻿
-// Type: CashmereDeposit.Views.FormFieldView
-
-
-
-
+﻿using CashmereDeposit.UserControls;
+using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 
@@ -11,9 +11,6 @@ namespace CashmereDeposit.Views
 {
   public partial class FormFieldView : UserControl, IComponentConnector
   {
-      public FormFieldView()
-      {
-          InitializeComponent();
-      }
+    public FormFieldView() => InitializeComponent();
   }
 }

@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.DeviceManagerTest
-
-
-
-
-using System;
+﻿using System;
 
 namespace CashmereDeposit.Models
 {

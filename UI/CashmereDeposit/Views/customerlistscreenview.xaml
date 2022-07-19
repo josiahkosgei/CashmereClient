@@ -9,106 +9,106 @@
              xmlns:cal="http://www.caliburnproject.org"
              x:Name="_this"
              cal:Message.Attach="[Event PreviewMouseDown] = [Action ResetIdleTimerOnUserInteraction]">
-  <Control.Background>
-    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
-  </Control.Background>
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="8*"/>
-    </Grid.RowDefinitions>
-    <uc:ScreenHeader/>
-    <TextBlock x:Name="ScreenTitle" Grid.Row="1" Style="{StaticResource Heading1}" Text="Choose Option"/>
-    <TextBlock x:Name="ErrorText" Grid.Row="2" Style="{StaticResource FormErrorTextBlock}"
-               HorizontalAlignment="Center"/>
-    <Grid Row="3">
-      <Grid x:Name="FullInstructionsExpanderIsVisible" Visibility="Hidden" ZIndex="10000"
-            Style="{StaticResource FullInstructions_Grid}">
-        <DockPanel>
-          <TextBlock x:Name="FullInstructionsTitle" DockPanel.Dock="Top" Style="{StaticResource Heading2}"
-                     FontWeight="Bold" Text="[XML]Instructions"/>
-          <Button x:Name="HideFullInstructions" DockPanel.Dock="Bottom" Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="HideFullInstructionsCaption" Text="OK"/>
-          </Button>
-          <ScrollViewer Style="{StaticResource Instructions_ScrollViewer}">
-            <TextBlock x:Name="FullInstructions" Style="{StaticResource ImportantTextBlock}" TextWrapping="Wrap"
-                       TextAlignment="Left" Text="Instruction text goes here"/>
-          </ScrollViewer>
-        </DockPanel>
-      </Grid>
-      <Grid>
+    <Control.Background>
+        <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+    </Control.Background>
+    <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="80*"/>
-          <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.ColumnSpan="3" Margin="10">
-          <ListBox x:Name="FilteredList" ScrollViewer.CanContentScroll="false" ScrollViewer.PanningMode="None"
+        <uc:ScreenHeader/>
+        <TextBlock x:Name="ScreenTitle" Grid.Row="1" Style="{StaticResource Heading1}" Text="Choose Option"/>
+        <TextBlock x:Name="ErrorText" Grid.Row="2" Style="{StaticResource FormErrorTextBlock}"
+               HorizontalAlignment="Center"/>
+        <Grid Row="3">
+            <Grid x:Name="FullInstructionsExpanderIsVisible" Visibility="Hidden" ZIndex="10000"
+            Style="{StaticResource FullInstructions_Grid}">
+                <DockPanel>
+                    <TextBlock x:Name="FullInstructionsTitle" DockPanel.Dock="Top" Style="{StaticResource Heading2}"
+                     FontWeight="Bold" Text="[XML]Instructions"/>
+                    <Button x:Name="HideFullInstructions" DockPanel.Dock="Bottom" Style="{StaticResource NavigationButton}">
+                        <TextBlock x:Name="HideFullInstructionsCaption" Text="OK"/>
+                    </Button>
+                    <ScrollViewer Style="{StaticResource Instructions_ScrollViewer}">
+                        <TextBlock x:Name="FullInstructions" Style="{StaticResource ImportantTextBlock}" TextWrapping="Wrap"
+                       TextAlignment="Left" Text="Instruction text goes here"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Grid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.ColumnSpan="3" Margin="10">
+                    <ListBox x:Name="FilteredList" ScrollViewer.CanContentScroll="false" ScrollViewer.PanningMode="None"
                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <UniformGrid Columns="2" Rows="2"/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Grid Margin="4">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-                  <Border MaxHeight="90" Margin="10" BorderThickness="5">
-                    <Image HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Path=Image}"/>
-                  </Border>
-                  <Border Grid.Column="1" MaxHeight="90" BorderBrush="{x:Null}">
-                    <Viewbox>
-                      <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10" TextWrapping="Wrap"
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2" Rows="2"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border MaxHeight="90" Margin="10" BorderThickness="5">
+                                        <Image HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Path=Image}"/>
+                                    </Border>
+                                    <Border Grid.Column="1" MaxHeight="90" BorderBrush="{x:Null}">
+                                        <Viewbox>
+                                            <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10" TextWrapping="Wrap"
                                  Text="{Binding Path=SelectionText}"/>
-                    </Viewbox>
-                  </Border>
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ListBox>
-        </DockPanel>
-        <Grid Row="100" ColumnSpan="100">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*"/>
-          </Grid.ColumnDefinitions>
-          <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
-          <Button x:Name="Cancel" HorizontalAlignment="Stretch" Style="{StaticResource CancelNavigationButton}">
-            <TextBlock x:Name="CancelCaption" Text="Cancel"/>
-          </Button>
-          <Button x:Name="NavigateBack" Visibility="Hidden" Grid.Column="0" HorizontalAlignment="Stretch"
+                                        </Viewbox>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+                <Grid Row="100" ColumnSpan="100">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+                    <Button x:Name="Cancel" HorizontalAlignment="Stretch" Style="{StaticResource CancelNavigationButton}">
+                        <TextBlock x:Name="CancelCaption" Text="Cancel"/>
+                    </Button>
+                    <Button x:Name="NavigateBack" Visibility="Hidden" Grid.Column="0" HorizontalAlignment="Stretch"
                   Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="BackCaption" Text="Back"/>
-          </Button>
-          <Button x:Name="ShowFullInstructions" Grid.Column="2" Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="ShowFullInstructionsCaption" Text="Help"/>
-          </Button>
-          <Grid Column="4">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="auto"/>
-              <ColumnDefinition Width="auto"/>
-              <ColumnDefinition/>
-              <ColumnDefinition Width="auto"/>
-              <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="GetPrevPage" Grid.Column="1" HorizontalAlignment="Stretch"
+                        <TextBlock x:Name="BackCaption" Text="Back"/>
+                    </Button>
+                    <Button x:Name="ShowFullInstructions" Grid.Column="2" Style="{StaticResource NavigationButton}">
+                        <TextBlock x:Name="ShowFullInstructionsCaption" Text="Help"/>
+                    </Button>
+                    <Grid Column="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="GetPrevPage" Grid.Column="1" HorizontalAlignment="Stretch"
                     Style="{StaticResource NavigationButton}">
-              <TextBlock x:Name="GetPreviousPageCaption" Text="Prev"/>
-            </Button>
-            <Button x:Name="GetNextPage" Grid.Column="4" HorizontalAlignment="Stretch"
+                            <TextBlock x:Name="GetPreviousPageCaption" Text="Prev"/>
+                        </Button>
+                        <Button x:Name="GetNextPage" Grid.Column="4" HorizontalAlignment="Stretch"
                     Style="{StaticResource NavigationButton}">
-              <TextBlock x:Name="GetNextPageCaption" Text="More"/>
-            </Button>
-          </Grid>
+                            <TextBlock x:Name="GetNextPageCaption" Text="More"/>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Grid>
-      </Grid>
     </Grid>
-  </Grid>
 </UserControl>

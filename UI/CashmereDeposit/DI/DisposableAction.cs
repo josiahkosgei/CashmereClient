@@ -7,16 +7,16 @@ namespace CashmereDeposit.DI
     public sealed class DisposableAction : Disposable
     {
         /// <exception cref="ArgumentNullException"><paramref name="action" /> is <see langword="null" />.</exception>
-        public DisposableAction(System.Action action)
+        public DisposableAction(Action action)
         {
             if (action == null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
-            this.Action = action;
+            Action = action;
         }
 
-        private System.Action Action { get; }
+        private Action Action { get; }
 
         protected override void Dispose(bool disposing)
         {
@@ -24,7 +24,7 @@ namespace CashmereDeposit.DI
 
             if (disposing)
             {
-                this.Action.Invoke();
+                Action.Invoke();
             }
         }
     }

@@ -117,6 +117,6 @@ namespace CashmereDeposit.Utils
         return template;
     }
 
-    public static string CashmereReplace(this string s, ApplicationViewModel ApplicationViewModel) => s?.Replace("{transaction_limit_value}", ApplicationViewModel?.CurrentTransaction?.TransactionLimits?.OverdepositAmount.ToString("###,##0.00"))?.Replace("{transaction_underdeposit_amount}", ApplicationViewModel?.CurrentTransaction?.TransactionLimits?.UnderdepositAmount.ToString("###,##0.00"))?.Replace("{currency_code}", ApplicationViewModel?.CurrentTransaction?.CurrencyCode?.ToUpper())?.Replace("{bank_name}", ApplicationViewModel?.CurrentSession?.Device?.Branch?.Bank?.Name)?.Replace("{branch_name}", ApplicationViewModel?.CurrentSession?.Device?.Branch?.Name);
+    public static string? CashmereReplace(this string s, ApplicationViewModel ApplicationViewModel) => s?.Replace("{transaction_limit_value}", ApplicationViewModel?.CurrentTransaction?.TransactionLimits?.OverdepositAmount.ToString("###,##0.00"))?.Replace("{transaction_underdeposit_amount}", ApplicationViewModel?.CurrentTransaction?.TransactionLimits?.UnderdepositAmount.ToString("###,##0.00"))?.Replace("{currency_code}", ApplicationViewModel?.CurrentTransaction?.CurrencyCode?.ToUpper())?.Replace("{bank_name}", ApplicationViewModel?.CurrentSession?.Device?.Branch?.Bank?.Name)?.Replace("{branch_name}", ApplicationViewModel?.CurrentSession?.Device?.Branch?.Name);
   }
 }

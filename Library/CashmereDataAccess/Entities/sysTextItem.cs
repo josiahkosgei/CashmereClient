@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("sysTextItem", Schema = "xlns")]
-    // [Index("Token", Name = "UX_SysTextItem_name", IsUnique = true)]
-    // [Index("Category", Name = "iCategory_xlns_sysTextItem_A264365A")]
-    // [Index("TextItemTypeId", Name = "iTextItemTypeID_xlns_sysTextItem_BD18CE82")]
     public partial class SysTextItem
     {
         public SysTextItem()
@@ -34,12 +31,9 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid? TextItemTypeId { get; set; }
 
         [ForeignKey("Category")]
-        //[InverseProperty("SysTextItems")]
         public virtual SysTextItemCategory CategoryNavigation { get; set; } = null!;
         [ForeignKey("TextItemTypeId")]
-        //[InverseProperty("SysTextItems")]
         public virtual SysTextItemType? TextItemType { get; set; }
-        //[InverseProperty("SysTextItem")]
         public virtual ICollection<SysTextTranslation> SysTextTranslations { get; set; }
     }
 }

@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.CoreBankingPostResult
-
-
-
-
-using System;
+﻿using System;
 
 namespace CashmereDeposit.Models
 {

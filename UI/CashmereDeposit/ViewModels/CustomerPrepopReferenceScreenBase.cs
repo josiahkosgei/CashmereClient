@@ -38,7 +38,7 @@ namespace CashmereDeposit.ViewModels
       {
         if (value != null)
           CustomerInput = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => SelectedCustomerComboBoxInput));
+         NotifyOfPropertyChange( () => SelectedCustomerComboBoxInput);
       }
     }
 
@@ -68,7 +68,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _EditComboBoxButtonCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => EditComboBoxButtonCaption));
+         NotifyOfPropertyChange( () => EditComboBoxButtonCaption);
       }
     }
 
@@ -78,7 +78,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _CancelEditComboBoxButtonCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => CancelEditComboBoxButtonCaption));
+         NotifyOfPropertyChange( () => CancelEditComboBoxButtonCaption);
       }
     }
 
@@ -88,7 +88,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _ComboBoxGridIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => ComboBoxGridIsVisible));
+        NotifyOfPropertyChange( () => ComboBoxGridIsVisible);
       }
     }
 
@@ -98,7 +98,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _TextBoxGridIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => TextBoxGridIsVisible));
+        NotifyOfPropertyChange( () => TextBoxGridIsVisible);
       }
     }
 
@@ -108,7 +108,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _KeyboardGridIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => KeyboardGridIsVisible));
+        NotifyOfPropertyChange( () => KeyboardGridIsVisible);
       }
     }
 
@@ -123,7 +123,7 @@ namespace CashmereDeposit.ViewModels
       {
         _AllowFreeText = value;
         ComboBoxButtonsIsVisible = _AllowFreeText;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => AllowFreeText));
+        NotifyOfPropertyChange( () => AllowFreeText);
       }
     }
 
@@ -138,7 +138,7 @@ namespace CashmereDeposit.ViewModels
         CancelEditComboBoxIsVisible = _IsComboBoxEditMode;
         ComboBoxGridIsVisible = !_IsComboBoxEditMode;
         EditComboBoxIsVisible = !_IsComboBoxEditMode;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => IsComboBoxEditMode));
+        NotifyOfPropertyChange( () => IsComboBoxEditMode);
       }
     }
 
@@ -150,7 +150,7 @@ namespace CashmereDeposit.ViewModels
         if (_EditComboBoxIsVisible == value)
           return;
         _EditComboBoxIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => EditComboBoxIsVisible));
+        NotifyOfPropertyChange( () => EditComboBoxIsVisible);
       }
     }
 
@@ -162,7 +162,7 @@ namespace CashmereDeposit.ViewModels
         if (_ComboBoxButtonsIsVisible == value)
           return;
         _ComboBoxButtonsIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => ComboBoxButtonsIsVisible));
+        NotifyOfPropertyChange( () => ComboBoxButtonsIsVisible);
       }
     }
 
@@ -174,7 +174,7 @@ namespace CashmereDeposit.ViewModels
         if (_CancelEditComboBoxIsVisible == value)
           return;
         _CancelEditComboBoxIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => CancelEditComboBoxIsVisible));
+        NotifyOfPropertyChange( () => CancelEditComboBoxIsVisible);
       }
     }
 
@@ -245,19 +245,19 @@ namespace CashmereDeposit.ViewModels
       {
         var customerComboBoxInput = CustomerComboBoxInput;
         // ISSUE: explicit non-virtual call
-        num3 = customerComboBoxInput != null ? (! (customerComboBoxInput.Contains(CustomerInput)) ? 1 : 0) : 0;
+        num3 = customerComboBoxInput != null ? ! customerComboBoxInput.Contains(CustomerInput) ? 1 : 0 : 0;
       }
       else
         num3 = 0;
       IsComboBoxEditMode = num3 != 0;
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanEditComboBox));
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanCancelEditComboBox));
+      NotifyOfPropertyChange( () => CanEditComboBox);
+      NotifyOfPropertyChange( () => CanCancelEditComboBox);
     }
 
     protected void SetComboBoxDefault(bool overrideWithDefault = false)
     {
       var guiPrepopList = GUIPrepopList;
-      if ((guiPrepopList != null ? ((bool)guiPrepopList.UseDefault ? 1 : 0) : 0) == 0 || !overrideWithDefault && !string.IsNullOrWhiteSpace(CustomerInput))
+      if ((guiPrepopList != null ? (bool)guiPrepopList.UseDefault ? 1 : 0 : 0) == 0 || !overrideWithDefault && !string.IsNullOrWhiteSpace(CustomerInput))
         return;
       SelectedCustomerComboBoxInput = CustomerComboBoxInput[GUIPrepopList.DefaultIndex.Clamp(0, GUIPrepopList.GUIPrepopListItems.Count - 1)];
     }
@@ -267,8 +267,8 @@ namespace CashmereDeposit.ViewModels
     public void EditComboBox()
     {
       IsComboBoxEditMode = true;
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanEditComboBox));
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanCancelEditComboBox));
+      NotifyOfPropertyChange( () => CanEditComboBox);
+      NotifyOfPropertyChange( () => CanCancelEditComboBox);
     }
 
     public bool CanCancelEditComboBox => AllowFreeText && IsComboBoxEditMode;
@@ -277,8 +277,8 @@ namespace CashmereDeposit.ViewModels
     {
       IsComboBoxEditMode = false;
       SetComboBoxDefault(true);
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanEditComboBox));
-      NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanCancelEditComboBox));
+      NotifyOfPropertyChange( () => CanEditComboBox);
+      NotifyOfPropertyChange( () => CanCancelEditComboBox);
     }
   }
 }

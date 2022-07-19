@@ -1,8 +1,4 @@
-﻿
-//.ReferenceAccountNumberInputScreenViewModel
-
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -23,7 +19,7 @@ namespace CashmereDeposit.ViewModels
       ApplicationViewModel.CurrentTransaction.AccountName = ApplicationViewModel.CurrentTransaction.TransactionType.DefaultAccountName;
       try
       {
-        ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ReferenceAccountNumberInputScreenViewModel  ScreenTitle", applicationViewModel?.CurrentTransaction?.TransactionType?.TransactionText.ReferenceAccountNumberCaption, "Reference Number");
+        ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateUserText(GetType().Name + ".ReferenceAccountNumberInputScreenViewModel  ScreenTitle", applicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText.ReferenceAccountNumberCaption, "Reference Number");
       }
       catch (Exception ex)
       {

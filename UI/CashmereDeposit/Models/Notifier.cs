@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.Notifier
-
-
-
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace CashmereDeposit.Models
 {

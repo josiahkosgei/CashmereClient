@@ -9,6 +9,7 @@ using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.CashmereDataAccess.Logging;
 using CashmereDeposit.Utils;
 using CashmereDeposit.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.Models
 {
@@ -454,25 +455,26 @@ namespace CashmereDeposit.Models
             InitialiseConfig(config, "UI_CULTURE", "UI_CULTURE", ref _UI_CULTURE, "en-gb");
         }
 
-    private IList<(string config_id, string config_value)> GenerateConfigs()
+    private List<(string name, string? default_value)> GenerateConfigs()
         {
             using (DepositorDBContext depositorDbContext = new DepositorDBContext())
             {
                 var configs = depositorDbContext.Configs.ToList();
                 var config_group = depositorDbContext.Devices.FirstOrDefault()?.ConfigGroup;
-
-                depositorDbContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
-                    .ForEach(deviceConfig =>
-                        configs.First(x =>
-                                x.Name.Equals(deviceConfig.ConfigId.ToString(), StringComparison.OrdinalIgnoreCase))
-                            .DefaultValue = deviceConfig.ConfigValue);
+                //var userType = depositorDbContext.Set().FromSql("dbo.SomeSproc @Id = {0}, @Name = {1}", 45, "Ada");
+                depositorDbContext.Set<DeviceConfig>().FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
+                //depositorDbContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
+                //    .ForEach(deviceConfig =>
+                //        configs.First(x =>
+                //                x.Name.Equals(deviceConfig.ConfigId.ToString(), StringComparison.OrdinalIgnoreCase))
+                //            .DefaultValue = deviceConfig.ConfigValue);
 
                 //depositorDbContext
                 //    .GetDeviceConfigByUserGroup(depositorDbContext.Devices.FirstOrDefault()?.config_group).ToList()
                 //    .ForEach(deviceConfig =>
                 //        configs.First(x => x.name.Equals(deviceConfig.config_id, StringComparison.OrdinalIgnoreCase))
                 //            .default_value = deviceConfig.config_value);
-                return configs.Select<Config, (string, string)>(x => (name: x.Name, default_value: x.DefaultValue))
+                return configs.Select(x => (name: x.Name, default_value: x.DefaultValue))
                     .ToList();
             }
         }

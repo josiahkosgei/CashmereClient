@@ -5,46 +5,46 @@
              xmlns:uc="clr-namespace:CashmereDeposit.UserControls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CashmereDeposit.Views">
-  <Control.Background>
-    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
-  </Control.Background>
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="8*"/>
-      <RowDefinition MinHeight="100" Height="*"/>
-    </Grid.RowDefinitions>
-    <uc:ScreenHeader/>
-    <TextBlock x:Name="ScreenTitle" Grid.Row="1" Style="{StaticResource Heading1}" Text="User Message Title"/>
-    <Grid Row="2">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="20*"/>
-        <ColumnDefinition Width="60*"/>
-        <ColumnDefinition Width="20*"/>
-      </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="70*"/>
-        <RowDefinition Height="auto"/>
-      </Grid.RowDefinitions>
-      <ScrollViewer Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+    <Control.Background>
+        <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+    </Control.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition MinHeight="100" Height="*"/>
+        </Grid.RowDefinitions>
+        <uc:ScreenHeader/>
+        <TextBlock x:Name="ScreenTitle" Grid.Row="1" Style="{StaticResource Heading1}" Text="User Message Title"/>
+        <Grid Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20*"/>
+                <ColumnDefinition Width="60*"/>
+                <ColumnDefinition Width="20*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
                     PanningMode="VerticalOnly" Background="White">
-        <TextBlock x:Name="Message" Margin="10" TextWrapping="Wrap" Text="This is a sample message to the customer"
+                <TextBlock x:Name="Message" Margin="10" TextWrapping="Wrap" Text="This is a sample message to the customer"
                    HorizontalAlignment="Stretch" TextAlignment="Center" VerticalAlignment="Center"
                    Style="{StaticResource ImportantTextBlock}"/>
-      </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
+        <Grid Row="100" ColumnSpan="100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+            <Button x:Name="Next" Grid.Column="3" Style="{StaticResource NextNavigationButton}">
+                <TextBlock x:Name="NextCaption" Text="OK"/>
+            </Button>
+        </Grid>
     </Grid>
-    <Grid Row="100" ColumnSpan="100">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="auto"/>
-        <ColumnDefinition Width="auto"/>
-        <ColumnDefinition/>
-        <ColumnDefinition Width="auto"/>
-      </Grid.ColumnDefinitions>
-      <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
-      <Button x:Name="Next" Grid.Column="3" Style="{StaticResource NextNavigationButton}">
-        <TextBlock x:Name="NextCaption" Text="OK"/>
-      </Button>
-    </Grid>
-  </Grid>
 </UserControl>

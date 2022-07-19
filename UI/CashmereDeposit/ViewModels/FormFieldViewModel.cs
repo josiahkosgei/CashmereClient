@@ -42,7 +42,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _errorMessageTextBlock = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => ErrorMessageTextBlock));
+         NotifyOfPropertyChange( () => ErrorMessageTextBlock);
       }
     }
 
@@ -52,7 +52,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _validatedText = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => ValidatedText));
+         NotifyOfPropertyChange( () => ValidatedText);
       }
     }
 
@@ -64,7 +64,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _nextButton_Caption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => NextButton_Caption));
+         NotifyOfPropertyChange( () => NextButton_Caption);
       }
     }
 
@@ -74,7 +74,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _backButton_Caption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => BackButton_Caption));
+         NotifyOfPropertyChange( () => BackButton_Caption);
       }
     }
 

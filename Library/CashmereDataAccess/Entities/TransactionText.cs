@@ -9,24 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("TransactionText")]
-    // [Index("TxItem", Name = "UX_TransactionText_tx_item", IsUnique = true)]
-    // [Index("FundsSourceCaption", Name = "iFundsSource_caption_TransactionText")]
-    // [Index("AccountNameCaption", Name = "iaccount_name_caption_TransactionText")]
-    // [Index("AccountNumberCaption", Name = "iaccount_number_caption_TransactionText")]
-    // [Index("AliasAccountNameCaption", Name = "ialias_account_name_caption_TransactionText")]
-    // [Index("AliasAccountNumberCaption", Name = "ialias_account_number_caption_TransactionText")]
-    // [Index("DepositorNameCaption", Name = "idepositor_name_caption_TransactionText")]
-    // [Index("Disclaimer", Name = "idisclaimer_TransactionText")]
-    // [Index("FullInstructions", Name = "ifull_instructions_TransactionText")]
-    // [Index("IdNumberCaption", Name = "iid_number_caption_TransactionText")]
-    // [Index("ListItemCaption", Name = "ilistItem_caption_TransactionText")]
-    // [Index("NarrationCaption", Name = "inarration_caption_TransactionText")]
-    // [Index("PhoneNumberCaption", Name = "iphone_number_caption_TransactionText")]
-    // [Index("ReceiptTemplate", Name = "ireceipt_template_TransactionText")]
-    // [Index("ReferenceAccountNameCaption", Name = "ireference_account_name_caption_TransactionText")]
-    // [Index("ReferenceAccountNumberCaption", Name = "ireference_account_number_caption_TransactionText")]
-    // [Index("Terms", Name = "iterms_TransactionText")]
-    // [Index("TxItem", Name = "itx_item_TransactionText")]
     public partial class TransactionText
     {
         public TransactionText()
@@ -79,64 +61,45 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid? ValidationTextErrorMessage { get; set; }
 
         [ForeignKey("AccountNameCaption")]
-        //[InverseProperty("TransactionTextAccountNameCaptions")]
         public virtual TextItem? AccountNameCaptionNavigation { get; set; }
         [ForeignKey("AccountNumberCaption")]
-        //[InverseProperty("TransactionTextAccountNumberCaptions")]
         public virtual TextItem? AccountNumberCaptionNavigation { get; set; }
         [ForeignKey("AliasAccountNameCaption")]
-        //[InverseProperty("TransactionTextAliasAccountNameCaptions")]
         public virtual TextItem? AliasAccountNameCaptionNavigation { get; set; }
         [ForeignKey("AliasAccountNumberCaption")]
-        //[InverseProperty("TransactionTextAliasAccountNumberCaptions")]
         public virtual TextItem? AliasAccountNumberCaptionNavigation { get; set; }
         [ForeignKey("DepositorNameCaption")]
-        //[InverseProperty("TransactionTextDepositorNameCaptions")]
         public virtual TextItem? DepositorNameCaptionNavigation { get; set; }
         [ForeignKey("Disclaimer")]
-        //[InverseProperty("TransactionTextDisclaimers")]
         public virtual TextItem? DisclaimerNavigation { get; set; }
         [ForeignKey("FullInstructions")]
-        //[InverseProperty("TransactionTextFullInstructionss")]
         public virtual TextItem? FullInstructionsNavigation { get; set; }
         [ForeignKey("FundsSourceCaption")]
-        //[InverseProperty("TransactionTextFundsSourceCaptions")]
+        
         public virtual TextItem? FundsSourceCaptionNavigation { get; set; }
         [ForeignKey("IdNumberCaption")]
-        //[InverseProperty("TransactionTextIdNumberCaptions")]
         public virtual TextItem? IdNumberCaptionNavigation { get; set; }
         [ForeignKey("ListItemCaption")]
-        //[InverseProperty("TransactionTextListItemCaptions")]
         public virtual TextItem? ListItemCaptionNavigation { get; set; }
         [ForeignKey("NarrationCaption")]
-        //[InverseProperty("TransactionTextNarrationCaptions")]
         public virtual TextItem? NarrationCaptionNavigation { get; set; }
         [ForeignKey("PhoneNumberCaption")]
-        //[InverseProperty("TransactionTextPhoneNumberCaptions")]
         public virtual TextItem? PhoneNumberCaptionNavigation { get; set; }
         [ForeignKey("ReceiptTemplate")]
-        //[InverseProperty("TransactionTextReceiptTemplates")]
         public virtual TextItem? ReceiptTemplateNavigation { get; set; }
         [ForeignKey("ReferenceAccountNameCaption")]
-        //[InverseProperty("TransactionTextReferenceAccountNameCaptions")]
         public virtual TextItem? ReferenceAccountNameCaptionNavigation { get; set; }
         [ForeignKey("ReferenceAccountNumberCaption")]
-        //[InverseProperty("TransactionTextReferenceAccountNumberCaptions")]
         public virtual TextItem? ReferenceAccountNumberCaptionNavigation { get; set; }
         [ForeignKey("Terms")]
-        //[InverseProperty("TransactionTextTermss")]
         public virtual TextItem? TermsNavigation { get; set; }
         [ForeignKey("ValidationTextErrorMessage")]
-        //[InverseProperty("TransactionTextTermss")]
         public virtual ValidationText? ValidationTextErrorMessageNavigation { get; set; }
         [ForeignKey("ValidationTextSuccessMessage")]
-        //[InverseProperty("TransactionTextTermss")]
         public virtual ValidationText? ValidationTextSuccessMessageNavigation { get; set; }
 
         [ForeignKey("TxItem")]
-        //[InverseProperty("TransactionText")]
         public virtual TransactionTypeListItem TxItemNavigation { get; set; } = null!;
-        //[InverseProperty("TxTextNavigation")]
         public virtual ICollection<TransactionTypeListItem> TransactionTypeListItems { get; set; }
     }
 }

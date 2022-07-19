@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using Caliburn.Micro;
+using System;
 using System.Windows;
-using Caliburn.Micro;
 
 namespace CashmereDeposit.Models.Forms
 {
@@ -24,7 +23,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         name = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => Name));
+        NotifyOfPropertyChange<string>((System.Linq.Expressions.Expression<Func<string>>) (() => Name));
       }
     }
 
@@ -34,7 +33,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         label = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => Label));
+        NotifyOfPropertyChange<string>((System.Linq.Expressions.Expression<Func<string>>) (() => Label));
       }
     }
 
@@ -44,7 +43,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         _value = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => Value));
+        NotifyOfPropertyChange<string>((System.Linq.Expressions.Expression<Func<string>>) (() => Value));
       }
     }
 
@@ -62,7 +61,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         errorMessage = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => ErrorMessage));
+        NotifyOfPropertyChange<string>((System.Linq.Expressions.Expression<Func<string>>) (() => ErrorMessage));
       }
     }
 
@@ -78,7 +77,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         valueLabelTextboxIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<Visibility>>) (() => ValueLabelTextboxIsVisible));
+        NotifyOfPropertyChange<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => ValueLabelTextboxIsVisible));
       }
     }
 
@@ -88,7 +87,7 @@ namespace CashmereDeposit.Models.Forms
       set
       {
         valueTextboxIsVisible = value;
-        NotifyOfPropertyChange((Expression<Func<Visibility>>) (() => ValueTextboxIsVisible));
+        NotifyOfPropertyChange<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => ValueTextboxIsVisible));
       }
     }
 

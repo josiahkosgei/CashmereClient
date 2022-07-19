@@ -544,7 +544,7 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
                     .HasForeignKey(d => d.GUIPrepoplistId)
                     .HasConstraintName("FK_GuiScreenList_Screen_GUIPrepopList");
 
-                entity.HasOne(d => d.ScreenNavigation)
+                entity.HasOne(d => d.GUIScreenNavigation)
                     .WithMany(p => p.GuiScreenListScreens)
                     .HasForeignKey(d => d.Screen)
                     .OnDelete(DeleteBehavior.ClientSetNull)
@@ -947,7 +947,7 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
                     .HasConstraintName("FK_TransactionText_full_instructions");
 
                 entity.HasOne(d => d.TxItemNavigation)
-                    .WithOne(p => p.TransactionText)
+                    .WithOne(p => p.TransactionTextNav)
                     .HasForeignKey<TransactionText>(d => d.TxItem)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_TransactionText_TransactionTypeListItem");
@@ -1079,7 +1079,7 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
                     .HasForeignKey(d => d.TxLimitList)
                     .HasConstraintName("FK_TransactionTypeListItem_TransactionLimitList");
 
-                entity.HasOne(d => d.TxTextNavigation)
+                entity.HasOne(d => d.TxTextNavigationText)
                     .WithMany(p => p.TransactionTypeListItems)
                     .HasForeignKey(d => d.TxText)
                     .OnDelete(DeleteBehavior.SetNull)

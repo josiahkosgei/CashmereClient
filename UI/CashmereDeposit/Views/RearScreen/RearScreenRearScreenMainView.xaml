@@ -1,0 +1,95 @@
+<UserControl x:Class="CashmereDeposit.Views.RearScreen.RearScreenMainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CashmereDeposit.Views.RearScreen"
+             xmlns:uc="clr-namespace:CashmereDeposit.UserControls">
+  <Control.Background>
+    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+  </Control.Background>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto"/>
+      <RowDefinition Height="auto"/>
+      <RowDefinition Height="8*"/>
+    </Grid.RowDefinitions>
+    <uc:ScreenHeader/>
+    <TextBlock x:Name="ScreenTitle" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource Heading1}"
+               Text="CDM Status"/>
+    <Grid Row="2">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="70*"/>
+          <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <Label Content="{StaticResource DeviceSummary_Summary_Machine_Name_Caption}"/>
+            <Label Name="MachineName" Content="CASHDEPTEST"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Cashmere_Deposit_Version_Caption}"/>
+            <Label Name="CashmereGUIVersion" Content="0.0.0.0"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Device_Manager_Version_Caption}"/>
+            <Label Name="DeviceManagerVersion" Content="0.0.0.0"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Cashmere_Util_Version_Caption}"/>
+            <Label Name="CashmereUtilVersion" Content="0.0.0.0"/>
+          </StackPanel>
+          <StackPanel Grid.Column="1">
+            <Label Content="{StaticResource DeviceSummary_Summary_ControllerStatus}"/>
+            <Label Name="ControllerStatus" Content="IDLE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Transaction}"/>
+            <Label Name="TransactionStatus" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Sensor_Bag_Caption}"/>
+            <Label Name="SensorBag" Content="BAG_OPEN"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Sensor_Door_Caption}"/>
+            <Label Name="SensorDoor" Content="OPEN"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2">
+            <Label Content="{StaticResource DeviceSummary_Summary_Bag_Status_Caption}"/>
+            <Label Name="BagStatus" Content="IDLE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Bag_Number_Caption}"/>
+            <Label Name="BagNumber" Content="9999"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Bag_PercentFull_Caption}"/>
+            <Label Name="BagPercentFull" Content="10"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Bag_NoteLevel_Caption}"/>
+            <Label Name="BagNoteLevel" Content="1500"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Bag_NoteCapacity_Caption}"/>
+            <Label Name="BagNoteCapacity" Content="15000"/>
+          </StackPanel>
+          <StackPanel Grid.Column="3">
+            <Label Content="{StaticResource DeviceSummary_Summary_BA_Status_Caption}"/>
+            <Label Name="BAStatus" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_BA_Type_Caption}"/>
+            <Label Name="BAType" Content="DE50"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Escrow_Type_Caption}"/>
+            <Label Name="EscrowType" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Escrow_Status_Caption}"/>
+            <Label Name="EscrowStatus" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Escrow_Position_Caption}"/>
+            <Label Name="EscrowPosition" Content="NONE"/>
+          </StackPanel>
+          <StackPanel Grid.Column="4">
+            <Label Content="{StaticResource DeviceSummary_Summary_Application_Status_Caption}"/>
+            <Label Name="ApplicationStatus" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Device_State_Caption}"/>
+            <Label Name="DeviceState" Content="NONE"/>
+            <Label Content="{StaticResource DeviceSummary_Summary_Application_State_Caption}"/>
+            <Label Name="ApplicationState" Content="NONE"/>
+          </StackPanel>
+        </Grid>
+        <uc:ScreenFooter Grid.Row="100" Grid.ColumnSpan="100"/>
+        <Button x:Name="AdminButton" Grid.Row="2" Style="{StaticResource NextNavigationButton}" Width="200"
+                Height="75">
+          <TextBlock x:Name="AdminButtonCaption" Text="Admin"/>
+        </Button>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

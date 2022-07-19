@@ -1,12 +1,6 @@
-﻿
-// Type: CashmereDeposit.Models.ATMSelectionItem`1
-
-
-
-
+﻿using Cashmere.Library.Standard.Utilities;
 using System;
 using System.Windows.Media.Imaging;
-using Cashmere.Library.Standard.Utilities;
 
 namespace CashmereDeposit.Models
 {

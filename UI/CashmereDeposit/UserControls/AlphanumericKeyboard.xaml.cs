@@ -1,10 +1,7 @@
-﻿
-// Type: CashmereDeposit.UserControls.AlphanumericKeyboard
-
-
-
-
-using System;
+﻿using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,12 +11,13 @@ namespace CashmereDeposit.UserControls
 {
   public partial class AlphanumericKeyboard : UserControl, IComponentConnector
   {
-    private string LastTexboxValue;
+    private string LastTexboxValue = null;
+    public AlphanumericKeyboard() => InitializeComponent();
 
-    private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[2]
+    private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke((object) passwordBox, new object[2]
     {
-      start,
-      length
+      (object) start,
+      (object) length
     });
 
     private void pressKey(string s)
@@ -80,5 +78,6 @@ namespace CashmereDeposit.UserControls
     private void keydelete_Click(object sender, RoutedEventArgs e) => deleteText();
 
     private void key_space_Click(object sender, RoutedEventArgs e) => pressKey(" ");
+
   }
 }

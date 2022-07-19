@@ -192,7 +192,7 @@ namespace CashmereDeposit.Models
           Printout printout,
           DepositorDBContext depositorDBContext)
         {
-            TransactionText transactionText = transaction?.TxTypeNavigation?.TransactionText;
+            TransactionText transactionText = transaction?.TxTypeNavigation?.TxTextNavigationText;
             if (transactionText == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): transactionText cannot be null");
             string str1 = "\r\n" + ApplicationViewModel.CashmereTranslationService?.TranslateUserText(GetType().Name + ".GeneratePrintoutFromTransaction receiptTemplate", transactionText.ReceiptTemplate, null).Replace("\r\n", "\n").Replace("\n", "\r\n");

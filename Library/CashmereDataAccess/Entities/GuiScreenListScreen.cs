@@ -43,7 +43,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public virtual GUIPrepopList? GUIPrepopList { get; set; }
         [ForeignKey("Screen")]
         //[InverseProperty("GuiScreenListScreens")]
-        public virtual GUIScreen ScreenNavigation { get; set; } = null!;
+        public virtual GUIScreen GUIScreenNavigation { get; set; } = null!;
         [ForeignKey("ValidationListId")]
         //[InverseProperty("GuiScreenListScreens")]
         public virtual ValidationList? ValidationList { get; set; }

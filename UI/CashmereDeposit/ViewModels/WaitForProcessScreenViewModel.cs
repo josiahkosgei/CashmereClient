@@ -1,9 +1,4 @@
 ﻿
-//.WaitForProcessScreenViewModel
-
-
-
-
 using Caliburn.Micro;
 using System;
 using System.Linq.Expressions;
@@ -11,7 +6,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class WaitForProcessScreenViewModel :  Conductor<Screen>, IShell
+  public class WaitForProcessScreenViewModel : Conductor<Screen>, IShell
   {
     public ApplicationViewModel ApplicationViewModel { get; }
 
@@ -50,8 +45,8 @@ namespace CashmereDeposit.ViewModels
     public WaitForProcessScreenViewModel(ApplicationViewModel applicationViewModel)
     {
       ApplicationViewModel = applicationViewModel;
-      NotifyOfPropertyChange((Expression<Func<string>>) (() => ProcessingTitleText));
-      NotifyOfPropertyChange((Expression<Func<string>>) (() => ProcessingDescriptionText));
+      NotifyOfPropertyChange(() => ProcessingTitleText);
+      NotifyOfPropertyChange(() => ProcessingDescriptionText);
     }
   }
 }

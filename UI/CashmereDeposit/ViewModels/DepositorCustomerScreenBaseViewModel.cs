@@ -48,7 +48,7 @@ namespace CashmereDeposit.ViewModels
             if (applicationViewModel == null)
                 throw new NullReferenceException("applicationViewModel cannot be null in DepositorCustomerScreenBaseViewModel.DepositorCustomerScreenBaseViewModel()");
             EnableIdleTimer = enableIdleTimer;
-            TimeOutInterval = timeoutInterval > 0.0 ? timeoutInterval : (ApplicationViewModel.DeviceConfiguration.USER_SCREEN_TIMEOUT > 0 ? ApplicationViewModel.DeviceConfiguration.USER_SCREEN_TIMEOUT : 30.0);
+            TimeOutInterval = timeoutInterval > 0.0 ? timeoutInterval : ApplicationViewModel.DeviceConfiguration.USER_SCREEN_TIMEOUT > 0 ? ApplicationViewModel.DeviceConfiguration.USER_SCREEN_TIMEOUT : 30.0;
             applicationViewModel?.SetLanguage();
             Required = required;
             InitialiseScreen();
@@ -70,7 +70,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _customerInput = !string.IsNullOrWhiteSpace(value) ? value : ApplicationViewModel?.CurrentGUIScreen?.PrefillText;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => CustomerInput));
+                 NotifyOfPropertyChange(() => CustomerInput);
             }
         }
 
@@ -80,7 +80,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _cancelCaption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => CancelCaption));
+                 NotifyOfPropertyChange(() => CancelCaption);
             }
         }
 
@@ -90,7 +90,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _nextCaption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => NextCaption));
+                 NotifyOfPropertyChange(() => NextCaption);
             }
         }
 
@@ -100,7 +100,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _backCaption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => BackCaption));
+                 NotifyOfPropertyChange(() => BackCaption);
             }
         }
 
@@ -110,7 +110,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _GetPreviousPage_Caption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => GetPreviousPageCaption));
+                 NotifyOfPropertyChange(() => GetPreviousPageCaption);
             }
         }
 
@@ -120,7 +120,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _GetNextPageButton_Caption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => GetNextPageCaption));
+                 NotifyOfPropertyChange(() => GetNextPageCaption);
             }
         }
 
@@ -130,7 +130,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _fullInstructionsExpanderIsVisible = value;
-                NotifyOfPropertyChange((Expression<Func<bool>>)(() => FullInstructionsExpanderIsVisible));
+                NotifyOfPropertyChange(() => FullInstructionsExpanderIsVisible);
             }
         }
 
@@ -140,7 +140,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _fullInstructions = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => FullInstructions));
+                 NotifyOfPropertyChange(() => FullInstructions);
             }
         }
 
@@ -150,7 +150,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _screenTitleInstruction = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => ScreenTitleInstruction));
+                 NotifyOfPropertyChange(() => ScreenTitleInstruction);
             }
         }
 
@@ -160,7 +160,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _ShowFullInstructions_Caption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => ShowFullInstructionsCaption));
+                 NotifyOfPropertyChange(() => ShowFullInstructionsCaption);
             }
         }
 
@@ -170,7 +170,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _HideFullInstructions_Caption = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => HideFullInstructionsCaption));
+                 NotifyOfPropertyChange(() => HideFullInstructionsCaption);
             }
         }
 
@@ -180,7 +180,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _FullInstructionsTitle = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => FullInstructionsTitle));
+                 NotifyOfPropertyChange(() => FullInstructionsTitle);
             }
         }
 
@@ -206,7 +206,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _canNext = value;
-                NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanNext));
+                NotifyOfPropertyChange(() => CanNext);
             }
         }
 
@@ -216,7 +216,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _canCancel = value;
-                NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanCancel));
+                NotifyOfPropertyChange(() => CanCancel);
             }
         }
 
@@ -226,7 +226,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _canShowFullInstructions = value;
-                NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanShowFullInstructions));
+                NotifyOfPropertyChange(() => CanShowFullInstructions);
             }
         }
 
@@ -238,7 +238,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _errorText = value;
-                NotifyOfPropertyChange((Expression<Func<string>>)(() => ErrorText));
+                 NotifyOfPropertyChange(() => ErrorText);
             }
         }
 
@@ -296,7 +296,7 @@ namespace CashmereDeposit.ViewModels
             Keyboard = (KeyboardType)num2;
             //if (CurrentGUIScreenText != null)
             //{
-                ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) : this.ScreenTitle;
+                ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) : ScreenTitle;
                 CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
                 BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
                 NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
@@ -324,9 +324,9 @@ namespace CashmereDeposit.ViewModels
         private void RefreshKeyboard()
         {
             NotifyOfPropertyChange((Expression<Func<KeyboardType>>)(() => Keyboard));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => AlphanumericKeyboardIsVisible));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => FullAlphanumericKeyboardIsVisible));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => NumericKeypadIsVisible));
+            NotifyOfPropertyChange(() => AlphanumericKeyboardIsVisible);
+            NotifyOfPropertyChange(() => FullAlphanumericKeyboardIsVisible);
+            NotifyOfPropertyChange(() => NumericKeypadIsVisible);
         }
 
         internal void PrintErrorText(string errorText)
@@ -366,7 +366,7 @@ namespace CashmereDeposit.ViewModels
                     }
                     foreach (var listValidationItem in listValidationItemList)
                     {
-                        if ((bool)listValidationItem.Enabled && listValidationItem.ValidationItem.Enabled && (listValidationItem.ValidationItem.ValidationType.Enabled && listValidationItem.ValidationItem.ValidationType.Name == "Regex") && (listValidationItem.ValidationItem.ValidationItemValues.Count <= 0 || !ClientValidationRules.RegexValidation(valueToValidate, listValidationItem.ValidationItem.ValidationItemValues.OrderBy(x => x.Order).ToList()[0].Value.Replace("\r\n", "\n").Replace("\n", ""))))
+                        if ((bool)listValidationItem.Enabled && listValidationItem.ValidationItem.Enabled && listValidationItem.ValidationItem.ValidationType.Enabled && listValidationItem.ValidationItem.ValidationType.Name == "Regex" && (listValidationItem.ValidationItem.ValidationItemValues.Count <= 0 || !ClientValidationRules.RegexValidation(valueToValidate, listValidationItem.ValidationItem.ValidationItemValues.OrderBy(x => x.Order).ToList()[0].Value.Replace("\r\n", "\n").Replace("\n", ""))))
                         {
                             try
                             {

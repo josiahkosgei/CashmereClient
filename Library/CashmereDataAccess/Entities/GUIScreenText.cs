@@ -9,14 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("GUIScreenText")]
-    // [Index("GUIScreenId", Name = "UX_GUIScreenText_gui_screen_id", IsUnique = true)]
-    // [Index("BtnAcceptCaption", Name = "ibtn_accept_caption_GUIScreenText")]
-    // [Index("BtnBackCaption", Name = "ibtn_back_caption_GUIScreenText")]
-    // [Index("BtnCancelCaption", Name = "ibtn_cancel_caption_GUIScreenText")]
-    // [Index("FullInstructions", Name = "ifull_instructions_GUIScreenText")]
-    // [Index("GUIScreenId", Name = "iguiscreen_id_GUIScreenText")]
-    // [Index("ScreenTitle", Name = "iscreen_title_GUIScreenText")]
-    // [Index("ScreenTitleInstruction", Name = "iscreen_title_instruction_GUIScreenText")]
     public partial class GUIScreenText
     {
         public GUIScreenText()
@@ -43,27 +35,19 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid? BtnCancelCaption { get; set; }
 
         [ForeignKey("BtnAcceptCaption")]
-        //[InverseProperty("GUIScreenTextBtnAcceptCaptions")]
         public virtual TextItem? BtnAcceptCaptionNavigation { get; set; }
         [ForeignKey("BtnBackCaption")]
-        //[InverseProperty("GUIScreenTextBtnBackCaptions")]
         public virtual TextItem? BtnBackCaptionNavigation { get; set; }
         [ForeignKey("BtnCancelCaption")]
-        //[InverseProperty("GUIScreenTextBtnCancelCaptions")]
         public virtual TextItem? BtnCancelCaptionNavigation { get; set; }
         [ForeignKey("FullInstructions")]
-        //[InverseProperty("GUIScreenTextFullInstructionss")]
         public virtual TextItem? FullInstructionsNavigation { get; set; }
         [ForeignKey("GUIScreenId")]
-        //[InverseProperty("GUIScreenText")]
         public virtual GUIScreen GUIScreen { get; set; } = null!;
         [ForeignKey("ScreenTitleInstruction")]
-        //[InverseProperty("GUIScreenTextScreenTitleInstructions")]
         public virtual TextItem? ScreenTitleInstructionNavigation { get; set; }
         [ForeignKey("ScreenTitle")]
-        //[InverseProperty("GUIScreenTextScreenTitles")]
         public virtual TextItem ScreenTitleNavigation { get; set; } = null!;
-        //[InverseProperty("GuiTextNavigation")]
         public virtual ICollection<GUIScreen> GUIScreens { get; set; }
     }
 }

@@ -1,10 +1,4 @@
-﻿
-// Type: CashmereDeposit.Models.SummaryListItem
-
-
-
-
-namespace CashmereDeposit.Models
+﻿namespace CashmereDeposit.Models
 {
   public class SummaryListItem
   {

@@ -19,7 +19,7 @@ namespace CashmereDeposit.ViewModels
         private set
       {
         _passwordLabel_Caption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => PasswordLabel_Caption));
+         NotifyOfPropertyChange( () => PasswordLabel_Caption);
       }
     }
 

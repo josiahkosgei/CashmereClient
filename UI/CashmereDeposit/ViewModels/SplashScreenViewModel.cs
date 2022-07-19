@@ -14,7 +14,7 @@ namespace CashmereDeposit.ViewModels
   public class SplashScreenViewModel : DepositorCustomerScreenBaseViewModel
   {
    
-  public string splashVideo => this.ApplicationViewModel.ApplicationModel.SplashVideoPath;
+  public string splashVideo => ApplicationViewModel.ApplicationModel.SplashVideoPath;
 
     public SplashScreenViewModel(
       string screenTitle,

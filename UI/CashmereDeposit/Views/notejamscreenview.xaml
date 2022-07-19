@@ -16,6 +16,7 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="auto"/>
         <RowDefinition Height="*"/>
+        <RowDefinition Height="auto"/>
       </Grid.RowDefinitions>
       <TextBlock x:Name="NoteJamErrorDescriptionText" Grid.ColumnSpan="3" Margin="20 5"
                  Text="A note has become stuck while being counted. Kindly remove the trapped notes as per the instructions below or contact a custodian for assistance."
@@ -23,6 +24,9 @@
       <MediaElement Loaded="myMediaElement_Loaded" MediaEnded="myMediaElement_MediaEnded" Name="myMediaElement"
                     Grid.Row="1" Grid.Column="1" Source="Resources/notejam.mp4" LoadedBehavior="Manual"
                     Stretch="Uniform" Volume="0"/>
+      <Button x:Name="ClearNoteJam" Grid.Row="2" Style="{StaticResource NavigationButton}">
+        <TextBlock x:Name="ClearNoteJamCaption" Text="[XML] Clear Note Jam"/>
+      </Button>
     </Grid>
   </DockPanel>
 </UserControl>

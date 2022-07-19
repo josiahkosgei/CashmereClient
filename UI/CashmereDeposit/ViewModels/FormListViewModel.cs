@@ -48,7 +48,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _nextCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => NextCaption));
+         NotifyOfPropertyChange( () => NextCaption);
       }
     }
 
@@ -67,7 +67,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _backCaption = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => BackCaption));
+         NotifyOfPropertyChange( () => BackCaption);
       }
     }
 

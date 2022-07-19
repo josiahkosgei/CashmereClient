@@ -1,12 +1,6 @@
-﻿
-// Type: CashmereDeposit.Models.Submodule.SubmoduleBase
-
-
-
-
-using System;
-using CashmereDeposit.ViewModels;
+﻿using CashmereDeposit.ViewModels;
 using CashmereUtil.Licensing;
+using System;
 
 namespace CashmereDeposit.Models.Submodule
 {

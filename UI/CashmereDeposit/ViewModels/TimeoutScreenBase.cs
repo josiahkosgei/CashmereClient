@@ -13,7 +13,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class TimeoutScreenBase: Conductor<Screen>, IShell, IDisposable
+  public class TimeoutScreenBase: Conductor<Screen>, IDisposable
   {
     private string _screenTitle;
     protected bool EnableIdleTimer;

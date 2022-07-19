@@ -7,102 +7,102 @@
              xmlns:local="clr-namespace:CashmereDeposit.Views"
              xmlns:cal="http://www.caliburnproject.org"
              cal:Message.Attach="[Event PreviewMouseDown] = [Action ResetIdleTimerOnUserInteraction]">
-  <Control.Background>
-    <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
-  </Control.Background>
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="auto"/>
-      <RowDefinition Height="8*"/>
-    </Grid.RowDefinitions>
-    <uc:ScreenHeader/>
-    <TextBlock x:Name="ScreenTitle" Grid.Row="1" DockPanel.Dock="Top" VerticalAlignment="Center"
-               Style="{StaticResource Heading1}" Text="Screen Title"/>
-    <Grid Row="2">
-      <Grid x:Name="FullInstructionsExpanderIsVisible" Visibility="Hidden" ZIndex="10000"
-            Style="{StaticResource FullInstructions_Grid}">
-        <DockPanel>
-          <TextBlock x:Name="FullInstructionsTitle" DockPanel.Dock="Top" Style="{StaticResource Heading2}"
-                     FontWeight="Bold" Text="Instructions"/>
-          <Button x:Name="HideFullInstructions" DockPanel.Dock="Bottom" Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="HideFullInstructionsCaption" Text="OK"/>
-          </Button>
-          <ScrollViewer Style="{StaticResource Instructions_ScrollViewer}">
-            <TextBlock x:Name="FullInstructions" Style="{StaticResource ImportantTextBlock}" TextWrapping="Wrap"
-                       TextAlignment="Left" Text="Instruction text goes here"/>
-          </ScrollViewer>
-        </DockPanel>
-      </Grid>
-      <Grid>
+    <Control.Background>
+        <ImageBrush ImageSource="{StaticResource main_background}" Stretch="UniformToFill"/>
+    </Control.Background>
+    <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="70*"/>
-          <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.ColumnSpan="3" Margin="10">
-          <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition/>
-              <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
+        <uc:ScreenHeader/>
+        <TextBlock x:Name="ScreenTitle" Grid.Row="1" DockPanel.Dock="Top" VerticalAlignment="Center"
+               Style="{StaticResource Heading1}" Text="Screen Title"/>
+        <Grid Row="2">
+            <Grid x:Name="FullInstructionsExpanderIsVisible" Visibility="Hidden" ZIndex="10000"
+            Style="{StaticResource FullInstructions_Grid}">
+                <DockPanel>
+                    <TextBlock x:Name="FullInstructionsTitle" DockPanel.Dock="Top" Style="{StaticResource Heading2}"
+                     FontWeight="Bold" Text="Instructions"/>
+                    <Button x:Name="HideFullInstructions" DockPanel.Dock="Bottom" Style="{StaticResource NavigationButton}">
+                        <TextBlock x:Name="HideFullInstructionsCaption" Text="OK"/>
+                    </Button>
+                    <ScrollViewer Style="{StaticResource Instructions_ScrollViewer}">
+                        <TextBlock x:Name="FullInstructions" Style="{StaticResource ImportantTextBlock}" TextWrapping="Wrap"
+                       TextAlignment="Left" Text="Instruction text goes here"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Grid>
             <Grid>
-              <Grid x:Name="TextBoxGridIsVisible">
-                <TextBox x:Name="CustomerInput" Style="{StaticResource MainTextbox}" Margin="0"/>
-              </Grid>
-              <Grid x:Name="ComboBoxGridIsVisible" Visibility="Collapsed">
-                <ComboBox x:Name="CustomerComboBoxInput" Style="{StaticResource MainComboBox}" Text="{Binding CustomerInput}"/>
-              </Grid>
-            </Grid>
-            <Grid x:Name="ComboBoxButtonsIsVisible" Column="1" Visibility="Collapsed">
-              <Grid x:Name="EditComboBoxIsVisible" Visibility="Collapsed">
-                <Button x:Name="EditComboBox" MinWidth="100" Style="{StaticResource ButtonBase}">
-                  <TextBlock x:Name="EditComboBoxButtonCaption" Text="Edit"/>
-                </Button>
-              </Grid>
-              <Grid x:Name="CancelEditComboBoxIsVisible" Visibility="Collapsed">
-                <Button x:Name="CancelEditComboBox" MinWidth="100" Style="{StaticResource ButtonBase}">
-                  <TextBlock x:Name="CancelEditComboBoxButtonCaption" Text="Choose"/>
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-          <TextBlock x:Name="ErrorText" DockPanel.Dock="Top" Style="{StaticResource FormErrorTextBlock}"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.ColumnSpan="3" Margin="10">
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid x:Name="TextBoxGridIsVisible">
+                                <TextBox x:Name="CustomerInput" Style="{StaticResource MainTextbox}" Margin="0"/>
+                            </Grid>
+                            <Grid x:Name="ComboBoxGridIsVisible" Visibility="Collapsed">
+                                <ComboBox x:Name="CustomerComboBoxInput" Style="{StaticResource MainComboBox}" Text="{Binding CustomerInput}"/>
+                            </Grid>
+                        </Grid>
+                        <Grid x:Name="ComboBoxButtonsIsVisible" Column="1" Visibility="Collapsed">
+                            <Grid x:Name="EditComboBoxIsVisible" Visibility="Collapsed">
+                                <Button x:Name="EditComboBox" MinWidth="100" Style="{StaticResource ButtonBase}">
+                                    <TextBlock x:Name="EditComboBoxButtonCaption" Text="Edit"/>
+                                </Button>
+                            </Grid>
+                            <Grid x:Name="CancelEditComboBoxIsVisible" Visibility="Collapsed">
+                                <Button x:Name="CancelEditComboBox" MinWidth="100" Style="{StaticResource ButtonBase}">
+                                    <TextBlock x:Name="CancelEditComboBoxButtonCaption" Text="Choose"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <TextBlock x:Name="ErrorText" DockPanel.Dock="Top" Style="{StaticResource FormErrorTextBlock}"
                      HorizontalAlignment="Center" Text="Sample Error Text"/>
-          <Grid x:Name="KeyboardGridIsVisible">
-            <Grid x:Name="AlphanumericKeyboardIsVisible">
-              <uc:AlphanumericKeyboard Margin="20 10" DataContext="{x:Reference Name=CustomerInput}"/>
+                    <Grid x:Name="KeyboardGridIsVisible">
+                        <Grid x:Name="AlphanumericKeyboardIsVisible">
+                            <uc:AlphanumericKeyboard Margin="20 10" DataContext="{x:Reference Name=CustomerInput}"/>
+                        </Grid>
+                        <Grid x:Name="FullAlphanumericKeyboardIsVisible">
+                            <uc:FullAlphanumericKeyboard Margin="20 10" DataContext="{x:Reference Name=CustomerInput}"/>
+                        </Grid>
+                        <Grid x:Name="NumericKeypadIsVisible">
+                            <uc:NumericKeypad MaxWidth="300" Margin="0,-2,0,2" DataContext="{x:Reference Name=CustomerInput}"/>
+                        </Grid>
+                    </Grid>
+                </DockPanel>
+                <Grid Row="100" ColumnSpan="100">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
+                    <Button x:Name="Next" Grid.Column="4" Style="{StaticResource NextNavigationButton}">
+                        <TextBlock x:Name="NextCaption" Text="[XML] Next"/>
+                    </Button>
+                    <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
+                        <TextBlock x:Name="CancelCaption" Text="[XML] Cancel"/>
+                    </Button>
+                    <Button x:Name="Back" Grid.Column="1" Style="{StaticResource NavigationButton}">
+                        <TextBlock x:Name="BackCaption" Text="[XML] Back"/>
+                    </Button>
+                    <Button x:Name="ShowFullInstructions" Grid.Column="2" Style="{StaticResource NavigationButton}">
+                        <TextBlock x:Name="ShowFullInstructionsCaption" Text="[XML] Help"/>
+                    </Button>
+                </Grid>
             </Grid>
-            <Grid x:Name="FullAlphanumericKeyboardIsVisible">
-              <uc:FullAlphanumericKeyboard Margin="20 10" DataContext="{x:Reference Name=CustomerInput}"/>
-            </Grid>
-            <Grid x:Name="NumericKeypadIsVisible">
-              <uc:NumericKeypad MaxWidth="300" Margin="0,-2,0,2" DataContext="{x:Reference Name=CustomerInput}"/>
-            </Grid>
-          </Grid>
-        </DockPanel>
-        <Grid Row="100" ColumnSpan="100">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="auto"/>
-          </Grid.ColumnDefinitions>
-          <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
-          <Button x:Name="Next" Grid.Column="4" Style="{StaticResource NextNavigationButton}">
-            <TextBlock x:Name="NextCaption" Text="Next"/>
-          </Button>
-          <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
-            <TextBlock x:Name="CancelCaption" Text="Cancel"/>
-          </Button>
-          <Button x:Name="Back" Grid.Column="1" Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="BackCaption" Text="Back"/>
-          </Button>
-          <Button x:Name="ShowFullInstructions" Grid.Column="2" Style="{StaticResource NavigationButton}">
-            <TextBlock x:Name="ShowFullInstructionsCaption" Text="Help"/>
-          </Button>
         </Grid>
-      </Grid>
     </Grid>
-  </Grid>
 </UserControl>

@@ -84,16 +84,12 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public byte[] AppKey { get; set; } = null!;
 
         [ForeignKey("BranchId")]
-        //[InverseProperty("Devices")]
         public virtual Branch Branch { get; set; } = null!;
         [ForeignKey("ConfigGroup")]
-        //[InverseProperty("Devices")]
         public virtual ConfigGroup ConfigGroupNavigation { get; set; } = null!;
         [ForeignKey("CurrencyList")]
-        //[InverseProperty("Devices")]
         public virtual CurrencyList CurrencyListNavigation { get; set; } = null!;
         [ForeignKey("GUIScreenList")]
-        //[InverseProperty("Devices")]
         public virtual GUIScreenList GUIScreenListNavigation { get; set; } = null!;
         [ForeignKey("LanguageList")]
         //[InverseProperty("Devices")]

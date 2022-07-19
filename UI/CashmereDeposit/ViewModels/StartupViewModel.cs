@@ -25,7 +25,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
-    public class StartupViewModel : Conductor<Screen>, IShell,  IDisposable
+    public class StartupViewModel : Conductor<Screen>, IShell, IDisposable
     {
 
         private DispatcherTimer _startupTimer = new(DispatcherPriority.Send);
@@ -194,42 +194,42 @@ namespace CashmereDeposit.ViewModels
                         .ThenInclude(x => x.LanguageListLanguages)
                     .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(x => x.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenType)
 
                     .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnAcceptCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnBackCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.BtnCancelCaptionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.FullInstructionsNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.ScreenTitleInstructionNavigation)
 
               .Include(x => x.GUIScreenListNavigation)
                         .ThenInclude(a => a.GuiScreenListScreens)
-                        .ThenInclude(x => x.ScreenNavigation)
+                        .ThenInclude(x => x.GUIScreenNavigation)
                         .ThenInclude(x => x.GUIScreenText)
                         .ThenInclude(x => x.ScreenTitleNavigation)
 
@@ -237,9 +237,144 @@ namespace CashmereDeposit.ViewModels
                     .Include(x => x.CurrencyListNavigation.DefaultCurrencyNavigation)
                     .Include(x => x.ConfigGroupNavigation)
                     .Include(x => x.TransactionTypeListNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
                         .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
                         .ThenInclude(x => x.TxtypeListItemNavigation)
                         .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTypeGUIScreenlistNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TransactionTextNav)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.DisclaimerNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AccountNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.AliasAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.DepositorNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.FullInstructionsNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.FundsSourceCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.IdNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ListItemCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.NarrationCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.PhoneNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReceiptTemplateNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReferenceAccountNameCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ReferenceAccountNumberCaptionNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.TermsNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ValidationTextErrorMessageNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.ValidationTextSuccessMessageNavigation)
+
+                    .Include(x => x.TransactionTypeListNavigation)
+                    .ThenInclude(x => x.TransactionTypeListTransactionTypeListItems)
+                    .ThenInclude(x => x.TxtypeListItemNavigation)
+                    .ThenInclude(x => x.TxTextNavigationText)
+                    .ThenInclude(x => x.TxItemNavigation)
                     .FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
         }
         private readonly CompositeDisposable _disposables = new();
@@ -249,23 +384,23 @@ namespace CashmereDeposit.ViewModels
         // use this in non-derived class
         protected virtual void Dispose(bool isDisposing)
         {
-            if (this._isDisposed)
+            if (_isDisposed)
                 return;
 
             if (isDisposing)
             {
                 // free managed resources here
-                this._disposables.Dispose();
+                _disposables.Dispose();
             }
 
             // free unmanaged resources (unmanaged objects) and override a finalizer below.
             // set large fields to null.
 
-            this._isDisposed = true;
+            _isDisposed = true;
         }
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
     }
 }

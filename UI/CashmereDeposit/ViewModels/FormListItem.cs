@@ -28,7 +28,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _errorMessageTextBlock = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => ErrorMessageTextBlock));
+         NotifyOfPropertyChange( () => ErrorMessageTextBlock);
       }
     }
 

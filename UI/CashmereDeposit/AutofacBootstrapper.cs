@@ -79,7 +79,7 @@ namespace CashmereDeposit
             //  register view models
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
               .Where(type => type.Name.EndsWith("ViewModel"))
-              .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("ViewModels")))
+              .Where(type => !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("ViewModels")))
               .Where(type => type.GetInterface(ViewModelBaseType.Name, false) != null)
               //.AsImplementedInterfaces()
               .AsSelf()
@@ -88,7 +88,20 @@ namespace CashmereDeposit
             //  register views
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
               .Where(type => type.Name.EndsWith("View"))
-              .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("Views")))
+              .Where(type => !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("Views")))
+              .AsSelf()
+              .InstancePerDependency();    
+
+            //  register Models
+            builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
+              .Where(type => type.Name.EndsWith("Model"))
+              .Where(type => !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("Model")))
+              .AsSelf()
+              .InstancePerDependency();  
+
+            //  register UserControls
+            builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
+              .Where(Func)
               .AsSelf()
               .InstancePerDependency();
 
@@ -113,6 +126,11 @@ namespace CashmereDeposit
 
             Container = builder.Build();
 
+        }
+
+        private bool Func(Type type)
+        {
+            return !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("UserControls"));
         }
 
         /// <summary>

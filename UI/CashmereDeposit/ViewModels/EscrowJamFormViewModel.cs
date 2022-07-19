@@ -26,7 +26,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _additionalInfo = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => AdditionalInfo));
+         NotifyOfPropertyChange( () => AdditionalInfo);
       }
     }
 
@@ -46,7 +46,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _RetreivedAmountString = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => RetreivedAmountString));
+         NotifyOfPropertyChange( () => RetreivedAmountString);
       }
     }
 

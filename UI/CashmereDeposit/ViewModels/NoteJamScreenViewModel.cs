@@ -24,7 +24,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _NoteJamErrorTitleText = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => NoteJamErrorTitleText));
+         NotifyOfPropertyChange( () => NoteJamErrorTitleText);
       }
     }
 
@@ -34,7 +34,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         _NoteJamErrorDescriptionText = value;
-        NotifyOfPropertyChange((Expression<Func<string>>) (() => NoteJamErrorDescriptionText));
+         NotifyOfPropertyChange( () => NoteJamErrorDescriptionText);
       }
     }
 

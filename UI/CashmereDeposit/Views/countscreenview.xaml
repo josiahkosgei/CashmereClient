@@ -33,42 +33,137 @@
       </Grid>
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="70*"/>
+          <RowDefinition Height="*"/>
           <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Grid>
+        <Grid x:Name="MainStateShellGrid" Margin="20">
           <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition/>
             <RowDefinition Height="auto"/>
           </Grid.RowDefinitions>
-          <Viewbox Grid.Row="0" DockPanel.Dock="Top" MaxHeight="60">
-            <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Style="{StaticResource CurrentCountText}">
-              <TextBlock x:Name="CountScreenTotalCaption" VerticalAlignment="Center" HorizontalAlignment="Center"
-                         Style="{StaticResource Heading2}" Text="Total"/>
-              <TextBlock x:Name="CurrentTransaction_CurrencyCode" Margin="10 0" VerticalAlignment="Center"
-                         HorizontalAlignment="Center" Style="{StaticResource Heading2}" Text="KES"/>
-              <TextBlock x:Name="CurrentTransaction_TotalDisplayAmountString" VerticalAlignment="Center"
-                         HorizontalAlignment="Center" Style="{StaticResource Heading2}" Text="999,999,999"/>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Border Margin="20 0 10 10" MaxWidth="600" Grid.Column="1" BorderBrush="Gray" BorderThickness=".3">
+            <StackPanel x:Name="InstructionsGrid" Margin="20 10">
+              <TextBlock x:Name="InstructionTitleCaption" Style="{StaticResource Heading2}" Text="[XML] Instructions"/>
+              <TextBlock x:Name="ScreenStateInstructions" Margin="0 20" TextWrapping="Wrap"
+                         Style="{StaticResource Heading3}" Text="[XML] 1. Please remove the counted notes from the"/>
             </StackPanel>
-          </Viewbox>
-          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20">
-            <Button x:Name="Count" Style="{StaticResource ButtonBase}" MinWidth="200" MinHeight="75"
-                    Grid.ColumnSpan="3">
-              <TextBlock x:Name="CountButtonCaption" Text="Count"/>
-            </Button>
-          </StackPanel>
-          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="EscrowReject" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
-                    MinHeight="75" Grid.ColumnSpan="3">
-              <TextBlock x:Name="EscrowRejectButtonCaption" Text="Reject"/>
-            </Button>
-            <Button x:Name="EscrowDrop" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
-                    MinHeight="75" Grid.ColumnSpan="3">
-              <TextBlock x:Name="EscrowDropButtonCaption" Text="Drop"/>
-            </Button>
-          </StackPanel>
+          </Border>
+          <Grid x:Name="ButtonControlsGrid" Row="2" Margin="10 10 10 10" Column="2" HorizontalAlignment="Center"
+                MaxHeight="100">
+            <StackPanel Orientation="Horizontal">
+              <Grid>
+                <Button x:Name="Count" Style="{StaticResource ButtonBase}" MinWidth="200" MinHeight="75"
+                        Grid.ColumnSpan="3">
+                  <TextBlock x:Name="CountButtonCaption" Text="XML:Count"/>
+                </Button>
+                <Button x:Name="BeginCount" Style="{StaticResource ButtonBase}" MinWidth="200" MinHeight="75"
+                        Grid.ColumnSpan="3">
+                  <TextBlock x:Name="CountBeginButtonCaption" Text="XML:Start Count"/>
+                </Button>
+              </Grid>
+              <Button x:Name="PauseCount" Style="{StaticResource ButtonBase}" MinWidth="200" MinHeight="75"
+                      Grid.ColumnSpan="3">
+                <TextBlock x:Name="PauseCountButtonCaption" Text="XML:PauseCount"/>
+              </Button>
+              <Button x:Name="EscrowReject" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
+                      MinHeight="75" Grid.ColumnSpan="3">
+                <TextBlock x:Name="EscrowRejectButtonCaption" Text="XML:Reject"/>
+              </Button>
+              <Button x:Name="EscrowDrop" Style="{StaticResource ButtonBase}" MinWidth="100" MaxWidth="200"
+                      MinHeight="75" Grid.ColumnSpan="3">
+                <TextBlock x:Name="EscrowDropButtonCaption" Text="XML:Drop"/>
+              </Button>
+            </StackPanel>
+          </Grid>
+          <Grid x:Name="STATEINITIsVisible" RowSpan="2" MaxWidth="500">
+            <Image Source="{StaticResource CountState_Inst_INIT}" Stretch="Uniform" VerticalAlignment="Top"/>
+          </Grid>
+          <Grid x:Name="TransactionSummaryIsVisible" RowSpan="2" Margin="10 0 10 10">
+            <StackPanel>
+              <TextBlock x:Name="CountTableTransactionSummaryCaption" Style="{StaticResource Heading2}"
+                         Text="[XML] TransactionSummary"/>
+              <Border BorderThickness="1" BorderBrush="Gray">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" SharedSizeGroup="A"/>
+                    <ColumnDefinition Width="100" SharedSizeGroup="B"/>
+                    <ColumnDefinition Width="*" SharedSizeGroup="C"/>
+                  </Grid.ColumnDefinitions>
+                  <Border BorderThickness=".5" BorderBrush="Gray">
+                    <TextBlock x:Name="CountTableDenominationCaption" HorizontalAlignment="Right"
+                               Style="{StaticResource Heading3}" Text="[XML] Denomination"/>
+                  </Border>
+                  <Border Grid.Column="1" BorderThickness=".5" BorderBrush="Gray">
+                    <TextBlock x:Name="CountTableCountCaption" HorizontalAlignment="Right" Style="{StaticResource Heading3}"
+                               Text="[XML] Count"/>
+                  </Border>
+                  <Border Grid.Column="2" BorderThickness=".5" BorderBrush="Gray">
+                    <TextBlock x:Name="CountTableSubTotalCaption" HorizontalAlignment="Right" Style="{StaticResource Heading3}"
+                               Grid.ColumnSpan="2" Text="[XML] Amount"/>
+                  </Border>
+                </Grid>
+              </Border>
+              <Border BorderThickness="1" BorderBrush="Gray">
+                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  <Grid>
+                    <ItemsControl x:Name="CurrentTransaction_TotalDenomination_DenominationItems">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Grid Height="50">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="200"/>
+                              <ColumnDefinition Width="100"/>
+                              <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border BorderThickness=".5" BorderBrush="Gray">
+                              <Grid HorizontalAlignment="Right">
+                                <Grid.ColumnDefinitions>
+                                  <ColumnDefinition Width="auto" SharedSizeGroup="A"/>
+                                  <ColumnDefinition Width="75" SharedSizeGroup="B"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="10" VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           Style="{StaticResource ImportantTextBlock_Level2}" Text="{Binding Currency}"/>
+                                <TextBlock Grid.Column="1" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                           Style="{StaticResource ImportantTextBlock_Level2}"
+                                           Text="{Binding MajorValue, StringFormat='#,##0.##'}"/>
+                              </Grid>
+                            </Border>
+                            <Border Grid.Column="1" BorderThickness=".5" BorderBrush="Gray">
+                              <TextBlock Margin="10" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                         Style="{StaticResource ImportantTextBlock_Level2}" Text="{Binding DisplayCount}"/>
+                            </Border>
+                            <Border Grid.Column="2" BorderThickness=".5" BorderBrush="Gray">
+                              <Grid Column="2" HorizontalAlignment="Right" IsSharedSizeScope="true">
+                                <Grid.ColumnDefinitions>
+                                  <ColumnDefinition Width="auto" SharedSizeGroup="A"/>
+                                  <ColumnDefinition Width="100" SharedSizeGroup="B"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="10" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                           Style="{StaticResource ImportantTextBlock_Level2}" Text="{Binding Currency}"/>
+                                <TextBlock Grid.Column="4" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                           Style="{StaticResource ImportantTextBlock_Level2}"
+                                           Text="{Binding MajorTotal, StringFormat='#,##0.##'}"/>
+                              </Grid>
+                            </Border>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </Grid>
+                </ScrollViewer>
+              </Border>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock x:Name="CountTableTotalAmountCaption" Style="{StaticResource Heading3}" Text="[XML] Total Amount"/>
+                <TextBlock x:Name="CurrentTransaction_CurrencyCode" Style="{StaticResource Heading3}" Text="[XML] KES"/>
+                <TextBlock x:Name="CurrentTransaction_TotalDisplayAmountString" Style="{StaticResource Heading3}"
+                           Text="[XML] 10,000"/>
+              </StackPanel>
+            </StackPanel>
+          </Grid>
         </Grid>
         <Grid Row="100" ColumnSpan="100">
           <Grid.ColumnDefinitions>
@@ -78,7 +173,7 @@
           </Grid.ColumnDefinitions>
           <uc:ScreenFooter Grid.Row="2" Grid.ColumnSpan="8"/>
           <Button x:Name="Next" Grid.Column="0" Grid.ColumnSpan="20" Style="{StaticResource NextNavigationButton}">
-            <TextBlock x:Name="NextCaption" Text="Go for it!"/>
+            <TextBlock x:Name="NextCaption" Text="[XML] Accept"/>
           </Button>
           <Button x:Name="Cancel" Style="{StaticResource CancelNavigationButton}">
             <TextBlock x:Name="CancelCaption" Text="Cancel"/>

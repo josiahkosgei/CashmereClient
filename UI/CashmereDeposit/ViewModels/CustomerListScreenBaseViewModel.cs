@@ -1,10 +1,4 @@
-﻿
-//.CustomerListScreenBaseViewModel
-
-
-
-
-using Cashmere.Library.Standard.Utilities;
+﻿using Cashmere.Library.Standard.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -105,11 +99,11 @@ namespace CashmereDeposit.ViewModels
         private void RefreshPagination()
         {
             NotifyOfPropertyChange((Expression<Func<int>>)(() => CurrentPage));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanGetFirstPage));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanGetPrevPage));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanGetNextPage));
-            NotifyOfPropertyChange((Expression<Func<bool>>)(() => CanGetLastPage));
-            NotifyOfPropertyChange((Expression<Func<string>>)(() => PaginationInfoString));
+            NotifyOfPropertyChange(() => CanGetFirstPage);
+            NotifyOfPropertyChange(() => CanGetPrevPage);
+            NotifyOfPropertyChange(() => CanGetNextPage);
+            NotifyOfPropertyChange(() => CanGetLastPage);
+             NotifyOfPropertyChange(() => PaginationInfoString);
         }
 
         private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)

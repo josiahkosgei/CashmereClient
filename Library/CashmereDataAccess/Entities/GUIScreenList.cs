@@ -29,12 +29,9 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public string? Description { get; set; }
         [Column("enabled")]
         public bool Enabled { get; set; }
-
-        //[InverseProperty("GUIScreenListNavigation")]
+        
         public virtual ICollection<Device> Devices { get; set; }
-        //[InverseProperty("GuiScreenListNavigation")]
         public virtual ICollection<GuiScreenListScreen> GuiScreenListScreens { get; set; }
-        //[InverseProperty("TxTypeGUIScreenlistNavigation")]
         public virtual ICollection<TransactionTypeListItem> TransactionTypeListItems { get; set; }
     }
 }

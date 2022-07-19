@@ -76,7 +76,7 @@ namespace CashmereDeposit.ViewModels
         set
       {
         canNext = value;
-        NotifyOfPropertyChange((Expression<Func<bool>>) (() => CanNext));
+        NotifyOfPropertyChange( () => CanNext);
       }
     }
 
