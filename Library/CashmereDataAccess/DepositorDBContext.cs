@@ -9,7 +9,7 @@ namespace Cashmere.Library.CashmereDataAccess
 {
     public partial class DepositorDBContext : DbContext
     {
-       
+
         public DepositorDBContext()
         {
         }
@@ -102,10 +102,17 @@ namespace Cashmere.Library.CashmereDataAccess
         public virtual DbSet<ValidationListValidationItem> ValidationListValidationItems { get; set; } = null!;
         public virtual DbSet<ValidationText> ValidationTexts { get; set; } = null!;
         public virtual DbSet<ValidationType> ValidationTypes { get; set; } = null!;
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return base.SaveChangesAsync(cancellationToken);
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True",
-                options => options.EnableRetryOnFailure());
+            optionsBuilder
+                //.UseModel(DepositorDBContextModel.Instance)
+            .UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True",
+            options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+
             base.OnConfiguring(optionsBuilder);
         }
 

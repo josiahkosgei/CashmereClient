@@ -6,9 +6,9 @@
 
 namespace CashmereDeposit.Utils
 {
-  public enum DepositorLoginAction
-  {
-    Login,
-    Logoff,
-  }
+    public enum DepositorLoginAction
+    {
+        Login,
+        Logoff,
+    }
 }

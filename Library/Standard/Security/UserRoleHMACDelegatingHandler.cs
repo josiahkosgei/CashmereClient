@@ -9,26 +9,26 @@ using System.Threading.Tasks;
 
 namespace Cashmere.Library.Standard.Security
 {
-  public class UserRoleHMACDelegatingHandler : DelegatingHandler
-  {
-    private Guid APPId;
-    private byte[] APIKey;
-
-    public UserRoleHMACDelegatingHandler(Guid aPPId, byte[] apiKey)
+    public class UserRoleHMACDelegatingHandler : DelegatingHandler
     {
-      APPId = aPPId;
-      APIKey = apiKey;
-    }
+        private Guid APPId;
+        private byte[] APIKey;
 
-    protected override async Task<HttpResponseMessage> SendAsync(
-      HttpRequestMessage request,
-      CancellationToken cancellationToken)
-    {
-      string requestUri = request.RequestUri.AbsoluteUri;
-      string requestHttpMethod = request.Method.Method;
-      string content = await request.Content.ReadAsStringAsync();
-      request.Headers.Add("hmacAuth", APIHashing.GetAuthHeader(APPId, requestUri, requestHttpMethod, APIKey, content));
-      return await base.SendAsync(request, cancellationToken);
+        public UserRoleHMACDelegatingHandler(Guid aPPId, byte[] apiKey)
+        {
+            APPId = aPPId;
+            APIKey = apiKey;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+          HttpRequestMessage request,
+          CancellationToken cancellationToken)
+        {
+            string requestUri = request.RequestUri.AbsoluteUri;
+            string requestHttpMethod = request.Method.Method;
+            string content = await request.Content.ReadAsStringAsync();
+            request.Headers.Add("hmacAuth", APIHashing.GetAuthHeader(APPId, requestUri, requestHttpMethod, APIKey, content));
+            return await base.SendAsync(request, cancellationToken);
+        }
     }
-  }
 }

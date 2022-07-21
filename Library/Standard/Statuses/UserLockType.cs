@@ -3,11 +3,11 @@
 
 namespace Cashmere.Library.Standard.Statuses
 {
-  public enum UserLockType
-  {
-    Lock,
-    Unlock,
-    Disable,
-    Enable,
-  }
+    public enum UserLockType
+    {
+        Lock,
+        Unlock,
+        Disable,
+        Enable,
+    }
 }

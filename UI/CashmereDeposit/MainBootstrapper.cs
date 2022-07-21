@@ -16,6 +16,7 @@ using CashmereDeposit.Utils;
 using CashmereDeposit.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace CashmereDeposit
 {
@@ -80,14 +81,16 @@ namespace CashmereDeposit
         protected override void ConfigureContainer(ContainerBuilder containerBuilder)
         {
 
-            //containerBuilder.RegisterType<StartupViewModel>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<ApplicationViewModel>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<BusyIndicator>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<FullAlphanumericKeyboard>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<NumericKeypad>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<ScreenFooter>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<ScreenHeader>().AsSelf().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<SummaryScreen>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<StartupViewModel>().As<IShell>().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<ApplicationViewModel>().As<IShell>().InstancePerLifetimeScope();
+            containerBuilder.RegisterType<CashmereDeviceStatus>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<BusyIndicator>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<FullAlphanumericKeyboard>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<NumericKeypad>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<ScreenFooter>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<ScreenHeader>().AsSelf().InstancePerLifetimeScope();
+            //containerBuilder.RegisterType<SummaryScreen>().AsSelf().InstancePerLifetimeScope();
+			//containerBuilder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().SingleInstance();
 
             containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient("CashmereDepositHttpClient")).As<HttpClient>().SingleInstance();
             containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient("CDM_APIClient")).As<HttpClient>().SingleInstance();
@@ -105,7 +108,8 @@ namespace CashmereDeposit
                 .WithParameter("options", DepositorContextFactory.Get())
                 .InstancePerLifetimeScope();
 
-            containerBuilder.RegisterGeneric(typeof(RepositoryBase<>)).As(typeof(IAsyncRepository<>)).SingleInstance();
+            containerBuilder.RegisterGeneric(typeof(RepositoryBase<>)).As(typeof(IAsyncRepository<>)).InstancePerLifetimeScope();
+            containerBuilder.RegisterType(typeof(DeviceRepository)).As(typeof(IDeviceRepository)).InstancePerLifetimeScope();
 
             base.ConfigureContainer(containerBuilder);
         }

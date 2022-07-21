@@ -11,50 +11,50 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  [Guid("DF433792-DDBD-41EB-A95E-8730A9313505")]
-  public class ReferenceDetailsVerifyDetailsScreenViewModel : DepositorCustomerScreenBaseViewModel
-  {
-    public List<SummaryListItem> SummaryList { get; set; }
-
-    public ReferenceDetailsVerifyDetailsScreenViewModel(
-      string screenTitle,
-      ApplicationViewModel applicationViewModel,
-      bool required = false)
-      : base(screenTitle, applicationViewModel, required)
+    [Guid("DF433792-DDBD-41EB-A95E-8730A9313505")]
+    public class ReferenceDetailsVerifyDetailsScreenViewModel : DepositorCustomerScreenBaseViewModel
     {
-        SummaryList = applicationViewModel.CurrentTransaction.TransactionReferences;
-    }
+        public List<SummaryListItem> SummaryList { get; set; }
 
-    public void Cancel()
-    {
-        ApplicationViewModel.CancelSessionOnUserInput();
-    }
+        public ReferenceDetailsVerifyDetailsScreenViewModel(
+          string screenTitle,
+          ApplicationViewModel applicationViewModel,
+          bool required = false)
+          : base(screenTitle, applicationViewModel, required)
+        {
+            SummaryList = applicationViewModel.CurrentTransaction.TransactionReferences;
+        }
 
-    public void Back()
-    {
-      ApplicationViewModel.ReferencesAccepted(false);
-      ApplicationViewModel.NavigatePreviousScreen();
-    }
+        public void Cancel()
+        {
+            ApplicationViewModel.CancelSessionOnUserInput();
+        }
 
-    public void Next()
-    {
-      lock (ApplicationViewModel.NavigationLock)
-      {
-        if (!CanNext)
-          return;
-        CanNext = false;
-        ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-        var backgroundWorker = new BackgroundWorker();
-        backgroundWorker.WorkerReportsProgress = false;
-        backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
-        backgroundWorker.RunWorkerAsync();
-      }
-    }
+        public void Back()
+        {
+            ApplicationViewModel.ReferencesAccepted(false);
+            ApplicationViewModel.NavigatePreviousScreen();
+        }
 
-    private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)
-    {
-      ApplicationViewModel.StartCountingProcess();
-      ApplicationViewModel.NavigateNextScreen();
+        public void Next()
+        {
+            lock (ApplicationViewModel.NavigationLock)
+            {
+                if (!CanNext)
+                    return;
+                CanNext = false;
+                ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
+                var backgroundWorker = new BackgroundWorker();
+                backgroundWorker.WorkerReportsProgress = false;
+                backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
+                backgroundWorker.RunWorkerAsync();
+            }
+        }
+
+        private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            ApplicationViewModel.StartCountingProcess();
+            ApplicationViewModel.NavigateNextScreen();
+        }
     }
-  }
 }

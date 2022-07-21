@@ -78,7 +78,7 @@ public class AppTransaction : PropertyChangedBase
         }
         else
         {
-            Device device = applicationModel.GetDevice(DepositorDBContext);
+            Device device = applicationModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
             if (device == null)
             {
                 str = null;
@@ -138,7 +138,7 @@ public class AppTransaction : PropertyChangedBase
         {
             Transaction.TxSuspenseAccount = value;
             ApplicationViewModel.Log.InfoFormat(GetType().Name, "SuspenseAccount Set", "Tx Property Changed", "SuspenseAccount set to {0}", Transaction.TxSuspenseAccount);
-             NotifyOfPropertyChange(() => SuspenseAccount);
+            NotifyOfPropertyChange(() => SuspenseAccount);
         }
     }
 
@@ -254,7 +254,7 @@ public class AppTransaction : PropertyChangedBase
             NotifyOfPropertyChange(nameof(FundsSource));
         }
     }
-    
+
     public string Phone
     {
         get => _phone;

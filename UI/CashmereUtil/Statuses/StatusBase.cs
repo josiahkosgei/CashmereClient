@@ -4,7 +4,7 @@
 
 namespace CashmereUtil.Statuses
 {
-  internal class StatusBase
-  {
-  }
+    internal class StatusBase
+    {
+    }
 }

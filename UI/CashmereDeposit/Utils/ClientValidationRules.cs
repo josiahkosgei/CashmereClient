@@ -8,8 +8,8 @@ using System.Text.RegularExpressions;
 
 namespace CashmereDeposit.Utils
 {
-  public static class ClientValidationRules
-  {
-    public static bool RegexValidation(string input, string regularExpression) => Regex.Match(input, regularExpression, RegexOptions.IgnoreCase).Success;
-  }
+    public static class ClientValidationRules
+    {
+        public static bool RegexValidation(string input, string regularExpression) => Regex.Match(input, regularExpression, RegexOptions.IgnoreCase).Success;
+    }
 }

@@ -12,47 +12,47 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  [Guid("16A5EB6B-4D4F-4652-ADC2-0351F1FBDFA1")]
-  public class LanguageListScreenViewModel : CustomerListScreenBaseViewModel
-  {
-    public LanguageListScreenViewModel(
-      string screenTitle,
-      ApplicationViewModel applicationViewModel,
-      bool required = false)
-      : base(screenTitle, applicationViewModel, required)
+    [Guid("16A5EB6B-4D4F-4652-ADC2-0351F1FBDFA1")]
+    public class LanguageListScreenViewModel : CustomerListScreenBaseViewModel
     {
-      var applicationViewModel1 = ApplicationViewModel;
-      List<ATMSelectionItem<object>> atmSelectionItemList;
-      if (applicationViewModel1 == null)
-      {
-        atmSelectionItemList = null;
-      }
-      else
-      {
-        var languagesAvailable = applicationViewModel1.LanguagesAvailable;
-        if (languagesAvailable == null)
+        public LanguageListScreenViewModel(
+          string screenTitle,
+          ApplicationViewModel applicationViewModel,
+          bool required = false)
+          : base(screenTitle, applicationViewModel, required)
         {
-          atmSelectionItemList = null;
+            var applicationViewModel1 = ApplicationViewModel;
+            List<ATMSelectionItem<object>> atmSelectionItemList;
+            if (applicationViewModel1 == null)
+            {
+                atmSelectionItemList = null;
+            }
+            else
+            {
+                var languagesAvailable = applicationViewModel1.LanguagesAvailable;
+                if (languagesAvailable == null)
+                {
+                    atmSelectionItemList = null;
+                }
+                else
+                {
+                    var source = languagesAvailable.Select(x => new ATMSelectionItem<object>(x.Flag, x.Name, x));
+                    atmSelectionItemList = source != null ? source.ToList() : null;
+                }
+            }
+            FullList = atmSelectionItemList;
+            GetFirstPage();
         }
-        else
+
+        public void Cancel()
         {
-          var source = languagesAvailable.Select(x => new ATMSelectionItem<object>(x.Flag, x.Name, x));
-          atmSelectionItemList = source != null ? source.ToList() : null;
+            ApplicationViewModel.CancelSessionOnUserInput();
         }
-      }
-      FullList = atmSelectionItemList;
-      GetFirstPage();
-    }
 
-    public void Cancel()
-    {
-        ApplicationViewModel.CancelSessionOnUserInput();
+        public override void PerformSelection()
+        {
+            ApplicationViewModel?.SetLanguage(SelectedFilteredList.Value as Language);
+            ApplicationViewModel.NavigateNextScreen();
+        }
     }
-
-    public override void PerformSelection()
-    {
-      ApplicationViewModel?.SetLanguage(SelectedFilteredList.Value as Language);
-      ApplicationViewModel.NavigateNextScreen();
-    }
-  }
 }

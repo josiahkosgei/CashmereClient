@@ -6,7 +6,7 @@
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public class SMSResponse : APIResponseBase
-  {
-  }
+    public class SMSResponse : APIResponseBase
+    {
+    }
 }

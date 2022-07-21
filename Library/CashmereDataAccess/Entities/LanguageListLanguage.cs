@@ -9,10 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("LanguageList_Language")]
-    //// [Index("LanguageItem", "LanguageList", Name = "UX_LanguageList_Language_LanguageItem", IsUnique = true)]
-    //// [Index("LanguageList", "LanguageOrder", Name = "UX_LanguageList_Language_Order", IsUnique = true)]
-    //// [Index("LanguageItem", Name = "ilanguage_item_LanguageList_Language")]
-    //// [Index("LanguageList", Name = "ilanguage_list_LanguageList_Language")]
     public partial class LanguageListLanguage
     {
         [Key]

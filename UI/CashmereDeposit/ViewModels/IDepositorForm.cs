@@ -3,22 +3,22 @@ using System.Threading.Tasks;
 
 namespace CashmereDeposit.ViewModels
 {
-  public interface IDepositorForm
-  {
-    void SelectFormField(int fieldID);
+    public interface IDepositorForm
+    {
+        void SelectFormField(int fieldID);
 
-    void SelectFormField(FormListItem field);
+        void SelectFormField(FormListItem field);
 
-    void FormHome(bool success);
+        void FormHome(bool success);
 
-    void FormClose(bool success);
+        void FormClose(bool success);
 
-    List<FormListItem> GetFields();
+        List<FormListItem> GetFields();
 
-    Task<string> SaveForm();
+        Task<string> SaveForm();
 
-    int FormValidation();
+        int FormValidation();
 
-    string GetErrors();
-  }
+        string GetErrors();
+    }
 }

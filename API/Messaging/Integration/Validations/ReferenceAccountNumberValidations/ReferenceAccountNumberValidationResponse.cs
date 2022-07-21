@@ -3,8 +3,8 @@
 
 namespace Cashmere.API.Messaging.Integration.Validations.ReferenceAccountNumberValidations
 {
-  public class ReferenceAccountNumberValidationResponse : ValidationResponseBase
-  {
-    public string RequestedReferenceAccountNumber { get; set; }
-  }
+    public class ReferenceAccountNumberValidationResponse : ValidationResponseBase
+    {
+        public string RequestedReferenceAccountNumber { get; set; }
+    }
 }

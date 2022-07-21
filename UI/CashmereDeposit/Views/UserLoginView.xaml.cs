@@ -14,9 +14,9 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class UserLoginView : UserControl, IComponentConnector
-  {
+    public partial class UserLoginView : UserControl, IComponentConnector
+    {
 
-    public UserLoginView() => InitializeComponent();
-  }
+        public UserLoginView() => InitializeComponent();
+    }
 }

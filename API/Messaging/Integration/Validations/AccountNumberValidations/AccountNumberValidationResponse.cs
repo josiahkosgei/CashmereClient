@@ -3,7 +3,7 @@
 
 namespace Cashmere.API.Messaging.Integration.Validations.AccountNumberValidations
 {
-  public class AccountNumberValidationResponse : ValidationResponseBase
-  {
-  }
+    public class AccountNumberValidationResponse : ValidationResponseBase
+    {
+    }
 }

@@ -103,7 +103,7 @@ namespace CashmereDeposit.ViewModels
             NotifyOfPropertyChange(() => CanGetPrevPage);
             NotifyOfPropertyChange(() => CanGetNextPage);
             NotifyOfPropertyChange(() => CanGetLastPage);
-             NotifyOfPropertyChange(() => PaginationInfoString);
+            NotifyOfPropertyChange(() => PaginationInfoString);
         }
 
         private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)

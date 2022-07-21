@@ -2,12 +2,12 @@
 
 namespace DeviceManager
 {
-  public interface IDeviceMessenger
-  {
-    StandardResult CreateConnection();
+    public interface IDeviceMessenger
+    {
+        StandardResult CreateConnection();
 
-    StandardResult TerminateConnection();
+        StandardResult TerminateConnection();
 
-    string SendMessage(string message, bool expectACK = true);
-  }
+        string SendMessage(string message, bool expectACK = true);
+    }
 }

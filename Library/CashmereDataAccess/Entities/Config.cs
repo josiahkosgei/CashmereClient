@@ -20,7 +20,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         [Key]
         [Column("name")]
         [StringLength(50)]
-        public string Name { get; set; } = null!;
+        public string Name { get; set; }
         [Column("default_value")]
         public string? DefaultValue { get; set; }
         [Column("description")]
@@ -30,9 +30,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public Guid CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]
-        //[InverseProperty("Configs")]
-        public virtual ConfigCategory Category { get; set; } = null!;
-        //[InverseProperty("Config")]
+        public virtual ConfigCategory Category { get; set; }
         public virtual ICollection<DeviceConfig> DeviceConfigs { get; set; }
     }
 }

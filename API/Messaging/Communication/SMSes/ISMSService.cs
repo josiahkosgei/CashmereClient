@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public interface ISMSService
-  {
-    Task SendAsync(SMSMessage SMSMessage);
+    public interface ISMSService
+    {
+        Task SendAsync(SMSMessage SMSMessage);
 
-    Task<List<SMSMessage>> ReceiveSMSAsync(int maxCount = 10);
-  }
+        Task<List<SMSMessage>> ReceiveSMSAsync(int maxCount = 10);
+    }
 }

@@ -9,31 +9,31 @@ using Caliburn.Micro;
 
 namespace CashmereDeposit.Utils
 {
-  public class FormBase : PropertyChangedBase
-  {
-    public List<FormField> Field;
-    public FormField CurrentField;
-
-    public string ScreenTitle { get; set; }
-
-    public int currentFieldIndex { get; set; }
-
-    public FormField SelectedField
+    public class FormBase : PropertyChangedBase
     {
-      get => CurrentField;
-      set => CurrentField = value;
-    }
+        public List<FormField> Field;
+        public FormField CurrentField;
 
-    public void SaveForm()
-    {
-    }
+        public string ScreenTitle { get; set; }
 
-    public void CancelForm()
-    {
-    }
+        public int currentFieldIndex { get; set; }
 
-    public virtual void CloseFormField()
-    {
+        public FormField SelectedField
+        {
+            get => CurrentField;
+            set => CurrentField = value;
+        }
+
+        public void SaveForm()
+        {
+        }
+
+        public void CancelForm()
+        {
+        }
+
+        public virtual void CloseFormField()
+        {
+        }
     }
-  }
 }

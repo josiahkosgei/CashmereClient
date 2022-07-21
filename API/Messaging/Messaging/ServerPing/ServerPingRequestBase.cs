@@ -1,6 +1,6 @@
 ﻿namespace Cashmere.API.Messaging.ServerPing
 {
-  public class ServerPingRequestBase : APIRequestBase
-  {
-  }
+    public class ServerPingRequestBase : APIRequestBase
+    {
+    }
 }

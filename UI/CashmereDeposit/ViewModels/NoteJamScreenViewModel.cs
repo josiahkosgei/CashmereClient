@@ -11,43 +11,43 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  internal class NoteJamScreenViewModel : Conductor<Screen>, IShell
-  {
-    private string _NoteJamErrorTitleText;
-    private string _NoteJamErrorDescriptionText;
-
-    public ApplicationViewModel ApplicationViewModel { get; }
-
-    public string NoteJamErrorTitleText
+    internal class NoteJamScreenViewModel : Conductor<Screen>, IShell
     {
-        get => _NoteJamErrorTitleText;
-        set
-      {
-        _NoteJamErrorTitleText = value;
-         NotifyOfPropertyChange( () => NoteJamErrorTitleText);
-      }
-    }
+        private string _NoteJamErrorTitleText;
+        private string _NoteJamErrorDescriptionText;
 
-    public string NoteJamErrorDescriptionText
-    {
-        get => _NoteJamErrorDescriptionText;
-        set
-      {
-        _NoteJamErrorDescriptionText = value;
-         NotifyOfPropertyChange( () => NoteJamErrorDescriptionText);
-      }
-    }
+        public ApplicationViewModel ApplicationViewModel { get; }
 
-    public NoteJamScreenViewModel(ApplicationViewModel applicationViewModel)
-    {
-      ApplicationViewModel = applicationViewModel;
-      InitialiseScreen();
-    }
+        public string NoteJamErrorTitleText
+        {
+            get => _NoteJamErrorTitleText;
+            set
+            {
+                _NoteJamErrorTitleText = value;
+                NotifyOfPropertyChange(() => NoteJamErrorTitleText);
+            }
+        }
 
-    private void InitialiseScreen()
-    {
-      NoteJamErrorDescriptionText = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("NoteJamErrorDescriptionText", "sys_NoteJamErrorDescriptionText", "Drop");
-      NoteJamErrorTitleText = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("NoteJamErrorTitleText", "sys_NoteJamErrorTitleText", "Reject");
+        public string NoteJamErrorDescriptionText
+        {
+            get => _NoteJamErrorDescriptionText;
+            set
+            {
+                _NoteJamErrorDescriptionText = value;
+                NotifyOfPropertyChange(() => NoteJamErrorDescriptionText);
+            }
+        }
+
+        public NoteJamScreenViewModel(ApplicationViewModel applicationViewModel)
+        {
+            ApplicationViewModel = applicationViewModel;
+            InitialiseScreen();
+        }
+
+        private void InitialiseScreen()
+        {
+            NoteJamErrorDescriptionText = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("NoteJamErrorDescriptionText", "sys_NoteJamErrorDescriptionText", "Drop");
+            NoteJamErrorTitleText = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("NoteJamErrorTitleText", "sys_NoteJamErrorTitleText", "Reject");
+        }
     }
-  }
 }

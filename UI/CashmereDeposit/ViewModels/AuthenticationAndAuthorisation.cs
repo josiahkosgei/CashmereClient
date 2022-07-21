@@ -10,22 +10,22 @@ using Cashmere.Library.CashmereDataAccess.Entities;
 
 namespace CashmereDeposit.ViewModels
 {
-  public static class AuthenticationAndAuthorisation
-  {
-    public static bool Authenticate(
-      ApplicationViewModel applicationViewModel,
-      ApplicationUser user,
-      string activityString,
-      bool isAuthorising)
+    public static class AuthenticationAndAuthorisation
     {
-        using var DBContext = new DepositorDBContext();
-        if (applicationViewModel.UserPermissionAllowed(user, activityString, isAuthorising))
+        public static bool Authenticate(
+          ApplicationViewModel applicationViewModel,
+          ApplicationUser user,
+          string activityString,
+          bool isAuthorising)
         {
-            ApplicationViewModel.SaveToDatabase(DBContext);
-            return true;
+            using var DBContext = new DepositorDBContext();
+            if (applicationViewModel.UserPermissionAllowed(user, activityString, isAuthorising))
+            {
+                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                return true;
+            }
+            ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+            return false;
         }
-        ApplicationViewModel.SaveToDatabase(DBContext);
-        return false;
     }
-  }
 }

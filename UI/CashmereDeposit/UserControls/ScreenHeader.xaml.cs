@@ -8,8 +8,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.UserControls
 {
-  public partial class ScreenHeader : UserControl, IComponentConnector
-  {
-      public ScreenHeader() => InitializeComponent();
-  }
+    public partial class ScreenHeader : UserControl, IComponentConnector
+    {
+        public ScreenHeader() => InitializeComponent();
+    }
 }

@@ -20,7 +20,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public bool? CanEditModel { get; set; }
         public int? PermissionPolicy { get; set; }
         public int? OptimisticLockField { get; set; }
-      
+
         public int? Gcrecord { get; set; }
         public int? ObjectTypeId { get; set; }
 

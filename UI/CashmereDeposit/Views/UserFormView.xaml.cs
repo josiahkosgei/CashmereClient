@@ -9,15 +9,15 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class UserFormView : UserControl, IComponentConnector
-  {
-
-    public UserFormView()
+    public partial class UserFormView : UserControl, IComponentConnector
     {
-      InitializeComponent();
-      new Style().Setters.Add((SetterBase) new Setter(VisibilityProperty, (object) Visibility.Collapsed));
-    }
 
-    private void FieldsListbox_PreviewMouseUp(object sender, MouseButtonEventArgs e) => tabControl.SelectedIndex = FieldsListbox.SelectedIndex + 1;
-  }
+        public UserFormView()
+        {
+            InitializeComponent();
+            new Style().Setters.Add((SetterBase)new Setter(VisibilityProperty, (object)Visibility.Collapsed));
+        }
+
+        private void FieldsListbox_PreviewMouseUp(object sender, MouseButtonEventArgs e) => tabControl.SelectedIndex = FieldsListbox.SelectedIndex + 1;
+    }
 }

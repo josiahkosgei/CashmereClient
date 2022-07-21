@@ -4,26 +4,26 @@ using System;
 
 namespace CashmereDeposit.Models.Submodule
 {
-  public abstract class SubmoduleBase
-  {
-    public CDMLicense License { get; set; }
-
-    public string ModuleName { get; set; }
-
-    public Guid ModuleID { get; set; }
-
-    protected ApplicationViewModel ApplicationViewModel { get; }
-
-    public SubmoduleBase(
-      ApplicationViewModel applicationViewModel,
-      CDMLicense license,
-      Guid subModuleID,
-      string subModuleName)
+    public abstract class SubmoduleBase
     {
-      ApplicationViewModel = applicationViewModel;
-      License = license;
-      ModuleID = subModuleID;
-      ModuleName = subModuleName;
+        public CDMLicense License { get; set; }
+
+        public string ModuleName { get; set; }
+
+        public Guid ModuleID { get; set; }
+
+        protected ApplicationViewModel ApplicationViewModel { get; }
+
+        public SubmoduleBase(
+          ApplicationViewModel applicationViewModel,
+          CDMLicense license,
+          Guid subModuleID,
+          string subModuleName)
+        {
+            ApplicationViewModel = applicationViewModel;
+            License = license;
+            ModuleID = subModuleID;
+            ModuleName = subModuleName;
+        }
     }
-  }
 }

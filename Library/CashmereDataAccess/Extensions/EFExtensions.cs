@@ -28,7 +28,7 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
         }
 
         public static IQueryable<TEntity> IncludeMany<TEntity, TProperty>(
-            [NotNull] this IQueryable<TEntity>source,
+            [NotNull] this IQueryable<TEntity> source,
             [NotNull] Expression<Func<TEntity, IEnumerable<TProperty>>> navigationPropertyPath,
             [NotNull] params Expression<Func<TProperty, object>>[] nextProperties)
             where TEntity : class

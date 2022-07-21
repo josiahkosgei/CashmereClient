@@ -2,7 +2,7 @@
 
 namespace Cashmere.API.Messaging.Authentication.Monitoring
 {
-  public class AuthenticationServerPingRequest : ServerPingRequestBase
-  {
-  }
+    public class AuthenticationServerPingRequest : ServerPingRequestBase
+    {
+    }
 }

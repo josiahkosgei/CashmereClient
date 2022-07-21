@@ -8,9 +8,9 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class FormScreenView : UserControl, IComponentConnector
-  {
+    public partial class FormScreenView : UserControl, IComponentConnector
+    {
 
-    public FormScreenView() => InitializeComponent();
-  }
+        public FormScreenView() => InitializeComponent();
+    }
 }

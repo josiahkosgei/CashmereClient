@@ -41,7 +41,7 @@ namespace CashmereDeposit.ViewModels
                     var userLoginViewModel = new UserLoginViewModel(ApplicationViewModel,
                         ApplicationViewModel, CallingObject,
                         new EscrowJamStatusReportScreenViewModel(ApplicationViewModel, Conductor, this, true),
-                        "ESCROWJAM_AUTHORISER",splitAuthorise: true);
+                        "ESCROWJAM_AUTHORISER", splitAuthorise: true);
                     Screens.Add(new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/clear_escrow_jam.png", ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor sys_EscrowJamCommand_Caption", "sys_EscrowJamCommand_Caption", "Clear Escrow Jam"), userLoginViewModel));
                 }
             }

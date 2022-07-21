@@ -9,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("DepositorSession")]
-    // [Index("DeviceId", Name = "idevice_id_DepositorSession")]
-    // [Index("LanguageCode", Name = "ilanguage_code_DepositorSession")]
     public partial class DepositorSession
     {
         public DepositorSession()
@@ -52,12 +50,9 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public string? Salt { get; set; }
 
         [ForeignKey("DeviceId")]
-        //[InverseProperty("DepositorSessions")]
         public virtual Device Device { get; set; } = null!;
         [ForeignKey("LanguageCode")]
-        //[InverseProperty("DepositorSessions")]
         public virtual Language? LanguageCodeNavigation { get; set; }
-        //[InverseProperty("Session")]
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

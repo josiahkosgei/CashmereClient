@@ -6,18 +6,18 @@
 
 namespace CashmereDeposit.ViewModels
 {
-  public interface IATMScreen
-  {
-    void GetFirstPage();
+    public interface IATMScreen
+    {
+        void GetFirstPage();
 
-    void GetLastPage();
+        void GetLastPage();
 
-    void GetPreviousPage();
+        void GetPreviousPage();
 
-    void GetNextPage();
+        void GetNextPage();
 
-    void GetPage(int PageID);
+        void GetPage(int PageID);
 
-    void NavigateBack();
-  }
+        void NavigateBack();
+    }
 }

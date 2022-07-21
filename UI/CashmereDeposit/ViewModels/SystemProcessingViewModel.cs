@@ -6,7 +6,7 @@
 
 namespace CashmereDeposit.ViewModels
 {
-  public class SystemProcessingViewModel
-  {
-  }
+    public class SystemProcessingViewModel
+    {
+    }
 }

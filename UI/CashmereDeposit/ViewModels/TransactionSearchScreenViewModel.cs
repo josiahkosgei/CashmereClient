@@ -15,61 +15,61 @@ using Cashmere.Library.CashmereDataAccess;
 
 namespace CashmereDeposit.ViewModels
 {
-  [Guid("65FA2238-C8E3-49DD-BC1B-C9EF19DD58BB")]
-  internal class TransactionSearchScreenViewModel : CustomerSearchScreenBaseViewModel
-  {
-    public TransactionSearchScreenViewModel(
-      string screenTitle,
-      ApplicationViewModel applicationViewModel,
-      bool required = false)
-      : base(screenTitle, applicationViewModel, required)
+    [Guid("65FA2238-C8E3-49DD-BC1B-C9EF19DD58BB")]
+    internal class TransactionSearchScreenViewModel : CustomerSearchScreenBaseViewModel
     {
-      using (new DepositorDBContext())
-      {
-        ScrollList();
-        PerformSearch();
-      }
-    }
-        
-    public void Cancel()
-    {
-        ApplicationViewModel.CancelSessionOnUserInput();
-    }
-
-    public override void PerformSelection()
-    {
-      var SelectedTransactionListItem = SelectedFilteredList.Value as Account;
-      if (SelectedTransactionListItem == null)
-        throw new NullReferenceException(GetType().Name + ".PerformSelection SelectedTransactionListItem");
-      using (new DepositorDBContext())
-      {
-        var str1 = SelectedTransactionListItem?.account_name ?? "";
-        var str2 = SelectedTransactionListItem?.account_number ?? "";
-        if (ApplicationViewModel.CurrentTransaction.TransactionType.ValidateDefaultAccount)
+        public TransactionSearchScreenViewModel(
+          string screenTitle,
+          ApplicationViewModel applicationViewModel,
+          bool required = false)
+          : base(screenTitle, applicationViewModel, required)
         {
-          var result = Task.Run((Func<Task<AccountNumberValidationResponse>>) (() => ValidateAsync(SelectedTransactionListItem.account_number, SelectedTransactionListItem.currency))).Result;
-          if (result == null || !result.IsSuccess || !result.CanTransact)
-          {
-            ErrorText = result != null ? result?.PublicErrorMessage : "Transaction Type is offline. Please try again later";
-            ApplicationViewModel.Log.ErrorFormat(GetType().Name, 99, ApplicationErrorConst.ERROR_TRANSACTION_ACCOUNT_INVALID.ToString(), "cb={0},sv={1}", result.PublicErrorMessage, result?.ServerErrorMessage);
-            ApplicationViewModel.CloseDialog(false);
-            return;
-          }
-          str1 = result.AccountName;
-          str2 = SelectedTransactionListItem.account_number;
+            using (new DepositorDBContext())
+            {
+                ScrollList();
+                PerformSearch();
+            }
         }
-        ApplicationViewModel.CurrentTransaction.AccountNumber = str2;
-        ApplicationViewModel.CurrentTransaction.AccountName = str1;
-        ApplicationViewModel.NavigateNextScreen();
-      }
-    }
 
-    public async Task<AccountNumberValidationResponse> ValidateAsync(
-      string accountNumber,
-      string currency)
-    {
-      var searchScreenViewModel = this;
-      return await searchScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(accountNumber, currency, searchScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+        public void Cancel()
+        {
+            ApplicationViewModel.CancelSessionOnUserInput();
+        }
+
+        public override void PerformSelection()
+        {
+            var SelectedTransactionListItem = SelectedFilteredList.Value as Account;
+            if (SelectedTransactionListItem == null)
+                throw new NullReferenceException(GetType().Name + ".PerformSelection SelectedTransactionListItem");
+            using (new DepositorDBContext())
+            {
+                var str1 = SelectedTransactionListItem?.AccountName ?? "";
+                var str2 = SelectedTransactionListItem?.AccountNumber ?? "";
+                if (ApplicationViewModel.CurrentTransaction.TransactionType.ValidateDefaultAccount)
+                {
+                    var result = Task.Run((Func<Task<AccountNumberValidationResponse>>)(() => ValidateAsync(SelectedTransactionListItem.AccountNumber, SelectedTransactionListItem.Currency))).Result;
+                    if (result == null || !result.IsSuccess || !result.CanTransact)
+                    {
+                        ErrorText = result != null ? result?.PublicErrorMessage : "Transaction Type is offline. Please try again later";
+                        ApplicationViewModel.Log.ErrorFormat(GetType().Name, 99, ApplicationErrorConst.ERROR_TRANSACTION_ACCOUNT_INVALID.ToString(), "cb={0},sv={1}", result.PublicErrorMessage, result?.ServerErrorMessage);
+                        ApplicationViewModel.CloseDialog(false);
+                        return;
+                    }
+                    str1 = result.AccountName;
+                    str2 = SelectedTransactionListItem.AccountNumber;
+                }
+                ApplicationViewModel.CurrentTransaction.AccountNumber = str2;
+                ApplicationViewModel.CurrentTransaction.AccountName = str1;
+                ApplicationViewModel.NavigateNextScreen();
+            }
+        }
+
+        public async Task<AccountNumberValidationResponse> ValidateAsync(
+          string accountNumber,
+          string currency)
+        {
+            var searchScreenViewModel = this;
+            return await searchScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(accountNumber, currency, searchScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+        }
     }
-  }
 }

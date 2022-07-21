@@ -3,8 +3,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class CustomerListScreenView : UserControl, IComponentConnector
-  {
-    public CustomerListScreenView() => InitializeComponent();
-  }
+    public partial class CustomerListScreenView : UserControl, IComponentConnector
+    {
+        public CustomerListScreenView() => InitializeComponent();
+    }
 }

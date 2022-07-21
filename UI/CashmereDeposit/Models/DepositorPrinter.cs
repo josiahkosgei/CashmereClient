@@ -109,7 +109,7 @@ namespace CashmereDeposit.Models
             CIT.CITPrintouts.Add(printout);
             try
             {
-                ApplicationViewModel.SaveToDatabase(DBContext);
+                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
             }
             catch (ValidationException ex)
             {
@@ -161,7 +161,7 @@ namespace CashmereDeposit.Models
                 throw;
             }
             transaction.Printouts.Add(printout);
-            ApplicationViewModel.SaveToDatabase(depositorDBContext);
+            ApplicationViewModel.SaveToDatabaseAsync(depositorDBContext).Wait();
             int receiptOriginalCount = ApplicationViewModel.DeviceConfiguration.RECEIPT_ORIGINAL_COUNT;
             int num = receiptOriginalCount < 1 ? 1 : receiptOriginalCount;
             for (int index = 0; index < num; ++index)

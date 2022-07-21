@@ -21,7 +21,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public int? OptimisticLockField { get; set; }
         [Column("GCRecord")]
         public int? Gcrecord { get; set; }
-        
+
         public virtual ICollection<ModelDifferenceAspect> ModelDifferenceAspects { get; set; }
     }
 }

@@ -8,20 +8,20 @@ using System.Collections.Generic;
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public class SMSMessage
-  {
-    public SMSMessage()
+    public class SMSMessage
     {
-      ToContacts = new List<SMSContact>(1);
-      FromContacts = new List<SMSContact>(1);
+        public SMSMessage()
+        {
+            ToContacts = new List<SMSContact>(1);
+            FromContacts = new List<SMSContact>(1);
+        }
+
+        public List<SMSContact> ToContacts { get; set; }
+
+        public List<SMSContact> FromContacts { get; set; }
+
+        public string Subject { get; set; }
+
+        public string MessageText { get; set; }
     }
-
-    public List<SMSContact> ToContacts { get; set; }
-
-    public List<SMSContact> FromContacts { get; set; }
-
-    public string Subject { get; set; }
-
-    public string MessageText { get; set; }
-  }
 }

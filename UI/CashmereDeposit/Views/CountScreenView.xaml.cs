@@ -3,8 +3,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class CountScreenView : UserControl, IComponentConnector
-  {
-    public CountScreenView() => InitializeComponent();
-  }
+    public partial class CountScreenView : UserControl, IComponentConnector
+    {
+        public CountScreenView() => InitializeComponent();
+    }
 }

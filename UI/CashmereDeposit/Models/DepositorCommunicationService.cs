@@ -22,6 +22,7 @@ using Cashmere.Library.Standard.Logging;
 using Cashmere.Library.Standard.Utilities;
 
 using CashmereDeposit.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.Models
 {
@@ -34,7 +35,7 @@ namespace CashmereDeposit.Models
         private static byte[] _appKey;
         private static string _appName;
         private BackgroundWorker _emailSendingWorker = new BackgroundWorker();
-        private bool _quitSendingEmail;
+        private bool _quitSendingEmail =true;
         private int _alertBatchSize = Math.Max(ApplicationViewModel.DeviceConfiguration.ALERT_BATCH_SIZE, 5);
 
         private static IHttpClientFactory _httpClientFactory;
@@ -126,7 +127,7 @@ namespace CashmereDeposit.Models
         {
             try
             {
-                ApplicationViewModel.SaveToDatabase(dbContext);
+                ApplicationViewModel.SaveToDatabaseAsync(dbContext).Wait();
             }
             catch (Exception ex)
             {
@@ -235,7 +236,7 @@ namespace CashmereDeposit.Models
                     var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
                     //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
 
-                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv =>dv.UserGroupNavigation.ApplicationUsers.ToList());
+                    var deviceUsersByDevice = depositorDbContext.Devices.Include(i => i.UserGroupNavigation).ThenInclude(t => t.ApplicationUsers).ThenInclude(u => u.Role).Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)
                     {
@@ -322,7 +323,7 @@ namespace CashmereDeposit.Models
                     _log.Debug(nameof(DepositorCommunicationService), nameof(ProcessSms), nameof(ProcessSms), "get the recipients");
                     var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
                     //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
-                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv =>dv.UserGroupNavigation.ApplicationUsers.ToList());
+                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
 
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)

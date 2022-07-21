@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace CashmereDeposit.ViewModels.DummyData
 {
-  public class DummyAppTransactionDenominations
-  {
-    public int TotalAmountCents { get; internal set; } = 37000000;
-
-    public Denomination TotalDenominationResult { get; internal set; } = new()
+    public class DummyAppTransactionDenominations
     {
-      DenominationItems = new List<DenominationItem>()
+        public int TotalAmountCents { get; internal set; } = 37000000;
+
+        public Denomination TotalDenominationResult { get; internal set; } = new()
+        {
+            DenominationItems = new List<DenominationItem>()
       {
         new()
         {
@@ -47,13 +47,13 @@ namespace CashmereDeposit.ViewModels.DummyData
           type = DenominationItemType.NOTE
         }
       }
-    };
+        };
 
-    public int CountedAmountCents { get; internal set; } = 185000;
+        public int CountedAmountCents { get; internal set; } = 185000;
 
-    public Denomination CountedDenominationResult { get; internal set; } = new()
-    {
-        DenominationItems = new List<DenominationItem>()
+        public Denomination CountedDenominationResult { get; internal set; } = new()
+        {
+            DenominationItems = new List<DenominationItem>()
       {
         new()
         {
@@ -91,13 +91,13 @@ namespace CashmereDeposit.ViewModels.DummyData
           type = DenominationItemType.NOTE
         }
       }
-    };
+        };
 
-    public int DroppedAmountCentsResult { get; internal set; } = 185000;
+        public int DroppedAmountCentsResult { get; internal set; } = 185000;
 
-    public Denomination DroppedDenomination { get; internal set; } = new()
-    {
-      DenominationItems = new List<DenominationItem>()
+        public Denomination DroppedDenomination { get; internal set; } = new()
+        {
+            DenominationItems = new List<DenominationItem>()
       {
         new()
         {
@@ -135,6 +135,6 @@ namespace CashmereDeposit.ViewModels.DummyData
           type = DenominationItemType.NOTE
         }
       }
-    };
-  }
+        };
+    }
 }

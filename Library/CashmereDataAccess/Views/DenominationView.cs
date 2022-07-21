@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Views
 {
-  
+
     [Keyless]
     public partial class DenominationView
     {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
-    
+
     public class RepositoryBase<T> : IAsyncRepository<T> where T : class
 
     {
@@ -13,7 +13,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
-        
+
 
         public virtual async Task<T> AddAsync(T entity)
         {
@@ -26,7 +26,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
             }
             return entity;
         }
-        
+
         public virtual async Task DeleteAsync(T entity)
         {
             using (var dbContextTransaction = await DbContext.Database.BeginTransactionAsync())
@@ -49,7 +49,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
             var result = await DbContext.Set<T>().ToListAsync();
             return result;
 
-        }    
+        }
 
         public virtual async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate)
         {
@@ -74,6 +74,6 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
             }
             return entity;
         }
-        
+
     }
 }

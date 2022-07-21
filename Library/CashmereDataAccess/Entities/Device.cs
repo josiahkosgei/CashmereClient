@@ -9,14 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("Device")]
-    // [Index("GUIScreenList", Name = "iGUIScreen_list_DeviceList")]
-    // [Index("BranchId", Name = "ibranch_id_DeviceList")]
-    // [Index("ConfigGroup", Name = "iconfig_group_DeviceList")]
-    // [Index("CurrencyList", Name = "icurrency_list_DeviceList")]
-    // [Index("LanguageList", Name = "ilanguage_list_Device")]
-    // [Index("TransactionTypeList", Name = "itransaction_type_list_DeviceList")]
-    // [Index("TypeId", Name = "itype_id_DeviceList")]
-    // [Index("UserGroup", Name = "iuser_group_DeviceList")]
     public partial class Device
     {
         public DeviceCITSuspenseAccount GetCITSuspenseAccount(string currency) => this.DeviceCITSuspenseAccounts.FirstOrDefault<DeviceCITSuspenseAccount>(x => x.CurrencyCodeNavigation.Code.Equals(currency, StringComparison.OrdinalIgnoreCase));
@@ -92,32 +84,21 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         [ForeignKey("GUIScreenList")]
         public virtual GUIScreenList GUIScreenListNavigation { get; set; } = null!;
         [ForeignKey("LanguageList")]
-        //[InverseProperty("Devices")]
         public virtual LanguageList? LanguageListNavigation { get; set; }
         [ForeignKey("TransactionTypeList")]
-        //[InverseProperty("Devices")]
         public virtual TransactionTypeList TransactionTypeListNavigation { get; set; } = null!;
         [ForeignKey("TypeId")]
-        //[InverseProperty("Devices")]
         public virtual DeviceType Type { get; set; } = null!;
         [ForeignKey("UserGroup")]
-        //[InverseProperty("Devices")]
         public virtual UserGroup? UserGroupNavigation { get; set; }
-        //[InverseProperty("Device")]
+
         public virtual ICollection<CIT> CITs { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DepositorSession> DepositorSessions { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DeviceCITSuspenseAccount> DeviceCITSuspenseAccounts { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DeviceLock> DeviceLocks { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DeviceLogin> DeviceLogins { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DevicePrinter> DevicePrinters { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<DeviceSuspenseAccount> DeviceSuspenseAccounts { get; set; }
-        //[InverseProperty("Device")]
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

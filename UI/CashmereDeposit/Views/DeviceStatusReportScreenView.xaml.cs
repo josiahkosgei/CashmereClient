@@ -9,8 +9,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class DeviceStatusReportScreenView : UserControl, IComponentConnector
-  {
-    public DeviceStatusReportScreenView() => InitializeComponent();
-  }
+    public partial class DeviceStatusReportScreenView : UserControl, IComponentConnector
+    {
+        public DeviceStatusReportScreenView() => InitializeComponent();
+    }
 }

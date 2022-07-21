@@ -1,7 +1,7 @@
 ﻿namespace CashmereDeposit.Models
 {
-  public static class AlertEmailAttachmentType
-  {
-    public const string CIT_REPORT = "130001";
-  }
+    public static class AlertEmailAttachmentType
+    {
+        public const string CIT_REPORT = "130001";
+    }
 }

@@ -7,27 +7,27 @@ using System.Xml.Serialization;
 
 namespace CashAccSysDeviceManager.MessageClasses
 {
-  [XmlRoot(ElementName = "CCP")]
-  public class StatusRequest : CashAccSysMessageBase
-  {
-    [NonSerialized]
-    private static XmlSerializer _serializer = new XmlSerializer(typeof (StatusRequest));
-
-    [XmlElement(ElementName = "body")]
-    public string Body { get; set; }
-
-    public StatusRequest()
+    [XmlRoot(ElementName = "CCP")]
+    public class StatusRequest : CashAccSysMessageBase
     {
-    }
+        [NonSerialized]
+        private static XmlSerializer _serializer = new XmlSerializer(typeof(StatusRequest));
 
-    public StatusRequest(int seqno)
-    {
-      MessageID = 102;
-      MessageName = Enum.GetName(typeof (MessageType), MessageID);
-      SequenceNumber = seqno;
-      Body = "";
-    }
+        [XmlElement(ElementName = "body")]
+        public string Body { get; set; }
 
-    internal new static XmlSerializer Serializer => _serializer;
-  }
+        public StatusRequest()
+        {
+        }
+
+        public StatusRequest(int seqno)
+        {
+            MessageID = 102;
+            MessageName = Enum.GetName(typeof(MessageType), MessageID);
+            SequenceNumber = seqno;
+            Body = "";
+        }
+
+        internal new static XmlSerializer Serializer => _serializer;
+    }
 }

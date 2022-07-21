@@ -11,6 +11,6 @@ namespace CashmereDeposit.Views
     public partial class OutOfOrderFatalScreenView : UserControl, IComponentConnector
     {
         public OutOfOrderFatalScreenView() => InitializeComponent();
-        
+
     }
 }

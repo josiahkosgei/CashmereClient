@@ -8,8 +8,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class CITReportScreenView : UserControl, IComponentConnector
-  {
-    public CITReportScreenView() => InitializeComponent();
-  }
+    public partial class CITReportScreenView : UserControl, IComponentConnector
+    {
+        public CITReportScreenView() => InitializeComponent();
+    }
 }

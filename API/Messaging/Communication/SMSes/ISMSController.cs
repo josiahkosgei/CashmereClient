@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public interface ISMSController
-  {
-    Task<SMSResponse> SendSMSAsync(SMSRequest request);
-  }
+    public interface ISMSController
+    {
+        Task<SMSResponse> SendSMSAsync(SMSRequest request);
+    }
 }

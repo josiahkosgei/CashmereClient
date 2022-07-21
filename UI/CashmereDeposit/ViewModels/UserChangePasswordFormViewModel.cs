@@ -168,7 +168,7 @@ namespace CashmereDeposit.ViewModels
             {
                 if (!ApplicationViewModel.DeviceConfiguration.ALLOW_OFFLINE_AUTH)
                 {
-                    var device = ApplicationViewModel.GetDevice(DBContext);
+                    Device? device = ApplicationViewModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
                     var changePasswordRequest = new ChangePasswordRequest
                     {
                         AppID = device.AppId,
@@ -193,7 +193,7 @@ namespace CashmereDeposit.ViewModels
                         ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "SUCCESS", "Change password SUCCESS for request {0}, User {1}", request.MessageID, User.Username);
                     else
                         ApplicationViewModel.Log.WarningFormat("UserLoginViewModel", nameof(ValidatePassword), "FAIL", "Change password FAIL for request {0}, User {1}: {2}>{3}", request.MessageID, User.Username, result.PublicErrorMessage, result.ServerErrorMessage);
-                    ApplicationViewModel.SaveToDatabase(DBContext);
+                    ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
                     FormErrorText = result.PublicErrorMessage;
                     return result.IsSuccess ? 0 : 1;
                 }
@@ -242,7 +242,7 @@ namespace CashmereDeposit.ViewModels
                                     Id = Guid.NewGuid(),
                                     Password = hash
                                 });
-                                ApplicationViewModel.SaveToDatabase(DBContext);
+                                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
                                 return 0;
                             }
                             var stringBuilder = new StringBuilder();

@@ -59,7 +59,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                ApplicationViewModel.SaveToDatabase(DBContext);
+                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
                 return true;
             }
             catch (ValidationException ex)

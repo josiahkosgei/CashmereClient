@@ -8,10 +8,10 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.UserControls
 {
-  public partial class BusyIndicator : UserControl, IComponentConnector
-  {
+    public partial class BusyIndicator : UserControl, IComponentConnector
+    {
 
-    public BusyIndicator() => InitializeComponent();
-      
-  }
+        public BusyIndicator() => InitializeComponent();
+
+    }
 }

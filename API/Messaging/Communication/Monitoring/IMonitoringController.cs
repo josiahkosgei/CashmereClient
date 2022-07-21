@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Cashmere.API.Messaging.Communication.Monitoring
 {
-  public interface IMonitoringController
-  {
-    Task<CommunicationServerPingResponse> ServerPingAsync(
-      CommunicationServerPingRequest request);
-  }
+    public interface IMonitoringController
+    {
+        Task<CommunicationServerPingResponse> ServerPingAsync(
+          CommunicationServerPingRequest request);
+    }
 }

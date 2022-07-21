@@ -2,7 +2,7 @@
 
 namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
-    public interface IAsyncRepository<T> where T : class 
+    public interface IAsyncRepository<T> where T : class
     {
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);

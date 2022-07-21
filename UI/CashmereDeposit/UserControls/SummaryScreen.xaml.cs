@@ -12,20 +12,20 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.UserControls
 {
-  public partial class SummaryScreen : UserControl, IComponentConnector
-  {
-      public SummaryScreen(List<SummaryListItem> boundList)
+    public partial class SummaryScreen : UserControl, IComponentConnector
     {
-      InitializeComponent();
-      SummaryListBox.ItemsSource = (IEnumerable) boundList;
-    }
+        public SummaryScreen(List<SummaryListItem> boundList)
+        {
+            InitializeComponent();
+            SummaryListBox.ItemsSource = (IEnumerable)boundList;
+        }
 
-    private void OnManipulationBoundaryFeedback(
-      object sender,
-      ManipulationBoundaryFeedbackEventArgs e)
-    {
-      e.Handled = true;
+        private void OnManipulationBoundaryFeedback(
+          object sender,
+          ManipulationBoundaryFeedbackEventArgs e)
+        {
+            e.Handled = true;
+        }
+
     }
-      
-  }
 }

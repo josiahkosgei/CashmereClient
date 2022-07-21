@@ -70,7 +70,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _customerInput = !string.IsNullOrWhiteSpace(value) ? value : ApplicationViewModel?.CurrentGUIScreen?.PrefillText;
-                 NotifyOfPropertyChange(() => CustomerInput);
+                NotifyOfPropertyChange(() => CustomerInput);
             }
         }
 
@@ -80,7 +80,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _cancelCaption = value;
-                 NotifyOfPropertyChange(() => CancelCaption);
+                NotifyOfPropertyChange(() => CancelCaption);
             }
         }
 
@@ -90,7 +90,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _nextCaption = value;
-                 NotifyOfPropertyChange(() => NextCaption);
+                NotifyOfPropertyChange(() => NextCaption);
             }
         }
 
@@ -100,7 +100,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _backCaption = value;
-                 NotifyOfPropertyChange(() => BackCaption);
+                NotifyOfPropertyChange(() => BackCaption);
             }
         }
 
@@ -110,7 +110,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _GetPreviousPage_Caption = value;
-                 NotifyOfPropertyChange(() => GetPreviousPageCaption);
+                NotifyOfPropertyChange(() => GetPreviousPageCaption);
             }
         }
 
@@ -120,7 +120,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _GetNextPageButton_Caption = value;
-                 NotifyOfPropertyChange(() => GetNextPageCaption);
+                NotifyOfPropertyChange(() => GetNextPageCaption);
             }
         }
 
@@ -140,7 +140,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _fullInstructions = value;
-                 NotifyOfPropertyChange(() => FullInstructions);
+                NotifyOfPropertyChange(() => FullInstructions);
             }
         }
 
@@ -150,7 +150,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _screenTitleInstruction = value;
-                 NotifyOfPropertyChange(() => ScreenTitleInstruction);
+                NotifyOfPropertyChange(() => ScreenTitleInstruction);
             }
         }
 
@@ -160,7 +160,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _ShowFullInstructions_Caption = value;
-                 NotifyOfPropertyChange(() => ShowFullInstructionsCaption);
+                NotifyOfPropertyChange(() => ShowFullInstructionsCaption);
             }
         }
 
@@ -170,7 +170,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _HideFullInstructions_Caption = value;
-                 NotifyOfPropertyChange(() => HideFullInstructionsCaption);
+                NotifyOfPropertyChange(() => HideFullInstructionsCaption);
             }
         }
 
@@ -180,7 +180,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _FullInstructionsTitle = value;
-                 NotifyOfPropertyChange(() => FullInstructionsTitle);
+                NotifyOfPropertyChange(() => FullInstructionsTitle);
             }
         }
 
@@ -238,7 +238,7 @@ namespace CashmereDeposit.ViewModels
             set
             {
                 _errorText = value;
-                 NotifyOfPropertyChange(() => ErrorText);
+                NotifyOfPropertyChange(() => ErrorText);
             }
         }
 
@@ -296,20 +296,20 @@ namespace CashmereDeposit.ViewModels
             Keyboard = (KeyboardType)num2;
             //if (CurrentGUIScreenText != null)
             //{
-                ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) : ScreenTitle;
-                CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
-                BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
-                NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
-                GetPreviousPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetPreviousPageCaption", "sys_GetPreviousPage_Caption", "Prev");
-                GetNextPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetNextPageCaption", "sys_GetNextPage_Caption", "Next");
-                FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructions, null));
-                ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstruction, null));
-                ShowFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("ShowFullInstructionsCaption", "sys_ShowFullInstructions_Caption", "Help");
-                HideFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("HideFullInstructionsCaption", "sys_Dialog_OK_Caption", "OK");
-                FullInstructionsTitle = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("FullInstructionsTitle", "sys_FullInstructionsExpander_TitleCaption", "Instructions");
-                if (!string.IsNullOrWhiteSpace(FullInstructions))
-                    return;
-                CanShowFullInstructions = false;
+            ScreenTitle = string.IsNullOrWhiteSpace(ScreenTitle) ? ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitle", CurrentGUIScreenText?.ScreenTitle, ApplicationViewModel?.CurrentGUIScreen?.Name) : ScreenTitle;
+            CancelCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("CancelCaption", CurrentGUIScreenText?.BtnCancelCaption, "Cancel");
+            BackCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("BackCaption", CurrentGUIScreenText?.BtnBackCaption, "Back");
+            NextCaption = ApplicationViewModel.CashmereTranslationService?.TranslateUserText("NextCaption", CurrentGUIScreenText?.BtnAcceptCaption, "Next");
+            GetPreviousPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetPreviousPageCaption", "sys_GetPreviousPage_Caption", "Prev");
+            GetNextPageCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("GetNextPageCaption", "sys_GetNextPage_Caption", "Next");
+            FullInstructions = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("FullInstructions", CurrentGUIScreenText?.FullInstructions, null));
+            ScreenTitleInstruction = CustomerInputScreenReplace(ApplicationViewModel.CashmereTranslationService?.TranslateUserText("ScreenTitleInstruction", CurrentGUIScreenText?.ScreenTitleInstruction, null));
+            ShowFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("ShowFullInstructionsCaption", "sys_ShowFullInstructions_Caption", "Help");
+            HideFullInstructionsCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("HideFullInstructionsCaption", "sys_Dialog_OK_Caption", "OK");
+            FullInstructionsTitle = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText("FullInstructionsTitle", "sys_FullInstructionsExpander_TitleCaption", "Instructions");
+            if (!string.IsNullOrWhiteSpace(FullInstructions))
+                return;
+            CanShowFullInstructions = false;
 
             //}
         }

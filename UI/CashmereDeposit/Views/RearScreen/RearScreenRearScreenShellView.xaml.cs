@@ -22,7 +22,7 @@ namespace CashmereDeposit.Views.V3
                 return;
             _contentLoaded = true;
         }
-        
+
         void IComponentConnector.Connect(int connectionId, object target)
         {
             switch (connectionId)

@@ -9,42 +9,42 @@ using Cashmere.Library.CashmereDataAccess.Entities;
 
 namespace CashmereDeposit.ViewModels
 {
-  public interface ICustomerComboBoxInputScreen
-  {
-    ObservableCollection<string> CustomerComboBoxInput { get; set; }
+    public interface ICustomerComboBoxInputScreen
+    {
+        ObservableCollection<string> CustomerComboBoxInput { get; set; }
 
-    string SelectedCustomerComboBoxInput { get; set; }
+        string SelectedCustomerComboBoxInput { get; set; }
 
-    GuiScreenListScreen GuiScreenListScreens { get; set; }
+        GuiScreenListScreen GuiScreenListScreens { get; set; }
 
-    GUIPrepopList GUIPrepopList { get; set; }
+        GUIPrepopList GUIPrepopList { get; set; }
 
-    bool AllowFreeText { get; set; }
+        bool AllowFreeText { get; set; }
 
-    bool ComboBoxGridIsVisible { get; set; }
+        bool ComboBoxGridIsVisible { get; set; }
 
-    bool TextBoxGridIsVisible { get; set; }
+        bool TextBoxGridIsVisible { get; set; }
 
-    bool KeyboardGridIsVisible { get; set; }
+        bool KeyboardGridIsVisible { get; set; }
 
-    bool ComboBoxButtonsIsVisible { get; set; }
+        bool ComboBoxButtonsIsVisible { get; set; }
 
-    bool EditComboBoxIsVisible { get; set; }
+        bool EditComboBoxIsVisible { get; set; }
 
-    bool CancelEditComboBoxIsVisible { get; set; }
+        bool CancelEditComboBoxIsVisible { get; set; }
 
-    bool IsComboBoxEditMode { get; set; }
+        bool IsComboBoxEditMode { get; set; }
 
-    string EditComboBoxButtonCaption { get; set; }
+        string EditComboBoxButtonCaption { get; set; }
 
-    string CancelEditComboBoxButtonCaption { get; set; }
+        string CancelEditComboBoxButtonCaption { get; set; }
 
-    bool CanEditComboBox { get; }
+        bool CanEditComboBox { get; }
 
-    void EditComboBox();
+        void EditComboBox();
 
-    bool CanCancelEditComboBox { get; }
+        bool CanCancelEditComboBox { get; }
 
-    void CancelEditComboBox();
-  }
+        void CancelEditComboBox();
+    }
 }

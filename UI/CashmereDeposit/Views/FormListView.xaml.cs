@@ -8,8 +8,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class FormListView : UserControl, IComponentConnector
-  {
-      public FormListView() => InitializeComponent();
-  }
+    public partial class FormListView : UserControl, IComponentConnector
+    {
+        public FormListView() => InitializeComponent();
+    }
 }

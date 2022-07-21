@@ -10,35 +10,35 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  [Guid("7375104A-BDE3-40DF-B926-7DF69A010C79")]
-  internal class ReferenceAccountNumberVerifyDetailsScreenViewModel : DepositorCustomerScreenBaseViewModel
-  {
-    public List<SummaryListItem> SummaryList { get; set; }
-
-    public ReferenceAccountNumberVerifyDetailsScreenViewModel(
-      string screenTitle,
-      ApplicationViewModel applicationViewModel,
-      bool required = false)
-      : base(screenTitle, applicationViewModel, required)
+    [Guid("7375104A-BDE3-40DF-B926-7DF69A010C79")]
+    internal class ReferenceAccountNumberVerifyDetailsScreenViewModel : DepositorCustomerScreenBaseViewModel
     {
-        SummaryList = applicationViewModel.CurrentTransaction.TransactionAccountReferences;
-    }
+        public List<SummaryListItem> SummaryList { get; set; }
 
-    public void Cancel()
-    {
-        ApplicationViewModel.CancelSessionOnUserInput();
-    }
+        public ReferenceAccountNumberVerifyDetailsScreenViewModel(
+          string screenTitle,
+          ApplicationViewModel applicationViewModel,
+          bool required = false)
+          : base(screenTitle, applicationViewModel, required)
+        {
+            SummaryList = applicationViewModel.CurrentTransaction.TransactionAccountReferences;
+        }
 
-    public void Back()
-    {
-        ApplicationViewModel.NavigatePreviousScreen();
-    }
+        public void Cancel()
+        {
+            ApplicationViewModel.CancelSessionOnUserInput();
+        }
 
-    public void Next()
-    {
-      ApplicationViewModel.CurrentSession.AccountVerified = true;
-      ApplicationViewModel.CurrentSession.ReferenceAccountVerified = true;
-      ApplicationViewModel.NavigateNextScreen();
+        public void Back()
+        {
+            ApplicationViewModel.NavigatePreviousScreen();
+        }
+
+        public void Next()
+        {
+            ApplicationViewModel.CurrentSession.AccountVerified = true;
+            ApplicationViewModel.CurrentSession.ReferenceAccountVerified = true;
+            ApplicationViewModel.NavigateNextScreen();
+        }
     }
-  }
 }

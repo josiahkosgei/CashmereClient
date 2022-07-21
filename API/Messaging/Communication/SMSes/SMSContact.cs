@@ -6,10 +6,10 @@
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public class SMSContact
-  {
-    public string Name { get; set; }
+    public class SMSContact
+    {
+        public string Name { get; set; }
 
-    public string PhoneNumber { get; set; }
-  }
+        public string PhoneNumber { get; set; }
+    }
 }

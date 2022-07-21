@@ -17,7 +17,7 @@ namespace Cashmere.Library.CashmereDataAccess.Extensions
                     entity.SetTableName(entity.DisplayName());
                 }
             }
-            
+
             modelBuilder.UseCollation("Latin1_General_CI_AS");
 
             modelBuilder.Entity<Activity>(entity =>

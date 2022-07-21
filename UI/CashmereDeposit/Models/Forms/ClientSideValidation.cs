@@ -2,8 +2,8 @@
 
 namespace CashmereDeposit.Models.Forms
 {
-  public class ClientSideValidation
-  {
-    public List<Validation> Validations { get; set; }
-  }
+    public class ClientSideValidation
+    {
+        public List<Validation> Validations { get; set; }
+    }
 }

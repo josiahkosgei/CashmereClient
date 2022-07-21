@@ -22,10 +22,8 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public int ListOrder { get; set; }
 
         [ForeignKey("TxtypeListItem")]
-       //  //[InverseProperty("TransactionTypeListTransactionTypeListItems")]
         public virtual TransactionTypeListItem TxtypeListItemNavigation { get; set; } = null!;
         [ForeignKey("TxtypeList")]
-       //  //[InverseProperty("TransactionTypeListTransactionTypeListItems")]
         public virtual TransactionTypeList TxtypeListNavigation { get; set; } = null!;
     }
 }

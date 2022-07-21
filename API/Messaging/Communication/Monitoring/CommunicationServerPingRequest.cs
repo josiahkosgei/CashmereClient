@@ -2,7 +2,7 @@
 
 namespace Cashmere.API.Messaging.Communication.Monitoring
 {
-  public class CommunicationServerPingRequest : ServerPingRequestBase
-  {
-  }
+    public class CommunicationServerPingRequest : ServerPingRequestBase
+    {
+    }
 }

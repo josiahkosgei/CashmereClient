@@ -6,9 +6,9 @@
 
 namespace CashmereDeposit.Utils
 {
-  public struct ClientValidationResponse
-  {
-    public bool success;
-    public string message;
-  }
+    public struct ClientValidationResponse
+    {
+        public bool success;
+        public string message;
+    }
 }

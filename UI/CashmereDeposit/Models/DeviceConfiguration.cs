@@ -363,10 +363,14 @@ namespace CashmereDeposit.Models
             get => _API_AUTH_API_URI;
             internal set => _API_AUTH_API_URI = value;
         }
-
+        
+        private static IDeviceRepository _iDeviceRepository { get; set; }
+        private static DepositorDBContext _depositorDBContext { get; set; }
         private DeviceConfiguration()
         {
             _repository = IoC.Get<IAsyncRepository<DeviceConfig>>();
+            _iDeviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             Tokeniser = new Tokeniser(this);
             Init();
         }
@@ -455,14 +459,14 @@ namespace CashmereDeposit.Models
             InitialiseConfig(config, "UI_CULTURE", "UI_CULTURE", ref _UI_CULTURE, "en-gb");
         }
 
-    private List<(string name, string? default_value)> GenerateConfigs()
+        private List<(string name, string? default_value)> GenerateConfigs()
         {
-            using (DepositorDBContext depositorDbContext = new DepositorDBContext())
-            {
-                var configs = depositorDbContext.Configs.ToList();
-                var config_group = depositorDbContext.Devices.FirstOrDefault()?.ConfigGroup;
+            //using (DepositorDBContext depositorDbContext = new DepositorDBContext())
+            //{
+                var configs = _depositorDBContext.Configs.ToList();
+                var config_group = _depositorDBContext.Devices.FirstOrDefault()?.ConfigGroup;
                 //var userType = depositorDbContext.Set().FromSql("dbo.SomeSproc @Id = {0}, @Name = {1}", 45, "Ada");
-                depositorDbContext.Set<DeviceConfig>().FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
+                _depositorDBContext.Set<DeviceConfig>().FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
                 //depositorDbContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
                 //    .ForEach(deviceConfig =>
                 //        configs.First(x =>
@@ -476,7 +480,7 @@ namespace CashmereDeposit.Models
                 //            .default_value = deviceConfig.config_value);
                 return configs.Select(x => (name: x.Name, default_value: x.DefaultValue))
                     .ToList();
-            }
+            //}
         }
         public void InitialiseConfig(
           IList<(string config_id, string config_value)> config,

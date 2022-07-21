@@ -8,8 +8,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views.RearScreen
 {
-  public partial class RearScreenMainView : UserControl, IComponentConnector
-  {
-    public RearScreenMainView() => InitializeComponent();
-  }
+    public partial class RearScreenMainView : UserControl, IComponentConnector
+    {
+        public RearScreenMainView() => InitializeComponent();
+    }
 }

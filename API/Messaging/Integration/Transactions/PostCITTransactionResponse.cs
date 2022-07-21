@@ -3,7 +3,7 @@
 
 namespace Cashmere.API.Messaging.Integration.Transactions
 {
-  public class PostCITTransactionResponse : PostTransactionResponseBase
-  {
-  }
+    public class PostCITTransactionResponse : PostTransactionResponseBase
+    {
+    }
 }

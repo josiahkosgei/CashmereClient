@@ -14,7 +14,7 @@ namespace Cashmere.Library.CashmereDataAccess
         public DepositorDBContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DepositorDBContext>();
-            optionsBuilder.UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True",
+            optionsBuilder.UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True",
                 options => options.EnableRetryOnFailure());
 
             return new DepositorDBContext(optionsBuilder.Options);
@@ -24,7 +24,7 @@ namespace Cashmere.Library.CashmereDataAccess
 
             var builder = new DbContextOptionsBuilder<DepositorDBContext>();
             DbContextConfigurer.Configure(
-                builder, @"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True");
+                builder, @"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True");
 
             return builder.Options;
         }
@@ -32,10 +32,10 @@ namespace Cashmere.Library.CashmereDataAccess
     public class DbContextConfigurer
     {
         public static void Configure(
-            DbContextOptionsBuilder<DepositorDBContext> builder, 
+            DbContextOptionsBuilder<DepositorDBContext> builder,
             string connectionString)
         {
-            builder.UseSqlServer(connectionString,options => options.EnableRetryOnFailure());
+            builder.UseSqlServer(connectionString, options => options.EnableRetryOnFailure());
         }
     }
 }

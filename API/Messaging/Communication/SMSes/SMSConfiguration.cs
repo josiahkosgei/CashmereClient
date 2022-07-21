@@ -6,10 +6,10 @@
 
 namespace Cashmere.API.Messaging.Communication.SMSes
 {
-  public class SMSConfiguration : ISMSConfiguration
-  {
-    public string SMSHost { get; set; }
+    public class SMSConfiguration : ISMSConfiguration
+    {
+        public string SMSHost { get; set; }
 
-    public bool UseSSL { get; set; }
-  }
+        public bool UseSSL { get; set; }
+    }
 }

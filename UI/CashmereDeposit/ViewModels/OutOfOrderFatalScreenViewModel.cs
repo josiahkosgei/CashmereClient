@@ -9,7 +9,7 @@ using CashmereDeposit.Interfaces;
 
 namespace CashmereDeposit.ViewModels
 {
-  public class OutOfOrderFatalScreenViewModel :  Conductor<Screen>, IShell
-  {
-  }
+    public class OutOfOrderFatalScreenViewModel : Conductor<Screen>, IShell
+    {
+    }
 }

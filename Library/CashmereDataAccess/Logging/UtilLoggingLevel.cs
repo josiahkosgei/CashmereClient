@@ -4,13 +4,13 @@
 
 namespace Cashmere.Library.CashmereDataAccess.Logging
 {
-  public enum UtilLoggingLevel
-  {
-    TRACE,
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR,
-    FATAL,
-  }
+    public enum UtilLoggingLevel
+    {
+        TRACE,
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        FATAL,
+    }
 }

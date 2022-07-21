@@ -9,13 +9,13 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit
 {
-  public partial class MainWindow : Window, IComponentConnector
-  {
-      public MainWindow()
-      {
-          InitializeComponent();
-          
-      }
-        
-  }
+    public partial class MainWindow : Window, IComponentConnector
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+
+        }
+
+    }
 }

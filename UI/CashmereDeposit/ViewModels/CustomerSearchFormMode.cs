@@ -6,9 +6,9 @@
 
 namespace CashmereDeposit.ViewModels
 {
-  public enum CustomerSearchFormMode
-  {
-    NORMAL,
-    SEARCH,
-  }
+    public enum CustomerSearchFormMode
+    {
+        NORMAL,
+        SEARCH,
+    }
 }

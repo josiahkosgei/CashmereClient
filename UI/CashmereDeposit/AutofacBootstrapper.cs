@@ -23,7 +23,7 @@ namespace CashmereDeposit
         #region Properties
 
         protected IContainer Container { get; private set; }
-        
+
         protected IDictionary<string, object> RootViewDisplaySettings { get; set; }
         /// <summary>
         /// Should the namespace convention be enforced for type registration. The default is true.
@@ -90,14 +90,14 @@ namespace CashmereDeposit
               .Where(type => type.Name.EndsWith("View"))
               .Where(type => !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("Views")))
               .AsSelf()
-              .InstancePerDependency();    
+              .InstancePerDependency();
 
             //  register Models
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
               .Where(type => type.Name.EndsWith("Model"))
               .Where(type => !EnforceNamespaceConvention || (!string.IsNullOrWhiteSpace(type.Namespace) && type.Namespace.EndsWith("Model")))
               .AsSelf()
-              .InstancePerDependency();  
+              .InstancePerDependency();
 
             //  register UserControls
             builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
@@ -114,10 +114,10 @@ namespace CashmereDeposit
 
             builder.Register(c => CreateWindowManager()).InstancePerLifetimeScope();
             builder.Register<IEventAggregator>(c => CreateEventAggregator()).InstancePerLifetimeScope();
-            
+
             if (AutoSubscribeEventAggegatorHandlers)
                 builder.RegisterModule<EventAggregationAutoSubscriptionModule>();
-            
+
             ConfigureContainer(builder);
             var serviceCollection = new ServiceCollection();
 
@@ -197,7 +197,7 @@ namespace CashmereDeposit
             CreateWindowManager = () => new WindowManager();
             //  default event aggregator
             CreateEventAggregator = () => new EventAggregator();
-            
+
             var config = new TypeMappingConfiguration
             {
                 DefaultSubNamespaceForViews = typeof(StartupView).Namespace,
@@ -215,7 +215,7 @@ namespace CashmereDeposit
         protected virtual void ConfigureContainer(ContainerBuilder containerBuilder)
         {
         }
-        
+
         protected virtual void RegisterComponents(ContainerBuilder builder) { }
 
         /// <summary>Override this to add custom behavior on exit.</summary>
@@ -229,17 +229,35 @@ namespace CashmereDeposit
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
             base.OnStartup(sender, e);
-           DisplayRootViewForAsync<TRootViewModel>(RootViewDisplaySettings);
+            DisplayRootViewForAsync<TRootViewModel>(RootViewDisplaySettings);
         }
-        
-        private void ConfigureServices(IServiceCollection services)
-        {       
-            string connectionString=@"Data Source=.\;Initial Catalog=DepositorDatabase;Integrated Security=True";
-            services.AddDbContext<DepositorDBContext>(options =>
-                options.UseSqlServer(connectionString));
 
+        private void ConfigureServices(IServiceCollection services)
+        {
+            string connectionString = @"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True";
+            //services.AddDbContext<DepositorDBContext>(sqlServerOptionsAction =>
+            //    sqlServerOptionsAction.UseSqlServer(connectionString),
+            //    sqlServerOptionsAction: sqlOptions =>
+            //    {
+            //        sqlOptions.EnableRetryOnFailure(
+            //        maxRetryCount: 10,
+            //        maxRetryDelay: TimeSpan.FromSeconds(30),
+            //        errorNumbersToAdd: null);
+            //    });
+            //    );
+            services.AddDbContext<DepositorDBContext>(options =>
+                {
+                    options.UseSqlServer(connectionString,
+                    sqlServerOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    });
+               });
             services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
-        
+
             //services.AddHttpClient("CashmereDepositHttpClient", client => { });
             using (new DepositorDBContext())
             {
@@ -254,13 +272,13 @@ namespace CashmereDeposit
                     var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
                     return handler;
                 });
-               
+
             }
-            
-            services.AddHttpClient("CDM_APIClient", client => { }); 
+
+            services.AddHttpClient("CDM_APIClient", client => { });
             InitDatabase(services);
         }
-        
+
         private Device GetDevice(DepositorDBContext dbContext)
         {
             return dbContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName) ?? throw new Exception("Device not set correctly in database. Device is null during start up.");

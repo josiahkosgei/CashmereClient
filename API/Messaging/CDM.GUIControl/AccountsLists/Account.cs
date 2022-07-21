@@ -3,23 +3,23 @@ using Newtonsoft.Json;
 
 namespace Cashmere.API.Messaging.CDM.GUIControl.AccountsLists
 {
-  public class Account
-  {
-    public byte[] Icon { get; set; }
+    public class Account
+    {
+        public byte[] Icon { get; set; }
 
-    [JsonProperty(Required = Required.Always)]
-    public string account_number { get; set; }
+        [JsonProperty(Required = Required.Always)]
+        public string AccountNumber { get; set; }
 
-    public string account_name { get; set; }
+        public string AccountName { get; set; }
 
-    public string currency { get; set; }
+        public string Currency { get; set; }
 
-    public bool enabed { get; set; } = true;
+        public bool Enabled { get; set; } = true;
 
-    public override string ToString() => account_number + "|" + account_name + "|" + currency;
+        public override string ToString() => AccountNumber + "|" + AccountName + "|" + Currency;
 
-    public override bool Equals(object obj) => obj is Account account && account_number.Equals(account.account_number);
+        public override bool Equals(object obj) => obj is Account account && AccountNumber.Equals(account.AccountNumber);
 
-    public override int GetHashCode() => account_number.GetHashCode();
-  }
+        public override int GetHashCode() => AccountNumber.GetHashCode();
+    }
 }

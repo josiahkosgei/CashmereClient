@@ -4,11 +4,11 @@
 
 namespace DeviceManager
 {
-  public enum DeviceManagerMode
-  {
-      NONE,
-      CIT,
-      NOTEJAM,
-      ESCROW_JAM,
-  }
+    public enum DeviceManagerMode
+    {
+        NONE,
+        CIT,
+        NOTEJAM,
+        ESCROW_JAM,
+    }
 }

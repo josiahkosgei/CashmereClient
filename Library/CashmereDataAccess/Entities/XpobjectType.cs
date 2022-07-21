@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
-    
+
     public class XpobjectType
     {
         public XpobjectType()

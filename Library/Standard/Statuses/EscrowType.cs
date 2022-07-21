@@ -3,12 +3,12 @@
 
 namespace Cashmere.Library.Standard.Statuses
 {
-  public enum EscrowType
-  {
-    NONE,
-    NO_DEVICE,
-    VIRTUAL,
-    GPIO,
-    DE50,
-  }
+    public enum EscrowType
+    {
+        NONE,
+        NO_DEVICE,
+        VIRTUAL,
+        GPIO,
+        DE50,
+    }
 }

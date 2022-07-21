@@ -2,7 +2,7 @@
 
 namespace Cashmere.API.Messaging.Authentication
 {
-  public class ChangePasswordResponse : APIResponseBase
-  {
-  }
+    public class ChangePasswordResponse : APIResponseBase
+    {
+    }
 }

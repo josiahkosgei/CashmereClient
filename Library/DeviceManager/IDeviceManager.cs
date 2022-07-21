@@ -1,21 +1,21 @@
 ﻿namespace DeviceManager
 {
-  public interface IDeviceManager
-  {
-    void CountNotes();
+    public interface IDeviceManager
+    {
+        void CountNotes();
 
-    void CountCoins();
+        void CountCoins();
 
-    void CountBoth();
+        void CountBoth();
 
-    void ResetDevice(bool openEscrow = false);
+        void ResetDevice(bool openEscrow = false);
 
-    void SetCurrency(string currency);
+        void SetCurrency(string currency);
 
-    void Connect();
+        void Connect();
 
-    void Disconnect();
+        void Disconnect();
 
-    void CashInStart();
-  }
+        void CashInStart();
+    }
 }

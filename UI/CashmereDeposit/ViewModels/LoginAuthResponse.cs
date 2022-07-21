@@ -6,10 +6,10 @@
 
 namespace CashmereDeposit.ViewModels
 {
-  public enum LoginAuthResponse
-  {
-    NONE,
-    ALLOW,
-    DENY,
-  }
+    public enum LoginAuthResponse
+    {
+        NONE,
+        ALLOW,
+        DENY,
+    }
 }

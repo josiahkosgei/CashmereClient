@@ -36,7 +36,7 @@ namespace DeviceManager
                 _ConStat = value;
                 if (!(ConnectionStatusChanged != null & flag))
                     return;
-                
+
                 var workTask = Task.Run(() => ConnectionStatusChanged.Invoke(this, _ConStat));
                 workTask.ContinueWith(new Action<Task>(cbChangeConnectionStateComplete));
             }

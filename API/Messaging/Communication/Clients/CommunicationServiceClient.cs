@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace Cashmere.API.Messaging.Communication.Clients
 {
-  public class CommunicationServiceClient : APIClient, IEmailController, ISMSController
-  {
-    public CommunicationServiceClient(
-      string apiBaseAddress,
-      Guid AppID,
-      byte[] appKey,
-      IConfiguration configuration)
-      : base(new CashmereAPILogger(nameof (CommunicationServiceClient), configuration), apiBaseAddress, AppID, appKey, configuration)
+    public class CommunicationServiceClient : APIClient, IEmailController, ISMSController
     {
+        public CommunicationServiceClient(
+          string apiBaseAddress,
+          Guid AppID,
+          byte[] appKey,
+          IConfiguration configuration)
+          : base(new CashmereAPILogger(nameof(CommunicationServiceClient), configuration), apiBaseAddress, AppID, appKey, configuration)
+        {
+        }
+
+        public async Task<EmailResponse> SendEmailAsync(EmailRequest request) => await SendAsync<EmailResponse>("api/Email/SendEmail", request);
+
+        public async Task<SMSResponse> SendSMSAsync(SMSRequest request) => await SendAsync<SMSResponse>("api/SMS/SendSMS", request);
     }
-
-    public async Task<EmailResponse> SendEmailAsync(EmailRequest request) => await SendAsync<EmailResponse>("api/Email/SendEmail", request);
-
-    public async Task<SMSResponse> SendSMSAsync(SMSRequest request) => await SendAsync<SMSResponse>("api/SMS/SendSMS", request);
-  }
 }

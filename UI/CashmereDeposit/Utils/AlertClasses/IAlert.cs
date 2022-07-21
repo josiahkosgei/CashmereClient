@@ -6,8 +6,8 @@
 
 namespace CashmereDeposit.Utils.AlertClasses
 {
-  public interface IAlert
-  {
-    bool SendAlert();
-  }
+    public interface IAlert
+    {
+        bool SendAlert();
+    }
 }

@@ -4,43 +4,43 @@ using Caliburn.Micro;
 
 namespace CashmereDeposit.DI
 {
-    
-	public class EventAggregationAutoSubscriptionModule : Module
-	{
-		//protected override void AttachToComponentRegistration(IComponentRegistryBuilder componentRegistry, IComponentRegistration registration)
-		//{
-		//	registration.Activator += OnComponentActivated;
-		//}
 
-		static void OnComponentActivated(object sender, ActivatedEventArgs<object> args)
-		{
-			//  nothing we can do if a null event argument is passed (should never happen)
-			if (args == null)
-			{
-				return;
-			}
+    public class EventAggregationAutoSubscriptionModule : Module
+    {
+        //protected override void AttachToComponentRegistration(IComponentRegistryBuilder componentRegistry, IComponentRegistration registration)
+        //{
+        //	registration.Activator += OnComponentActivated;
+        //}
 
-			//  nothing we can do if instance is not a handler
-			var handler = args.Instance;
-			if (handler == null)
-			{
-				return;
-			}
+        static void OnComponentActivated(object sender, ActivatedEventArgs<object> args)
+        {
+            //  nothing we can do if a null event argument is passed (should never happen)
+            if (args == null)
+            {
+                return;
+            }
 
-			//  subscribe to handler, and prepare unsubscription when it's time for disposal
+            //  nothing we can do if instance is not a handler
+            var handler = args.Instance;
+            if (handler == null)
+            {
+                return;
+            }
 
-			var context = args.Context;
-			var lifetimeScope = context.Resolve<ILifetimeScope>();
-			var eventAggregator = lifetimeScope.Resolve<IEventAggregator>();
+            //  subscribe to handler, and prepare unsubscription when it's time for disposal
 
-			eventAggregator.Subscribe(handler);
+            var context = args.Context;
+            var lifetimeScope = context.Resolve<ILifetimeScope>();
+            var eventAggregator = lifetimeScope.Resolve<IEventAggregator>();
 
-			var disposableAction = new DisposableAction(() =>
-			{
-				eventAggregator.Unsubscribe(handler);
-			});
+            eventAggregator.Subscribe(handler);
 
-			lifetimeScope.Disposer.AddInstanceForDisposal(disposableAction);
-		}
-	}
+            var disposableAction = new DisposableAction(() =>
+            {
+                eventAggregator.Unsubscribe(handler);
+            });
+
+            lifetimeScope.Disposer.AddInstanceForDisposal(disposableAction);
+        }
+    }
 }

@@ -17,7 +17,7 @@ namespace CashmereDeposit.Startup
                 host = new WebHostBuilder()
                     .UseKestrel(options =>
                     {
-                        options.Listen(ip,port);
+                        options.Listen(ip, port);
                     })
                     .UseStartup<HostStartup>()
                     .Build();

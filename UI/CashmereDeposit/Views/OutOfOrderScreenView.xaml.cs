@@ -8,8 +8,8 @@ using System.Windows.Markup;
 
 namespace CashmereDeposit.Views
 {
-  public partial class OutOfOrderScreenView : UserControl, IComponentConnector
-  {
-      public OutOfOrderScreenView() => InitializeComponent();
-  }
+    public partial class OutOfOrderScreenView : UserControl, IComponentConnector
+    {
+        public OutOfOrderScreenView() => InitializeComponent();
+    }
 }

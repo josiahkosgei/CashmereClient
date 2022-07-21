@@ -3,18 +3,18 @@
 
 namespace Cashmere.Library.Standard.Statuses
 {
-  public interface IControllerStatus
-  {
-    DeviceBag Bag { get; set; }
+    public interface IControllerStatus
+    {
+        DeviceBag Bag { get; set; }
 
-    ControllerState ControllerState { get; set; }
+        ControllerState ControllerState { get; set; }
 
-    DeviceEscrow Escrow { get; set; }
+        DeviceEscrow Escrow { get; set; }
 
-    DeviceNoteAcceptor NoteAcceptor { get; set; }
+        DeviceNoteAcceptor NoteAcceptor { get; set; }
 
-    DeviceSensor Sensor { get; set; }
+        DeviceSensor Sensor { get; set; }
 
-    ControllerDeviceTransaction Transaction { get; set; }
-  }
+        ControllerDeviceTransaction Transaction { get; set; }
+    }
 }

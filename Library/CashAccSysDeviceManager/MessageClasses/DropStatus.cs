@@ -7,25 +7,25 @@ using System.Xml.Serialization;
 
 namespace CashAccSysDeviceManager.MessageClasses
 {
-  [XmlRoot(ElementName = "CCP")]
-  public class DropStatus : CashAccSysMessageBase
-  {
-    [NonSerialized]
-    private static XmlSerializer _serializer = new XmlSerializer(typeof (DropStatus));
-
-    [XmlElement(ElementName = "body")]
-    public DropStatusBody Body { get; set; }
-
-    public DropStatus()
+    [XmlRoot(ElementName = "CCP")]
+    public class DropStatus : CashAccSysMessageBase
     {
-    }
+        [NonSerialized]
+        private static XmlSerializer _serializer = new XmlSerializer(typeof(DropStatus));
 
-    public DropStatus(int seqno)
-    {
-      MessageID = 121;
-      SequenceNumber = seqno;
-    }
+        [XmlElement(ElementName = "body")]
+        public DropStatusBody Body { get; set; }
 
-    internal new static XmlSerializer Serializer => _serializer;
-  }
+        public DropStatus()
+        {
+        }
+
+        public DropStatus(int seqno)
+        {
+            MessageID = 121;
+            SequenceNumber = seqno;
+        }
+
+        internal new static XmlSerializer Serializer => _serializer;
+    }
 }

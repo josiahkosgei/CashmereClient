@@ -12,47 +12,47 @@ using CashmereDeposit.Models;
 
 namespace CashmereDeposit.ViewModels
 {
-  [Guid("392BC2B1-19AB-465F-B2D8-02E31D8E9392")]
-  public class CurrencyListScreenViewModel : CustomerListScreenBaseViewModel
-  {
-    public CurrencyListScreenViewModel(
-      string screenTitle,
-      ApplicationViewModel applicationViewModel,
-      bool required = false)
-      : base(screenTitle, applicationViewModel, required)
+    [Guid("392BC2B1-19AB-465F-B2D8-02E31D8E9392")]
+    public class CurrencyListScreenViewModel : CustomerListScreenBaseViewModel
     {
-      var applicationViewModel1 = ApplicationViewModel;
-      List<ATMSelectionItem<object>> atmSelectionItemList;
-      if (applicationViewModel1 == null)
-      {
-        atmSelectionItemList = null;
-      }
-      else
-      {
-        var currenciesAvailable = applicationViewModel1.CurrenciesAvailable;
-        if (currenciesAvailable == null)
+        public CurrencyListScreenViewModel(
+          string screenTitle,
+          ApplicationViewModel applicationViewModel,
+          bool required = false)
+          : base(screenTitle, applicationViewModel, required)
         {
-          atmSelectionItemList = null;
+            var applicationViewModel1 = ApplicationViewModel;
+            List<ATMSelectionItem<object>> atmSelectionItemList;
+            if (applicationViewModel1 == null)
+            {
+                atmSelectionItemList = null;
+            }
+            else
+            {
+                var currenciesAvailable = applicationViewModel1.CurrenciesAvailable;
+                if (currenciesAvailable == null)
+                {
+                    atmSelectionItemList = null;
+                }
+                else
+                {
+                    var source = currenciesAvailable.Select(x => new ATMSelectionItem<object>("{ResourceDir}/Resources\\Flags\\" + x.Flag + ".png", x.Name, x));
+                    atmSelectionItemList = source != null ? source.ToList() : null;
+                }
+            }
+            FullList = atmSelectionItemList;
+            GetFirstPage();
         }
-        else
+
+        public void Cancel()
         {
-          var source = currenciesAvailable.Select(x => new ATMSelectionItem<object>("{ResourceDir}/Resources\\Flags\\" + x.Flag + ".png", x.Name, x));
-          atmSelectionItemList = source != null ? source.ToList() : null;
+            ApplicationViewModel.CancelSessionOnUserInput();
         }
-      }
-      FullList = atmSelectionItemList;
-      GetFirstPage();
-    }
 
-    public void Cancel()
-    {
-        ApplicationViewModel.CancelSessionOnUserInput();
+        public override void PerformSelection()
+        {
+            ApplicationViewModel?.SetCurrency(SelectedFilteredList.Value as Currency);
+            ApplicationViewModel.NavigateNextScreen();
+        }
     }
-
-    public override void PerformSelection()
-    {
-      ApplicationViewModel?.SetCurrency(SelectedFilteredList.Value as Currency);
-      ApplicationViewModel.NavigateNextScreen();
-    }
-  }
 }

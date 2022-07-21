@@ -25,7 +25,7 @@ namespace CashmereDeposit.Startup
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, System.IServiceProvider serviceProvider)
         {
-           
+
             app.UseMvc(builder =>
             {
                 builder.MapRoute("DefaultApi", "api/{controller}/{id}", new

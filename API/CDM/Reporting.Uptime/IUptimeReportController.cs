@@ -4,11 +4,11 @@ using Cashmere.API.CDM.Reporting.Uptime.Models.Messaging;
 
 namespace Cashmere.API.CDM.Reporting.Uptime
 {
-  public interface IUptimeReportController
-  {
-    ICashmereAPILogger Log { get; set; }
+    public interface IUptimeReportController
+    {
+        ICashmereAPILogger Log { get; set; }
 
-    Task<UptimeReportResponse> GetUptimeReportAsync(
-      UptimeReportRequest request);
-  }
+        Task<UptimeReportResponse> GetUptimeReportAsync(
+          UptimeReportRequest request);
+    }
 }
