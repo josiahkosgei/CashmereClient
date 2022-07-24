@@ -1,7 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Cashmere.Library.Standard.Statuses.ApplicationErrorConst
-
-
+﻿
 namespace Cashmere.Library.Standard.Statuses
 {
     public enum ApplicationErrorConst

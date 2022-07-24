@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.Standard.Utilities;
@@ -20,20 +21,21 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 1201;
         private bool _duringCIT;
+        private readonly DepositorDBContext _depositorDBContext;
 
         public AlertSafeDoorClosed(Device device, DateTime dateDetected, bool duringCIT = false)
           : base(device, dateDetected)
         {
             _duringCIT = duringCIT;
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
-            AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1201);
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1201);
         }
 
         public override bool SendAlert()
         {
             try
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+            
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -46,14 +48,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                DBContext.AlertEvents.Add(entity);
+                _depositorDBContext.AlertEvents.Add(entity);
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
                 return true;
             }
             catch (ValidationException ex)

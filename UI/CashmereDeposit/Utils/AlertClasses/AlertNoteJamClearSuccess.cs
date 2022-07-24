@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.Standard.Utilities;
@@ -20,23 +21,25 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertNoteJamClearSuccess : AlertBase
     {
         public const int ALERT_ID = 4002;
+        private readonly DepositorDBContext _depositorDBContext;
         private Transaction _transaction;
         private AlertEvent associatedAlertEvent;
 
         public AlertNoteJamClearSuccess(Transaction transaction, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
             _transaction = transaction ?? throw new NullReferenceException("Variable transaction cannot be null in " + GetType().Name);
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
-            associatedAlertEvent = depositorDbContext.AlertEvents.Where(x => x.AlertTypeId == 4002).OrderByDescending(x => x.Created).FirstOrDefault();
-            AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 4002);
+            
+            associatedAlertEvent = _depositorDBContext.AlertEvents.Where(x => x.AlertTypeId == 4002).OrderByDescending(x => x.Created).FirstOrDefault();
+            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 4002);
         }
 
         public override bool SendAlert()
         {
             try
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+            
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -49,14 +52,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                DBContext.AlertEvents.Add(entity);
+                _depositorDBContext.AlertEvents.Add(entity);
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
                 return true;
             }
             catch (ValidationException ex)

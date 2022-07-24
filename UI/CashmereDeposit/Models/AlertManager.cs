@@ -6,11 +6,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Caliburn.Micro;
 
 namespace CashmereDeposit.Models
 {
     public class AlertManager
     {
+        private readonly DepositorDBContext _depositorDBContext;
         public static ICashmereLogger Log;
         private static string commserv_uri;
         private static Guid appID;
@@ -28,6 +30,7 @@ namespace CashmereDeposit.Models
           byte[] appKey,
           string AppName)
         {
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             Log = logger;
             appID = AppID;
             AppKey = appKey;
@@ -51,7 +54,7 @@ namespace CashmereDeposit.Models
         {
             using (DepositorDBContext depositorDbContext = new DepositorDBContext())
             {
-                AllowedMessages = depositorDbContext.AlertMessageTypes.Where(x => x.Enabled == true).ToList();
+                AllowedMessages = _depositorDBContext.AlertMessageTypes.Where(x => x.Enabled == true).ToList();
                 DepositorCommunicationService = DepositorCommunicationService.NewDepositorCommunicationService(commserv_uri, appID, AppKey, appName);
             }
         }

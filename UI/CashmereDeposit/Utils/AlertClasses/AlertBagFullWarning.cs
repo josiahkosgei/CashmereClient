@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.Standard.Statuses;
@@ -22,20 +23,20 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 2000;
         private DeviceBag Bag;
+        private DepositorDBContext _depositorDBContext;
 
         public AlertBagFullWarning(Device device, DateTime dateDetected, DeviceBag bag)
           : base(device, dateDetected)
         {
             Bag = bag;
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
-            AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 2000);
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 2000);
         }
 
         public override bool SendAlert()
         {
             try
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -48,14 +49,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                DBContext.AlertEvents.Add(entity);
+                _depositorDBContext.AlertEvents.Add(entity);
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
                 return true;
             }
             catch (ValidationException ex)

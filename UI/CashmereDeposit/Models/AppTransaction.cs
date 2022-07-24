@@ -40,12 +40,15 @@ public class AppTransaction : PropertyChangedBase
     private Denomination _droppedDenominationResult;
     private object DroppedDenominationUpdateLock = new object();
     private TransactionTypeListItem _transactionType;
+   //  private static DepositorDBContext _depositorDBContext { get; set; }
 
     public AppTransaction(
         AppSession session,
         TransactionTypeListItem transactionType,
         string currency)
     {
+
+        _depositorDBContext = IoC.Get<DepositorDBContext>();
         AppTransaction appTransaction = this;
         if (currency == null)
             throw new ArgumentNullException();
@@ -68,7 +71,7 @@ public class AppTransaction : PropertyChangedBase
             TxAmount = new long?(0L)
         };
         session.DBContext.Transactions.Add(_transaction);
-        Currency = DepositorDBContext.Currencies.FirstOrDefault(x => x.Code == currency);
+        Currency = _depositorDBContext.Currencies.FirstOrDefault(x => x.Code == currency);
         TransactionType = transactionType;
         ApplicationModel applicationModel = session.ApplicationViewModel.ApplicationModel;
         string str;
@@ -78,7 +81,7 @@ public class AppTransaction : PropertyChangedBase
         }
         else
         {
-            Device device = applicationModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
+            Device device = applicationModel.GetDeviceAsync();
             if (device == null)
             {
                 str = null;
@@ -306,7 +309,7 @@ public class AppTransaction : PropertyChangedBase
         set
         {
             ApplicationViewModel.Log.InfoFormat(GetType().Name, "Currency Changed", "Tx Property Changed", "Currency changed from {0} to {1}", (object)_currency?.Code, (object)value?.Code);
-            _currency = DepositorDBContext.Currencies.First(x => x.Code == value.Code);
+            _currency = _depositorDBContext.Currencies.First(x => x.Code == value.Code);
             Transaction.TxCurrencyNavigation = _currency;
             NotifyOfPropertyChange(nameof(Currency));
         }
@@ -512,7 +515,7 @@ public class AppTransaction : PropertyChangedBase
         {
             ApplicationViewModel.Log.InfoFormat(GetType().Name, "TransactionType Changed", "Tx Property Changed", "TransactionType changed from {0} to {1}", (object)_transactionType?.CbTxType, (object)value?.CbTxType);
             _transactionType = value;
-            Transaction.TxTypeNavigation = DepositorDBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == value.Id);
+            Transaction.TxTypeNavigation = _depositorDBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == value.Id);
             NotifyOfPropertyChange(nameof(TransactionType));
         }
     }
@@ -703,7 +706,7 @@ public class AppTransaction : PropertyChangedBase
             Session.ApplicationViewModel.AlertManager.SendAlert(new AlertTransactionEndedFailed(this, Session.Device, DateTime.Now));
         }
         if (Session.HasCounted && Transaction.Printouts.FirstOrDefault(x => !x.IsCopy) == null)
-            Session.ApplicationViewModel.PrintReceipt(Transaction, txDBContext: DepositorDBContext);
+            Session.ApplicationViewModel.PrintReceipt(Transaction);
         Session.SaveToDatabase();
     }
 

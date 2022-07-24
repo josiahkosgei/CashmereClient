@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
-    public interface IDeviceRepository: IAsyncRepository<Device>
+    public interface IDeviceRepository : IAsyncRepository<Device>
     {
-     public Task<Device> GetDevice(string machineName);
-     public Task<IList<Device>> GetAllAsync();
+        public Task<Device> GetByIdAsync(Guid DeviceId);
+        public Task<Device> GetDevice(string machineName);
+        public Task<Device> GetDeviceAndNavigations(string machineName);
+        public Task<IList<Device>> GetAllAsync();
     }
- 
+
 }

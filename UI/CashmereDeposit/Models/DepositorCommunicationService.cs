@@ -23,6 +23,7 @@ using Cashmere.Library.Standard.Utilities;
 
 using CashmereDeposit.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Caliburn.Micro;
 
 namespace CashmereDeposit.Models
 {
@@ -39,8 +40,11 @@ namespace CashmereDeposit.Models
         private int _alertBatchSize = Math.Max(ApplicationViewModel.DeviceConfiguration.ALERT_BATCH_SIZE, 5);
 
         private static IHttpClientFactory _httpClientFactory;
+        private DepositorDBContext _depositorDBContext;
+
         private DepositorCommunicationService()
         {
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             _emailSendingWorker.DoWork += new DoWorkEventHandler(EmailSendingWorker_DoWork);
             _emailSendingWorker.RunWorkerAsync();
         }
@@ -77,18 +81,18 @@ namespace CashmereDeposit.Models
             {
                 try
                 {
-                    using DepositorDBContext depositorDbContext = new DepositorDBContext();
+                    
                     if (ApplicationViewModel.DeviceConfiguration.EMAIL_CAN_SEND || ApplicationViewModel.DeviceConfiguration.SMS_CAN_SEND)
                     {
-                        List<AlertEvent> list = depositorDbContext.AlertEvents.Where(x => x.IsProcessed == false).OrderBy(y => y.DateDetected).Take(_alertBatchSize).ToList();
+                        List<AlertEvent> list = _depositorDBContext.AlertEvents.Where(x => x.IsProcessed == false).OrderBy(y => y.DateDetected).Take(_alertBatchSize).ToList();
                         _log.Trace(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), nameof(EmailSendingWorker_DoWork), "Found {0} AlertEvents to process", list.Count());
                         foreach (AlertEvent alertEvent in list)
                         {
                             try
                             {
                                 _log.Info(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), nameof(EmailSendingWorker_DoWork), string.Format("processing AlertEvent {0}", alertEvent));
-                                ProcessEmail(alertEvent, depositorDbContext);
-                                ProcessSms(alertEvent, depositorDbContext);
+                                ProcessEmail(alertEvent, _depositorDBContext);
+                                ProcessSms(alertEvent, _depositorDBContext);
                                 _log.Info(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), nameof(EmailSendingWorker_DoWork), "alertEvent [{0}] processed SUCCESS", alertEvent.ToString());
                                 alertEvent.IsProcessed = true;
                             }
@@ -97,7 +101,7 @@ namespace CashmereDeposit.Models
                                 _log.Info(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), nameof(EmailSendingWorker_DoWork), "alertEvent [{0}] processed ERROR", alertEvent.ToString());
                                 _log.Error(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), "NullReferenceException", "Error processing alertEvent [{0}]: {1}", alertEvent.ToString(), ex.MessageString());
                                 alertEvent.IsProcessed = true;
-                                SaveToDatabase(depositorDbContext);
+                                SaveToDatabase(_depositorDBContext);
                                 Thread.Sleep(Math.Max(1000, ApplicationViewModel.DeviceConfiguration.EMAIL_SEND_INTERVAL));
                             }
                             catch (Exception ex)
@@ -105,10 +109,10 @@ namespace CashmereDeposit.Models
                                 _log.Info(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), nameof(EmailSendingWorker_DoWork), "alertEvent [{0}] processed ERROR", alertEvent.ToString());
                                 _log.Error(nameof(DepositorCommunicationService), nameof(EmailSendingWorker_DoWork), "Exception", "Error processing alertEvent [{0}]: {1}", alertEvent.ToString(), ex.MessageString());
                                 alertEvent.IsProcessed = false;
-                                SaveToDatabase(depositorDbContext);
+                                SaveToDatabase(_depositorDBContext);
                                 Thread.Sleep(Math.Max(1000, ApplicationViewModel.DeviceConfiguration.EMAIL_SEND_INTERVAL));
                             }
-                            SaveToDatabase(depositorDbContext);
+                            SaveToDatabase(_depositorDBContext);
                         }
                     }
                     else
@@ -127,7 +131,7 @@ namespace CashmereDeposit.Models
         {
             try
             {
-                ApplicationViewModel.SaveToDatabaseAsync(dbContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (Exception ex)
             {
@@ -144,11 +148,12 @@ namespace CashmereDeposit.Models
                 _log.Debug(nameof(DepositorCommunicationService), nameof(GenerateEmail), nameof(GenerateEmail), "Generating MailMessage for AlertEmail:{0} and recipient: {1}", alertEmail.ToString(), recipient?.Email);
                 if (alertEmail == null)
                     throw new NullReferenceException("alertEmail cannot be null.");
-                EmailRequest emailRequest = new EmailRequest();
-                emailRequest.Message = new EmailMessage()
+                EmailRequest emailRequest = new EmailRequest
                 {
-                    HTMLContent = PersonaliseMessage(alertEmail.HtmlMessage, recipient),
-                    ToAddresses = new List<EmailAddress>()
+                    Message = new EmailMessage()
+                    {
+                        HTMLContent = PersonaliseMessage(alertEmail.HtmlMessage, recipient),
+                        ToAddresses = new List<EmailAddress>()
           {
             new EmailAddress()
             {
@@ -156,13 +161,14 @@ namespace CashmereDeposit.Models
               Address = recipient?.Email
             }
           },
-                    Subject = device.Name + ": " + alertEmail.Subject.Trim()
+                        Subject = device.Name + ": " + alertEmail.Subject.Trim()
+                    },
+                    MessageDateTime = DateTime.Now,
+                    SessionID = alertEmail.Id.ToString(),
+                    MessageID = Guid.NewGuid().ToString(),
+                    AppID = _appId,
+                    AppName = _appName
                 };
-                emailRequest.MessageDateTime = DateTime.Now;
-                emailRequest.SessionID = alertEmail.Id.ToString();
-                emailRequest.MessageID = Guid.NewGuid().ToString();
-                emailRequest.AppID = _appId;
-                emailRequest.AppName = _appName;
                 return emailRequest;
             }
         }
@@ -177,20 +183,22 @@ namespace CashmereDeposit.Models
                 _log.Debug(nameof(DepositorCommunicationService), nameof(GenerateSms), nameof(GenerateSms), "Generating SMS for AlertSMS:{0} and recipient: {1}", alertSms.ToString(), recipient?.Phone);
                 if (alertSms == null)
                     throw new NullReferenceException("alertSMS cannot be null.");
-                SMSRequest smsRequest = new SMSRequest();
-                smsRequest.AppID = _appId;
-                smsRequest.AppName = _appName;
-                smsRequest.SMSMessage = new SMSMessage()
+                SMSRequest smsRequest = new SMSRequest
                 {
-                    MessageText = PersonaliseMessage(alertSms.Message, recipient),
-                    ToContacts = new List<SMSContact>()
+                    AppID = _appId,
+                    AppName = _appName,
+                    SMSMessage = new SMSMessage()
+                    {
+                        MessageText = PersonaliseMessage(alertSms.Message, recipient),
+                        ToContacts = new List<SMSContact>()
           {
             new SMSContact() { PhoneNumber = phone }
           }
+                    },
+                    MessageDateTime = DateTime.Now,
+                    SessionID = alertSms.Id.ToString(),
+                    MessageID = Guid.NewGuid().ToString()
                 };
-                smsRequest.MessageDateTime = DateTime.Now;
-                smsRequest.SessionID = alertSms.Id.ToString();
-                smsRequest.MessageID = Guid.NewGuid().ToString();
                 return smsRequest;
             }
         }
@@ -208,8 +216,8 @@ namespace CashmereDeposit.Models
         {
             if (!ApplicationViewModel.DeviceConfiguration.EMAIL_CAN_SEND)
                 return;
-            List<AlertEmail> list1 = depositorDbContext.AlertEmails.Where(x => x.AlertEventId == alertEvent.Id).ToList();
-            Device device = depositorDbContext.Devices.FirstOrDefault(x => x.Id == alertEvent.DeviceId);
+            List<AlertEmail> list1 = _depositorDBContext.AlertEmails.Where(x => x.AlertEventId == alertEvent.Id).ToList();
+            Device device = _depositorDBContext.Devices.FirstOrDefault(x => x.Id == alertEvent.DeviceId);
             if (device == null)
                 throw new NullReferenceException("device cannot be null in EmailSendingWorker_DoWork()");
             Parallel.ForEach(list1, alertEmail =>
@@ -220,7 +228,7 @@ namespace CashmereDeposit.Models
                     List<AlertEmailAttachment> alertEmailAttachmentList = new List<AlertEmailAttachment>();
                     List<EmailAttachment> alertEmailAttachments = new List<EmailAttachment>(5);
                     if (ApplicationViewModel.DeviceConfiguration.EMAIL_SEND_ATTACHMENT)
-                        alertEmailAttachments = depositorDbContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmail.Id).ToList().Join(depositorDbContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
+                        alertEmailAttachments = _depositorDBContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmail.Id).ToList().Join(_depositorDBContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
                         {
                             Name = alertEmailAttachment.Name,
                             MimeType = new EmailAttachmentMIMEType()
@@ -236,7 +244,7 @@ namespace CashmereDeposit.Models
                     var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
                     //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
 
-                    var deviceUsersByDevice = depositorDbContext.Devices.Include(i => i.UserGroupNavigation).ThenInclude(t => t.ApplicationUsers).ThenInclude(u => u.Role).Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
+                    var deviceUsersByDevice = _depositorDBContext.Devices.Include(i => i.UserGroupNavigation).ThenInclude(t => t.ApplicationUsers).ThenInclude(u => u.Role).Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)
                     {
@@ -312,10 +320,10 @@ namespace CashmereDeposit.Models
         {
             if (!ApplicationViewModel.DeviceConfiguration.SMS_CAN_SEND)
                 return;
-            Parallel.ForEach(depositorDbContext.AlertSMS.Where(x => x.AlertEventId == alertEvent.Id).ToList(), alertSms =>
+            Parallel.ForEach(_depositorDBContext.AlertSMS.Where(x => x.AlertEventId == alertEvent.Id).ToList(), alertSms =>
             {
                 // ISSUE: reference to a compiler-generated field
-                Device device = depositorDbContext.Devices.FirstOrDefault(x => x.Id == alertEvent.DeviceId);
+                Device device = _depositorDBContext.Devices.FirstOrDefault(x => x.Id == alertEvent.DeviceId);
                 if (device == null)
                     throw new NullReferenceException("device cannot be null in EmailSendingWorker_DoWork()");
                 try
@@ -323,7 +331,7 @@ namespace CashmereDeposit.Models
                     _log.Debug(nameof(DepositorCommunicationService), nameof(ProcessSms), nameof(ProcessSms), "get the recipients");
                     var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
                     //var deviceUsersByDevice = depositorContextProcedures.GetDeviceUsersByDeviceAsync(device?.UserGroup).Result;
-                    var deviceUsersByDevice = depositorDbContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
+                    var deviceUsersByDevice = _depositorDBContext.Devices.Where(de => de.UserGroup == device.UserGroup).SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList());
 
                     List<ApplicationUser> applicationUserList;
                     if (deviceUsersByDevice == null)

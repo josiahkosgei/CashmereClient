@@ -22,7 +22,7 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-            Device = applicationViewModel?.ApplicationModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
+            Device = applicationViewModel?.ApplicationModel.GetDeviceAsync();
             if (Device == null)
                 ApplicationViewModel.Log.Error(GetType().Name, 106, ApplicationErrorConst.ERROR_NULL_REFERENCE_EXCEPTION.ToString(), "Device is null when constructing AdminDeviceSummaryViewModel");
             if (!(Application.Current.FindResource("DeviceSummaryScreenTitle") is string str))

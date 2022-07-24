@@ -8,8 +8,10 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.CashmereDataAccess.Logging;
 using Cashmere.Library.Standard.Logging;
 using Cashmere.Library.Standard.Utilities;
@@ -21,12 +23,16 @@ namespace CashmereDeposit.Utils
     public class DepositorLogger : CashmereLogger
     {
         private CashmereLogger _innerLogger;
+        private readonly IDeviceRepository _deviceRepository;
+        private readonly IApplicationLogRepository _iApplicationLogRepository;
 
         private ApplicationViewModel ApplicationViewModel { get; }
 
         public DepositorLogger(ApplicationViewModel applicationViewModel, string LoggerName = "CashmereDepositLog")
           : base(Assembly.GetCallingAssembly().GetName().Version.ToString(), LoggerName, null)
         {
+             _deviceRepository = IoC.Get<IDeviceRepository>();
+             _iApplicationLogRepository = IoC.Get<IApplicationLogRepository>();
             if (string.IsNullOrWhiteSpace(LoggerName))
                 LoggerName = "CashmereDepositLog";
             ApplicationViewModel = applicationViewModel;
@@ -136,27 +142,25 @@ namespace CashmereDeposit.Utils
             string str = string.Format(EventDetailFormat, EventDetailFormatObjects);
             if (string.IsNullOrEmpty(str) || Level < (UtilLoggingLevel)ApplicationViewModel.DeviceConfiguration.LOGGING_LEVEL)
                 return;
-            using DepositorDBContext DBContext = new DepositorDBContext();
+        
             try
             {
-                ApplicationLog applicationLog = new ApplicationLog();
-                applicationLog.Id = GuidExt.UuidCreateSequential();
-                applicationLog.LogDate = DateTime.Now;
-                applicationLog.Component = Component;
-                ParameterExpression parameterExpression;
-                // ISSUE: method reference
-                // ISSUE: method reference
-                // ISSUE: method reference
-                applicationLog.DeviceId = DBContext.Devices.FirstOrDefault(x => x.MachineName == Environment.MachineName).Id;
-                applicationLog.SessionId = ApplicationViewModel?.SessionID;
-                applicationLog.EventDetail = str;
-                applicationLog.EventName = EventName;
-                applicationLog.EventType = EventType;
-                applicationLog.LogLevel = (int)Level;
-                applicationLog.MachineName = Environment.MachineName;
-                ApplicationLog entity = applicationLog;
-                DBContext.ApplicationLogs.Add(entity);
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                var device = _deviceRepository.GetDevice(Environment.MachineName).ContinueWith(r=>r.Result).Result;
+                ApplicationLog applicationLog = new ApplicationLog
+                {
+                    Id = GuidExt.UuidCreateSequential(),
+                    LogDate = DateTime.Now,
+                    Component = Component,
+                    DeviceId = device.Id,
+                    SessionId = ApplicationViewModel?.SessionID,
+                    EventDetail = str,
+                    EventName = EventName,
+                    EventType = EventType,
+                    LogLevel = (int)Level,
+                    MachineName = Environment.MachineName
+                };
+                ApplicationLog entity = new();
+               entity= _iApplicationLogRepository.AddAsync(applicationLog).ContinueWith(r=>r.Result).Result;
             }
             catch (Exception ex)
             {

@@ -4,6 +4,7 @@
 
 
 
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 
@@ -12,19 +13,21 @@ namespace CashmereDeposit.ViewModels
 {
     public static class AuthenticationAndAuthorisation
     {
+        private static DepositorDBContext _depositorDBContext;
+
         public static bool Authenticate(
           ApplicationViewModel applicationViewModel,
           ApplicationUser user,
           string activityString,
           bool isAuthorising)
         {
-            using var DBContext = new DepositorDBContext();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             if (applicationViewModel.UserPermissionAllowed(user, activityString, isAuthorising))
             {
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
                 return true;
             }
-            ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+            _depositorDBContext.SaveChangesAsync().Wait();
             return false;
         }
     }

@@ -9,6 +9,9 @@ using System.Globalization;
 using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.Models
 {
@@ -16,11 +19,16 @@ namespace CashmereDeposit.Models
     {
         private AppTransaction _transaction;
         private ApplicationViewModel _applicationViewModel;
+        private static IDeviceRepository _iDeviceRepository { get; set; }
+       //  private static DepositorDBContext _depositorDBContext { get; set; }
 
         public AppSession(ApplicationViewModel applicationViewModel)
         {
+
+            _iDeviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             _applicationViewModel = applicationViewModel;
-            Device = ApplicationViewModel.ApplicationModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
+            Device = ApplicationViewModel.ApplicationModel.GetDeviceAsync();
             DepositorSession = new DepositorSession()
             {
                 Id = GuidExt.UuidCreateSequential(),
@@ -34,8 +42,8 @@ namespace CashmereDeposit.Models
             SessionStart = DateTime.Now;
             SessionComplete = false;
             PropertyChanged += new PropertyChangedEventHandler(OnPropertyChangedEvent);
-            DBContext.DepositorSessions.Add(DepositorSession);
-            ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+            _depositorDBContext.DepositorSessions.Add(DepositorSession);
+            _depositorDBContext.SaveChangesAsync().Wait();
             ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SessionStart), "Session", "Session {0} started", SessionID.ToString().ToUpper());
         }
 
@@ -186,7 +194,7 @@ namespace CashmereDeposit.Models
 
         public ApplicationViewModel ApplicationViewModel => _applicationViewModel;
 
-        public DepositorDBContext DBContext { get; set; } = new DepositorDBContext();
+        public DepositorDBContext DBContext { get; set; } = _depositorDBContext;
 
         public Device Device { get; }
 
@@ -203,7 +211,15 @@ namespace CashmereDeposit.Models
 
         internal void CreateTransaction(TransactionTypeListItem transactionType)
         {
-            Transaction = new AppTransaction(this, transactionType, transactionType.DefaultAccountCurrency);
+            var transactionTypeListItem = _depositorDBContext.TransactionTypeListItems.Where(s => s.Id == transactionType.Id)
+                  .Include(i => i.TxTypeGUIScreenlistNavigation)
+                  .Include(i => i.DefaultAccountCurrencyNavigation)
+                  .Include(i => i.TransactionTextNav)
+                  .Include(i => i.TxLimitListNavigation)
+                  .Include(i => i.TxTextNavigationText)
+                  .Include(i => i.TxTypeNavigation)
+                  .FirstOrDefault();
+            Transaction = new AppTransaction(this, transactionTypeListItem, transactionType.DefaultAccountCurrency);
             Transaction.TransactionLimitReachedEvent += new EventHandler<EventArgs>(Transaction_TransactionLimitReachedEvent);
             ApplicationViewModel.AlertManager.SendAlert(new AlertTransactionStarted(Transaction, Device, DateTime.Now));
         }
@@ -230,8 +246,8 @@ namespace CashmereDeposit.Models
             SessionEnd = DateTime.Now;
             if (Transaction != null && !Transaction.Completed)
                 Transaction.EndTransaction(result, errorMessage);
-            ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
-            DBContext.Dispose();
+            _depositorDBContext.SaveChangesAsync().Wait();
+            _depositorDBContext.Dispose();
         }
 
         private void OnPropertyChangedEvent(object sender, PropertyChangedEventArgs e) => SaveToDatabase();
@@ -247,7 +263,7 @@ namespace CashmereDeposit.Models
 
         internal void SaveToDatabase()
         {
-            ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+            _depositorDBContext.SaveChangesAsync().Wait();
         }
     }
 }

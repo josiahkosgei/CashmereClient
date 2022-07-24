@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.Standard.Statuses;
 using Cashmere.Library.Standard.Utilities;
 
@@ -29,6 +30,8 @@ namespace CashmereDeposit.Models
 
         public PrinterState State => _state;
 
+        private readonly DepositorDBContext _depositorDBContext;
+         private readonly IDeviceRepository _deviceRepository;
         private ApplicationViewModel ApplicationViewModel { get; }
 
         public DepositorPrinter(
@@ -40,6 +43,8 @@ namespace CashmereDeposit.Models
           int databits = 8,
           StopBits stopBits = StopBits.One)
         {
+            _deviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             ApplicationViewModel = applicationViewModel;
             Log = log;
             Log?.Info(GetType().Name, "Port Listener Initialising", "Initialisation", "Initialising the port listener");
@@ -77,7 +82,7 @@ namespace CashmereDeposit.Models
 
         private void dispTimer_Tick(object sender, EventArgs e) => CTSHolding = GetCTSHolding();
 
-        public void PrintCIT(CIT CIT, DepositorDBContext DBContext, bool isCopy)
+        public void PrintCIT(CIT CIT, bool isCopy)
         {
             CITPrintout printout = new CITPrintout()
             {
@@ -109,7 +114,7 @@ namespace CashmereDeposit.Models
             CIT.CITPrintouts.Add(printout);
             try
             {
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (ValidationException ex)
             {
@@ -128,10 +133,7 @@ namespace CashmereDeposit.Models
                 Print(printoutFromCIT);
         }
 
-        public void PrintTransaction(
-          Transaction transaction,
-          DepositorDBContext depositorDBContext,
-          bool isCopy = false)
+        public void PrintTransaction(Transaction transaction, bool isCopy = false)
         {
             Printout printout = new Printout()
             {
@@ -143,7 +145,7 @@ namespace CashmereDeposit.Models
             string printoutFromTransaction;
             try
             {
-                printoutFromTransaction = GeneratePrintoutFromTransaction(transaction, printout, depositorDBContext);
+                printoutFromTransaction = GeneratePrintoutFromTransaction(transaction, printout);
             }
             catch (IOException ex)
             {
@@ -161,7 +163,7 @@ namespace CashmereDeposit.Models
                 throw;
             }
             transaction.Printouts.Add(printout);
-            ApplicationViewModel.SaveToDatabaseAsync(depositorDBContext).Wait();
+            //depositorDBContext.SaveChangesAsync().Wait();
             int receiptOriginalCount = ApplicationViewModel.DeviceConfiguration.RECEIPT_ORIGINAL_COUNT;
             int num = receiptOriginalCount < 1 ? 1 : receiptOriginalCount;
             for (int index = 0; index < num; ++index)
@@ -189,8 +191,7 @@ namespace CashmereDeposit.Models
 
         private string GeneratePrintoutFromTransaction(
           Transaction transaction,
-          Printout printout,
-          DepositorDBContext depositorDBContext)
+          Printout printout)
         {
             TransactionText transactionText = transaction?.TxTypeNavigation?.TxTextNavigationText;
             if (transactionText == null)
@@ -198,7 +199,7 @@ namespace CashmereDeposit.Models
             string str1 = "\r\n" + ApplicationViewModel.CashmereTranslationService?.TranslateUserText(GetType().Name + ".GeneratePrintoutFromTransaction receiptTemplate", transactionText.ReceiptTemplate, null).Replace("\r\n", "\n").Replace("\n", "\r\n");
             if (str1 == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): receipt_template cannot be null");
-            Device device = depositorDBContext.Devices.FirstOrDefault(x => x.Id == transaction.DeviceId);
+            Device device = _deviceRepository.GetByIdAsync(transaction.DeviceId).ContinueWith(x=>x.Result).Result;
             if (device == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): transactionDevice cannot be null");
             string str2 = str1.Replace("{device_name}", device.Name).Replace("{device_machine_name}", device.MachineName).Replace("{device_device_number}", device.DeviceNumber).Replace("{receipt_bank_name}", ApplicationViewModel.DeviceConfiguration.RECEIPT_BANK_NAME);

@@ -58,8 +58,10 @@ namespace CashmereDeposit.ViewModels
                 selected = value;
                 NotifyOfPropertyChange(nameof(SelectedFilteredList));
                 ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-                var backgroundWorker = new BackgroundWorker();
-                backgroundWorker.WorkerReportsProgress = false;
+                var backgroundWorker = new BackgroundWorker
+                {
+                    WorkerReportsProgress = false
+                };
                 backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
                 backgroundWorker.RunWorkerAsync();
             }

@@ -1,7 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.Extensions;
 using Cashmere.Library.CashmereDataAccess.Views;
+using Cashmere.Library.Standard.Logging;
+using Cashmere.Library.Standard.Statuses;
 using Microsoft.EntityFrameworkCore;
 using ApplicationException = Cashmere.Library.CashmereDataAccess.Entities.ApplicationException;
 
@@ -9,7 +13,6 @@ namespace Cashmere.Library.CashmereDataAccess
 {
     public partial class DepositorDBContext : DbContext
     {
-
         public DepositorDBContext()
         {
         }
@@ -104,12 +107,21 @@ namespace Cashmere.Library.CashmereDataAccess
         public virtual DbSet<ValidationType> ValidationTypes { get; set; } = null!;
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            return base.SaveChangesAsync(cancellationToken);
+                var strategy = this.Database.CreateExecutionStrategy();
+                var result = strategy.ExecuteAsync(async () =>
+                     {
+                         await using var transaction = await this.Database.BeginTransactionAsync();
+                         var _returnValue = base.SaveChanges();
+                         await transaction.CommitAsync();
+                         return _returnValue;
+                     });
+                return result;
+            
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                //.UseModel(DepositorDBContextModel.Instance)
+            //.UseModel(DepositorDBContextModel.Instance)
             .UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True",
             options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 

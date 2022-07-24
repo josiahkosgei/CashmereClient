@@ -19,17 +19,33 @@ public class FinacleIntegrationServiceClient : APIClient, IMonitoringController,
     {
     }
 
-    public async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(AccountNumberValidationRequest request) => await SendAsync<AccountNumberValidationResponse>("api/Accounts/ValidateAccountNumber", request);
+    public async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(AccountNumberValidationRequest request)
+    {
+       // var BSGetAccountDetailsClient = new BSGetAccountDetailsClient();
+        return await SendAsync<AccountNumberValidationResponse>("api/Accounts/ValidateAccountNumber", request);
+    }
 
     public async Task<ReferenceAccountNumberValidationResponse> ValidateReferenceAccountNumberAsync(
-        ReferenceAccountNumberValidationRequest request) => await SendAsync<ReferenceAccountNumberValidationResponse>("api/Accounts/ValidateReferenceAccountNumber", request);
+        ReferenceAccountNumberValidationRequest request)
+    {
+        return await SendAsync<ReferenceAccountNumberValidationResponse>("api/Accounts/ValidateReferenceAccountNumber", request);
+    }
 
     public async Task<IntegrationServerPingResponse> ServerPingAsync(
-        IntegrationServerPingRequest request) => await SendAsync<IntegrationServerPingResponse>("api/Monitoring/ServerPing", request);
+        IntegrationServerPingRequest request)
+    {
+        return await SendAsync<IntegrationServerPingResponse>("api/Monitoring/ServerPing", request);
+    }
 
     public async Task<PostTransactionResponse> PostTransactionAsync(
-        PostTransactionRequest request) => await SendAsync<PostTransactionResponse>("api/Transactions/PostTransaction", request);
+        PostTransactionRequest request)
+    {
+        return await SendAsync<PostTransactionResponse>("api/Transactions/PostTransaction", request);
+    }
 
     public async Task<PostCITTransactionResponse> PostCITTransactionAsync(
-        PostCITTransactionRequest request) => await SendAsync<PostCITTransactionResponse>("api/Transactions/PostCITTransaction", request);
+        PostCITTransactionRequest request)
+    {
+        return await SendAsync<PostCITTransactionResponse>("api/Transactions/PostCITTransaction", request);
+    }
 }

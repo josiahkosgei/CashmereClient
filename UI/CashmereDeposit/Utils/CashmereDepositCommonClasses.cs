@@ -13,12 +13,8 @@ namespace CashmereDeposit.Utils
 {
     internal static class CashmereDepositCommonClasses
     {
-        internal static DeviceStatus GenerateDeviceStatus(
-          Guid deviceID,
-          DepositorDBContext DBContext)
+        internal static DeviceStatus GenerateDeviceStatus(Guid deviceID)
         {
-            if (DBContext == null)
-                throw new NullReferenceException("dBContext is null at GenerateDeviceStatus");
             return new DeviceStatus()
             {
                 DeviceId = deviceID,

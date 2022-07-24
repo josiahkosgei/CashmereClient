@@ -4,11 +4,13 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess;
 
 namespace CashmereDeposit.ViewModels
 {
     internal class UserControlViewModel : FormViewModelBase
     {
+        private readonly DepositorDBContext _depositorDBContext;
         private ApplicationUser ApplicationUser;
         private string _username;
         public string _password;
@@ -109,6 +111,7 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
             ApplicationUser = applicationUser;
             Username = ApplicationUser?.Username;
             FirstName = ApplicationUser?.Fname;
@@ -116,7 +119,7 @@ namespace CashmereDeposit.ViewModels
             Email = ApplicationUser?.Email;
             Role = ApplicationUser?.Role;
             PasswordHash = applicationUser?.Password;
-            var list = depositorDbContext.Roles.Select(x => x.Name).ToList();
+            var list = _depositorDBContext.Roles.Select(x => x.Name).ToList();
             Fields.Add(new FormListItem()
             {
                 DataLabel = nameof(Username),
@@ -183,7 +186,7 @@ namespace CashmereDeposit.ViewModels
                 return "Please enter a username";
             if (isNew)
             {
-                if (depositorDbContext.ApplicationUsers.Any(x => x.Username.ToUpper() == username.ToUpper()))
+                if (_depositorDBContext.ApplicationUsers.Any(x => x.Username.ToUpper() == username.ToUpper()))
                     return "User already exists";
             }
             return null;
@@ -232,7 +235,7 @@ namespace CashmereDeposit.ViewModels
         {
             if (string.IsNullOrWhiteSpace(role))
                 return "Please select a role";
-            var role1 = depositorDbContext.Roles.FirstOrDefault(x => x.Name == role);
+            var role1 = _depositorDBContext.Roles.FirstOrDefault(x => x.Name == role);
             if (role1 == null)
                 return "Role does not exist";
             Role = role1;
@@ -251,10 +254,10 @@ namespace CashmereDeposit.ViewModels
             ApplicationUser.Email = Email;
             ApplicationUser.RoleId = Role.Id;
             if (isNew)
-                depositorDbContext.ApplicationUsers.Add(ApplicationUser);
+                _depositorDBContext.ApplicationUsers.Add(ApplicationUser);
             try
             {
-                ApplicationViewModel.SaveToDatabaseAsync(depositorDbContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (Exception ex)
             {

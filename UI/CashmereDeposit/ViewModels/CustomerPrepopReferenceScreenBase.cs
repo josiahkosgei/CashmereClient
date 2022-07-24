@@ -11,6 +11,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess;
+using Caliburn.Micro;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -30,6 +34,8 @@ namespace CashmereDeposit.ViewModels
         private bool _CancelEditComboBoxIsVisible;
 
         public ObservableCollection<string> CustomerComboBoxInput { get; set; }
+        private static IDeviceRepository _iDeviceRepository { get; set; }
+       //  private static DepositorDBContext _depositorDBContext { get; set; }
 
         public string SelectedCustomerComboBoxInput
         {
@@ -189,23 +195,41 @@ namespace CashmereDeposit.ViewModels
         {
             var referenceScreenBase = this;
             IsComboBoxEditMode = true;
-            CustomerInput = customerInput;
-            GuiScreenListScreens = applicationViewModel.CurrentGUIScreen.GuiScreenListScreens.FirstOrDefault(x => x.GuiScreenList == applicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlistNavigation.Id);
+            CustomerInput = customerInput; 
+
+            _iDeviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
+
+            var txType = _depositorDBContext.TransactionTypeListItems.Where(s => s.Id == applicationViewModel.CurrentTransaction.TransactionType.Id)
+                .Include(x => x.TxTypeGUIScreenlistNavigation)
+                .Include(x => x.TransactionTextNav)
+                .Include(x => x.DefaultAccountCurrencyNavigation)
+                .Include(x => x.TxLimitListNavigation)
+                .Include(x => x.TxTextNavigationText)
+                .Include(x => x.TxTypeGUIScreenlistNavigation)
+                .Include(x => x.TxTypeNavigation)
+                //.Include(x => x.TxTypeNavigation)
+                .FirstOrDefault();
+            applicationViewModel.CurrentTransaction.TransactionType =txType;
+            GuiScreenListScreens = applicationViewModel.CurrentGUIScreen.GuiScreenListScreens.FirstOrDefault(x => x.GuiScreenList == txType.TxTypeGUIScreenlistNavigation?.Id);
             EditComboBoxButtonCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(nameof(EditComboBoxButtonCaption), "sys_EditComboBoxButtonCaption", "Edit");
             CancelEditComboBoxButtonCaption = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(nameof(CancelEditComboBoxButtonCaption), "sys_CancelEditComboBoxButtonCaption", "Choose");
-            if ((bool)!GuiScreenListScreens?.GUIPrepopList?.Enabled)
+            if (GuiScreenListScreens?.GUIPrepopList !=null && (bool)!GuiScreenListScreens?.GUIPrepopList?.Enabled)
                 return;
             var screenListScreen = GuiScreenListScreens;
-            int num1;
+            int num1=0;
             if (screenListScreen == null)
             {
                 num1 = 0;
             }
             else
             {
-                var count = screenListScreen.GUIPrepopList?.GUIPrepopListItems?.Count;
-                var num2 = 0;
-                num1 = count.GetValueOrDefault() > num2 & count.HasValue ? 1 : 0;
+                if (screenListScreen.GUIPrepopList?.GUIPrepopListItems !=null)
+                {
+                    var count = screenListScreen.GUIPrepopList?.GUIPrepopListItems?.Count;
+                    var num2 = 0;
+                    num1 = count.GetValueOrDefault() > num2 & count.HasValue ? 1 : 0; 
+                }
             }
             if (num1 == 0)
                 return;

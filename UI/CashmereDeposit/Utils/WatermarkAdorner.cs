@@ -20,9 +20,11 @@ namespace CashmereDeposit.Utils
           : base(adornedElement)
         {
             IsHitTestVisible = false;
-            this.contentPresenter = new ContentPresenter();
-            this.contentPresenter.Content = watermark;
-            this.contentPresenter.Opacity = 0.5;
+            this.contentPresenter = new ContentPresenter
+            {
+                Content = watermark,
+                Opacity = 0.5
+            };
             ContentPresenter contentPresenter = this.contentPresenter;
             Thickness thickness1 = Control.Margin;
             double left1 = thickness1.Left;

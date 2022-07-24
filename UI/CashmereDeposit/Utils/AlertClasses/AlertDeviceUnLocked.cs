@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.Standard.Utilities;
@@ -19,21 +20,22 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertDeviceUnLocked : AlertBase
     {
         public const int ALERT_ID = 1401;
+        private readonly DepositorDBContext _depositorDBContext;
         private string _errorMessage;
 
         public AlertDeviceUnLocked(string errorMessage, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
             _errorMessage = errorMessage;
-            using DepositorDBContext depositorDbContext = new DepositorDBContext();
-            AlertType = depositorDbContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1401);
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1401);
         }
 
         public override bool SendAlert()
         {
             try
             {
-                using DepositorDBContext DBContext = new DepositorDBContext();
+            
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -46,14 +48,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                DBContext.AlertEvents.Add(entity);
+                _depositorDBContext.AlertEvents.Add(entity);
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                _depositorDBContext.SaveChangesAsync().Wait();
                 return true;
             }
             catch (ValidationException ex)

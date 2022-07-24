@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
 
-    public class RepositoryBase<T> : IAsyncRepository<T> where T : class
+    public class RepositoryBase<T> : IAsyncRepository<T> where T : class, new()
 
     {
         protected readonly DepositorDBContext DbContext;

@@ -16,20 +16,29 @@ using Cashmere.Library.CashmereDataAccess.Entities;
 
 using CashmereDeposit.Models;
 using CashmereDeposit.Utils;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Caliburn.Micro;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashmereDeposit.ViewModels
 {
     [Guid("F6BEA4EB-B0C9-4EB3-B225-1F83F73BFD70")]
     internal class TransactionListScreenViewModel : CustomerListScreenBaseViewModel
     {
+
+        private static IDeviceRepository _iDeviceRepository { get; set; }
+       //  private static DepositorDBContext _depositorDBContext { get; set; }
         public TransactionListScreenViewModel(
           string screenTitle,
           ApplicationViewModel applicationViewModel,
           bool required = false)
           : base(screenTitle, applicationViewModel, required)
         {
-            using var DBContext = new DepositorDBContext();
-            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", DBContext.TransactionTexts.FirstOrDefault(y => y.TxItem == x.Id)?.ListItemCaption, "No Text"), (object)x)).ToList();
+
+            _iDeviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            
+            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", _depositorDBContext.TransactionTexts.FirstOrDefault(y => y.TxItem == x.Id)?.ListItemCaption, "No Text"), (object)x)).ToList();
             GetFirstPage();
         }
 
@@ -119,8 +128,10 @@ namespace CashmereDeposit.ViewModels
                 }
                 else
                 {
-                    var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
-                    var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimer, null);
+                    var transactionTypeId = ApplicationViewModel?.CurrentTransaction?.TransactionType.Id;
+                    var disclaimerNavigation = _depositorDBContext.TransactionTypeListItems.Where(x => x.Id == transactionTypeId).Include(x => x.TxTextNavigationText.DisclaimerNavigation).FirstOrDefault();
+                    //var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
+                    var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimerNavigation.TxTextNavigationText.Disclaimer, null);
                     str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
                 }
                 var message = str3;

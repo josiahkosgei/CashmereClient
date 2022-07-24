@@ -10,15 +10,17 @@ namespace CashmereDeposit.UserControls
     {
         private static Window CreateAutoCloseWindow(TimeSpan timeout)
         {
-            Window window1 = new Window();
-            window1.WindowStyle = WindowStyle.None;
-            window1.WindowState = WindowState.Maximized;
-            window1.Background = (Brush)Brushes.White;
-            window1.AllowsTransparency = true;
-            window1.Opacity = 0.5;
-            window1.ShowInTaskbar = false;
-            window1.ShowActivated = true;
-            window1.Topmost = true;
+            Window window1 = new Window
+            {
+                WindowStyle = WindowStyle.None,
+                WindowState = WindowState.Maximized,
+                Background = (Brush)Brushes.White,
+                AllowsTransparency = true,
+                Opacity = 0.5,
+                ShowInTaskbar = false,
+                ShowActivated = true,
+                Topmost = true
+            };
             Window window2 = window1;
             window2.Show();
             IntPtr handle = new WindowInteropHelper(window2).Handle;

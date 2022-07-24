@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace CashmereDeposit.ViewModels
 {
+    [Guid("DECF0FAF-2BA5-47CB-933A-FD45BDD58ECC")]
     public class AccountNumberInputScreenViewModel : DepositorCustomerScreenBaseViewModel
     {
         public AccountNumberInputScreenViewModel(
@@ -28,8 +29,10 @@ namespace CashmereDeposit.ViewModels
                     return;
                 CanNext = false;
                 ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
-                var backgroundWorker = new BackgroundWorker();
-                backgroundWorker.WorkerReportsProgress = false;
+                var backgroundWorker = new BackgroundWorker
+                {
+                    WorkerReportsProgress = false
+                };
                 backgroundWorker.DoWork += new DoWorkEventHandler(StatusWorker_DoWork);
                 backgroundWorker.RunWorkerAsync();
             }

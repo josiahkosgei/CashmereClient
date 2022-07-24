@@ -245,8 +245,14 @@ namespace CashmereDeposit
             //        errorNumbersToAdd: null);
             //    });
             //    );
+
             services.AddDbContext<DepositorDBContext>(options =>
                 {
+                    if (options is null)
+                    {
+                        throw new ArgumentNullException(nameof(options));
+                    }
+
                     options.UseSqlServer(connectionString,
                     sqlServerOptionsAction: sqlOptions =>
                     {
@@ -264,9 +270,9 @@ namespace CashmereDeposit
                 services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
                 {
                     Device device;
-                    using (DepositorDBContext DBContext = new DepositorDBContext())
+                    using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
                     {
-                        device = GetDevice(DBContext);
+                        device = GetDevice(_depositorDBContext);
                     }
 
                     var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);

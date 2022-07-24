@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -18,6 +19,7 @@ namespace CashmereDeposit.ViewModels
         private const int txPageSize = 10;
         private int maxPage;
         private int _currentPage;
+        private readonly DepositorDBContext _depositorDBContext;
         private IQueryable<Transaction> txQuery;
         private IEnumerable<Transaction> _transactionList;
         private Transaction selectedTransaction;
@@ -29,7 +31,8 @@ namespace CashmereDeposit.ViewModels
           Screen callingObject)
           : base(screenTitle, applicationViewModel, callingObject)
         {
-            txQuery = DBContext.Transactions.Where(t => t.TxEndDate >= txQueryStartDate && t.TxEndDate < txQueryEndDate).OrderByDescending(t => t.TxEndDate);
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            txQuery = _depositorDBContext.Transactions.Where(t => t.TxEndDate >= txQueryStartDate && t.TxEndDate < txQueryEndDate).OrderByDescending(t => t.TxEndDate);
             Activated += new EventHandler<ActivationEventArgs>(TransactionReportScreenViewModel_Activated);
         }
 

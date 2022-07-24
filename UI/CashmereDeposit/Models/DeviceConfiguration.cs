@@ -365,7 +365,7 @@ namespace CashmereDeposit.Models
         }
         
         private static IDeviceRepository _iDeviceRepository { get; set; }
-        private static DepositorDBContext _depositorDBContext { get; set; }
+       //  private static DepositorDBContext _depositorDBContext { get; set; }
         private DeviceConfiguration()
         {
             _repository = IoC.Get<IAsyncRepository<DeviceConfig>>();
@@ -465,16 +465,16 @@ namespace CashmereDeposit.Models
             //{
                 var configs = _depositorDBContext.Configs.ToList();
                 var config_group = _depositorDBContext.Devices.FirstOrDefault()?.ConfigGroup;
-                //var userType = depositorDbContext.Set().FromSql("dbo.SomeSproc @Id = {0}, @Name = {1}", 45, "Ada");
+                //var userType = _depositorDBContext.Set().FromSql("dbo.SomeSproc @Id = {0}, @Name = {1}", 45, "Ada");
                 _depositorDBContext.Set<DeviceConfig>().FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
-                //depositorDbContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
+                //_depositorDBContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
                 //    .ForEach(deviceConfig =>
                 //        configs.First(x =>
                 //                x.Name.Equals(deviceConfig.ConfigId.ToString(), StringComparison.OrdinalIgnoreCase))
                 //            .DefaultValue = deviceConfig.ConfigValue);
 
                 //depositorDbContext
-                //    .GetDeviceConfigByUserGroup(depositorDbContext.Devices.FirstOrDefault()?.config_group).ToList()
+                //    .GetDeviceConfigByUserGroup(_depositorDBContext.Devices.FirstOrDefault()?.config_group).ToList()
                 //    .ForEach(deviceConfig =>
                 //        configs.First(x => x.name.Equals(deviceConfig.config_id, StringComparison.OrdinalIgnoreCase))
                 //            .default_value = deviceConfig.config_value);

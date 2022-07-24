@@ -1,21 +1,17 @@
-﻿
-//.EscrowJamStatusReportScreenViewModel
-
-
-
-
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Cashmere.Library.Standard.Statuses;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess;
 
 namespace CashmereDeposit.ViewModels
 {
     public class EscrowJamStatusReportScreenViewModel : FormViewModelBase
     {
         private bool canNext;
+        private readonly DepositorDBContext _depositorDBContext;
 
         public EscrowJamStatusReportScreenViewModel(
           ApplicationViewModel applicationViewModel,
@@ -24,6 +20,7 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
             ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor ScreenTitle", "sys_EscrowJamFormScreenTitle", "Clear Escrow Jam");
             NextCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor NextCaption", "sys_EndEscrowJamRecoveryCommand_Caption", "Complete");
             CancelCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("ATMScreenViewModelBase.CancelCaption", "sys_CancelButton_Caption", "Cancel");
@@ -44,7 +41,7 @@ namespace CashmereDeposit.ViewModels
         {
             if (ApplicationViewModel.EscrowJam == null)
             {
-                var transaction = depositorDbContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
+                var transaction = _depositorDBContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
                 if (!transaction.TxCompleted || transaction.TxErrorCode == 85)
                 {
                     ApplicationViewModel.EscrowJam = new EscrowJam()
@@ -53,7 +50,7 @@ namespace CashmereDeposit.ViewModels
                         DateDetected = DateTime.Now
                     };
                     transaction.EscrowJams.Add(ApplicationViewModel.EscrowJam);
-                    ApplicationViewModel.SaveToDatabaseAsync(depositorDbContext).Wait();
+                    _depositorDBContext.SaveChangesAsync().Wait();
                 }
             }
             CanNext = ApplicationViewModel.DeviceManager.CurrentState == DeviceManagerState.ESCROWJAM_END_REQUEST;

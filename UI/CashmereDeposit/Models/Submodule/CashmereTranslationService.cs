@@ -8,17 +8,20 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Caliburn.Micro;
 
 namespace CashmereDeposit.Models.Submodule
 {
     [Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE")]
     public class CashmereTranslationService : SubmoduleBase
     {
+        private readonly DepositorDBContext _depositorDBContext;
         public bool isMultiLanguage { get; } = false;
 
         public CashmereTranslationService(ApplicationViewModel applicationViewModel, CDMLicense license)
           : base(applicationViewModel, license, new Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE"), nameof(CashmereTranslationService))
         {
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             if (license == null)
                 return;
             if (!license.Grant(new LicenseFeatureItem()
@@ -56,7 +59,7 @@ namespace CashmereDeposit.Models.Submodule
                     {
                         try
                         {
-                            SysTextItem sysTextItem = depositorDbContext.SysTextItems.FirstOrDefault<SysTextItem>(x => x.Token == tokenID);
+                            SysTextItem sysTextItem = _depositorDBContext.SysTextItems.FirstOrDefault<SysTextItem>(x => x.Token == tokenID);
                             if (sysTextItem == null)
                             {
                                 ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof(TranslateSystemText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
@@ -110,7 +113,7 @@ namespace CashmereDeposit.Models.Submodule
                     {
                         if (!textItem.HasValue)
                             throw new ArgumentNullException(nameof(textItem));
-                        TextItem textItem1 = depositorDbContext.TextItems.FirstOrDefault<TextItem>(x => x.Id == textItem);
+                        TextItem textItem1 = _depositorDBContext.TextItems.FirstOrDefault<TextItem>(x => x.Id == textItem);
                         if (textItem1 == null)
                         {
                             ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof(TranslateUserText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);

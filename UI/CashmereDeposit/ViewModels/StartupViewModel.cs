@@ -38,13 +38,14 @@ namespace CashmereDeposit.ViewModels
 
         private ApplicationViewModel ApplicationViewModel { get; set; }
         private static IDeviceRepository _iDeviceRepository { get; set; }
-        private static DepositorDBContext _depositorDBContext { get; set; }
+        //private static DepositorDBContext _depositorDBContext { get; set; }
+        private readonly IDeviceStatusRepository _deviceStatusRepository;
         public StartupViewModel()
         {
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
-
+          //  _depositorDBContext = IoC.Get<DepositorDBContext>();
+           _deviceStatusRepository = IoC.Get<IDeviceStatusRepository>();
             Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version?.ToString(), "CashmereDepositLog", null);
             AppDomain.CurrentDomain.UnhandledException += CrashHandler;
             ApplicationViewModel.DeviceConfiguration = DeviceConfiguration.Initialise();
@@ -53,7 +54,7 @@ namespace CashmereDeposit.ViewModels
             _startupTimer.Tick += StartupTimer_Tick;
             _startupTimer.IsEnabled = true;
             _outOfOrderTimer.Interval = TimeSpan.FromSeconds(11.0);
-            _outOfOrderTimer.Tick += OutOfOrderTimer_Tick;
+            _outOfOrderTimer.Tick += OutOfOrderTimer_TickAsync;
             _outOfOrderTimer.IsEnabled = true;
             WebAPI_StartSelfHost();
         }
@@ -92,17 +93,17 @@ namespace CashmereDeposit.ViewModels
             ChangeActiveItemAsync(new OutOfOrderFatalScreenViewModel(), true);
         }
 
-        private void OutOfOrderTimer_Tick(object sender, EventArgs e)
+        private async void OutOfOrderTimer_TickAsync(object sender, EventArgs e)
         {
             _outOfOrderTimer.Stop();
             _outOfOrderTimer = null;
             try
             {
-                var device = GetDeviceAsync().ContinueWith(x => x.Result).Result;
+                var device = GetDeviceAsync();
                 try
                 {
                     AlertManager = new AlertManager(new DepositorLogger(null), DeviceConfiguration.Initialise().API_COMMSERV_URI, device.AppId, device.AppKey, device.MachineName);
-                    ApplicationViewModel = new ApplicationViewModel(this);
+                    ApplicationViewModel = new ApplicationViewModel();
                     ChangeActiveItemAsync(ApplicationViewModel, true);
                 }
                 catch (Exception ex)
@@ -110,11 +111,11 @@ namespace CashmereDeposit.ViewModels
                     ActivateItemAsync(new OutOfOrderFatalScreenViewModel());
                     AlertManager?.SendAlert(new AlertDeviceStartupFailed(ex?.Message, device, DateTime.Now));
                     CrashHandler(this, new UnhandledExceptionEventArgs(ex, false));
-                    var deviceStatus = _depositorDBContext.DeviceStatus.FirstOrDefault(x => x.DeviceId == device.Id);
+                    var deviceStatus = await _deviceStatusRepository.GetByDeviceId(device.Id);
                     if (deviceStatus == null)
                     {
-                        deviceStatus = CashmereDepositCommonClasses.GenerateDeviceStatus(device.Id, _depositorDBContext);
-                        _depositorDBContext.DeviceStatus.Add(deviceStatus);
+                        deviceStatus = CashmereDepositCommonClasses.GenerateDeviceStatus(deviceID: device.Id);
+                        await _deviceStatusRepository.AddAsync(deviceStatus);
                     }
                     deviceStatus.CurrentStatus |= 1024;
                     deviceStatus.Modified = DateTime.Now;
@@ -124,7 +125,7 @@ namespace CashmereDeposit.ViewModels
             {
                 CrashHandler(this, new UnhandledExceptionEventArgs(ex, false));
             }
-            SaveToDatabase(_depositorDBContext);
+           // SaveToDatabase();
         }
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
@@ -137,8 +138,8 @@ namespace CashmereDeposit.ViewModels
                 {
           exceptionObject.MessageString()
                 });
-                var device = GetDeviceAsync().ContinueWith(x => x.Result).Result;
-                SaveToDatabase(_depositorDBContext);
+                var device = GetDeviceAsync();
+                SaveToDatabase();
                 AlertManager?.SendAlert(new AlertApplicationCrash(device, exceptionObject.Message, DateTime.Now, exceptionObject.StackTrace));
             }
             catch (Exception ex1)
@@ -155,11 +156,11 @@ namespace CashmereDeposit.ViewModels
             Application.Current.Shutdown();
         }
 
-        public void SaveToDatabase(DepositorDBContext dbContext)
+        public void SaveToDatabase()
         {
             try
             {
-                ApplicationViewModel.SaveToDatabaseAsync(dbContext).Wait();
+                //_depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (ValidationException ex)
             {
@@ -187,9 +188,9 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        private static async Task<Device> GetDeviceAsync()
+        private static Device GetDeviceAsync()
         {
-            return _depositorDBContext.Devices.ToList().FirstOrDefault() ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
+            return _iDeviceRepository.GetDevice(Environment.MachineName).ContinueWith(x=>x.Result).Result  ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
             //return device ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
         }
         private readonly CompositeDisposable _disposables = new();

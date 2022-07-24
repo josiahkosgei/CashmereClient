@@ -24,6 +24,7 @@ namespace CashmereDeposit.ViewModels
     internal class UserChangePasswordFormViewModel : FormViewModelBase
     {
         public bool IsAuthorise;
+        private readonly DepositorDBContext _depositorDBContext;
 
         private ApplicationUser User { get; set; }
 
@@ -48,17 +49,10 @@ namespace CashmereDeposit.ViewModels
           bool isAuthorise = false,
           UserLoginViewModel.LoginSuccessCallBack loginSuccessCallBack = null)
           : base(applicationViewModel, conductor, callingObject, true)
-        {
-            if (dbcontext == null)
-            {
-                DBContext = new DepositorDBContext();
-                User = DBContext.ApplicationUsers.FirstOrDefault(x => x.Id == user.Id);
-            }
-            else
-            {
-                DBContext = dbcontext;
-                User = user;
-            }
+        { 
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
+                User = _depositorDBContext.ApplicationUsers.FirstOrDefault(x => x.Id == user.Id);
+            
             NextObject = nextObject;
             if (!(Application.Current.FindResource("UserChangePasswordFormScreenTitle") is string str))
                 str = "Change Password";
@@ -168,7 +162,7 @@ namespace CashmereDeposit.ViewModels
             {
                 if (!ApplicationViewModel.DeviceConfiguration.ALLOW_OFFLINE_AUTH)
                 {
-                    Device? device = ApplicationViewModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
+                    Device? device = ApplicationViewModel.GetDeviceAsync();
                     var changePasswordRequest = new ChangePasswordRequest
                     {
                         AppID = device.AppId,
@@ -193,11 +187,11 @@ namespace CashmereDeposit.ViewModels
                         ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "SUCCESS", "Change password SUCCESS for request {0}, User {1}", request.MessageID, User.Username);
                     else
                         ApplicationViewModel.Log.WarningFormat("UserLoginViewModel", nameof(ValidatePassword), "FAIL", "Change password FAIL for request {0}, User {1}: {2}>{3}", request.MessageID, User.Username, result.PublicErrorMessage, result.ServerErrorMessage);
-                    ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                    _depositorDBContext.SaveChangesAsync().Wait();
                     FormErrorText = result.PublicErrorMessage;
                     return result.IsSuccess ? 0 : 1;
                 }
-                var passwordPolicy = DBContext.PasswordPolicies.FirstOrDefault();
+                var passwordPolicy = _depositorDBContext.PasswordPolicies.FirstOrDefault();
                 if (passwordPolicy == null)
                 {
                     FormErrorText = "error, no password policy defined";
@@ -212,7 +206,7 @@ namespace CashmereDeposit.ViewModels
                     SpecialLength = passwordPolicy.MinSpecial,
                     UpperCaseLength = passwordPolicy.MinUppercase
                 };
-                IList<PasswordHistory> list = DBContext.PasswordHistories.Where(x => x.User == User.Id).OrderByDescending(x => x.LogDate).Take(passwordPolicy.HistorySize).ToList();
+                IList<PasswordHistory> list = _depositorDBContext.PasswordHistories.Where(x => x.User == User.Id).OrderByDescending(x => x.LogDate).Take(passwordPolicy.HistorySize).ToList();
                 if (!string.IsNullOrWhiteSpace(OldPassword) && !string.IsNullOrWhiteSpace(NewPassword) && !string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     if (PasswordStorage.VerifyPassword(OldPassword, User.Password))
@@ -242,7 +236,7 @@ namespace CashmereDeposit.ViewModels
                                     Id = Guid.NewGuid(),
                                     Password = hash
                                 });
-                                ApplicationViewModel.SaveToDatabaseAsync(DBContext).Wait();
+                                _depositorDBContext.SaveChangesAsync().Wait();
                                 return 0;
                             }
                             var stringBuilder = new StringBuilder();

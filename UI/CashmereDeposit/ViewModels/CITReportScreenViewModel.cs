@@ -21,6 +21,7 @@ namespace CashmereDeposit.ViewModels
         private const int txPageSize = 10;
         private int maxPage;
         private int _currentPage;
+        private readonly DepositorDBContext _depositorDBContext;
         private IQueryable<CIT> txQuery;
         private IEnumerable<CIT> _citTransactionList;
         private CIT selectedCITTransaction;
@@ -32,7 +33,8 @@ namespace CashmereDeposit.ViewModels
           Screen callingObject)
           : base(screenTitle, applicationViewModel, callingObject)
         {
-            txQuery = DBContext.CITs.Where(t => t.FromDate >= txQueryStartDate && t.ToDate < txQueryEndDate).OrderByDescending(t => t.ToDate);
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            txQuery = _depositorDBContext.CITs.Where(t => t.FromDate >= txQueryStartDate && t.ToDate < txQueryEndDate).OrderByDescending(t => t.ToDate);
             Activated += new EventHandler<ActivationEventArgs>(CITReportScreenViewModel_Activated);
         }
 
@@ -172,7 +174,7 @@ namespace CashmereDeposit.ViewModels
 
         public void PrintCITReceipt()
         {
-            ApplicationViewModel.PrintCITReceipt(SelectedCITTransaction, DBContext, true);
+            ApplicationViewModel.PrintCITReceipt(SelectedCITTransaction, true);
             var num = (int)MessageBox.Show("Printing Complete");
         }
     }

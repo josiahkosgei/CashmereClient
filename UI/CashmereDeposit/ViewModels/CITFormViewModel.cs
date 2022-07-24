@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -50,6 +51,8 @@ namespace CashmereDeposit.ViewModels
 
         private DateTime thisCITFromDate { get; set; }
 
+        private DepositorDBContext _depositorDBContext;
+
         private Device Device { get; }
 
         public CITFormViewModel(
@@ -59,7 +62,8 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-            Device = applicationViewModel.ApplicationModel.GetDeviceAsync().ContinueWith(x => x.Result).Result;
+             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            Device = applicationViewModel.ApplicationModel.GetDeviceAsync();
             ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor ScreenTitle", "sys_CITFormScreenTitle", "CIT Operation");
             NextCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor NextCaption", "sys_StartCITCommand_Caption", "Start CIT");
             Fields.Add(new FormListItem()
@@ -91,7 +95,7 @@ namespace CashmereDeposit.ViewModels
 
         public string ValidateSealNumber(string newSealNumber)
         {
-            if (depositorDbContext.CITs.Where(x => x.SealNumber == newSealNumber).ToList().Count > 0)
+            if (_depositorDBContext.CITs.Where(x => x.SealNumber == newSealNumber).ToList().Count > 0)
                 return "Seal Number must be unique and unused.";
             SealNumber = newSealNumber;
             return null;
@@ -105,10 +109,10 @@ namespace CashmereDeposit.ViewModels
             var CIT = createCIT();
             if (CIT != null)
             {
-                depositorDbContext.CITs.Add(CIT);
+                _depositorDBContext.CITs.Add(CIT);
                 try
                 {
-                    ApplicationViewModel.SaveToDatabaseAsync(depositorDbContext).Wait();
+                    _depositorDBContext.SaveChangesAsync().Wait();
                     ApplicationViewModel.StartCIT(SealNumber);
                     ApplicationViewModel.AdminMode = false;
                     ApplicationViewModel.ShowErrorDialog(new OutOfOrderScreenViewModel(ApplicationViewModel));
@@ -179,7 +183,7 @@ namespace CashmereDeposit.ViewModels
                 CITError = 0,
                 Complete = false
             };
-            var transactions = depositorDbContext.Transactions;
+            var transactions = _depositorDBContext.Transactions;
             Expression<Func<Transaction, bool>> predicate = x => x.CITId == new Guid?() && x.DeviceId == Device.Id && x.TxStartDate >= CIT.FromDate && x.TxStartDate <= CIT.ToDate;
             foreach (var transaction in transactions.Where(predicate).ToList())
                 transaction.CIT = CIT;
@@ -212,16 +216,16 @@ namespace CashmereDeposit.ViewModels
                         {
                             Id = Guid.NewGuid(),
                             CITId = CIT.Id,
-                            AccountNumber = (depositorDbContext.DeviceCITSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid CITSuspenseAccount found for currency {0}", currency))).AccountNumber,
-                            SuspenseAccount = (depositorDbContext.DeviceSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid DeviceSuspenseAccount found for currency {0}", currency))).AccountNumber,
+                            AccountNumber = (_depositorDBContext.DeviceCITSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid CITSuspenseAccount found for currency {0}", currency))).AccountNumber,
+                            SuspenseAccount = (_depositorDBContext.DeviceSuspenseAccounts.FirstOrDefault(x => x.DeviceId == CIT.DeviceId && x.CurrencyCode.Equals(currency.Key, StringComparison.OrdinalIgnoreCase) && x.Enabled == true) ?? throw new NullReferenceException(string.Format("No valid DeviceSuspenseAccount found for currency {0}", currency))).AccountNumber,
                             Datetime = DateTime.Now,
                             Amount = num,
                             Currency = currency.Key,
                             Narration = string.Format("CIT {0} on {1:yyyyMMddTHHmmss}", Device.DeviceNumber, CIT.CITDate)
                         });
                 }
-                depositorDbContext.CITTransactions.AddRange(citTransactionList);
-                ApplicationViewModel.SaveToDatabaseAsync(depositorDbContext).Wait();
+                _depositorDBContext.CITTransactions.AddRange(citTransactionList);
+                _depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (Exception ex)
             {
