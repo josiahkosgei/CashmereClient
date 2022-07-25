@@ -30,7 +30,7 @@ namespace CashmereDeposit.ViewModels.RearScreen
             if (ApplicationViewModel.AdminMode)
             {
                 MenuBackendATMViewModel backendAtmViewModel = new MenuBackendATMViewModel("Main Menu", ApplicationViewModel, this, null);
-                ApplicationViewModel.ShowDialogBox((object)new OutOfOrderFatalScreenViewModel());
+                ApplicationViewModel.ShowDialogBox(new OutOfOrderFatalScreenViewModel());
             }
             else
                 CloseDialog(true);
@@ -45,7 +45,7 @@ namespace CashmereDeposit.ViewModels.RearScreen
 
         public void ShowDialog(Screen screen)
         {
-            ApplicationViewModel.Log.InfoFormat(nameof(RearScreenShellViewModel), "Init", nameof(ShowDialog), "showing screen {0}", (object)JsonConvert.SerializeObject(screen));
+            ApplicationViewModel.Log.InfoFormat(nameof(RearScreenShellViewModel), "Init", nameof(ShowDialog), "showing screen {0}", JsonConvert.SerializeObject(screen));
             if (ApplicationViewModel.AdminMode)
             {
                 ActivateItemAsync(screen);
@@ -59,7 +59,7 @@ namespace CashmereDeposit.ViewModels.RearScreen
 
         public void ShowDialogBox(Screen screen)
         {
-            ApplicationViewModel.Log.InfoFormat(nameof(RearScreenShellViewModel), "Init", nameof(ShowDialogBox), "showing screen {0}", (object)JsonConvert.SerializeObject(screen));
+            ApplicationViewModel.Log.InfoFormat(nameof(RearScreenShellViewModel), "Init", nameof(ShowDialogBox), "showing screen {0}", JsonConvert.SerializeObject(screen));
             ActivateItemAsync(screen);
         }
     }

@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using CashmereDeposit.Utils.AlertClasses;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -62,8 +63,11 @@ namespace CashmereDeposit.ViewModels
         private bool SplitAuthorise { get; set; }
 
         private LoginSuccessCallBack LoginSuccessCallBackDelegate { get; set; }
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
 
+        private static IDeviceRepository _deviceRepository;
+        private static IDeviceLoginRepository _deviceLoginRepository;
+        private static IApplicationUserRepository _applicationUserRepository;
+        private static IPasswordPolicyRepository _passwordPolicyRepository;
         public UserLoginViewModel(
           ApplicationViewModel applicationViewModel,
           Conductor<Screen> conductor,
@@ -76,7 +80,12 @@ namespace CashmereDeposit.ViewModels
           : base(applicationViewModel, conductor, callingObject, false)
         {
             Activity = activity;
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+
+            _deviceRepository = IoC.Get<IDeviceRepository>();
+            _deviceLoginRepository = IoC.Get<IDeviceLoginRepository>();
+            _applicationUserRepository = IoC.Get<IApplicationUserRepository>();
+            _passwordPolicyRepository = IoC.Get<IPasswordPolicyRepository>();
+
             ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor ScreenTitle", "sys_LoginUserScreenTitle", "Login");
             IsAuthorise = isAuthorise;
             ApplicationViewModel = applicationViewModel;
@@ -127,27 +136,27 @@ namespace CashmereDeposit.ViewModels
                 ApplicationViewModel.Log.Debug(GetType().Name, nameof(SaveForm), "Form", "Saving form");
                 FormErrorText = "";
                 var num = await FormValidation();
-                _depositorDBContext.SaveChangesAsync().Wait();
+                //_depositorDBContext.SaveChangesAsync().Wait();
                 switch (num)
                 {
                     case 0:
                         ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SaveForm), "Form", "login form validation successful for {0}", Username);
                         device.LoginAttempts = 0;
-                        _depositorDBContext.SaveChangesAsync().Wait();
+                        //_depositorDBContext.SaveChangesAsync().Wait();
                         return null;
                     case 9:
                         NextObject = new UserChangePasswordFormViewModel(ApplicationViewModel, ApplicationUser, null, Conductor, CallingObject, NextObject, IsAuthorise, LoginSuccessCallBackDelegate);
                         goto case 0;
                     case 10:
                         ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SaveForm), "Form", "Auth Server connection fault: user = {0}", Username);
-                        _depositorDBContext.SaveChangesAsync().Wait();
+                       // _depositorDBContext.SaveChangesAsync().Wait();
                         break;
                     default:
                         ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SaveForm), "Form", "loginform validation failed for {0}, incrementing loginfails", Username);
                         ++device.LoginAttempts;
                         if (device.Enabled && ApplicationViewModel.DeviceConfiguration.LOGINFAIL_DEVICELOCK && device.LoginAttempts >= ApplicationViewModel.DeviceConfiguration.LOGINFAIL_DEVICELOCK_RETRY_COUNT * ApplicationViewModel.DeviceConfiguration.LOGINFAIL_MAX_CYCLES)
                             ApplicationViewModel.LockDevice(true, ApplicationErrorConst.ERROR_LOGIN, "Maximum device login attempts reached " + (ApplicationViewModel.DeviceConfiguration.LOGINFAIL_DEVICELOCK_RETRY_COUNT * ApplicationViewModel.DeviceConfiguration.LOGINFAIL_MAX_CYCLES).ToString());
-                        _depositorDBContext.SaveChangesAsync().Wait();
+                       // _depositorDBContext.SaveChangesAsync().Wait();
                         break;
                 }
             }
@@ -161,7 +170,7 @@ namespace CashmereDeposit.ViewModels
                 ApplicationViewModel.Log.ErrorFormat(GetType().Name, 1, ApplicationErrorConst.ERROR_GENERAL.ToString(), "Login Error: {0}", ex.MessageString());
                 FormErrorText = "Login Error. Contact Administrator";
             }
-            _depositorDBContext.SaveChangesAsync().Wait();
+          //  _depositorDBContext.SaveChangesAsync().Wait();
             return FormErrorText;
         }
 
@@ -182,8 +191,7 @@ namespace CashmereDeposit.ViewModels
                 }
             }
             var depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
-            var dbApplicationUser = _depositorDBContext.Devices.Where(de => de.UserGroup == device.UserGroup).Select(dv =>
-                dv.UserGroupNavigation.ApplicationUsers.FirstOrDefault(x => !(bool)x.UserDeleted && (bool)x.Username.Equals(Username, StringComparison.InvariantCultureIgnoreCase))).FirstOrDefault();
+            var dbApplicationUser = await _deviceRepository.GetByUserGroupAsync(device.UserGroup,Username);
 
             //var dbApplicationUser = depositorContextProcedures
             //    .GetDeviceUsersByDeviceAsync(device.UserGroup).Result
@@ -207,7 +215,7 @@ namespace CashmereDeposit.ViewModels
                     LoginDate = DateTime.Now,
                     DeviceId = device.Id
                 };
-                var deviceLogin1 = (await _depositorDBContext.DeviceLogins.AddAsync(entity)).Entity;
+                var deviceLogin1 = await _deviceLoginRepository.AddAsync(entity);
 
                 var applicationUser1 = dbApplicationUser;
                 int num2;
@@ -241,7 +249,7 @@ namespace CashmereDeposit.ViewModels
                     }
                     else
                     {
-                        var result = Task.Run((Func<Task<AuthenticationResponse>>)(() => AuthenticationAsync(dbApplicationUser, Password))).Result;
+                        var result = Task.Run(() => AuthenticationAsync(dbApplicationUser, Password)).Result;
                         if (!result.IsSuccess)
                         {
                             if (result.IsInvalidCredentials)
@@ -252,13 +260,13 @@ namespace CashmereDeposit.ViewModels
                                     FormErrorText = "User has been locked";
                                     ApplicationViewModel.LockUser(dbApplicationUser, true, ApplicationErrorConst.WARN_LOCKING_USER, "Login Failure limit has been reached");
                                     dbApplicationUser.LoginAttempts = 0;
-                                    _depositorDBContext.SaveChangesAsync().Wait();
+                                    await _applicationUserRepository.UpdateAsync(dbApplicationUser);
                                     ApplicationViewModel.AlertManager.SendAlert(new AlertLoginFailed(device, DateTime.Now, FormErrorText, Username, dbApplicationUser));
                                     num1 = 3;
                                 }
                                 else
                                 {
-                                    _depositorDBContext.SaveChangesAsync().Wait();
+                                   // _depositorDBContext.SaveChangesAsync().Wait();
                                     FormErrorText = "Username or password is incorrect.";
                                     ApplicationViewModel.AlertManager.SendAlert(new AlertLoginFailed(device, DateTime.Now, FormErrorText, Username, dbApplicationUser));
                                     num1 = 1;
@@ -291,7 +299,7 @@ namespace CashmereDeposit.ViewModels
                             device.LoginAttempts = 0;
                             device.LoginCycles = 0;
                             ApplicationViewModel.AlertManager.SendAlert(new AlertLoginSuccess(device, DateTime.Now, errorMessage, Username, dbApplicationUser));
-                            _depositorDBContext.SaveChangesAsync().Wait();
+                            _deviceRepository.UpdateAsync(device);
                             ApplicationUser = dbApplicationUser;
                             _permissionRequiredResult = new PermissionRequiredResult()
                             {
@@ -309,7 +317,7 @@ namespace CashmereDeposit.ViewModels
                                 }
                                 else
                                 {
-                                    var passwordPolicy = _depositorDBContext.PasswordPolicies.FirstOrDefault();
+                                    var passwordPolicy = await _passwordPolicyRepository.GetFirst();
                                     if (passwordPolicy != null)
                                     {
                                         var applicationUser3 = dbApplicationUser;
@@ -371,8 +379,9 @@ namespace CashmereDeposit.ViewModels
                 deviceLogin2.Success = nullable1;
                 deviceLogin1.DepositorEnabled = dbApplicationUser.DepositorEnabled;
                 deviceLogin1.ChangePassword = new bool?(!dbApplicationUser.IsAdUser && dbApplicationUser.PasswordResetRequired);
+                await _deviceLoginRepository.UpdateAsync(deviceLogin1);
             }
-            _depositorDBContext.SaveChangesAsync().Wait();
+           // _depositorDBContext.SaveChangesAsync().Wait();
             return num1;
         }
 
@@ -418,7 +427,6 @@ namespace CashmereDeposit.ViewModels
           string password)
         {
             var userLoginViewModel = this;
-            using var depositorDBContext = new DepositorDBContext();
             var device = userLoginViewModel.ApplicationViewModel.ApplicationModel.GetDeviceAsync();
             if (user.IsAdUser || !ApplicationViewModel.DeviceConfiguration.ALLOW_OFFLINE_AUTH)
             {
@@ -445,7 +453,7 @@ namespace CashmereDeposit.ViewModels
                     ApplicationViewModel.Log.InfoFormat(nameof(UserLoginViewModel), nameof(AuthenticationAsync), "Login", "Login SUCCESS for request {0}, User {1}", request.MessageID, user.Username);
                 else
                     ApplicationViewModel.Log.WarningFormat(nameof(UserLoginViewModel), nameof(AuthenticationAsync), "Login", "Login FAIL for request {0}, User {1}: {2}", request.MessageID, user.Username, authenticationResponse.ServerErrorMessage);
-                _depositorDBContext.SaveChangesAsync().Wait();
+               // _depositorDBContext.SaveChangesAsync().Wait();
                 return authenticationResponse;
             }
             var flag = userLoginViewModel.StandardAuthentication(user);

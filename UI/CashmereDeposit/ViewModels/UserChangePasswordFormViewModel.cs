@@ -17,18 +17,17 @@ using System.Threading.Tasks;
 using System.Windows;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
     internal class UserChangePasswordFormViewModel : FormViewModelBase
     {
         public bool IsAuthorise;
-        private readonly DepositorDBContext _depositorDBContext;
+        //  private readonly DepositorDBContext _depositorDBContext;
 
         private ApplicationUser User { get; set; }
 
-        private DepositorDBContext DBContext { get; set; }
 
         private string OldPassword { get; set; }
 
@@ -37,22 +36,27 @@ namespace CashmereDeposit.ViewModels
         private string ConfirmPassword { get; set; }
 
         private object NextObject { get; set; }
+        private readonly IApplicationUserRepository _applicationUserRepository;
+        private readonly IPasswordPolicyRepository _passwordPolicyRepository;
+        private readonly IPasswordHistoryRepository _passwordHistoryRepository;
 
         private UserLoginViewModel.LoginSuccessCallBack LoginSuccessCallBackDelegate { get; set; }
         public UserChangePasswordFormViewModel(
           ApplicationViewModel applicationViewModel,
           ApplicationUser user,
-          DepositorDBContext dbcontext,
           Conductor<Screen> conductor,
           Screen callingObject,
           object nextObject,
           bool isAuthorise = false,
           UserLoginViewModel.LoginSuccessCallBack loginSuccessCallBack = null)
           : base(applicationViewModel, conductor, callingObject, true)
-        { 
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
-                User = _depositorDBContext.ApplicationUsers.FirstOrDefault(x => x.Id == user.Id);
-            
+        {
+            _applicationUserRepository = IoC.Get<IApplicationUserRepository>();
+            _passwordPolicyRepository = IoC.Get<IPasswordPolicyRepository>();
+            _passwordHistoryRepository = IoC.Get<IPasswordHistoryRepository>();
+
+            User = _applicationUserRepository.GetByIdAsync(user.Id).ContinueWith(x => x.Result).Result;
+
             NextObject = nextObject;
             if (!(Application.Current.FindResource("UserChangePasswordFormScreenTitle") is string str))
                 str = "Change Password";
@@ -181,17 +185,17 @@ namespace CashmereDeposit.ViewModels
                     var request = changePasswordRequest;
                     var client = new AuthenticationServiceClient(ApplicationViewModel.DeviceConfiguration.API_AUTH_API_URI, device.AppId, device.AppKey, null);
                     ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "API", "Sending request {0}", request);
-                    var result = Task.Run((Func<Task<ChangePasswordResponse>>)(() => client.ChangePasswordAsync(request))).Result;
+                    var result = Task.Run(() => client.ChangePasswordAsync(request)).Result;
                     ApplicationViewModel.Log.DebugFormat("UserLoginViewModel", nameof(ValidatePassword), "API", "Received response {0}", result);
                     if (result.IsSuccess)
                         ApplicationViewModel.Log.InfoFormat("UserLoginViewModel", nameof(ValidatePassword), "SUCCESS", "Change password SUCCESS for request {0}, User {1}", request.MessageID, User.Username);
                     else
                         ApplicationViewModel.Log.WarningFormat("UserLoginViewModel", nameof(ValidatePassword), "FAIL", "Change password FAIL for request {0}, User {1}: {2}>{3}", request.MessageID, User.Username, result.PublicErrorMessage, result.ServerErrorMessage);
-                    _depositorDBContext.SaveChangesAsync().Wait();
+                    //_depositorDBContext.SaveChangesAsync().Wait();
                     FormErrorText = result.PublicErrorMessage;
                     return result.IsSuccess ? 0 : 1;
                 }
-                var passwordPolicy = _depositorDBContext.PasswordPolicies.FirstOrDefault();
+                var passwordPolicy = _passwordPolicyRepository.GetFirst().ContinueWith(x => x.Result).Result;
                 if (passwordPolicy == null)
                 {
                     FormErrorText = "error, no password policy defined";
@@ -206,7 +210,7 @@ namespace CashmereDeposit.ViewModels
                     SpecialLength = passwordPolicy.MinSpecial,
                     UpperCaseLength = passwordPolicy.MinUppercase
                 };
-                IList<PasswordHistory> list = _depositorDBContext.PasswordHistories.Where(x => x.User == User.Id).OrderByDescending(x => x.LogDate).Take(passwordPolicy.HistorySize).ToList();
+                IList<PasswordHistory> list = _passwordHistoryRepository.GetByUserId(User.Id, passwordPolicy.HistorySize).ContinueWith(x => x.Result).Result;
                 if (!string.IsNullOrWhiteSpace(OldPassword) && !string.IsNullOrWhiteSpace(NewPassword) && !string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     if (PasswordStorage.VerifyPassword(OldPassword, User.Password))
@@ -216,7 +220,7 @@ namespace CashmereDeposit.ViewModels
                             var passwordPolicyResultList = PasswordPolicyManager.Validate(NewPassword, Policy);
                             if (passwordPolicyResultList == null)
                             {
-                                if ((bool)passwordPolicy.UseHistory && (bool)(list != null))
+                                if ((bool)passwordPolicy.UseHistory && list != null)
                                 {
                                     foreach (var passwordHistory in list)
                                     {
@@ -228,15 +232,17 @@ namespace CashmereDeposit.ViewModels
                                     }
                                 }
                                 var hash = PasswordStorage.CreateHash(NewPassword);
-                                User.Password = hash;
-                                User.PasswordResetRequired = false;
-                                User.PasswordHistories.Add(new PasswordHistory()
+                                var PasswordHistory = new PasswordHistory()
                                 {
                                     LogDate = new DateTime?(DateTime.Now),
                                     Id = Guid.NewGuid(),
-                                    Password = hash
-                                });
-                                _depositorDBContext.SaveChangesAsync().Wait();
+                                    Password = hash,
+                                    User = User.Id
+                                };
+                                User.Password = hash;
+                                User.PasswordResetRequired = false;
+                                _applicationUserRepository.UpdateAsync(User);
+                                _passwordHistoryRepository.AddAsync(PasswordHistory);
                                 return 0;
                             }
                             var stringBuilder = new StringBuilder();

@@ -12,6 +12,7 @@ using System.Text;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.Standard.Utilities;
 
 using CashmereDeposit.ViewModels;
@@ -21,18 +22,21 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertNoteJamClearSuccess : AlertBase
     {
         public const int ALERT_ID = 4002;
-        private readonly DepositorDBContext _depositorDBContext;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
         private Transaction _transaction;
         private AlertEvent associatedAlertEvent;
 
         public AlertNoteJamClearSuccess(Transaction transaction, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
             _transaction = transaction ?? throw new NullReferenceException("Variable transaction cannot be null in " + GetType().Name);
             
-            associatedAlertEvent = _depositorDBContext.AlertEvents.Where(x => x.AlertTypeId == 4002).OrderByDescending(x => x.Created).FirstOrDefault();
-            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 4002);
+            associatedAlertEvent = _alertEventRepository.GetAlertEventAsync(4002).ContinueWith(x => x.Result).Result;;
+            AlertType =  _alertMessageTypeRepository.GetByIdAsync(4002).ContinueWith(x => x.Result).Result;
         }
 
         public override bool SendAlert()
@@ -52,14 +56,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                _depositorDBContext.AlertEvents.Add(entity);
+                //_depositorDBContext.AlertEvents.Add(entity);
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                _depositorDBContext.SaveChangesAsync().Wait();
+                _alertEventRepository.AddAsync(entity).Wait();
                 return true;
             }
             catch (ValidationException ex)
@@ -275,6 +279,6 @@ namespace CashmereDeposit.Utils.AlertClasses
             return str;
         }
 
-        private new AlertEvent GetCorrespondingAlertEvent(DepositorDBContext DBContext) => throw new NotImplementedException();
+        private new AlertEvent GetCorrespondingAlertEvent() => throw new NotImplementedException();
     }
 }

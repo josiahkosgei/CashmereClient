@@ -56,7 +56,7 @@ namespace CashmereDeposit.Utils.AlertClasses
             DateDetected = dateDetected;
         }
 
-        protected virtual AlertEmail GetAlertEmail(DepositorDBContext DBContext) => throw new NotImplementedException();
+        protected virtual AlertEmail GetAlertEmail() => throw new NotImplementedException();
 
         protected string GetHTMLBody() => throw new NotImplementedException();
 
@@ -72,9 +72,9 @@ namespace CashmereDeposit.Utils.AlertClasses
 
         protected virtual string GenerateSMSMessageToken() => throw new NotImplementedException();
 
-        protected virtual AlertEvent GetCorrespondingAlertEvent(DepositorDBContext DBContext) => throw new NotImplementedException();
+        protected virtual AlertEvent GetCorrespondingAlertEvent() => throw new NotImplementedException();
 
-        protected virtual AlertEmail GenerateEmail(DepositorDBContext DBContext) => throw new NotImplementedException();
+        protected virtual AlertEmail GenerateEmail() => throw new NotImplementedException();
 
         protected virtual AlertEmail GenerateSMS() => throw new NotImplementedException();
 

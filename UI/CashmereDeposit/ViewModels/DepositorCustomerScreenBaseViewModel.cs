@@ -14,6 +14,7 @@ using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using CashmereDeposit.Utils;
 using Caliburn.Micro;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -37,7 +38,7 @@ namespace CashmereDeposit.ViewModels
         private bool _canNext = true;
         private bool _canCancel = true;
         private bool _canShowFullInstructions = true;
-        private readonly DepositorDBContext _depositorDBContext;
+        private readonly IGUIScreenRepository _gUIScreenRepository;
 
         public DepositorCustomerScreenBaseViewModel(
           string screenTitle,
@@ -47,7 +48,8 @@ namespace CashmereDeposit.ViewModels
           double timeoutInterval = 0.0)
           : base(screenTitle, applicationViewModel, timeoutInterval)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _gUIScreenRepository = IoC.Get<IGUIScreenRepository>();
+
             if (applicationViewModel == null)
                 throw new NullReferenceException("applicationViewModel cannot be null in DepositorCustomerScreenBaseViewModel.DepositorCustomerScreenBaseViewModel()");
             EnableIdleTimer = enableIdleTimer;
@@ -353,7 +355,7 @@ namespace CashmereDeposit.ViewModels
                 }
 
                 using var depositorDbContext = new DepositorDBContext();
-                var guiScreen = _depositorDBContext.GuiScreens.Where(z => z.Id == ApplicationViewModel.CurrentGUIScreen.Id).FirstOrDefault();
+                var guiScreen = _gUIScreenRepository.GetByIdAsync(ApplicationViewModel.CurrentGUIScreen.Id).ContinueWith(x=>x.Result).Result;
                 var validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenList == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlist).FirstOrDefault()?.ValidationList : null;
                 if (validationList != null)
                 {

@@ -10,6 +10,7 @@ using System.Linq;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.Standard.Utilities;
 
 using CashmereDeposit.ViewModels;
@@ -21,7 +22,8 @@ namespace CashmereDeposit.Utils.AlertClasses
         public const int ALERT_ID = 100;
         private string _stackTrace;
         private string _errorMessage;
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertApplicationCrash(
           Device device,
@@ -32,8 +34,9 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             _stackTrace = stackTrace;
             _errorMessage = errorMessage;
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
-            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 100);
+              _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//100);
         }
 
         public override bool SendAlert()
@@ -52,14 +55,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                _depositorDBContext.AlertEvents.Add(entity);
+               
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                _depositorDBContext.SaveChangesAsync().Wait();
+                _alertEventRepository.AddAsync(entity).Wait();
                 return true;
             }
             catch (Exception ex)
@@ -155,6 +158,6 @@ namespace CashmereDeposit.Utils.AlertClasses
             return str;
         }
 
-        private new AlertEvent GetCorrespondingAlertEvent(DepositorDBContext DBContext) => throw new NotImplementedException();
+        private new AlertEvent GetCorrespondingAlertEvent() => throw new NotImplementedException();
     }
 }

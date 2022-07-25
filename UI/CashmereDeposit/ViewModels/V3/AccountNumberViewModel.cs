@@ -149,7 +149,7 @@ namespace CashmereDeposit.ViewModels.V3
 
         public void Validate()
         {
-            ApplicationViewModel.ShowDialog((object)new WaitForProcessScreenViewModel(ApplicationViewModel));
+            ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
             BackgroundWorker backgroundWorker = new BackgroundWorker()
             {
                 WorkerReportsProgress = false
@@ -178,7 +178,7 @@ namespace CashmereDeposit.ViewModels.V3
                 }
                 if (num1 != 0 && ClientValidation(CustomerInput))
                 {
-                    if (Task.Run<bool>((Func<Task<bool>>)(() => ValidateAsync(CustomerInput))).Result)
+                    if (Task.Run<bool>(() => ValidateAsync(CustomerInput)).Result)
                     {
                         AccountName = ApplicationViewModel.CurrentTransaction.AccountName;
                         AccountNumber = ApplicationViewModel.CurrentTransaction.AccountNumber;
@@ -186,8 +186,8 @@ namespace CashmereDeposit.ViewModels.V3
                         flag = true;
                         ApplicationViewModel.Log.Info(nameof(AccountNumberViewModel), "SUCCESS", "Validate", "Account Number '{0}' = Account Name '{1}'", new object[2]
                         {
-              (object) CustomerInput,
-              (object) AccountName
+               CustomerInput,
+               AccountName
                         });
                     }
                     else
@@ -196,11 +196,11 @@ namespace CashmereDeposit.ViewModels.V3
                         ++ApplicationViewModel.CurrentTransaction.ValidationTries;
                         ApplicationViewModel.Log.Warning(nameof(AccountNumberViewModel), "FAILED", "Validate", "Validation of Account Number '{0}' Failed. Incrementing attempts from {1} to {2}", new object[3]
                         {
-              (object) CustomerInput,
-              (object) validationTries,
-              (object) ApplicationViewModel.CurrentTransaction.ValidationTries
+               CustomerInput,
+               validationTries,
+               ApplicationViewModel.CurrentTransaction.ValidationTries
                         });
-                        ErrorText += string.Format(" {0} attempt(s) left.", (object)(3 - ApplicationViewModel.CurrentTransaction.ValidationTries));
+                        ErrorText += string.Format(" {0} attempt(s) left.", 3 - ApplicationViewModel.CurrentTransaction.ValidationTries);
                     }
                 }
                 ApplicationViewModel applicationViewModel2 = ApplicationViewModel;
@@ -237,7 +237,7 @@ namespace CashmereDeposit.ViewModels.V3
                         else
                             nullable2 = new int?(currentTransaction.ValidationTries);
                     }
-                    objArray[0] = (object)nullable2;
+                    objArray[0] = nullable2;
                     log.Warning(nameof(AccountNumberViewModel), "Block Validation", "Validate", "Validation tries exceeded. Tries = {0}", objArray);
                     ErrorText = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("AccountNumberViewModel.Validate", "sys_ValidateAccountNumberCallsExceededErrorMessage", "Too many validation requests. Kindly restart the transaction.");
                 }

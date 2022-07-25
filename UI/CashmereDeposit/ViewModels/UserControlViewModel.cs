@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
     internal class UserControlViewModel : FormViewModelBase
     {
-        private readonly DepositorDBContext _depositorDBContext;
+        //  private readonly DepositorDBContext _depositorDBContext;
+
         private ApplicationUser ApplicationUser;
         private string _username;
         public string _password;
@@ -102,6 +104,8 @@ namespace CashmereDeposit.ViewModels
                 NotifyOfPropertyChange(nameof(Role));
             }
         }
+        private readonly IApplicationUserRepository _applicationUserRepository;
+        private readonly IRoleRepository _roleRepository;
 
         public UserControlViewModel(
           ApplicationViewModel applicationViewModel,
@@ -111,7 +115,8 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _applicationUserRepository = IoC.Get<IApplicationUserRepository>();
+            _roleRepository = IoC.Get<IRoleRepository>();
             ApplicationUser = applicationUser;
             Username = ApplicationUser?.Username;
             FirstName = ApplicationUser?.Fname;
@@ -119,7 +124,7 @@ namespace CashmereDeposit.ViewModels
             Email = ApplicationUser?.Email;
             Role = ApplicationUser?.Role;
             PasswordHash = applicationUser?.Password;
-            var list = _depositorDBContext.Roles.Select(x => x.Name).ToList();
+            var list = _roleRepository.GetAllAsync().ContinueWith(x=>x.Result).Result.Select(x => x.Name).ToList();
             Fields.Add(new FormListItem()
             {
                 DataLabel = nameof(Username),
@@ -186,7 +191,7 @@ namespace CashmereDeposit.ViewModels
                 return "Please enter a username";
             if (isNew)
             {
-                if (_depositorDBContext.ApplicationUsers.Any(x => x.Username.ToUpper() == username.ToUpper()))
+                if (_applicationUserRepository.GetAllAsync().ContinueWith(x => x.Result).Result.Any(x => x.Username.ToUpper() == username.ToUpper()))
                     return "User already exists";
             }
             return null;
@@ -235,7 +240,7 @@ namespace CashmereDeposit.ViewModels
         {
             if (string.IsNullOrWhiteSpace(role))
                 return "Please select a role";
-            var role1 = _depositorDBContext.Roles.FirstOrDefault(x => x.Name == role);
+            var role1 = _roleRepository.GetByNameAsync(role).ContinueWith(x=>x.Result).Result;
             if (role1 == null)
                 return "Role does not exist";
             Role = role1;
@@ -254,19 +259,19 @@ namespace CashmereDeposit.ViewModels
             ApplicationUser.Email = Email;
             ApplicationUser.RoleId = Role.Id;
             if (isNew)
-                _depositorDBContext.ApplicationUsers.Add(ApplicationUser);
-            try
-            {
-                _depositorDBContext.SaveChangesAsync().Wait();
-            }
-            catch (Exception ex)
-            {
-                ApplicationViewModel.Log.Error(GetType().Name, nameof(UserControlViewModel), nameof(SaveForm), "Error saving user to database: {0}", new object[1]
+
+                try
                 {
+                    await _applicationUserRepository.AddAsync(ApplicationUser);
+                }
+                catch (Exception ex)
+                {
+                    ApplicationViewModel.Log.Error(GetType().Name, nameof(UserControlViewModel), nameof(SaveForm), "Error saving user to database: {0}", new object[1]
+                    {
           ex.MessageString()
-                });
-                return "Error occurred while creating user.";
-            }
+                    });
+                    return "Error occurred while creating user.";
+                }
             return str;
         }
 

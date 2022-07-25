@@ -20,25 +20,40 @@ namespace CashmereDeposit.Models
         public static UptimeModeType CurrentUptimeMode { get; private set; }
 
         public static CashmereDeviceState CurrentUptimeComponentState { get; private set; }
+        private static IDeviceRepository _deviceRepository { get; set; }
 
-        private static IDeviceRepository _iDeviceRepository { get; set; }
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
+
+        private static IUptimeComponentStateRepository _uptimeComponentStateRepository { get; set; }
+        private static IUptimeModeRepository _uptimeModeRepository { get; set; }
+
 
         private UptimeMonitor()
         {
 
-            _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _deviceRepository = IoC.Get<IDeviceRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            _uptimeComponentStateRepository = IoC.Get<IUptimeComponentStateRepository>();
+            _uptimeModeRepository = IoC.Get<IUptimeModeRepository>();
+
             DateTime now = DateTime.Now;
-            DbSet<UptimeMode> uptimeModes = _depositorDBContext.UptimeModes;
-            Expression<Func<UptimeMode, bool>> predicate1 = x => !x.EndDate.HasValue;
-            foreach (UptimeMode uptimeMode in uptimeModes.Where(predicate1))
+            var uptimeModes = _uptimeModeRepository.GetEndDateHasValueAsync().ContinueWith(x => x.Result).Result;
+            foreach (UptimeMode uptimeMode in uptimeModes)
+            {
                 uptimeMode.EndDate = new DateTime?(now);
-            DbSet<UptimeComponentState> uptimeComponentStates = _depositorDBContext.UptimeComponentStates;
-            Expression<Func<UptimeComponentState, bool>> predicate2 = x => !x.EndDate.HasValue;
-            foreach (UptimeComponentState uptimeComponentState in uptimeComponentStates.Where(predicate2))
+                _uptimeModeRepository.UpdateAsync(uptimeMode).Wait();
+            }
+
+
+            var uptimeComponentStates = _uptimeComponentStateRepository.GetEndDateHasValueAsync().ContinueWith(x => x.Result).Result;
+            foreach (UptimeComponentState uptimeComponentState in uptimeComponentStates)
+            {
                 uptimeComponentState.EndDate = new DateTime?(now);
-            _depositorDBContext.SaveChangesAsync().Wait();
+                _uptimeComponentStateRepository.UpdateAsync(uptimeComponentState).Wait();
+
+            }
 
 
         }
@@ -50,7 +65,7 @@ namespace CashmereDeposit.Models
             return _uptimeMonitor;
         }
 
-        public static void SetCurrentUptimeMode(UptimeModeType state)
+        public static async void SetCurrentUptimeMode(UptimeModeType state)
         {
             try
             {
@@ -59,18 +74,17 @@ namespace CashmereDeposit.Models
                 DateTime now = DateTime.Now;
                 Device device = ApplicationViewModel.GetDeviceAsync();
                 CurrentUptimeMode = state;
-                UptimeMode uptimeMode = _depositorDBContext.UptimeModes.Where(x => x.Device == device.Id).OrderByDescending(x => x.Created).FirstOrDefault();
+                UptimeMode uptimeMode = await _uptimeModeRepository.GetByDeviceIdAsync(device.Id);
                 if (uptimeMode != null)
                     uptimeMode.EndDate = new DateTime?(now);
-                _depositorDBContext.UptimeModes.Add(new UptimeMode()
+                _uptimeModeRepository.AddAsync(new UptimeMode()
                 {
                     Id = GuidExt.UuidCreateSequential(),
                     Device = device.Id,
                     Created = now,
                     StartDate = now,
                     DeviceMode = (int)state
-                });
-                _depositorDBContext.SaveChangesAsync().Wait();
+                }).Wait();
             }
             catch (Exception ex)
             {
@@ -79,17 +93,18 @@ namespace CashmereDeposit.Models
 
         }
 
-        public static void SetCurrentUptimeComponentState(CashmereDeviceState state)
+        public static async void SetCurrentUptimeComponentState(CashmereDeviceState state)
         {
             try
             {
                 if (CurrentUptimeComponentState.HasFlag(state))
                     return;
                 DateTime now = DateTime.Now;
-                Device device = _depositorDBContext.Devices.FirstOrDefault(f => f.MachineName == Environment.MachineName);
+                Device device = await _deviceRepository.GetDevice(Environment.MachineName);
                 CurrentUptimeComponentState = state;
-                if (_depositorDBContext.UptimeComponentStates.Where(x => x.Device == device.Id && x.ComponentState == (int)state && !x.EndDate.HasValue).OrderByDescending(x => x.Created).FirstOrDefault() == null)
-                    _depositorDBContext.UptimeComponentStates.Add(new UptimeComponentState()
+                var uptimeComponentState= await _uptimeComponentStateRepository.GetByDeviceIdAsync(device.Id, (int)CurrentUptimeComponentState);
+                if (uptimeComponentState == null)
+                    await _uptimeComponentStateRepository.AddAsync(new UptimeComponentState()
                     {
                         Id = GuidExt.UuidCreateSequential(),
                         Device = device.Id,
@@ -97,7 +112,6 @@ namespace CashmereDeposit.Models
                         StartDate = now,
                         ComponentState = (int)state
                     });
-                _depositorDBContext.SaveChangesAsync().Wait();
             }
             catch (Exception ex)
             {
@@ -106,7 +120,7 @@ namespace CashmereDeposit.Models
 
         }
 
-        public static void UnSetCurrentUptimeComponentState(CashmereDeviceState state)
+        public static async void UnSetCurrentUptimeComponentState(CashmereDeviceState state)
         {
             try
             {
@@ -115,15 +129,15 @@ namespace CashmereDeposit.Models
                 DateTime now = DateTime.Now;
                 Device device = ApplicationViewModel.GetDeviceAsync();
                 CurrentUptimeComponentState = state;
-                UptimeComponentState entity = _depositorDBContext.UptimeComponentStates.Where(x => x.Device == device.Id && x.ComponentState == (int)state && !x.EndDate.HasValue).OrderByDescending(x => x.Created).FirstOrDefault();
+                UptimeComponentState entity = await _uptimeComponentStateRepository.GetByDeviceIdAsync(device.Id, (int)CurrentUptimeComponentState);
                 if (entity != null)
                 {
                     if (now - entity.StartDate < TimeSpan.FromMinutes(1.0))
-                        _depositorDBContext.UptimeComponentStates.Remove(entity);
+                       await _uptimeComponentStateRepository.DeleteAsync(entity);
                     else
                         entity.EndDate = new DateTime?(now);
                 }
-                _depositorDBContext.SaveChangesAsync().Wait();
+               _uptimeComponentStateRepository.UpdateAsync(entity).Wait();
             }
             catch (Exception ex)
             {

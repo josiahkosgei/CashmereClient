@@ -20,13 +20,21 @@ namespace CashmereDeposit.Models
         private AppTransaction _transaction;
         private ApplicationViewModel _applicationViewModel;
         private static IDeviceRepository _iDeviceRepository { get; set; }
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
+
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
+        private readonly IDepositorSessionRepository _depositorSessionRepository;
+        private readonly ITransactionTypeListItemRepository _transactionTypeListItemRepository;
 
         public AppSession(ApplicationViewModel applicationViewModel)
         {
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            _depositorSessionRepository = IoC.Get<IDepositorSessionRepository>();
+            _transactionTypeListItemRepository = IoC.Get<ITransactionTypeListItemRepository>();
+
             _applicationViewModel = applicationViewModel;
             Device = ApplicationViewModel.ApplicationModel.GetDeviceAsync();
             DepositorSession = new DepositorSession()
@@ -42,8 +50,7 @@ namespace CashmereDeposit.Models
             SessionStart = DateTime.Now;
             SessionComplete = false;
             PropertyChanged += new PropertyChangedEventHandler(OnPropertyChangedEvent);
-            _depositorDBContext.DepositorSessions.Add(DepositorSession);
-            _depositorDBContext.SaveChangesAsync().Wait();
+            _depositorSessionRepository.AddAsync(DepositorSession).Wait();            
             ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SessionStart), "Session", "Session {0} started", SessionID.ToString().ToUpper());
         }
 
@@ -194,8 +201,6 @@ namespace CashmereDeposit.Models
 
         public ApplicationViewModel ApplicationViewModel => _applicationViewModel;
 
-        public DepositorDBContext DBContext { get; set; } = _depositorDBContext;
-
         public Device Device { get; }
 
         public DepositorSession DepositorSession { get; set; }
@@ -209,16 +214,17 @@ namespace CashmereDeposit.Models
 
         public override int GetHashCode() => SessionID.GetHashCode();
 
-        internal void CreateTransaction(TransactionTypeListItem transactionType)
+        internal async void CreateTransaction(TransactionTypeListItem transactionType)
         {
-            var transactionTypeListItem = _depositorDBContext.TransactionTypeListItems.Where(s => s.Id == transactionType.Id)
-                  .Include(i => i.TxTypeGUIScreenlistNavigation)
-                  .Include(i => i.DefaultAccountCurrencyNavigation)
-                  .Include(i => i.TransactionTextNav)
-                  .Include(i => i.TxLimitListNavigation)
-                  .Include(i => i.TxTextNavigationText)
-                  .Include(i => i.TxTypeNavigation)
-                  .FirstOrDefault();
+            var transactionTypeListItem = await _transactionTypeListItemRepository.GetTransactionTypeScreenList(transactionType.Id);
+                //_depositorDBContext.TransactionTypeListItems.Where(s => s.Id == transactionType.Id)
+                //  .Include(i => i.TxTypeGUIScreenlistNavigation)
+                //  .Include(i => i.DefaultAccountCurrencyNavigation)
+                //  .Include(i => i.TransactionTextNav)
+                //  .Include(i => i.TxLimitListNavigation)
+                //  .Include(i => i.TxTextNavigationText)
+                //  .Include(i => i.TxTypeNavigation)
+                //  .FirstOrDefault();
             Transaction = new AppTransaction(this, transactionTypeListItem, transactionType.DefaultAccountCurrency);
             Transaction.TransactionLimitReachedEvent += new EventHandler<EventArgs>(Transaction_TransactionLimitReachedEvent);
             ApplicationViewModel.AlertManager.SendAlert(new AlertTransactionStarted(Transaction, Device, DateTime.Now));
@@ -246,11 +252,16 @@ namespace CashmereDeposit.Models
             SessionEnd = DateTime.Now;
             if (Transaction != null && !Transaction.Completed)
                 Transaction.EndTransaction(result, errorMessage);
-            _depositorDBContext.SaveChangesAsync().Wait();
-            _depositorDBContext.Dispose();
+           
+           // _depositorSessionRepository.UpdateAsync(SessionEnd);
+             //_depositorDBContext.SaveChangesAsync().Wait();
+            //_depositorDBContext.Dispose();
         }
 
-        private void OnPropertyChangedEvent(object sender, PropertyChangedEventArgs e) => SaveToDatabase();
+        private void OnPropertyChangedEvent(object sender, PropertyChangedEventArgs e)
+        {
+            SaveToDatabase();
+        }
 
         public event EventHandler<EventArgs> TransactionLimitReachedEvent;
 
@@ -263,7 +274,7 @@ namespace CashmereDeposit.Models
 
         internal void SaveToDatabase()
         {
-            _depositorDBContext.SaveChangesAsync().Wait();
+          //  _depositorDBContext.SaveChangesAsync().Wait();
         }
     }
 }

@@ -31,7 +31,7 @@ namespace CashmereDeposit.ViewModels.V3
                 if (!CanNext)
                     return;
                 CanNext = false;
-                ApplicationViewModel.ShowDialog((object)new WaitForProcessScreenViewModel(ApplicationViewModel));
+                ApplicationViewModel.ShowDialog(new WaitForProcessScreenViewModel(ApplicationViewModel));
                 BackgroundWorker backgroundWorker = new BackgroundWorker()
                 {
                     WorkerReportsProgress = false
@@ -56,7 +56,7 @@ namespace CashmereDeposit.ViewModels.V3
 
         private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (ClientValidation(CustomerInput) && Task.Run<bool>((Func<Task<bool>>)(() => ValidateAsync(CustomerInput))).Result)
+            if (ClientValidation(CustomerInput) && Task.Run<bool>(() => ValidateAsync(CustomerInput)).Result)
             {
                 ApplicationViewModel.NavigateNextScreen();
             }

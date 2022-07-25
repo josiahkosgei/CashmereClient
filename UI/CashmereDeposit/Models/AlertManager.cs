@@ -7,12 +7,14 @@ using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Caliburn.Micro;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.Models
 {
     public class AlertManager
     {
-        private readonly DepositorDBContext _depositorDBContext;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
         public static ICashmereLogger Log;
         private static string commserv_uri;
         private static Guid appID;
@@ -30,7 +32,8 @@ namespace CashmereDeposit.Models
           byte[] appKey,
           string AppName)
         {
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
             Log = logger;
             appID = AppID;
             AppKey = appKey;
@@ -50,13 +53,11 @@ namespace CashmereDeposit.Models
             }
         }
 
-        public void InitialiseAlertManager()
+        public async void InitialiseAlertManager()
         {
-            using (DepositorDBContext depositorDbContext = new DepositorDBContext())
-            {
-                AllowedMessages = _depositorDBContext.AlertMessageTypes.Where(x => x.Enabled == true).ToList();
+                AllowedMessages = await _alertMessageTypeRepository.GetEnabled();
                 DepositorCommunicationService = DepositorCommunicationService.NewDepositorCommunicationService(commserv_uri, appID, AppKey, appName);
-            }
+            
         }
     }
 }

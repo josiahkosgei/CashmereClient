@@ -11,6 +11,7 @@ using System.Linq;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.Standard.Utilities;
 
 using CashmereDeposit.Models;
@@ -22,7 +23,8 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 4008;
         private AppTransaction _transaction;
-        private readonly DepositorDBContext _depositorDBContext;
+               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertTransactionTimedout(
           AppTransaction transaction,
@@ -31,8 +33,9 @@ namespace CashmereDeposit.Utils.AlertClasses
           : base(device, dateDetected)
         {
             _transaction = transaction;
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
-            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 4008);
+               _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x=>x.Result).Result;//== 4008);
         }
 
         public override bool SendAlert()
@@ -52,19 +55,19 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                _depositorDBContext.AlertEvents.Add(entity);
+               
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                _depositorDBContext.SaveChangesAsync().Wait();
+                _alertEventRepository.AddAsync(entity).Wait();
                 return true;
             }
             catch (ValidationException ex)
             {
-                string ErrorDetail = "Error Saving to Database: " + string.Format("{0}\n{1}", (object)ex.Message, (object)ex?.InnerException?.Message);
+                string ErrorDetail = "Error Saving to Database: " + string.Format("{0}\n{1}", ex.Message, ex?.InnerException?.Message);
                 foreach (var entityValidationError in ex.ValidationResult.MemberNames)
                 {
                     ErrorDetail += ">validation error>";
@@ -162,6 +165,6 @@ namespace CashmereDeposit.Utils.AlertClasses
             return str;
         }
 
-        private new AlertEvent GetCorrespondingAlertEvent(DepositorDBContext DBContext) => throw new NotImplementedException();
+        private new AlertEvent GetCorrespondingAlertEvent() => throw new NotImplementedException();
     }
 }

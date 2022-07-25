@@ -28,10 +28,10 @@ namespace CashmereDeposit.UserControls
 
         public FullAlphanumericKeyboard() => InitializeComponent();
 
-        private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke((object)passwordBox, new object[2]
+        private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[2]
         {
-      (object) start,
-      (object) length
+       start,
+       length
         });
 
         private void pressKey(string s)
@@ -112,11 +112,11 @@ namespace CashmereDeposit.UserControls
 
         private void RenderButtonText()
         {
-            foreach (Button visualChild in UtilExtentionMethods.FindVisualChildren<Button>((DependencyObject)this))
+            foreach (Button visualChild in UtilExtentionMethods.FindVisualChildren<Button>(this))
             {
                 string content = visualChild.Content as string;
                 if (content.Length == 1)
-                    visualChild.Content = CapsLockDown ? (object)content.ToUpperInvariant() : (object)content.ToLowerInvariant();
+                    visualChild.Content = CapsLockDown ? content.ToUpperInvariant() : (object)content.ToLowerInvariant();
             }
         }
 

@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\API\Messaging\Communication\Communication.csproj" />
     <ProjectReference Include="..\Standard\Standard.csproj" />
   </ItemGroup>
 

@@ -17,7 +17,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public async Task<GUIScreen> GetGUIScreenByCode(Guid code)
         {
-             return await DbContext.GuiScreens.Where(w => w.GUIScreenType.Code == code).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).OrderBy(y => y.Id).FirstOrDefaultAsync();
+            return await DbContext.GuiScreens.Where(w => w.GUIScreenType.Code == code).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).OrderBy(y => y.Id).FirstOrDefaultAsync();
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Linq;
 using System.Windows;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
-
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -19,9 +19,9 @@ namespace CashmereDeposit.ViewModels
     {
         private new DepositorDBContext DBContext = new();
         private const int txPageSize = 10;
+        private readonly ICITRepository _citRepository;
         private int maxPage;
         private int _currentPage;
-        private readonly DepositorDBContext _depositorDBContext;
         private IQueryable<CIT> txQuery;
         private IEnumerable<CIT> _citTransactionList;
         private CIT selectedCITTransaction;
@@ -33,8 +33,8 @@ namespace CashmereDeposit.ViewModels
           Screen callingObject)
           : base(screenTitle, applicationViewModel, callingObject)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
-            txQuery = _depositorDBContext.CITs.Where(t => t.FromDate >= txQueryStartDate && t.ToDate < txQueryEndDate).OrderByDescending(t => t.ToDate);
+            _citRepository = IoC.Get<ICITRepository>();
+            txQuery = _citRepository.GetByDateRange(txQueryStartDate ,txQueryEndDate);
             Activated += new EventHandler<ActivationEventArgs>(CITReportScreenViewModel_Activated);
         }
 

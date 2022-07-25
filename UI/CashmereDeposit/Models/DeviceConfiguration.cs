@@ -16,7 +16,7 @@ namespace CashmereDeposit.Models
     public class DeviceConfiguration
     {
 
-        private readonly IAsyncRepository<DeviceConfig> _repository;
+
         private bool _ALLOW_WEB_SERVER;
         private int _MIN_HDD_SPACE;
         private int _LOGGING_LEVEL;
@@ -363,14 +363,15 @@ namespace CashmereDeposit.Models
             get => _API_AUTH_API_URI;
             internal set => _API_AUTH_API_URI = value;
         }
-        
-        private static IDeviceRepository _iDeviceRepository { get; set; }
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
+
+        private static IDeviceRepository _deviceRepository { get; set; }
+        private readonly IConfigRepository _configRepository;
+        private readonly IDeviceConfigRepository _deviceConfigRepository;
         private DeviceConfiguration()
         {
-            _repository = IoC.Get<IAsyncRepository<DeviceConfig>>();
-            _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _deviceConfigRepository = IoC.Get<IDeviceConfigRepository>();
+            _deviceRepository = IoC.Get<IDeviceRepository>();
+            _configRepository = IoC.Get<IConfigRepository>();
             Tokeniser = new Tokeniser(this);
             Init();
         }
@@ -420,9 +421,9 @@ namespace CashmereDeposit.Models
             InitialiseConfig(config, "APPLICATION_DATE_FORMAT", "APPLICATION_DATE_FORMAT", ref _APPLICATION_DATE_FORMAT, "yyyy-MM-dd HH:mm:ss.fff");
             InitialiseConfig(config, "SMS_DATE_FORMAT", "SMS_DATE_FORMAT", ref _SMS_DATE_FORMAT, "d/M/yy 'at' h:mm tt");
             InitialiseConfig(config, "SMS_AMOUNT_FORMAT", "SMS_AMOUNT_FORMAT", ref _SMS_AMOUNT_FORMAT, "#,#0.00");
-            InitialiseConfig(config, "APPLICATION_GUID_FORMAT", "APPLICATION_GUID_FORMAT", ref _APPLICATION_GUID_FORMAT, (string)null);
-            InitialiseConfig(config, "APPLICATION_INTEGER_FORMAT", "APPLICATION_INTEGER_FORMAT", ref _APPLICATION_INTEGER_FORMAT, (string)null);
-            InitialiseConfig(config, "APPLICATION_DOUBLE_FORMAT", "APPLICATION_DOUBLE_FORMAT", ref _APPLICATION_DOUBLE_FORMAT, (string)null);
+            InitialiseConfig(config, "APPLICATION_GUID_FORMAT", "APPLICATION_GUID_FORMAT", ref _APPLICATION_GUID_FORMAT, null);
+            InitialiseConfig(config, "APPLICATION_INTEGER_FORMAT", "APPLICATION_INTEGER_FORMAT", ref _APPLICATION_INTEGER_FORMAT, null);
+            InitialiseConfig(config, "APPLICATION_DOUBLE_FORMAT", "APPLICATION_DOUBLE_FORMAT", ref _APPLICATION_DOUBLE_FORMAT, null);
             InitialiseConfig(config, "APPLICATION_MONEY_FORMAT", "APPLICATION_MONEY_FORMAT", ref _APPLICATION_MONEY_FORMAT, "########0");
             InitialiseConfig(config, "PHONE_MASK", "PHONE_MASK", ref _PHONE_MASK, "254 000 000 000");
             InitialiseConfig(config, "PHONE_CODE", "PHONE_CODE", ref _PHONE_CODE, "254");
@@ -448,10 +449,10 @@ namespace CashmereDeposit.Models
             InitialiseConfig(config, "TRANSACTION_LOG_FOLDER", "TRANSACTION_LOG_FOLDER", ref _TRANSACTION_LOG_FOLDER, "C:\\CashmereDeposit\\Transactions");
             InitialiseConfig(config, "DEVICECONTROLLER_PORT", "DEVICECONTROLLER_PORT", ref _DEVICECONTROLLER_PORT, 20201);
             InitialiseConfig(config, "DEVICECONTROLLER_HOST", "DEVICECONTROLLER_HOST", ref _DEVICECONTROLLER_HOST, "localhost");
-            InitialiseConfig(config, "FIX_CONTROLLER_PORT", "FIX_CONTROLLER_PORT", ref _FIX_CONTROLLER_PORT, (string)null);
-            InitialiseConfig(config, "FIX_DEVICE_PORT", "FIX_DEVICE_PORT", ref _FIX_DEVICE_PORT, (string)null);
-            InitialiseConfig(config, "CONTROLLER_TYPE", "CONTROLLER_TYPE", ref _CONTROLLER_TYPE, (string)null);
-            InitialiseConfig(config, "CONTROLLER_LOG_DIRECTORY", "CONTROLLER_LOG_DIRECTORY", ref _CONTROLLER_LOG_DIRECTORY, (string)null);
+            InitialiseConfig(config, "FIX_CONTROLLER_PORT", "FIX_CONTROLLER_PORT", ref _FIX_CONTROLLER_PORT, null);
+            InitialiseConfig(config, "FIX_DEVICE_PORT", "FIX_DEVICE_PORT", ref _FIX_DEVICE_PORT, null);
+            InitialiseConfig(config, "CONTROLLER_TYPE", "CONTROLLER_TYPE", ref _CONTROLLER_TYPE, null);
+            InitialiseConfig(config, "CONTROLLER_LOG_DIRECTORY", "CONTROLLER_LOG_DIRECTORY", ref _CONTROLLER_LOG_DIRECTORY, null);
             InitialiseConfig(config, "SENSOR_INVERT_DOOR", "SENSOR_INVERT_DOOR", ref _SENSOR_INVERT_DOOR, false);
             InitialiseConfig(config, "BAGFULL_WARN_PERCENT", "BAGFULL_WARN_PERCENT", ref _BAGFULL_WARN_PERCENT, 80);
             InitialiseConfig(config, "MESSAGEKEEPALIVETIME", "MESSAGEKEEPALIVETIME", ref _MESSAGEKEEPALIVETIME, 900);
@@ -461,26 +462,13 @@ namespace CashmereDeposit.Models
 
         private List<(string name, string? default_value)> GenerateConfigs()
         {
-            //using (DepositorDBContext depositorDbContext = new DepositorDBContext())
-            //{
-                var configs = _depositorDBContext.Configs.ToList();
-                var config_group = _depositorDBContext.Devices.FirstOrDefault()?.ConfigGroup;
-                //var userType = _depositorDBContext.Set().FromSql("dbo.SomeSproc @Id = {0}, @Name = {1}", 45, "Ada");
-                _depositorDBContext.Set<DeviceConfig>().FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
-                //_depositorDBContext.DeviceConfigs.Where(x => config_group != null && x.GroupId == config_group).AsQueryable().ToList()
-                //    .ForEach(deviceConfig =>
-                //        configs.First(x =>
-                //                x.Name.Equals(deviceConfig.ConfigId.ToString(), StringComparison.OrdinalIgnoreCase))
-                //            .DefaultValue = deviceConfig.ConfigValue);
 
-                //depositorDbContext
-                //    .GetDeviceConfigByUserGroup(_depositorDBContext.Devices.FirstOrDefault()?.config_group).ToList()
-                //    .ForEach(deviceConfig =>
-                //        configs.First(x => x.name.Equals(deviceConfig.config_id, StringComparison.OrdinalIgnoreCase))
-                //            .default_value = deviceConfig.config_value);
-                return configs.Select(x => (name: x.Name, default_value: x.DefaultValue))
-                    .ToList();
-            //}
+            var configs = _configRepository.GetAllAsync().ContinueWith(w => w.Result).Result;
+            var config_group = _deviceRepository.GetDevice(Environment.MachineName).ContinueWith(w => w.Result).Result.ConfigGroup;
+            var deviceConfigs = _deviceConfigRepository.ExecuteStoredProc(config_group).ContinueWith(w => w.Result).Result;
+            deviceConfigs.ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
+            return configs.Select(x => (name: x.Name, default_value: x.DefaultValue))
+                .ToList();
         }
         public void InitialiseConfig(
           IList<(string config_id, string config_value)> config,
@@ -493,10 +481,10 @@ namespace CashmereDeposit.Models
             if (!bool.TryParse(str, out field))
             {
                 field = defaultValue;
-                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", (object)configName, (object)str, (object)defaultValue);
+                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", configName, str, defaultValue);
             }
             else
-                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", (object)configName, (object)field);
+                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", configName, field);
         }
 
         public void InitialiseConfig(
@@ -510,10 +498,10 @@ namespace CashmereDeposit.Models
             if (!int.TryParse(s, out field))
             {
                 field = defaultValue;
-                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", (object)configName, (object)s, (object)defaultValue);
+                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", configName, s, defaultValue);
             }
             else
-                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", (object)configName, (object)field);
+                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", configName, field);
         }
 
         public void InitialiseConfig(
@@ -527,12 +515,12 @@ namespace CashmereDeposit.Models
             if (string.IsNullOrWhiteSpace(str) && str.Length == 1)
             {
                 field = defaultValue;
-                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", (object)configName, (object)str, (object)defaultValue);
+                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", configName, str, defaultValue);
             }
             else
             {
                 field = str[0];
-                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", (object)configName, (object)field);
+                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", configName, field);
             }
         }
 
@@ -547,12 +535,12 @@ namespace CashmereDeposit.Models
             if (string.IsNullOrWhiteSpace(str))
             {
                 field = defaultValue;
-                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", (object)configName, (object)str, (object)defaultValue);
+                Log.WarningFormat(nameof(DeviceConfiguration), "Setting FAIL", nameof(InitialiseConfig), "Couldn't set config {0} to {1} so used default value {2}", configName, str, defaultValue);
             }
             else
             {
                 field = str;
-                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", (object)configName, (object)field);
+                Log.InfoFormat(nameof(DeviceConfiguration), "Setting SUCCESS", nameof(InitialiseConfig), "Set config {0} to {1}", configName, field);
             }
         }
     }

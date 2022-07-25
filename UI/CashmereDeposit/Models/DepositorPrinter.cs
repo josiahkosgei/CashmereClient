@@ -30,8 +30,10 @@ namespace CashmereDeposit.Models
 
         public PrinterState State => _state;
 
-        private readonly DepositorDBContext _depositorDBContext;
-         private readonly IDeviceRepository _deviceRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
+        private readonly IDeviceRepository _deviceRepository;
+        private readonly ICITRepository _citRepository;
         private ApplicationViewModel ApplicationViewModel { get; }
 
         public DepositorPrinter(
@@ -43,8 +45,9 @@ namespace CashmereDeposit.Models
           int databits = 8,
           StopBits stopBits = StopBits.One)
         {
-            _deviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _citRepository = IoC.Get<ICITRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
             ApplicationViewModel = applicationViewModel;
             Log = log;
             Log?.Info(GetType().Name, "Port Listener Initialising", "Initialisation", "Initialising the port listener");
@@ -82,7 +85,7 @@ namespace CashmereDeposit.Models
 
         private void dispTimer_Tick(object sender, EventArgs e) => CTSHolding = GetCTSHolding();
 
-        public void PrintCIT(CIT CIT, bool isCopy)
+        public async void PrintCIT(CIT CIT, bool isCopy)
         {
             CITPrintout printout = new CITPrintout()
             {
@@ -114,7 +117,7 @@ namespace CashmereDeposit.Models
             CIT.CITPrintouts.Add(printout);
             try
             {
-                _depositorDBContext.SaveChangesAsync().Wait();
+               await _citRepository.AddAsync(CIT);
             }
             catch (ValidationException ex)
             {
@@ -199,7 +202,7 @@ namespace CashmereDeposit.Models
             string str1 = "\r\n" + ApplicationViewModel.CashmereTranslationService?.TranslateUserText(GetType().Name + ".GeneratePrintoutFromTransaction receiptTemplate", transactionText.ReceiptTemplate, null).Replace("\r\n", "\n").Replace("\n", "\r\n");
             if (str1 == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): receipt_template cannot be null");
-            Device device = _deviceRepository.GetByIdAsync(transaction.DeviceId).ContinueWith(x=>x.Result).Result;
+            Device device = _deviceRepository.GetByIdAsync(transaction.DeviceId).ContinueWith(x => x.Result).Result;
             if (device == null)
                 throw new NullReferenceException("GeneratePrintoutFromTransaction(): transactionDevice cannot be null");
             string str2 = str1.Replace("{device_name}", device.Name).Replace("{device_machine_name}", device.MachineName).Replace("{device_device_number}", device.DeviceNumber).Replace("{receipt_bank_name}", ApplicationViewModel.DeviceConfiguration.RECEIPT_BANK_NAME);
@@ -282,7 +285,7 @@ namespace CashmereDeposit.Models
                 try
                 {
                     List<string> stringList1 = new List<string>();
-                    new DepositorDBContext().Devices.FirstOrDefault(x => x.Id == CIT.DeviceId);
+                    //new DepositorDBContext().Devices.FirstOrDefault(x => x.Id == CIT.DeviceId);
                     stringList1.Add(MakeTitleText(ApplicationViewModel.DeviceConfiguration.RECEIPT_BANK_NAME));
                     if (printout.IsCopy)
                         stringList1.Add("RECEIPT COPY");

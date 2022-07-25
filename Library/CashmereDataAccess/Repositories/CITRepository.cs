@@ -28,5 +28,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
             return await DbContext.CITs.Where(x => x.Id == lastCITId).Include(y => y.StartUserNavigation).Include(z => z.AuthUserNavigation).FirstOrDefaultAsync();
         }
+
+        public async Task<bool> ValidateSealNumberAsync(string newSealNumber)
+        {
+            return await DbContext.CITs.AnyAsync(x => x.SealNumber == newSealNumber);
+        }
+
+        public IQueryable<CIT> GetByDateRange(DateTime txQueryStartDate, DateTime txQueryEndDate)
+        {
+              return DbContext.CITs.Where(t => t.FromDate >= txQueryStartDate && t.ToDate < txQueryEndDate).OrderByDescending(t => t.ToDate).AsQueryable();
+        }
     }
 }

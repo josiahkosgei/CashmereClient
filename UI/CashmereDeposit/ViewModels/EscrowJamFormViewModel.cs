@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
@@ -20,7 +21,7 @@ namespace CashmereDeposit.ViewModels
         private string _additionalInfo;
         private Decimal _retreived_amount;
         private string _RetreivedAmountString;
-        private readonly DepositorDBContext _depositorDBContext;
+        //  private readonly DepositorDBContext _depositorDBContext;
 
         protected string AdditionalInfo
         {
@@ -53,6 +54,7 @@ namespace CashmereDeposit.ViewModels
         }
 
         private EscrowJam EscrowJam { get; set; }
+        private readonly IEscrowJamRepository _escrowJamRepository;
 
         public EscrowJamFormViewModel(
           ApplicationViewModel applicationViewModel,
@@ -61,7 +63,7 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _escrowJamRepository = IoC.Get<IEscrowJamRepository>();
             if (ApplicationViewModel.EscrowJam == null)
             {
                 ApplicationViewModel.Log.Error(nameof(EscrowJamFormViewModel), "Invalid EscrowJam", "ctor", "Currenct EscrowJam is null", Array.Empty<object>());
@@ -74,7 +76,7 @@ namespace CashmereDeposit.ViewModels
                 {
           applicationViewModel.EscrowJam.Id
                 });
-                EscrowJam = _depositorDBContext.EscrowJams.FirstOrDefault(x => x.Id == ApplicationViewModel.EscrowJam.Id);
+                EscrowJam = _escrowJamRepository.GetByIdAsync(ApplicationViewModel.EscrowJam.Id).ContinueWith(x => x.Result).Result;
                 AdditionalInfo = EscrowJam?.AdditionalInfo;
                 ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor ScreenTitle", "sys_EscrowJamFormScreenTitle", "Clear Escrow Jam");
                 NextCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor NextCaption", "sys_EndEscrowJamRecoveryCommand_Caption", "Complete");
@@ -134,7 +136,7 @@ namespace CashmereDeposit.ViewModels
                     EscrowJam.AdditionalInfo = AdditionalInfo;
                     EscrowJam.AuthorisingUser = new Guid?(ApplicationViewModel.ValidatingUser.Id);
                     EscrowJam.InitialisingUser = new Guid?(ApplicationViewModel.CurrentUser.Id);
-                    _depositorDBContext.SaveChangesAsync().Wait();
+                    await _escrowJamRepository.UpdateAsync(EscrowJam);
                     ApplicationViewModel.EndEscrowJam();
                 }
                 catch (Exception ex)

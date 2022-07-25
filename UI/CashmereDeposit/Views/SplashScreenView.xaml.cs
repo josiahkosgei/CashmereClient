@@ -29,7 +29,7 @@ namespace CashmereDeposit.Views
 
         private void myMediaElement_MediaEnded(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Log.TraceFormat(GetType().Name, "MediaEnded", "SplashScreen", "Loop {0} complete", (object)(videoLoopCount + 1));
+            ApplicationViewModel.Log.TraceFormat(GetType().Name, "MediaEnded", "SplashScreen", "Loop {0} complete", videoLoopCount + 1);
             myMediaElement.Stop();
             myMediaElement.Position = TimeSpan.FromSeconds(0.0);
             myMediaElement.Play();

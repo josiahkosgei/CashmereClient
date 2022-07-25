@@ -2,8 +2,9 @@
 
 namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
-    public interface ITransactionTypeListItemRepository: IAsyncRepository<TransactionTypeListItem>
+    public interface ITransactionTypeListItemRepository : IAsyncRepository<TransactionTypeListItem>
     {
+        public Task<TransactionTypeListItem> GetTransactionTypeScreenList(int transactionChosenId);
     }
- 
+
 }

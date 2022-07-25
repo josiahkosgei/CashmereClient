@@ -2,8 +2,8 @@
 
 namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
-    public interface IApplicationLogRepository: IAsyncRepository<ApplicationLog>
+    public interface IApplicationLogRepository : IAsyncRepository<ApplicationLog>
     {
     }
- 
+
 }

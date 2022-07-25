@@ -62,6 +62,11 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
             return await DbContext.Set<T>().FindAsync(id);
 
         }
+        public virtual async Task<T> GetByIdAsync(Guid id)
+        {
+            return await DbContext.Set<T>().FindAsync(id);
+
+        }
 
         public virtual async Task<T> UpdateAsync(T entity)
         {

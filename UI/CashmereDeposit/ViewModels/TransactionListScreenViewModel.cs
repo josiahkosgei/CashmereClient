@@ -25,9 +25,11 @@ namespace CashmereDeposit.ViewModels
     [Guid("F6BEA4EB-B0C9-4EB3-B225-1F83F73BFD70")]
     internal class TransactionListScreenViewModel : CustomerListScreenBaseViewModel
     {
+        
 
+        private readonly ITransactionTypeListItemRepository _transactionTypeListItemRepository;
+        private readonly ITransactionTextRepository _transactionTextRepository;
         private static IDeviceRepository _iDeviceRepository { get; set; }
-       //  private static DepositorDBContext _depositorDBContext { get; set; }
         public TransactionListScreenViewModel(
           string screenTitle,
           ApplicationViewModel applicationViewModel,
@@ -36,9 +38,9 @@ namespace CashmereDeposit.ViewModels
         {
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
-            
-            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", _depositorDBContext.TransactionTexts.FirstOrDefault(y => y.TxItem == x.Id)?.ListItemCaption, "No Text"), (object)x)).ToList();
+            _transactionTypeListItemRepository = IoC.Get<ITransactionTypeListItemRepository>();
+            _transactionTextRepository = IoC.Get<ITransactionTextRepository>();            
+            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption",_transactionTextRepository.GetByIdAsync(x.Id).ContinueWith(x=>x.Result).Result?.ListItemCaption , "No Text"), x)).ToList();
             GetFirstPage();
         }
 
@@ -92,7 +94,7 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        private void PerformSelectionFinal()
+        private async void PerformSelectionFinal()
         {
             var SelectedTransactionListItem = SelectedFilteredList.Value as TransactionTypeListItem;
             if (SelectedTransactionListItem == null)
@@ -104,7 +106,7 @@ namespace CashmereDeposit.ViewModels
                 var str2 = SelectedTransactionListItem?.DefaultAccount ?? "";
                 if (!string.IsNullOrWhiteSpace(SelectedTransactionListItem.DefaultAccount) && SelectedTransactionListItem.ValidateDefaultAccount)
                 {
-                    var result = Task.Run((Func<Task<AccountNumberValidationResponse>>)(() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrency, SelectedTransactionListItem.Id))).Result;
+                    var result = Task.Run(() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrency, SelectedTransactionListItem.Id)).Result;
                     if (result == null || !result.IsSuccess || !result.CanTransact)
                     {
                         ErrorText = "Transaction Type is offline. Please try again later";
@@ -129,7 +131,7 @@ namespace CashmereDeposit.ViewModels
                 else
                 {
                     var transactionTypeId = ApplicationViewModel?.CurrentTransaction?.TransactionType.Id;
-                    var disclaimerNavigation = _depositorDBContext.TransactionTypeListItems.Where(x => x.Id == transactionTypeId).Include(x => x.TxTextNavigationText.DisclaimerNavigation).FirstOrDefault();
+                    var disclaimerNavigation = await _transactionTypeListItemRepository.GetTransactionTypeScreenList((int)transactionTypeId);
                     //var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
                     var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimerNavigation.TxTextNavigationText.Disclaimer, null);
                     str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;

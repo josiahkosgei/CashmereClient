@@ -14,10 +14,10 @@ namespace CashmereDeposit.UserControls
         private string LastTexboxValue = null;
         public AlphanumericKeyboard() => InitializeComponent();
 
-        private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke((object)passwordBox, new object[2]
+        private void SetSelection(PasswordBox passwordBox, int start, int length) => passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[2]
         {
-      (object) start,
-      (object) length
+       start,
+       length
         });
 
         private void pressKey(string s)

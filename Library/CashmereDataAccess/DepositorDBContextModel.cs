@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Cashmere.Library.CashmereDataAccess
 {
     [DbContext(typeof(DepositorDBContext))]
-    public partial  class DepositorDBContextModel : RuntimeModel
+    public partial class DepositorDBContextModel : RuntimeModel
     {
         private static DepositorDBContextModel _instance;
         public static IModel Instance

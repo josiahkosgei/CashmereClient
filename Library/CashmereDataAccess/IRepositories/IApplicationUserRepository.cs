@@ -6,6 +6,5 @@ namespace Cashmere.Library.CashmereDataAccess.IRepositories
     {
         public Task<ApplicationUser> GetFirst();
         public Task<ApplicationUser> GetByIdAsync(Guid id);
-    } 
-
+    }
 }

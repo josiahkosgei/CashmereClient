@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Cashmere.Library.CashmereDataAccess.Entities
 {
     [Table("PasswordHistory")]
-    // [Index("User", Name = "iUser_PasswordHistory")]
     public partial class PasswordHistory
     {
         [Key]
@@ -22,7 +21,6 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         public string? Password { get; set; }
 
         [ForeignKey("User")]
-        //[InverseProperty("PasswordHistories")]
         public virtual ApplicationUser? UserNavigation { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using System.Text;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Cashmere.Library.Standard.Security;
 using Cashmere.Library.Standard.Utilities;
 
@@ -28,15 +29,24 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertCITSuccess : AlertBase
     {
         public const int ALERT_ID = 1300;
+        private readonly IAlertAttachmentTypeRepository _alertAttachmentTypeRepository;
+        private readonly IAlertEmailAttachmentRepository _alertEmailAttachmentRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
+        private readonly ITransactionRepository _transactionRepository;
         private CIT _cit;
-        private readonly DepositorDBContext _depositorDBContext;
 
         public AlertCITSuccess(CIT CIT, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
+            _alertAttachmentTypeRepository = IoC.Get<IAlertAttachmentTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEmailAttachmentRepository = IoC.Get<IAlertEmailAttachmentRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            _transactionRepository = IoC.Get<ITransactionRepository>();
             _cit = CIT != null ? CIT : throw new NullReferenceException("Variable CIT cannot be null");
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
-            AlertType = _depositorDBContext.AlertMessageTypes.FirstOrDefault(x => x.Id == 1300);
+
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;
         }
 
         public override bool SendAlert()
@@ -56,14 +66,14 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-                _depositorDBContext.AlertEvents.Add(entity);
-                AlertEmail email = GenerateEmail(_depositorDBContext);
+               
+                AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
                 AlertSMS sms = GenerateSMS();
                 if (sms != null)
                     entity.AlertSMS.Add(sms);
-                _depositorDBContext.SaveChangesAsync().Wait();
+                _alertEventRepository.AddAsync(entity).Wait();
                 return true;
             }
             catch (ValidationException ex)
@@ -83,7 +93,7 @@ namespace CashmereDeposit.Utils.AlertClasses
             return false;
         }
 
-        private new AlertEmail GenerateEmail(DepositorDBContext DBContext)
+        private new AlertEmail GenerateEmail()
         {
             AlertEmail alertEmail = new AlertEmail
             {
@@ -96,7 +106,7 @@ namespace CashmereDeposit.Utils.AlertClasses
             };
             try
             {
-                CreateAlertEmailattachments(DBContext, alertEmail);
+                CreateAlertEmailattachments(alertEmail);
             }
             catch (Exception ex)
             {
@@ -105,18 +115,18 @@ namespace CashmereDeposit.Utils.AlertClasses
             return alertEmail.RawTextMessage == null || alertEmail.HtmlMessage == null ? null : alertEmail;
         }
 
-        private void CreateAlertEmailattachments(DepositorDBContext DBContext, AlertEmail alertEmail)
+        private void CreateAlertEmailattachments(AlertEmail alertEmail)
         {
             DirectoryInfo directory = Directory.CreateDirectory(ApplicationViewModel.DeviceConfiguration.EMAIL_LOCAL_FOLDER + "\\Attachments\\CITReport\\");
-            GenerateCITReportAttachment(DBContext, alertEmail, directory);
+            GenerateCITReportAttachment(alertEmail, directory);
         }
 
-        private void GenerateCITReportAttachment(
-          DepositorDBContext DBContext,
+        private async void GenerateCITReportAttachment(
+          
           AlertEmail alertEmail,
           DirectoryInfo directory)
         {
-            AlertAttachmentType alertAttachmentType = _depositorDBContext.AlertAttachmentTypes.FirstOrDefault(x => x.Code.Equals("130001", StringComparison.Ordinal));
+            AlertAttachmentType alertAttachmentType = await _alertAttachmentTypeRepository.GetByCode("130001");
             if (alertAttachmentType == null)
                 return;
             if (!alertAttachmentType.Enabled)
@@ -223,7 +233,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                 byte[] citExcelAttachment = ExcelManager.GenerateCITExcelAttachment(CITReport, str);
                 FileInfo fileInfo = new FileInfo(str);
                 ApplicationViewModel.AlertLog.InfoFormat(nameof(AlertCITSuccess), "CITReport", "CreateAlertEmailattachments", "CITReport attachment saved at {0} with {1} bytes", str, fileInfo.Length.ToString("#,##0"));
-                _depositorDBContext.AlertEmailAttachments.Add(new AlertEmailAttachment
+                await _alertEmailAttachmentRepository.AddAsync(new AlertEmailAttachment
                 {
                     Id = Guid.NewGuid(),
                     AlertEmailId = alertEmail.Id,
@@ -233,7 +243,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     Data = citExcelAttachment,
                     Hash = CashmereHashing.HMACSHA512(Device.AppKey, citExcelAttachment)
                 });
-                _depositorDBContext.SaveChangesAsync().Wait();
+               // _alertEventRepository.AddAsync(entity).Wait();
             }
         }
 
@@ -412,6 +422,6 @@ namespace CashmereDeposit.Utils.AlertClasses
             return str;
         }
 
-        private new AlertEvent GetCorrespondingAlertEvent(DepositorDBContext DBContext) => throw new NotImplementedException();
+        private new AlertEvent GetCorrespondingAlertEvent() => throw new NotImplementedException();
     }
 }

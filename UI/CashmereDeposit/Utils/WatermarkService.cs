@@ -18,7 +18,7 @@ namespace CashmereDeposit.Utils
 {
     public static class WatermarkService
     {
-        public static readonly DependencyProperty WatermarkProperty = DependencyProperty.RegisterAttached("Watermark", typeof(object), typeof(WatermarkService), (PropertyMetadata)new FrameworkPropertyMetadata((object)null, new PropertyChangedCallback(OnWatermarkChanged)));
+        public static readonly DependencyProperty WatermarkProperty = DependencyProperty.RegisterAttached("Watermark", typeof(object), typeof(WatermarkService), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(OnWatermarkChanged)));
         private static readonly Dictionary<object, ItemsControl> itemsControls = new Dictionary<object, ItemsControl>();
 
         public static object GetWatermark(DependencyObject d) => d.GetValue(WatermarkProperty);
@@ -45,8 +45,8 @@ namespace CashmereDeposit.Utils
                 return;
             ItemsControl component = (ItemsControl)d;
             component.ItemContainerGenerator.ItemsChanged += new ItemsChangedEventHandler(ItemsChanged);
-            itemsControls.Add((object)component.ItemContainerGenerator, component);
-            DependencyPropertyDescriptor.FromProperty(ItemsControl.ItemsSourceProperty, component.GetType()).AddValueChanged((object)component, new EventHandler(ItemsSourceChanged));
+            itemsControls.Add(component.ItemContainerGenerator, component);
+            DependencyPropertyDescriptor.FromProperty(ItemsControl.ItemsSourceProperty, component.GetType()).AddValueChanged(component, new EventHandler(ItemsSourceChanged));
         }
 
         private static void Control_GotKeyboardFocus(object sender, RoutedEventArgs e)
@@ -55,7 +55,7 @@ namespace CashmereDeposit.Utils
             if (ShouldShowWatermark(control))
                 ShowWatermark(control);
             else
-                RemoveWatermark((UIElement)control);
+                RemoveWatermark(control);
         }
 
         private static void Control_Loaded(object sender, RoutedEventArgs e)
@@ -71,13 +71,13 @@ namespace CashmereDeposit.Utils
             ItemsControl itemsControl = (ItemsControl)sender;
             if (itemsControl.ItemsSource != null)
             {
-                if (ShouldShowWatermark((Control)itemsControl))
-                    ShowWatermark((Control)itemsControl);
+                if (ShouldShowWatermark(itemsControl))
+                    ShowWatermark(itemsControl);
                 else
-                    RemoveWatermark((UIElement)itemsControl);
+                    RemoveWatermark(itemsControl);
             }
             else
-                ShowWatermark((Control)itemsControl);
+                ShowWatermark(itemsControl);
         }
 
         private static void ItemsChanged(object sender, ItemsChangedEventArgs e)
@@ -85,15 +85,15 @@ namespace CashmereDeposit.Utils
             ItemsControl itemsControl;
             if (!itemsControls.TryGetValue(sender, out itemsControl))
                 return;
-            if (ShouldShowWatermark((Control)itemsControl))
-                ShowWatermark((Control)itemsControl);
+            if (ShouldShowWatermark(itemsControl))
+                ShowWatermark(itemsControl);
             else
-                RemoveWatermark((UIElement)itemsControl);
+                RemoveWatermark(itemsControl);
         }
 
         private static void RemoveWatermark(UIElement control)
         {
-            AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer((Visual)control);
+            AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer(control);
             if (adornerLayer == null)
                 return;
             Adorner[] adorners = adornerLayer.GetAdorners(control);
@@ -109,7 +109,7 @@ namespace CashmereDeposit.Utils
             }
         }
 
-        private static void ShowWatermark(Control control) => AdornerLayer.GetAdornerLayer((Visual)control)?.Add((Adorner)new WatermarkAdorner((UIElement)control, GetWatermark((DependencyObject)control)));
+        private static void ShowWatermark(Control control) => AdornerLayer.GetAdornerLayer(control)?.Add(new WatermarkAdorner(control, GetWatermark(control)));
 
         private static bool ShouldShowWatermark(Control c)
         {

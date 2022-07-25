@@ -47,7 +47,7 @@ namespace CashmereDeposit.ViewModels
                 var str2 = SelectedTransactionListItem?.AccountNumber ?? "";
                 if (ApplicationViewModel.CurrentTransaction.TransactionType.ValidateDefaultAccount)
                 {
-                    var result = Task.Run((Func<Task<AccountNumberValidationResponse>>)(() => ValidateAsync(SelectedTransactionListItem.AccountNumber, SelectedTransactionListItem.Currency))).Result;
+                    var result = Task.Run(() => ValidateAsync(SelectedTransactionListItem.AccountNumber, SelectedTransactionListItem.Currency)).Result;
                     if (result == null || !result.IsSuccess || !result.CanTransact)
                     {
                         ErrorText = result != null ? result?.PublicErrorMessage : "Transaction Type is offline. Please try again later";

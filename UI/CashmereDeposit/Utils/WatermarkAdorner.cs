@@ -43,10 +43,10 @@ namespace CashmereDeposit.Utils
                 this.contentPresenter.VerticalAlignment = VerticalAlignment.Center;
                 this.contentPresenter.HorizontalAlignment = HorizontalAlignment.Center;
             }
-            SetBinding(VisibilityProperty, (BindingBase)new Binding("IsVisible")
+            SetBinding(VisibilityProperty, new Binding("IsVisible")
             {
-                Source = (object)adornedElement,
-                Converter = (IValueConverter)new BooleanToVisibilityConverter()
+                Source = adornedElement,
+                Converter = new BooleanToVisibilityConverter()
             });
         }
 
@@ -54,7 +54,7 @@ namespace CashmereDeposit.Utils
 
         private Control Control => (Control)AdornedElement;
 
-        protected override Visual GetVisualChild(int index) => (Visual)contentPresenter;
+        protected override Visual GetVisualChild(int index) => contentPresenter;
 
         protected override Size MeasureOverride(Size constraint)
         {

@@ -246,43 +246,43 @@ namespace CashmereDeposit
             //    });
             //    );
 
-            services.AddDbContext<DepositorDBContext>(options =>
-                {
-                    if (options is null)
-                    {
-                        throw new ArgumentNullException(nameof(options));
-                    }
+            //services.AddDbContext<DepositorDBContext>(options =>
+            //    {
+            //        if (options is null)
+            //        {
+            //            throw new ArgumentNullException(nameof(options));
+            //        }
 
-                    options.UseSqlServer(connectionString,
-                    sqlServerOptionsAction: sqlOptions =>
-                    {
-                        sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null);
-                    });
-               });
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
+            //        options.UseSqlServer(connectionString,
+            //        sqlServerOptionsAction: sqlOptions =>
+            //        {
+            //            sqlOptions.EnableRetryOnFailure(
+            //            maxRetryCount: 10,
+            //            maxRetryDelay: TimeSpan.FromSeconds(30),
+            //            errorNumbersToAdd: null);
+            //        });
+            //   });
+            //services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
 
             //services.AddHttpClient("CashmereDepositHttpClient", client => { });
-            using (new DepositorDBContext())
-            {
-                services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    Device device;
-                    using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
-                    {
-                        device = GetDevice(_depositorDBContext);
-                    }
+            //using (new DepositorDBContext())
+            //{
+            //    services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
+            //    {
+            //        Device device;
+            //        using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
+            //        {
+            //            device = GetDevice(_depositorDBContext);
+            //        }
 
-                    var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
-                    return handler;
-                });
+            //        var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
+            //        return handler;
+            //    });
 
-            }
+            //}
 
             services.AddHttpClient("CDM_APIClient", client => { });
-            InitDatabase(services);
+           // InitDatabase(services);
         }
 
         private Device GetDevice(DepositorDBContext dbContext)

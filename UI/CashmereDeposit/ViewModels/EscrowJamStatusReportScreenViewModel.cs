@@ -5,13 +5,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.ViewModels
 {
     public class EscrowJamStatusReportScreenViewModel : FormViewModelBase
     {
         private bool canNext;
-        private readonly DepositorDBContext _depositorDBContext;
+        private readonly ICITRepository _citRepository;
+        private readonly ICITTransactionRepository _cITTransactionRepository;
+        private readonly ITransactionRepository _transactionRepository;
+        private readonly IDeviceCITSuspenseAccountRepository _deviceCITSuspenseAccountRepository;
+        private readonly IDeviceSuspenseAccountRepository _deviceSuspenseAccountRepository;
 
         public EscrowJamStatusReportScreenViewModel(
           ApplicationViewModel applicationViewModel,
@@ -20,7 +25,12 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-             _depositorDBContext = IoC.Get<DepositorDBContext>();
+            
+            _citRepository = IoC.Get<ICITRepository>();
+            _cITTransactionRepository = IoC.Get<ICITTransactionRepository>();
+            _transactionRepository = IoC.Get<ITransactionRepository>();
+            _deviceCITSuspenseAccountRepository = IoC.Get<IDeviceCITSuspenseAccountRepository>();
+            _deviceSuspenseAccountRepository = IoC.Get<IDeviceSuspenseAccountRepository>();
             ScreenTitle = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor ScreenTitle", "sys_EscrowJamFormScreenTitle", "Clear Escrow Jam");
             NextCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText(GetType().Name + ".Constructor NextCaption", "sys_EndEscrowJamRecoveryCommand_Caption", "Complete");
             CancelCaption = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("ATMScreenViewModelBase.CancelCaption", "sys_CancelButton_Caption", "Cancel");
@@ -35,13 +45,13 @@ namespace CashmereDeposit.ViewModels
             CanNext = true;
         }
 
-        private void EscrowJamStatusReportScreenViewModel_Activated(
+        private async void EscrowJamStatusReportScreenViewModel_Activated(
           object sender,
           ActivationEventArgs e)
         {
             if (ApplicationViewModel.EscrowJam == null)
             {
-                var transaction = _depositorDBContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
+                var transaction = await _transactionRepository.GetFirstSortBy();// _depositorDBContext.Transactions.OrderByDescending(x => x.TxStartDate).FirstOrDefault();
                 if (!transaction.TxCompleted || transaction.TxErrorCode == 85)
                 {
                     ApplicationViewModel.EscrowJam = new EscrowJam()
@@ -50,7 +60,7 @@ namespace CashmereDeposit.ViewModels
                         DateDetected = DateTime.Now
                     };
                     transaction.EscrowJams.Add(ApplicationViewModel.EscrowJam);
-                    _depositorDBContext.SaveChangesAsync().Wait();
+                    await _transactionRepository.UpdateAsync(transaction);
                 }
             }
             CanNext = ApplicationViewModel.DeviceManager.CurrentState == DeviceManagerState.ESCROWJAM_END_REQUEST;

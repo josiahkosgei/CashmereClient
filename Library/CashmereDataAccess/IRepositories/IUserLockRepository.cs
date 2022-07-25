@@ -5,5 +5,5 @@ namespace Cashmere.Library.CashmereDataAccess.IRepositories
     public interface IUserLockRepository : IAsyncRepository<UserLock>
     {
         public Task<UserLock> GetFirst();
-    } 
+    }
 }

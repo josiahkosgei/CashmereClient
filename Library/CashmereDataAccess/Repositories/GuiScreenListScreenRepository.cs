@@ -12,7 +12,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public async Task<GuiScreenListScreen> GetByGUIScreenId(int Id)
         {
-            return await DbContext.GuiScreenListScreens.Where(w=>w.GUIScreenNavigation.Id == Id).FirstOrDefaultAsync();
+            return await DbContext.GuiScreenListScreens.Where(w => w.GUIScreenNavigation.Id == Id).FirstOrDefaultAsync();
         }
     }
 }

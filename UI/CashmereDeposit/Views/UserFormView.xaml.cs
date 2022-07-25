@@ -15,7 +15,7 @@ namespace CashmereDeposit.Views
         public UserFormView()
         {
             InitializeComponent();
-            new Style().Setters.Add((SetterBase)new Setter(VisibilityProperty, (object)Visibility.Collapsed));
+            new Style().Setters.Add(new Setter(VisibilityProperty, Visibility.Collapsed));
         }
 
         private void FieldsListbox_PreviewMouseUp(object sender, MouseButtonEventArgs e) => tabControl.SelectedIndex = FieldsListbox.SelectedIndex + 1;

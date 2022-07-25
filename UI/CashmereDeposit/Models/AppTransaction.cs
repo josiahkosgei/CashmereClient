@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.Models;
 
@@ -40,7 +41,11 @@ public class AppTransaction : PropertyChangedBase
     private Denomination _droppedDenominationResult;
     private object DroppedDenominationUpdateLock = new object();
     private TransactionTypeListItem _transactionType;
-   //  private static DepositorDBContext _depositorDBContext { get; set; }
+    private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+    private readonly IAlertEventRepository _alertEventRepository;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly ICurrencyRepository _currenciesRepository;
+    private readonly ITransactionTypeListItemRepository _transactionTypeListItemRepository;
 
     public AppTransaction(
         AppSession session,
@@ -48,7 +53,11 @@ public class AppTransaction : PropertyChangedBase
         string currency)
     {
 
-        _depositorDBContext = IoC.Get<DepositorDBContext>();
+        _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+        _alertEventRepository = IoC.Get<IAlertEventRepository>();
+        _transactionRepository = IoC.Get<ITransactionRepository>();
+        _currenciesRepository = IoC.Get<ICurrencyRepository>();
+        _transactionTypeListItemRepository = IoC.Get<ITransactionTypeListItemRepository>();
         AppTransaction appTransaction = this;
         if (currency == null)
             throw new ArgumentNullException();
@@ -70,8 +79,8 @@ public class AppTransaction : PropertyChangedBase
             CbAccountName = "",
             TxAmount = new long?(0L)
         };
-        session.DBContext.Transactions.Add(_transaction);
-        Currency = _depositorDBContext.Currencies.FirstOrDefault(x => x.Code == currency);
+        var result = _transactionRepository.AddAsync(_transaction).ContinueWith(x => x.Result).Result;
+        Currency = _currenciesRepository.GetByCode(currency).ContinueWith(x => x.Result).Result;
         TransactionType = transactionType;
         ApplicationModel applicationModel = session.ApplicationViewModel.ApplicationModel;
         string str;
@@ -89,7 +98,7 @@ public class AppTransaction : PropertyChangedBase
             else
             {
                 ICollection<DeviceSuspenseAccount> suspenseAccounts = device.DeviceSuspenseAccounts;
-                str = suspenseAccounts != null ? suspenseAccounts.FirstOrDefault(x => x.CurrencyCode == appTransaction.Currency.Code?.ToUpper())?.AccountNumber : (string)null;
+                str = suspenseAccounts != null ? suspenseAccounts.FirstOrDefault(x => x.CurrencyCode == appTransaction.Currency.Code?.ToUpper())?.AccountNumber : null;
             }
         }
         SuspenseAccount = str;
@@ -271,8 +280,6 @@ public class AppTransaction : PropertyChangedBase
     }
 
     public int ValidationTries { get; set; }
-    [IgnoreDataMember]
-    private DepositorDBContext DepositorDBContext => Session.DBContext;
 
     [IgnoreDataMember]
     public object PostingLock { get; set; } = new object();
@@ -308,8 +315,8 @@ public class AppTransaction : PropertyChangedBase
         get => _currency;
         set
         {
-            ApplicationViewModel.Log.InfoFormat(GetType().Name, "Currency Changed", "Tx Property Changed", "Currency changed from {0} to {1}", (object)_currency?.Code, (object)value?.Code);
-            _currency = _depositorDBContext.Currencies.First(x => x.Code == value.Code);
+            ApplicationViewModel.Log.InfoFormat(GetType().Name, "Currency Changed", "Tx Property Changed", "Currency changed from {0} to {1}", _currency?.Code, value?.Code);
+            _currency = _currenciesRepository.GetByCode(value.Code).ContinueWith(x => x.Result).Result;
             Transaction.TxCurrencyNavigation = _currency;
             NotifyOfPropertyChange(nameof(Currency));
         }
@@ -497,7 +504,7 @@ public class AppTransaction : PropertyChangedBase
                 else
                 {
                     ICollection<TransactionLimitListItem> transactionLimitListItems = transactionLimitList.TransactionLimitListItems;
-                    transactionLimits = transactionLimitListItems != null ? transactionLimitListItems.FirstOrDefault(x => string.Equals(x.CurrencyCode, CurrencyCode, StringComparison.InvariantCultureIgnoreCase)) : (TransactionLimitListItem)null;
+                    transactionLimits = transactionLimitListItems != null ? transactionLimitListItems.FirstOrDefault(x => string.Equals(x.CurrencyCode, CurrencyCode, StringComparison.InvariantCultureIgnoreCase)) : null;
                 }
             }
             return transactionLimits;
@@ -513,9 +520,9 @@ public class AppTransaction : PropertyChangedBase
         get => _transaction?.TxTypeNavigation;
         set
         {
-            ApplicationViewModel.Log.InfoFormat(GetType().Name, "TransactionType Changed", "Tx Property Changed", "TransactionType changed from {0} to {1}", (object)_transactionType?.CbTxType, (object)value?.CbTxType);
+            ApplicationViewModel.Log.InfoFormat(GetType().Name, "TransactionType Changed", "Tx Property Changed", "TransactionType changed from {0} to {1}", _transactionType?.CbTxType, value?.CbTxType);
             _transactionType = value;
-            Transaction.TxTypeNavigation = _depositorDBContext.TransactionTypeListItems.FirstOrDefault(x => x.Id == value.Id);
+            Transaction.TxTypeNavigation = _transactionTypeListItemRepository.GetByIdAsync(value.Id).ContinueWith(x => x.Result).Result;;
             NotifyOfPropertyChange(nameof(TransactionType));
         }
     }

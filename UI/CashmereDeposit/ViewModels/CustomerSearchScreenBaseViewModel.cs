@@ -141,7 +141,7 @@ namespace CashmereDeposit.ViewModels
 
         protected void ScrollList()
         {
-            var list = CreateList(Task.Run((Func<Task<AccountsListResponse>>)(() => ApplicationViewModel.GetAccountListAsync(ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.Currency.Code, PageNumber, PageSize)))?.Result);
+            var list = CreateList(Task.Run(() => ApplicationViewModel.GetAccountListAsync(ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.Currency.Code, PageNumber, PageSize))?.Result);
             if (FullList == null)
             {
                 FullList = new ObservableCollection<ATMSelectionItem<object>>(list);
@@ -158,7 +158,7 @@ namespace CashmereDeposit.ViewModels
         {
             try
             {
-                return AccountList != null ? AccountList.Accounts.Select(x => new ATMSelectionItem<object>(x.Icon == null ? ImageManipuation.GetBitmapFromFile("{AppDir}\\NoImg.png") : ImageManipuation.GetBitmapFromBytes(x.Icon), x.AccountNumber + " | " + x.AccountName, (object)x)).ToList() : null;
+                return AccountList != null ? AccountList.Accounts.Select(x => new ATMSelectionItem<object>(x.Icon == null ? ImageManipuation.GetBitmapFromFile("{AppDir}\\NoImg.png") : ImageManipuation.GetBitmapFromBytes(x.Icon), x.AccountNumber + " | " + x.AccountName, x)).ToList() : null;
             }
             catch (Exception ex)
             {
@@ -178,7 +178,7 @@ namespace CashmereDeposit.ViewModels
 
         public void PerformSearch()
         {
-            FilteredList = string.IsNullOrWhiteSpace(CustomerInput) || CustomerInput.Length <= 2 ? FullList : new ObservableCollection<ATMSelectionItem<object>>(CreateList(Task.Run((Func<Task<AccountsListResponse>>)(() => ApplicationViewModel.SearchAccountListAsync(CustomerInput, ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.CurrencyCode))).Result));
+            FilteredList = string.IsNullOrWhiteSpace(CustomerInput) || CustomerInput.Length <= 2 ? FullList : new ObservableCollection<ATMSelectionItem<object>>(CreateList(Task.Run(() => ApplicationViewModel.SearchAccountListAsync(CustomerInput, ApplicationViewModel.CurrentTransaction.TransactionType, ApplicationViewModel.CurrentTransaction.CurrencyCode)).Result));
             NotifyOfPropertyChange((Expression<Func<ObservableCollection<ATMSelectionItem<object>>>>)(() => FilteredList));
         }
 

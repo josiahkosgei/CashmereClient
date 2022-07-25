@@ -174,7 +174,7 @@ namespace CashmereDeposit.ViewModels
 
                 Log.Error(nameof(StartupViewModel), ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), nameof(SaveToDatabase), "Error Saving to Database: {0}>>{1}", new object[2]
                 {
-          (object) ex.MessageString(),
+           ex.MessageString(),
           errorDetail
                 });
             }

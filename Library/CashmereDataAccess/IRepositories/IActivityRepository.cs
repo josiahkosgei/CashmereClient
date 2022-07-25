@@ -2,9 +2,9 @@
 
 namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
-    public interface IActivityRepository: IAsyncRepository<Activity>
+    public interface IActivityRepository : IAsyncRepository<Activity>
     {
         public Task<Activity> GetByName(string Name);
     }
- 
+
 }

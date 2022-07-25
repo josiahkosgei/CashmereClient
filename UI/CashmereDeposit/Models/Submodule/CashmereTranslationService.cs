@@ -9,19 +9,30 @@ using System.Runtime.InteropServices;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Caliburn.Micro;
+using Cashmere.Library.CashmereDataAccess.IRepositories;
 
 namespace CashmereDeposit.Models.Submodule
 {
     [Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE")]
     public class CashmereTranslationService : SubmoduleBase
     {
-        private readonly DepositorDBContext _depositorDBContext;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertEventRepository _alertEventRepository;
+        private readonly ISysTextItemRepository _sysTextItemRepository;
+        private readonly ISysTextItemCategoryRepository _sysTextItemCategoryRepository;
+        private readonly ITextItemRepository _textItemRepository;
+
         public bool isMultiLanguage { get; } = false;
 
         public CashmereTranslationService(ApplicationViewModel applicationViewModel, CDMLicense license)
           : base(applicationViewModel, license, new Guid("1E83A30B-2338-43A5-AB11-EEA2190F7CAE"), nameof(CashmereTranslationService))
         {
-            _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertEventRepository = IoC.Get<IAlertEventRepository>();
+            _sysTextItemRepository = IoC.Get<ISysTextItemRepository>();
+            _sysTextItemCategoryRepository = IoC.Get<ISysTextItemCategoryRepository>();
+            _textItemRepository = IoC.Get<ITextItemRepository>();
+
             if (license == null)
                 return;
             if (!license.Grant(new LicenseFeatureItem()
@@ -55,11 +66,9 @@ namespace CashmereDeposit.Models.Submodule
                 }
                 else
                 {
-                    using (DepositorDBContext depositorDbContext = new DepositorDBContext())
-                    {
                         try
                         {
-                            SysTextItem sysTextItem = _depositorDBContext.SysTextItems.FirstOrDefault<SysTextItem>(x => x.Token == tokenID);
+                            SysTextItem sysTextItem = _sysTextItemRepository.GetByTokenId(tokenID).ContinueWith(x=>x.Result).Result;
                             if (sysTextItem == null)
                             {
                                 ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof(TranslateSystemText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
@@ -88,7 +97,7 @@ namespace CashmereDeposit.Models.Submodule
                         {
                             ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof(TranslateSystemText), "Caller = {0}: Error translating text [{1}] into language {2}: {3}>>{4}", caller, tokenID, languageCode, ex?.Message, ex?.InnerException?.Message);
                         }
-                    }
+                    
                 }
             }
             return TokenReplace(defaultText);
@@ -106,14 +115,11 @@ namespace CashmereDeposit.Models.Submodule
                 ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, "TranslateSystemText", "Caller = {0}: Error Language.IsNullOrWhiteSpace()", caller);
             }
             else
-            {
-                using (DepositorDBContext depositorDbContext = new DepositorDBContext())
-                {
-                    try
+            {  try
                     {
                         if (!textItem.HasValue)
                             throw new ArgumentNullException(nameof(textItem));
-                        TextItem textItem1 = _depositorDBContext.TextItems.FirstOrDefault<TextItem>(x => x.Id == textItem);
+                        TextItem textItem1 = _textItemRepository.GetByIdAsync((Guid)textItem).ContinueWith(x=>x.Result).Result;
                         if (textItem1 == null)
                         {
                             ApplicationViewModel.Log.WarningFormat(GetType().Name, nameof(TranslateUserText), "TranslationError", "Caller = {0}>: sysTextItem is null in db", caller);
@@ -148,7 +154,7 @@ namespace CashmereDeposit.Models.Submodule
                     {
                         ApplicationViewModel.Log.ErrorFormat(GetType().Name, 108, nameof(TranslateUserText), "Caller = {0}: Error translating text {1} into language {2}: {3}>>{4}", caller, textItem, languageCode, ex?.Message, ex?.InnerException?.Message);
                     }
-                }
+                
             }
             return TokenReplace(defaultText);
         }

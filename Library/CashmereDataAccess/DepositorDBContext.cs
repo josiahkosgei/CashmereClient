@@ -107,16 +107,16 @@ namespace Cashmere.Library.CashmereDataAccess
         public virtual DbSet<ValidationType> ValidationTypes { get; set; } = null!;
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-                var strategy = this.Database.CreateExecutionStrategy();
-                var result = strategy.ExecuteAsync(async () =>
-                     {
-                         await using var transaction = await this.Database.BeginTransactionAsync();
-                         var _returnValue = base.SaveChanges();
-                         await transaction.CommitAsync();
-                         return _returnValue;
-                     });
-                return result;
-            
+            var strategy = this.Database.CreateExecutionStrategy();
+            var result = strategy.ExecuteAsync(async () =>
+                 {
+                     await using var transaction = await this.Database.BeginTransactionAsync();
+                     var _returnValue = base.SaveChanges();
+                     await transaction.CommitAsync();
+                     return _returnValue;
+                 });
+            return result;
+
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

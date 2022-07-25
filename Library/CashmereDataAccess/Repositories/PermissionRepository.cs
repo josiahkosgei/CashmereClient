@@ -15,7 +15,7 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
             return await DbContext.Permissions.FirstOrDefaultAsync(x => x.Id == Id);
         }
 
-        public async Task<Permission> GetFirst( ApplicationUser user,Guid ActivityId,  bool isAuthenticating = false)
+        public async Task<Permission> GetFirst(ApplicationUser user, Guid ActivityId, bool isAuthenticating = false)
         {
             return await DbContext.Permissions.FirstOrDefaultAsync(x => x.RoleId == user.RoleId && x.ActivityId == ActivityId && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
         }

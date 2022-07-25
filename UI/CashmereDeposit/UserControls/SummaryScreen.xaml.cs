@@ -17,7 +17,7 @@ namespace CashmereDeposit.UserControls
         public SummaryScreen(List<SummaryListItem> boundList)
         {
             InitializeComponent();
-            SummaryListBox.ItemsSource = (IEnumerable)boundList;
+            SummaryListBox.ItemsSource = boundList;
         }
 
         private void OnManipulationBoundaryFeedback(
