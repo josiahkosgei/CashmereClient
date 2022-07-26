@@ -34,7 +34,7 @@ namespace CashmereDeposit.Utils.AlertClasses
             _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             Bag = bag;
-            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x=>x.Result).Result;
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;
         }
 
         public override bool SendAlert()

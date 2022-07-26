@@ -35,13 +35,12 @@ namespace CashmereDeposit.ViewModels
                 return;
             if (!ApplicationViewModel.CurrentUser.IsAdUser && ApplicationViewModel.UserPermissionAllowed(ApplicationViewModel.CurrentUser, "USER_CHANGE_PASSWORD"))
             {
-                using (new DepositorDBContext())
-                    Screens.Add(new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/pin-code.png",
-                        ApplicationViewModel.CashmereTranslationService.TranslateSystemText(
-                            nameof(MenuUserManagementATMViewModel_Activated), "sys_User_ChangePasswordCommand_Caption",
-                            "Change Password", ApplicationViewModel.CurrentLanguage),
-                        new UserChangePasswordFormViewModel(ApplicationViewModel, ApplicationViewModel.CurrentUser,
-                            null, Conductor, CallingObject, CallingObject)));
+                Screens.Add(new ATMSelectionItem<object>("{AppDir}/Resources/Icons/Main/pin-code.png",
+                    ApplicationViewModel.CashmereTranslationService.TranslateSystemText(
+                        nameof(MenuUserManagementATMViewModel_Activated), "sys_User_ChangePasswordCommand_Caption",
+                        "Change Password", ApplicationViewModel.CurrentLanguage),
+                    new UserChangePasswordFormViewModel(ApplicationViewModel, ApplicationViewModel.CurrentUser,
+                        Conductor, CallingObject, CallingObject)));
             }
             isInitialised = true;
         }

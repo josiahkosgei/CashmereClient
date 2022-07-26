@@ -25,7 +25,7 @@ namespace CashmereDeposit.ViewModels
           bool isNewEntry)
           : base(applicationViewModel, conductor, callingObject, isNewEntry)
         {
-            
+
             _citRepository = IoC.Get<ICITRepository>();
             _cITTransactionRepository = IoC.Get<ICITTransactionRepository>();
             _transactionRepository = IoC.Get<ITransactionRepository>();

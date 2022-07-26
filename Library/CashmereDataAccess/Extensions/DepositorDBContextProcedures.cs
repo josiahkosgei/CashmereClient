@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.Extensions;
+using Caliburn.Micro;
 
 namespace Cashmere.Library.CashmereDataAccess
 {
@@ -19,7 +20,7 @@ namespace Cashmere.Library.CashmereDataAccess
         {
             get
             {
-                if (_procedures is null) _procedures = new DepositorDBContextProcedures(this);
+                if (_procedures is null) _procedures = new DepositorDBContextProcedures();
                 return _procedures;
             }
             set
@@ -46,9 +47,9 @@ namespace Cashmere.Library.CashmereDataAccess
     {
         private readonly DepositorDBContext _context;
 
-        public DepositorDBContextProcedures(DepositorDBContext context)
+        public DepositorDBContextProcedures()
         {
-            _context = context;
+            _context = IoC.Get<DepositorDBContext>();
         }
 
         public virtual async Task<List<GetCITDenominationByDatesResult>> GetCITDenominationByDatesAsync(DateTime? startDate, DateTime? endDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)

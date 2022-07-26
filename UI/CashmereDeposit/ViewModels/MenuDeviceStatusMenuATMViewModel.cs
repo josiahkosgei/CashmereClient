@@ -31,7 +31,7 @@ namespace CashmereDeposit.ViewModels
         {
             if (isInitialised)
                 return;
-            var userPermission = ApplicationViewModel.GetUserPermissionAsync(ApplicationViewModel.CurrentUser, "DEVICE_SUMMARY").ContinueWith(x=>x.Result).Result;
+            var userPermission = ApplicationViewModel.GetUserPermissionAsync(ApplicationViewModel.CurrentUser, "DEVICE_SUMMARY").ContinueWith(x => x.Result).Result;
             if (userPermission != null)
             {
                 var reportScreenViewModel = new DeviceStatusReportScreenViewModel(Application.Current.FindResource("DeviceStatusScreenTitle") as string, ApplicationViewModel, this);

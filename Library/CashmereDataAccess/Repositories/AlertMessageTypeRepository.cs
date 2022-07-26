@@ -1,18 +1,20 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class AlertMessageTypeRepository : RepositoryBase<AlertMessageType>, IAlertMessageTypeRepository
     {
-        public AlertMessageTypeRepository(DepositorDBContext dbContext) : base(dbContext)
+        public AlertMessageTypeRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
-        public Task<List<AlertMessageType>> GetEnabled()
+        public async Task<List<AlertMessageType>> GetEnabled()
         {
-            return DbContext.AlertMessageTypes.Where(x => x.Enabled.Value == true).ToListAsync();
+            var result = depositorDBContext.AlertMessageTypes.Where(x => x.Enabled.Value == true).ToList();
+            return await Task.Run<List<AlertMessageType>>(() => result);
         }
     }
 }

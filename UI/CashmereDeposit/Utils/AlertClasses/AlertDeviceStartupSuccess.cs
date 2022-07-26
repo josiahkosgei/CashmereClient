@@ -21,22 +21,22 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertDeviceStartupSuccess : AlertBase
     {
         public const int ALERT_ID = 1100;
-               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertDeviceStartupSuccess(Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
-              _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
-            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x=>x.Result).Result;//== 1100);
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//== 1100);
         }
 
         public override bool SendAlert()
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -49,7 +49,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

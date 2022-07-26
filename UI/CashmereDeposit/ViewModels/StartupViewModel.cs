@@ -44,8 +44,8 @@ namespace CashmereDeposit.ViewModels
         {
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
-          //  _depositorDBContext = IoC.Get<DepositorDBContext>();
-           _deviceStatusRepository = IoC.Get<IDeviceStatusRepository>();
+            //  _depositorDBContext = IoC.Get<DepositorDBContext>();
+            _deviceStatusRepository = IoC.Get<IDeviceStatusRepository>();
             Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version?.ToString(), "CashmereDepositLog", null);
             AppDomain.CurrentDomain.UnhandledException += CrashHandler;
             ApplicationViewModel.DeviceConfiguration = DeviceConfiguration.Initialise();
@@ -125,7 +125,7 @@ namespace CashmereDeposit.ViewModels
             {
                 CrashHandler(this, new UnhandledExceptionEventArgs(ex, false));
             }
-           // SaveToDatabase();
+            // SaveToDatabase();
         }
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
@@ -139,7 +139,7 @@ namespace CashmereDeposit.ViewModels
           exceptionObject.MessageString()
                 });
                 var device = GetDeviceAsync();
-                SaveToDatabase();
+
                 AlertManager?.SendAlert(new AlertApplicationCrash(device, exceptionObject.Message, DateTime.Now, exceptionObject.StackTrace));
             }
             catch (Exception ex1)
@@ -156,41 +156,10 @@ namespace CashmereDeposit.ViewModels
             Application.Current.Shutdown();
         }
 
-        public void SaveToDatabase()
-        {
-            try
-            {
-                //_depositorDBContext.SaveChangesAsync().Wait();
-            }
-            catch (ValidationException ex)
-            {
-                var errorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
-                foreach (var entityValidationError in ex.ValidationResult.MemberNames)
-                {
-                    errorDetail += ">validation error>";
-                    errorDetail = errorDetail + "ErrorMessage=>" + entityValidationError;
-                }
-                Console.WriteLine(errorDetail);
-
-                Log.Error(nameof(StartupViewModel), ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), nameof(SaveToDatabase), "Error Saving to Database: {0}>>{1}", new object[2]
-                {
-           ex.MessageString(),
-          errorDetail
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error Saving to Database: {0}", string.Format("{0}\n{1}", ex.Message, ex?.InnerException?.Message));
-                Log.Error(nameof(StartupViewModel), ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), nameof(SaveToDatabase), "Error Saving to Database: {0}", new object[1]
-                {
-          ex.MessageString()
-                });
-            }
-        }
 
         private static Device GetDeviceAsync()
         {
-            return _iDeviceRepository.GetDevice(Environment.MachineName).ContinueWith(x=>x.Result).Result  ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
+            return _iDeviceRepository.GetDevice(Environment.MachineName).ContinueWith(x => x.Result).Result ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
             //return device ?? throw new Exception("Device: " + Environment.MachineName + " not set correctly in database. Device is null during start up.");
         }
         private readonly CompositeDisposable _disposables = new();

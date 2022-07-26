@@ -50,7 +50,7 @@ namespace CashmereDeposit.Models
             SessionStart = DateTime.Now;
             SessionComplete = false;
             PropertyChanged += new PropertyChangedEventHandler(OnPropertyChangedEvent);
-            _depositorSessionRepository.AddAsync(DepositorSession).Wait();            
+            _depositorSessionRepository.AddAsync(DepositorSession).Wait();
             ApplicationViewModel.Log.InfoFormat(GetType().Name, nameof(SessionStart), "Session", "Session {0} started", SessionID.ToString().ToUpper());
         }
 
@@ -217,14 +217,14 @@ namespace CashmereDeposit.Models
         internal async void CreateTransaction(TransactionTypeListItem transactionType)
         {
             var transactionTypeListItem = await _transactionTypeListItemRepository.GetTransactionTypeScreenList(transactionType.Id);
-                //_depositorDBContext.TransactionTypeListItems.Where(s => s.Id == transactionType.Id)
-                //  .Include(i => i.TxTypeGUIScreenlistNavigation)
-                //  .Include(i => i.DefaultAccountCurrencyNavigation)
-                //  .Include(i => i.TransactionTextNav)
-                //  .Include(i => i.TxLimitListNavigation)
-                //  .Include(i => i.TxTextNavigationText)
-                //  .Include(i => i.TxTypeNavigation)
-                //  .FirstOrDefault();
+            //_depositorDBContext.TransactionTypeListItems.Where(s => s.Id == transactionType.Id)
+            //  .Include(i => i.TxTypeGUIScreenlistNavigation)
+            //  .Include(i => i.DefaultAccountCurrencyNavigation)
+            //  .Include(i => i.TransactionTextNav)
+            //  .Include(i => i.TxLimitListNavigation)
+            //  .Include(i => i.TxTextNavigationText)
+            //  .Include(i => i.TxTypeNavigation)
+            //  .FirstOrDefault();
             Transaction = new AppTransaction(this, transactionTypeListItem, transactionType.DefaultAccountCurrency);
             Transaction.TransactionLimitReachedEvent += new EventHandler<EventArgs>(Transaction_TransactionLimitReachedEvent);
             ApplicationViewModel.AlertManager.SendAlert(new AlertTransactionStarted(Transaction, Device, DateTime.Now));
@@ -252,9 +252,9 @@ namespace CashmereDeposit.Models
             SessionEnd = DateTime.Now;
             if (Transaction != null && !Transaction.Completed)
                 Transaction.EndTransaction(result, errorMessage);
-           
-           // _depositorSessionRepository.UpdateAsync(SessionEnd);
-             //_depositorDBContext.SaveChangesAsync().Wait();
+
+            // _depositorSessionRepository.UpdateAsync(SessionEnd);
+            //_depositorDBContext.SaveChangesAsync().Wait();
             //_depositorDBContext.Dispose();
         }
 
@@ -274,7 +274,7 @@ namespace CashmereDeposit.Models
 
         internal void SaveToDatabase()
         {
-          //  _depositorDBContext.SaveChangesAsync().Wait();
+            //  _depositorDBContext.SaveChangesAsync().Wait();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 4006;
         private AppTransaction _transaction;
-               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertTransactionEndedSuccess(
@@ -33,7 +33,7 @@ namespace CashmereDeposit.Utils.AlertClasses
           : base(device, dateDetected)
         {
             _transaction = transaction != null ? transaction : throw new NullReferenceException("Variable transaction cannot be null in " + GetType().Name);
-               _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//4006);
         }
@@ -42,7 +42,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent()
                 {
@@ -55,7 +55,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

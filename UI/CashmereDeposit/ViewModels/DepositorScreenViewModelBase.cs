@@ -14,7 +14,6 @@ namespace CashmereDeposit.ViewModels
     public class DepositorScreenViewModelBase : Conductor<Screen>
     {
         public ApplicationViewModel ApplicationViewModel;
-        protected DepositorDBContext DBContext = new();
 
         protected string ScreenTitle { get; set; }
 

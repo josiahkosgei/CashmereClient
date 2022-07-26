@@ -325,7 +325,7 @@ namespace DeviceManager
                 IgnoreWhitespace = true
             };
             XmlReader xmlReader;
-            var stream =_client.GetStream();
+            var stream = _client.GetStream();
             using (xmlReader = XmlReader.Create(stream, settings))
             {
                 while (true)

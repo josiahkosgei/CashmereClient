@@ -30,20 +30,20 @@ namespace CashmereDeposit.Utils.AlertClasses
         public AlertNoteJamClearSuccess(Transaction transaction, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
-            
+
             _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             _transaction = transaction ?? throw new NullReferenceException("Variable transaction cannot be null in " + GetType().Name);
-            
-            associatedAlertEvent = _alertEventRepository.GetAlertEventAsync(4002).ContinueWith(x => x.Result).Result;;
-            AlertType =  _alertMessageTypeRepository.GetByIdAsync(4002).ContinueWith(x => x.Result).Result;
+
+            associatedAlertEvent = _alertEventRepository.GetAlertEventAsync(4002).ContinueWith(x => x.Result).Result; ;
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(4002).ContinueWith(x => x.Result).Result;
         }
 
         public override bool SendAlert()
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {

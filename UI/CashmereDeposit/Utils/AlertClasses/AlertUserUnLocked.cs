@@ -23,7 +23,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         public const int ALERT_ID = 3001;
         private ApplicationUser _user;
         private string _errorMessage;
-               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertUserUnLocked(
@@ -35,7 +35,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             _user = user;
             _errorMessage = errorMessage;
-               _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//3001);
         }
@@ -44,7 +44,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -57,7 +57,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

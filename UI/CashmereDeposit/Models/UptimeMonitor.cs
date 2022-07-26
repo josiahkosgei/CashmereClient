@@ -102,7 +102,7 @@ namespace CashmereDeposit.Models
                 DateTime now = DateTime.Now;
                 Device device = await _deviceRepository.GetDevice(Environment.MachineName);
                 CurrentUptimeComponentState = state;
-                var uptimeComponentState= await _uptimeComponentStateRepository.GetByDeviceIdAsync(device.Id, (int)CurrentUptimeComponentState);
+                var uptimeComponentState = await _uptimeComponentStateRepository.GetByDeviceIdAsync(device.Id, (int)CurrentUptimeComponentState);
                 if (uptimeComponentState == null)
                     await _uptimeComponentStateRepository.AddAsync(new UptimeComponentState()
                     {
@@ -133,11 +133,11 @@ namespace CashmereDeposit.Models
                 if (entity != null)
                 {
                     if (now - entity.StartDate < TimeSpan.FromMinutes(1.0))
-                       await _uptimeComponentStateRepository.DeleteAsync(entity);
+                        await _uptimeComponentStateRepository.DeleteAsync(entity);
                     else
                         entity.EndDate = new DateTime?(now);
                 }
-               _uptimeComponentStateRepository.UpdateAsync(entity).Wait();
+                _uptimeComponentStateRepository.UpdateAsync(entity).Wait();
             }
             catch (Exception ex)
             {

@@ -1,17 +1,19 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class SysTextItemRepository : RepositoryBase<SysTextItem>, ISysTextItemRepository
     {
-        public SysTextItemRepository(DepositorDBContext dbContext) : base(dbContext)
+        public SysTextItemRepository(IConfiguration configuration) : base(configuration)
         {
         }
         public async Task<SysTextItem> GetByTokenId(string tokenID)
         {
-            return await DbContext.SysTextItems.Where(x => x.Token == tokenID).FirstOrDefaultAsync();
+            var result = depositorDBContext.SysTextItems.Where(x => x.Token == tokenID).FirstOrDefault();
+            return await Task.Run<SysTextItem>(() => result);
         }
     }
 }

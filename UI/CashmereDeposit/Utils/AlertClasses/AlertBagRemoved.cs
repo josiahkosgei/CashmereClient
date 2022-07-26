@@ -50,7 +50,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

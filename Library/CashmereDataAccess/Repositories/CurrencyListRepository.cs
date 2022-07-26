@@ -1,11 +1,13 @@
 ﻿using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class CurrencyListRepository : RepositoryBase<CurrencyList>, ICurrencyListRepository
     {
-        public CurrencyListRepository(DepositorDBContext dbContext) : base(dbContext)
+        public CurrencyListRepository(IConfiguration configuration) : base(configuration)
         {
         }
     }

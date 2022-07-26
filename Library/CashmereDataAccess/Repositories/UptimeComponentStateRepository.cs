@@ -1,21 +1,24 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class UptimeComponentStateRepository : RepositoryBase<UptimeComponentState>, IUptimeComponentStateRepository
     {
-        public UptimeComponentStateRepository(DepositorDBContext dbContext) : base(dbContext)
+        public UptimeComponentStateRepository(IConfiguration configuration) : base(configuration)
         {
         }
-         public async Task<UptimeComponentState> GetByDeviceIdAsync(Guid deviceId, int state)
+        public async Task<UptimeComponentState> GetByDeviceIdAsync(Guid deviceId, int state)
         {
-            return await DbContext.UptimeComponentStates.Where(x =>x.Device ==deviceId  && x.ComponentState ==  state && !x.EndDate.HasValue).OrderByDescending(x => x.Created).FirstOrDefaultAsync();
+            var result = depositorDBContext.UptimeComponentStates.Where(x => x.Device == deviceId && x.ComponentState == state && !x.EndDate.HasValue).OrderByDescending(x => x.Created).FirstOrDefault();
+            return await Task.Run<UptimeComponentState>(() => result);
         }
-         public async Task<List<UptimeComponentState>> GetEndDateHasValueAsync()
+        public async Task<List<UptimeComponentState>> GetEndDateHasValueAsync()
         {
-           return await DbContext.UptimeComponentStates.Where(x => !x.EndDate.HasValue).ToListAsync();
+            var result = depositorDBContext.UptimeComponentStates.Where(x => !x.EndDate.HasValue).ToList();
+            return await Task.Run<List<UptimeComponentState>>(() => result);
         }
     }
 }

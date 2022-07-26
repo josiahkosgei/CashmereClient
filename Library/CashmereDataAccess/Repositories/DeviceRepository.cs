@@ -3,34 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class DeviceRepository : RepositoryBase<Device>, IDeviceRepository
     {
-        public DeviceRepository(DepositorDBContext dbContext) : base(dbContext)
+        public DeviceRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
-        public async Task<Device> GetDevicedd(string machineName)
-        {
-            var tasks = await Task.Run(() =>
-                      {
-                          return DbContext.Devices
-                                     .Where(x => x.MachineName == machineName)
-                                     //.ToListAsync()
-                                     //.Include(x => x.Branch)
-                                     .FirstOrDefaultAsync();
-                      });
-            var device = Task.Run(() => tasks);
-            return device.Result ?? null;
-        }
         public async Task<Device> GetDeviceWithNavigations(string machineName)
         {
-            return await DbContext.Devices
+            var result = depositorDBContext.Devices
                 .Where(x => x.MachineName == machineName)
                  .Include(x => x.Branch)
                     .Include(x => x.DeviceSuspenseAccounts)
@@ -222,32 +210,40 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
                       .ThenInclude(x => x.TxtypeListItemNavigation)
                       .ThenInclude(x => x.TxTextNavigationText)
                       .ThenInclude(x => x.TxItemNavigation)
-                 .FirstOrDefaultAsync();
+                 .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
         public async Task<IList<Device>> GetAllAsync()
         {
-            return await DbContext.Devices.ToListAsync();
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices.ToList();
+            return await Task.Run<IList<Device>>(() => result);
         }
 
         public async Task<Device> GetByIdAsync(Guid DeviceId)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
              .Where(x => x.Id == DeviceId)
              .Include(x => x.Branch)
-              .FirstOrDefaultAsync();
+              .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
         public async Task<Device> GetDevice(string machineName)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
              .Where(x => x.MachineName == machineName)
              .Include(x => x.Branch)
              .Include(x => x.ConfigGroupNavigation)
-             .FirstOrDefaultAsync();
+             .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
 
         public async Task<Device> GetDeviceScreenList(string machineName)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
                 .Where(x => x.MachineName == machineName)
                 .Include(x => x.GUIScreenListNavigation.GuiScreenListScreens)
                 .ThenInclude(x => x.GUIScreenNavigation.GUIScreenType)
@@ -358,50 +354,57 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
                      .ThenInclude(x => x.TransactionTypeListItems)
                      .ThenInclude(x => x.TxTextNavigationText)
                      .ThenInclude(x => x.ValidationTextSuccessMessageNavigation)
-                 .FirstOrDefaultAsync();
+                 .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
 
         public async Task<Device> GetDeviceLanguageList(string machineName)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
                 .Where(x => x.MachineName == machineName)
                 .Include(x => x.LanguageListNavigation.LanguageListLanguages).ThenInclude(x => x.LanguageItemNavigation)
-                 .FirstOrDefaultAsync();
+                 .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
 
         public async Task<Device> GetDeviceCurrencyList(string machineName)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
                 .Where(x => x.MachineName == machineName)
                 .Include(x => x.CurrencyListNavigation.CurrencyListCurrencies).ThenInclude(x => x.CurrencyItemNavigation)
-                 .FirstOrDefaultAsync();
+                 .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
         public async Task<Device> GetDeviceTransactionTypeList(string machineName)
         {
-            return await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
                 .Where(x => x.MachineName == machineName)
                 .Include(x => x.TransactionTypeListNavigation.TransactionTypeListTransactionTypeListItems).ThenInclude(x => x.TxtypeListItemNavigation)
-                 .FirstOrDefaultAsync();
+                 .FirstOrDefault();
+            return await Task.Run<Device>(() => result);
         }
 
         public async Task<List<ApplicationUser>> GetByUserGroupAsync(int? UserGroup)
         {
-            var response = await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
              .Where(x => x.UserGroup == UserGroup)
              .Include(i => i.UserGroupNavigation).ThenInclude(t => t.ApplicationUsers).ThenInclude(u => u.Role)
              .SelectMany(dv => dv.UserGroupNavigation.ApplicationUsers.ToList())
-             .ToListAsync();
-
-            return response;
+             .ToList();
+            return await Task.Run<List<ApplicationUser>>(() => result);
         }
         public async Task<ApplicationUser> GetByUserGroupAsync(int? UserGroup, string Username)
         {
-            var response = await DbContext.Devices
+            var depositorDBContext = _dbContextFactory.CreateDbContext(null);
+            var result = depositorDBContext.Devices
                 .Where(de => de.UserGroup == UserGroup)
                 .Select(dv => dv.UserGroupNavigation.ApplicationUsers.FirstOrDefault(x => !(bool)x.UserDeleted && x.Username.Equals(Username, StringComparison.InvariantCultureIgnoreCase)))
-                .FirstOrDefaultAsync();
-
-            return response;
+                .FirstOrDefault();
+            return await Task.Run<ApplicationUser>(() => result);
         }
     }
 }

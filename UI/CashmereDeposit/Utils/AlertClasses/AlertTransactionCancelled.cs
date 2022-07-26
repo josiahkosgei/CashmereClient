@@ -46,7 +46,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent()
                 {

@@ -25,7 +25,7 @@ namespace CashmereDeposit.ViewModels
     [Guid("F6BEA4EB-B0C9-4EB3-B225-1F83F73BFD70")]
     internal class TransactionListScreenViewModel : CustomerListScreenBaseViewModel
     {
-        
+
 
         private readonly ITransactionTypeListItemRepository _transactionTypeListItemRepository;
         private readonly ITransactionTextRepository _transactionTextRepository;
@@ -39,8 +39,8 @@ namespace CashmereDeposit.ViewModels
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
             _transactionTypeListItemRepository = IoC.Get<ITransactionTypeListItemRepository>();
-            _transactionTextRepository = IoC.Get<ITransactionTextRepository>();            
-            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption",_transactionTextRepository.GetByIdAsync(x.Id).ContinueWith(x=>x.Result).Result?.ListItemCaption , "No Text"), x)).ToList();
+            _transactionTextRepository = IoC.Get<ITransactionTextRepository>();
+            FullList = ApplicationViewModel.TransactionTypesAvailable.Select(x => new ATMSelectionItem<object>(ImageManipuation.GetBitmapFromBytes(x.Icon), ApplicationViewModel.CashmereTranslationService.TranslateUserText("TransactionListScreenViewModel.listItem_caption", _transactionTextRepository.GetByIdAsync(x.Id).ContinueWith(x => x.Result).Result?.ListItemCaption, "No Text"), x)).ToList();
             GetFirstPage();
         }
 
@@ -99,50 +99,49 @@ namespace CashmereDeposit.ViewModels
             var SelectedTransactionListItem = SelectedFilteredList.Value as TransactionTypeListItem;
             if (SelectedTransactionListItem == null)
                 throw new NullReferenceException(GetType().Name + ".PerformSelection SelectedTransactionListItem");
-            using (new DepositorDBContext())
+
+            ClearErrorText();
+            var str1 = "";
+            var str2 = SelectedTransactionListItem?.DefaultAccount ?? "";
+            if (!string.IsNullOrWhiteSpace(SelectedTransactionListItem.DefaultAccount) && SelectedTransactionListItem.ValidateDefaultAccount)
             {
-                ClearErrorText();
-                var str1 = "";
-                var str2 = SelectedTransactionListItem?.DefaultAccount ?? "";
-                if (!string.IsNullOrWhiteSpace(SelectedTransactionListItem.DefaultAccount) && SelectedTransactionListItem.ValidateDefaultAccount)
+                var result = Task.Run(() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrency, SelectedTransactionListItem.Id)).Result;
+                if (result == null || !result.IsSuccess || !result.CanTransact)
                 {
-                    var result = Task.Run(() => ValidateAsync(SelectedTransactionListItem.DefaultAccount, SelectedTransactionListItem.DefaultAccountCurrency, SelectedTransactionListItem.Id)).Result;
-                    if (result == null || !result.IsSuccess || !result.CanTransact)
-                    {
-                        ErrorText = "Transaction Type is offline. Please try again later";
-                        ApplicationViewModel.Log.ErrorFormat(GetType().Name, 99, ApplicationErrorConst.ERROR_TRANSACTION_ACCOUNT_INVALID.ToString(), "cb={0},sv={1}", result.PublicErrorMessage, result?.ServerErrorMessage);
-                        ApplicationViewModel.CloseDialog(false);
-                        return;
-                    }
-                    str1 = result.AccountName;
-                    str2 = SelectedTransactionListItem.DefaultAccount;
+                    ErrorText = "Transaction Type is offline. Please try again later";
+                    ApplicationViewModel.Log.ErrorFormat(GetType().Name, 99, ApplicationErrorConst.ERROR_TRANSACTION_ACCOUNT_INVALID.ToString(), "cb={0},sv={1}", result.PublicErrorMessage, result?.ServerErrorMessage);
+                    ApplicationViewModel.CloseDialog(false);
+                    return;
                 }
-                ApplicationViewModel.CreateTransaction(SelectedTransactionListItem);
-                ApplicationViewModel.CurrentTransaction.AccountNumber = str2;
-                ApplicationViewModel.CurrentTransaction.AccountName = str1;
-                ApplicationViewModel.CurrentTransaction.Transaction.InitUser = ApplicationViewModel.CurrentUser?.Id;
-                ApplicationViewModel.CurrentTransaction.Transaction.AuthUser = ApplicationViewModel.ValidatingUser?.Id;
-                var translationService = ApplicationViewModel.CashmereTranslationService;
-                string? str3;
-                if (translationService == null)
-                {
-                    str3 = null;
-                }
-                else
-                {
-                    var transactionTypeId = ApplicationViewModel?.CurrentTransaction?.TransactionType.Id;
-                    var disclaimerNavigation = await _transactionTypeListItemRepository.GetTransactionTypeScreenList((int)transactionTypeId);
-                    //var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
-                    var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimerNavigation.TxTextNavigationText.Disclaimer, null);
-                    str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
-                }
-                var message = str3;
-                var title = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_DisclaimerTitle_Caption", "Disclaimer");
-                if (!string.IsNullOrWhiteSpace(message))
-                    ApplicationViewModel.ShowUserMessageScreen(title, message);
-                else
-                    ApplicationViewModel.NavigateNextScreen();
+                str1 = result.AccountName;
+                str2 = SelectedTransactionListItem.DefaultAccount;
             }
+            ApplicationViewModel.CreateTransaction(SelectedTransactionListItem);
+            ApplicationViewModel.CurrentTransaction.AccountNumber = str2;
+            ApplicationViewModel.CurrentTransaction.AccountName = str1;
+            ApplicationViewModel.CurrentTransaction.Transaction.InitUser = ApplicationViewModel.CurrentUser?.Id;
+            ApplicationViewModel.CurrentTransaction.Transaction.AuthUser = ApplicationViewModel.ValidatingUser?.Id;
+            var translationService = ApplicationViewModel.CashmereTranslationService;
+            string? str3;
+            if (translationService == null)
+            {
+                str3 = null;
+            }
+            else
+            {
+                var transactionTypeId = ApplicationViewModel?.CurrentTransaction?.TransactionType.Id;
+                var disclaimerNavigation = await _transactionTypeListItemRepository.GetTransactionTypeScreenList((int)transactionTypeId);
+                //var disclaimer = ApplicationViewModel?.CurrentTransaction?.TransactionType?.TxTextNavigationText?.Disclaimer;
+                var s = translationService.TranslateUserText(GetType().Name + ".PerformSelection disclaimer", disclaimerNavigation.TxTextNavigationText.Disclaimer, null);
+                str3 = s != null ? s.CashmereReplace(ApplicationViewModel) : null;
+            }
+            var message = str3;
+            var title = ApplicationViewModel.CashmereTranslationService?.TranslateSystemText(GetType().Name + ".PerformSelection", "sys_DisclaimerTitle_Caption", "Disclaimer");
+            if (!string.IsNullOrWhiteSpace(message))
+                ApplicationViewModel.ShowUserMessageScreen(title, message);
+            else
+                ApplicationViewModel.NavigateNextScreen();
+
         }
 
         public async Task<AccountNumberValidationResponse> ValidateAsync(

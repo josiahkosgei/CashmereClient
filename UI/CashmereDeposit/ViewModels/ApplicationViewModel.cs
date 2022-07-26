@@ -586,7 +586,7 @@ namespace CashmereDeposit.ViewModels
                     CurrentTransaction.Transaction.EscrowJams.Add(EscrowJam);
                     CurrentTransaction.DroppedAmountCents = CurrentTransaction.TotalAmountCents;
                     CurrentTransaction.DroppedDenomination += CurrentTransaction.CountedDenomination;
-                    ApplicationViewModel.SaveToDatabaseAsync();
+                    ///ApplicationViewModel.SaveToDatabaseAsync();
                 }
                 AlertManager.SendAlert(new AlertEscrowJam(CurrentTransaction, CurrentSession.Device, DateTime.Now));
                 CurrentTransaction.NoteJamDetected = true;
@@ -1551,9 +1551,9 @@ namespace CashmereDeposit.ViewModels
                     deviceStatus.SensorsValue = e.ControllerStatus.Sensor.Value;
                     deviceStatus.SensorsBag = e.ControllerStatus.Sensor.Bag.ToString();
                     deviceStatus.SensorsDoor = e.ControllerStatus.Sensor.Door.ToString();
+                    var reslt = await _deviceStatusRepository.UpdateAsync(deviceStatus);
                 }
             }
-            SaveToDatabaseAsync().Wait();
             if (e.ControllerStatus.Sensor.Door == DeviceSensorDoor.OPEN)
             {
                 if (debugDisableSafeSensor)
@@ -1761,9 +1761,8 @@ namespace CashmereDeposit.ViewModels
                     {
                         last_CIT.Complete = true;
                         last_CIT.CITCompleteDate = DateTime.Now;
-                        SaveToDatabaseAsync().Wait();
+                        var reslt = _citRepository.UpdateAsync(last_CIT).ContinueWith(x => x.Result).Result;
                         Task.Run(() => PostCITTransactionsAsync(last_CIT));
-                        //Expression<Func<CIT, bool>> predicate = x => x.Id != last_CIT.Id && x.DeviceId == device.Id && x.Complete == false;
                         foreach (var cit in ciTs)
                         {
                             cit.Complete = true;
@@ -1771,9 +1770,10 @@ namespace CashmereDeposit.ViewModels
                             cit.CITError = 95;
                             cit.CITErrorMessage = "Incomplete CIT completed by a newer CIT";
                             AlertManager.SendAlert(new AlertCITFailed(cit, device, DateTime.Now));
+                            var output = _citRepository.UpdateAsync(cit).ContinueWith(x => x.Result).Result;
                         }
                     }
-                    SaveToDatabaseAsync().Wait();
+
                     AlertManager.SendAlert(new AlertCITSuccess(last_CIT, device, DateTime.Now));
                     InitialiseApp();
                     DeviceManager.DeviceManagerMode = DeviceManagerMode.NONE;
@@ -1954,7 +1954,7 @@ namespace CashmereDeposit.ViewModels
                         }
                         else
                             Log.Warning(nameof(ApplicationViewModel), "CITPost", nameof(PostCITTransactionsAsync), "Skipping CITPost on zero count");
-                        SaveToDatabaseAsync().Wait();
+                        //SaveToDatabaseAsync().Wait();
                     }
                 }
                 catch (Exception ex)
@@ -1964,7 +1964,7 @@ namespace CashmereDeposit.ViewModels
             }
             else
                 Log.Info(nameof(ApplicationViewModel), "CIT_ALLOW_POST", nameof(PostCITTransactionsAsync), "Not allowed by config");
-            SaveToDatabaseAsync().Wait();
+            //SaveToDatabaseAsync().Wait();
             Log.Trace(nameof(ApplicationViewModel), "CITPost", nameof(PostCITTransactionsAsync), "End of Function");
         }
         private void DeviceManager_BagClosedEvent(object sender, EventArgs e) => Log.Info(GetType().Name, nameof(DeviceManager_BagClosedEvent), "EventHandling", "BagClosedEvent");
@@ -3404,33 +3404,6 @@ namespace CashmereDeposit.ViewModels
             }
         }
 
-        public static async Task SaveToDatabaseAsync()
-        {
-            try
-            {
-                //if (_depositorDBContext != null)
-                //{
-
-                //    await _depositorDBContext.SaveChangesAsync();
-                //}
-            }
-            catch (ValidationException ex)
-            {
-                var ErrorDetail = string.Format("{0}>>{1}>>{2}>stack>{3}>Validation Errors: ", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.StackTrace);
-                foreach (var entityValidationError in ex.ValidationResult.MemberNames)
-                {
-                    ErrorDetail += ">validation error>";
-                    ErrorDetail = ErrorDetail + "ErrorMessage=>" + entityValidationError;
-                }
-                Console.WriteLine(ErrorDetail);
-                Log.Error("ApplicationViewModel.SaveToDatabaseAsync()", 3, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString("G"), ErrorDetail);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error Saving to Database: {0}", string.Format("{0}\n{1}", ex.Message, ex?.InnerException?.Message));
-                Log.ErrorFormat(nameof(ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Error Saving to Database: {0}", string.Format("{0}>>{1}>>{2}>>{3}", ex.Message, ex.InnerException?.Message, ex.InnerException?.InnerException?.Message, ex.InnerException?.InnerException?.InnerException?.Message));
-            }
-        }
 
         internal bool InSessionAndTransaction(string callingCode, bool enforceDeviceState = true)
         {

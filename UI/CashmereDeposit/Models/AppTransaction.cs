@@ -522,7 +522,7 @@ public class AppTransaction : PropertyChangedBase
         {
             ApplicationViewModel.Log.InfoFormat(GetType().Name, "TransactionType Changed", "Tx Property Changed", "TransactionType changed from {0} to {1}", _transactionType?.CbTxType, value?.CbTxType);
             _transactionType = value;
-            Transaction.TxTypeNavigation = _transactionTypeListItemRepository.GetByIdAsync(value.Id).ContinueWith(x => x.Result).Result;;
+            Transaction.TxTypeNavigation = _transactionTypeListItemRepository.GetByIdAsync(value.Id).ContinueWith(x => x.Result).Result; ;
             NotifyOfPropertyChange(nameof(TransactionType));
         }
     }

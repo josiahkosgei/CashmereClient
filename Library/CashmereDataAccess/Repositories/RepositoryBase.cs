@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
+using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
@@ -8,76 +10,83 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
     public class RepositoryBase<T> : IAsyncRepository<T> where T : class, new()
 
     {
-        protected readonly DepositorDBContext DbContext;
-        public RepositoryBase(DepositorDBContext dbContext)
+        protected readonly DepositorContextFactory _dbContextFactory;
+        protected readonly DepositorDBContext depositorDBContext;
+        public RepositoryBase(IConfiguration configuration)
         {
-            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _dbContextFactory = new DepositorContextFactory(configuration);
         }
 
 
         public virtual async Task<T> AddAsync(T entity)
         {
-            using (var dbContextTransaction = await DbContext.Database.BeginTransactionAsync())
+            using (var dbContextFactory = _dbContextFactory.CreateDbContext(null))
             {
-                DbContext.Set<T>().Add(entity);
-                await DbContext.SaveChangesAsync();
+                dbContextFactory.Set<T>().Add(entity);
+                dbContextFactory.SaveChanges();
 
-                await dbContextTransaction.CommitAsync();
+
             }
-            return entity;
+            return await Task.Run<T>(() => entity);
         }
 
         public virtual async Task DeleteAsync(T entity)
         {
-            using (var dbContextTransaction = await DbContext.Database.BeginTransactionAsync())
+            using (var dbContextFactory = _dbContextFactory.CreateDbContext(null))
             {
-                DbContext.Set<T>().Remove(entity);
-                await DbContext.SaveChangesAsync();
-
-                await dbContextTransaction.CommitAsync();
+                dbContextFactory.Set<T>().Remove(entity);
+                dbContextFactory.SaveChanges();
             }
         }
 
         public async Task<bool> Exists(int id)
         {
-            var result = await DbContext.Set<T>().FindAsync(id);
-            return result != null;
+            var dbContextFactory = _dbContextFactory.CreateDbContext(null);
+            var result = dbContextFactory.Set<T>().Find(id);
+            return await Task.Run(() => result != null);
         }
 
         public virtual async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            var result = await DbContext.Set<T>().ToListAsync();
-            return result;
+            var dbContextFactory = _dbContextFactory.CreateDbContext(null);
 
+            var result = dbContextFactory.Set<T>().ToList();
+            return await Task.Run<IReadOnlyList<T>>(() => result);
         }
 
         public virtual async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await DbContext.Set<T>().Where(predicate).ToListAsync();
+            var dbContextFactory = _dbContextFactory.CreateDbContext(null);
+            var result = dbContextFactory.Set<T>().Where(predicate).ToList();
+            return await Task.Run<IReadOnlyList<T>>(() => result);
 
         }
 
         public virtual async Task<T> GetByIdAsync(int id)
         {
-            return await DbContext.Set<T>().FindAsync(id);
+            var dbContextFactory = _dbContextFactory.CreateDbContext(null);
+            var result = dbContextFactory.Set<T>().Find(id);
+            return await Task.Run<T>(() => result);
 
         }
         public virtual async Task<T> GetByIdAsync(Guid id)
         {
-            return await DbContext.Set<T>().FindAsync(id);
+            var dbContextFactory = _dbContextFactory.CreateDbContext(null);
+            var result = dbContextFactory.Set<T>().Find(id);
+            return await Task.Run<T>(() => result);
 
         }
 
         public virtual async Task<T> UpdateAsync(T entity)
         {
-            using (var dbContextTransaction = await DbContext.Database.BeginTransactionAsync())
+            using (var dbContextFactory = _dbContextFactory.CreateDbContext(null))
             {
-                DbContext.Entry(entity).State = EntityState.Modified;
-                await DbContext.SaveChangesAsync();
+                dbContextFactory.Entry(entity).State = EntityState.Modified;
+                dbContextFactory.SaveChanges();
 
-                await dbContextTransaction.CommitAsync();
+
             }
-            return entity;
+            return await Task.Run<T>(() => entity);
         }
 
     }

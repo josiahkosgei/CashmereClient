@@ -14,7 +14,6 @@ namespace CashmereDeposit.ViewModels
         protected bool isNew;
         public string _formErrorText;
         protected ApplicationViewModel ApplicationViewModel;
-        protected DepositorDBContext depositorDbContext = new();
         protected DepositorDBContextProcedures depositorContextProcedures;
 
         public string ScreenTitle { get; set; }
@@ -51,7 +50,7 @@ namespace CashmereDeposit.ViewModels
             ApplicationViewModel = applicationViewModel;
             Conductor = conductor;
             CallingObject = callingObject;
-            depositorContextProcedures = new DepositorDBContextProcedures(depositorDbContext);
+            depositorContextProcedures = new DepositorDBContextProcedures();
         }
 
         public void SelectFormField(int fieldID)

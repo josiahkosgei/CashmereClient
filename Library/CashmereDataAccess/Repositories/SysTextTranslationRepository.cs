@@ -1,11 +1,13 @@
 ﻿using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class SysTextTranslationRepository : RepositoryBase<SysTextTranslation>, ISysTextTranslationRepository
     {
-        public SysTextTranslationRepository(DepositorDBContext dbContext) : base(dbContext)
+        public SysTextTranslationRepository(IConfiguration configuration) : base(configuration)
         {
         }
     }

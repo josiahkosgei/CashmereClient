@@ -22,7 +22,7 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 1102;
         private string _errorMessage;
-               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertHDDFull(
@@ -33,16 +33,16 @@ namespace CashmereDeposit.Utils.AlertClasses
           : base(device, dateDetected)
         {
             _errorMessage = string.Format("Setting CashmereDeviceState.HDD_FULL as HDD space of {0:0.##} GB < {1:0.##} GB", availableSpace, minimumSpace);
-               _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
-            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x=>x.Result).Result;//== 1102);
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//== 1102);
         }
 
         public override bool SendAlert()
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -55,7 +55,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

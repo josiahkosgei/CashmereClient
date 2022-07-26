@@ -1,27 +1,31 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class DeviceStatusRepository : RepositoryBase<DeviceStatus>, IDeviceStatusRepository
     {
-        public DeviceStatusRepository(DepositorDBContext dbContext) : base(dbContext)
+        public DeviceStatusRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<DeviceStatus> GetByDeviceId(Guid DeviceId)
         {
-            return await DbContext.DeviceStatus.Where(y => y.DeviceId == DeviceId).FirstOrDefaultAsync();
+            var result = depositorDBContext.DeviceStatus.Where(y => y.DeviceId == DeviceId).FirstOrDefault();
+            return await Task.Run<DeviceStatus>(() => result);
         }
         public async Task<DeviceStatus> GetByMachineName(string MachineName)
         {
-            return await DbContext.DeviceStatus.Where(y => y.MachineName == MachineName).FirstOrDefaultAsync();
+            var result = depositorDBContext.DeviceStatus.Where(y => y.MachineName == MachineName).FirstOrDefault();
+            return await Task.Run<DeviceStatus>(() => result);
         }
 
         public async Task<IList<DeviceStatus>> GetAllAsync()
         {
-            return await DbContext.DeviceStatus.ToListAsync();
+            var result = depositorDBContext.DeviceStatus.ToList();
+            return await Task.Run<IList<DeviceStatus>>(() => result);
         }
     }
 }

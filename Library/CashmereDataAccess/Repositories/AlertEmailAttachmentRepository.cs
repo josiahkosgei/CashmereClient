@@ -1,19 +1,20 @@
 ﻿using Cashmere.API.Messaging.Communication.Emails;
-using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class AlertEmailAttachmentRepository : RepositoryBase<AlertEmailAttachment>, IAlertEmailAttachmentRepository
     {
-        public AlertEmailAttachmentRepository(DepositorDBContext dbContext) : base(dbContext)
+        public AlertEmailAttachmentRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public List<EmailAttachment> GetAlertEmailAttachments(Guid alertEmailId)
         {
-            var response = DbContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmailId).ToList().Join(DbContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
+            var response = depositorDBContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmailId).ToList().Join(depositorDBContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
             {
                 Name = alertEmailAttachment.Name,
                 MimeType = new EmailAttachmentMIMEType()

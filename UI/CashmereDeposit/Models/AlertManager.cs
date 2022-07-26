@@ -55,9 +55,9 @@ namespace CashmereDeposit.Models
 
         public async void InitialiseAlertManager()
         {
-                AllowedMessages = await _alertMessageTypeRepository.GetEnabled();
-                DepositorCommunicationService = DepositorCommunicationService.NewDepositorCommunicationService(commserv_uri, appID, AppKey, appName);
-            
+            AllowedMessages = await _alertMessageTypeRepository.GetEnabled();
+            DepositorCommunicationService = DepositorCommunicationService.NewDepositorCommunicationService(commserv_uri, appID, AppKey, appName);
+
         }
     }
 }

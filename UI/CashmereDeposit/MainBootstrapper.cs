@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Autofac;
+using Autofac.Configuration;
 using Autofac.Features.ResolveAnything;
 using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
@@ -82,34 +84,30 @@ namespace CashmereDeposit
         protected override void ConfigureContainer(ContainerBuilder containerBuilder)
         {
 
-            //containerBuilder.RegisterType<CashmereDeviceStatus>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<BusyIndicator>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<FullAlphanumericKeyboard>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<NumericKeypad>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<ScreenFooter>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<ScreenHeader>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<SummaryScreen>().AsSelf().InstancePerLifetimeScope();
-            //containerBuilder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().SingleInstance();
-            // CashmereLogger : ICashmereLogger
+            var _configuration = Configuration;
+            var module = new ConfigurationModule(_configuration);
+            containerBuilder.RegisterModule(module);
+
             containerBuilder.RegisterType<CashmereLogger>().As<ICashmereLogger>().InstancePerLifetimeScope();
 
             containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient("CashmereDepositHttpClient")).As<HttpClient>().SingleInstance();
             containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient("CDM_APIClient")).As<HttpClient>().SingleInstance();
 
             containerBuilder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
+
             containerBuilder.RegisterType<DepositorDBContext>().As<DbContext>()
                 .InstancePerLifetimeScope();
+
             containerBuilder
                 .RegisterType<HttpContextAccessor>()
                 .As<IHttpContextAccessor>()
                 .SingleInstance();
 
-            //containerBuilder
-            //    .RegisterType<DepositorDBContext>()
-            //    .WithParameter("options", DepositorContextFactory.Get())
-            //    .InstancePerLifetimeScope();
+            containerBuilder.RegisterGeneric(typeof(RepositoryBase<>)).As(typeof(IAsyncRepository<>))
+                 .WithParameter("configuration", _configuration)
+                .InstancePerLifetimeScope()
+                .AutoActivate();
 
-            containerBuilder.RegisterGeneric(typeof(RepositoryBase<>)).As(typeof(IAsyncRepository<>)).InstancePerLifetimeScope();
             containerBuilder.RegisterType(typeof(DeviceRepository)).As(typeof(IDeviceRepository)).InstancePerLifetimeScope();
             containerBuilder.RegisterType(typeof(ApplicationLogRepository)).As(typeof(IApplicationLogRepository)).InstancePerLifetimeScope();
             containerBuilder.RegisterType(typeof(EscrowJamRepository)).As(typeof(IEscrowJamRepository)).InstancePerLifetimeScope();

@@ -34,7 +34,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             _stackTrace = stackTrace;
             _errorMessage = errorMessage;
-              _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//100);
         }
@@ -55,7 +55,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

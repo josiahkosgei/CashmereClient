@@ -17,7 +17,6 @@ namespace CashmereDeposit.ViewModels
 {
     public class CITReportScreenViewModel : DepositorScreenViewModelBase
     {
-        private new DepositorDBContext DBContext = new();
         private const int txPageSize = 10;
         private readonly ICITRepository _citRepository;
         private int maxPage;
@@ -34,7 +33,7 @@ namespace CashmereDeposit.ViewModels
           : base(screenTitle, applicationViewModel, callingObject)
         {
             _citRepository = IoC.Get<ICITRepository>();
-            txQuery = _citRepository.GetByDateRange(txQueryStartDate ,txQueryEndDate);
+            txQuery = _citRepository.GetByDateRange(txQueryStartDate, txQueryEndDate);
             Activated += new EventHandler<ActivationEventArgs>(CITReportScreenViewModel_Activated);
         }
 

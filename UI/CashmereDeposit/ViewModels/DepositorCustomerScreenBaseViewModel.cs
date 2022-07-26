@@ -354,8 +354,7 @@ namespace CashmereDeposit.ViewModels
                     return false;
                 }
 
-                using var depositorDbContext = new DepositorDBContext();
-                var guiScreen = _gUIScreenRepository.GetByIdAsync(ApplicationViewModel.CurrentGUIScreen.Id).ContinueWith(x=>x.Result).Result;
+                var guiScreen = _gUIScreenRepository.GetByIdAsync(ApplicationViewModel.CurrentGUIScreen.Id).ContinueWith(x => x.Result).Result;
                 var validationList = guiScreen != null ? guiScreen.GuiScreenListScreens.Where(x => x.GuiScreenList == ApplicationViewModel.CurrentTransaction.TransactionType.TxTypeGUIScreenlist).FirstOrDefault()?.ValidationList : null;
                 if (validationList != null)
                 {

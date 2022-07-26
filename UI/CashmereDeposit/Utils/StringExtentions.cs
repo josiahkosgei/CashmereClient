@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Caliburn.Micro;
 using Cashmere.Library.CashmereDataAccess;
 using Cashmere.Library.CashmereDataAccess.Entities;
 
@@ -55,18 +56,18 @@ namespace CashmereDeposit.Utils
           DeviceConfiguration DeviceConfiguration,
           bool isHTML = false)
         {
-            using DepositorDBContext depositorDbContext1 = new DepositorDBContext();
+            var depositorDbContext1 = IoC.Get<DepositorDBContext>();
             AlertMessageType AlertMessageType = depositorDbContext1.AlertMessageTypes.FirstOrDefault(x => x.Id == AlertEvent.AlertTypeId);
             template = AlertMessageType != null ? AlertMessageType.StringReplace(template, DeviceConfiguration, isHTML) : null;
-            DepositorDBContext depositorDbContext2 = new DepositorDBContext();
+
             string str1;
-            if (depositorDbContext2 == null)
+            if (depositorDbContext1 == null)
             {
                 str1 = null;
             }
             else
             {
-                DbSet<Device> devices = depositorDbContext2.Devices;
+                DbSet<Device> devices = depositorDbContext1.Devices;
                 if (devices == null)
                 {
                     str1 = null;

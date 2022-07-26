@@ -4,6 +4,6 @@ namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
     public interface ISysTextItemCategoryRepository : IAsyncRepository<SysTextItemCategory>
     {
-        
+
     }
 }

@@ -20,7 +20,7 @@ namespace CashmereDeposit.ViewModels
         private const int txPageSize = 10;
         private int maxPage;
         private int _currentPage;
-       //  private readonly DepositorDBContext _depositorDBContext;
+        //  private readonly DepositorDBContext _depositorDBContext;
         private IQueryable<Transaction> txQuery;
         private IEnumerable<Transaction> _transactionList;
         private Transaction selectedTransaction;
@@ -33,8 +33,8 @@ namespace CashmereDeposit.ViewModels
           Screen callingObject)
           : base(screenTitle, applicationViewModel, callingObject)
         {
-             _transactionRepository = IoC.Get<ITransactionRepository>();
-            txQuery = _transactionRepository.GetByDateRange(txQueryStartDate,txQueryEndDate);
+            _transactionRepository = IoC.Get<ITransactionRepository>();
+            txQuery = _transactionRepository.GetByDateRange(txQueryStartDate, txQueryEndDate);
             Activated += new EventHandler<ActivationEventArgs>(TransactionReportScreenViewModel_Activated);
         }
 

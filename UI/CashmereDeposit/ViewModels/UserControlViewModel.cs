@@ -124,7 +124,7 @@ namespace CashmereDeposit.ViewModels
             Email = ApplicationUser?.Email;
             Role = ApplicationUser?.Role;
             PasswordHash = applicationUser?.Password;
-            var list = _roleRepository.GetAllAsync().ContinueWith(x=>x.Result).Result.Select(x => x.Name).ToList();
+            var list = _roleRepository.GetAllAsync().ContinueWith(x => x.Result).Result.Select(x => x.Name).ToList();
             Fields.Add(new FormListItem()
             {
                 DataLabel = nameof(Username),
@@ -240,7 +240,7 @@ namespace CashmereDeposit.ViewModels
         {
             if (string.IsNullOrWhiteSpace(role))
                 return "Please select a role";
-            var role1 = _roleRepository.GetByNameAsync(role).ContinueWith(x=>x.Result).Result;
+            var role1 = _roleRepository.GetByNameAsync(role).ContinueWith(x => x.Result).Result;
             if (role1 == null)
                 return "Role does not exist";
             Role = role1;

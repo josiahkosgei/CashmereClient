@@ -117,7 +117,7 @@ namespace CashmereDeposit.Models
             CIT.CITPrintouts.Add(printout);
             try
             {
-               await _citRepository.AddAsync(CIT);
+                await _citRepository.AddAsync(CIT);
             }
             catch (ValidationException ex)
             {

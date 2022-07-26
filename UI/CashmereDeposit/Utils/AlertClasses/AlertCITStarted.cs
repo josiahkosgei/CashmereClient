@@ -23,14 +23,14 @@ namespace CashmereDeposit.Utils.AlertClasses
     {
         public const int ALERT_ID = 1302;
         private CIT _cit;
-                private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
 
         public AlertCITStarted(CIT CIT, Device device, DateTime dateDetected)
           : base(device, dateDetected)
         {
             _cit = CIT != null ? CIT : throw new NullReferenceException("Variable CIT cannot be null");
-               _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
             AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//1302);
         }
@@ -39,7 +39,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -52,7 +52,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

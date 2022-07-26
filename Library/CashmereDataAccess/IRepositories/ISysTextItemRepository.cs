@@ -4,6 +4,6 @@ namespace Cashmere.Library.CashmereDataAccess.IRepositories
 {
     public interface ISysTextItemRepository : IAsyncRepository<SysTextItem>
     {
-       public Task<SysTextItem> GetByTokenId(string tokenID);
+        public Task<SysTextItem> GetByTokenId(string tokenID);
     }
 }

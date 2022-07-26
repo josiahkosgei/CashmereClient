@@ -53,7 +53,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -66,7 +66,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);
@@ -122,7 +122,7 @@ namespace CashmereDeposit.Utils.AlertClasses
         }
 
         private async void GenerateCITReportAttachment(
-          
+
           AlertEmail alertEmail,
           DirectoryInfo directory)
         {
@@ -243,7 +243,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     Data = citExcelAttachment,
                     Hash = CashmereHashing.HMACSHA512(Device.AppKey, citExcelAttachment)
                 });
-               // _alertEventRepository.AddAsync(entity).Wait();
+                // _alertEventRepository.AddAsync(entity).Wait();
             }
         }
 

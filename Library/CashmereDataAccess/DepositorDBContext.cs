@@ -21,6 +21,7 @@ namespace Cashmere.Library.CashmereDataAccess
             : base(options)
         {
         }
+        public DepositorDBContext(DbContextOptions options) : base(options) { }
 
         public virtual DbSet<Activity> Activities { get; set; } = null!;
         public virtual DbSet<AlertAttachmentType> AlertAttachmentTypes { get; set; } = null!;
@@ -107,6 +108,23 @@ namespace Cashmere.Library.CashmereDataAccess
         public virtual DbSet<ValidationType> ValidationTypes { get; set; } = null!;
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
+            var entities = from e in ChangeTracker.Entries()
+                           where e.State == EntityState.Added ||
+                               e.State == EntityState.Modified
+                           select e.Entity;
+            foreach (var entity in entities)
+            {
+                var validationContext = new ValidationContext(entity);
+                Validator.ValidateObject(entity, validationContext);
+            }
+            var validationErrors = ChangeTracker
+                .Entries<IValidatableObject>()
+                .SelectMany(e => e.Entity.Validate(null))
+                .Where(r => r != ValidationResult.Success);
+            if (validationErrors.Any())
+            {
+                throw new Exception(validationErrors.FirstOrDefault().ErrorMessage);
+            }
             var strategy = this.Database.CreateExecutionStrategy();
             var result = strategy.ExecuteAsync(async () =>
                  {
@@ -130,6 +148,7 @@ namespace Cashmere.Library.CashmereDataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.RemovePluralizingTableNameConvention();
             OnModelCreatingGeneratedProcedures(modelBuilder);
             OnModelCreatingGeneratedFunctions(modelBuilder);

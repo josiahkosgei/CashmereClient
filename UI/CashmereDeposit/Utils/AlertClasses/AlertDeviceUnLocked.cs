@@ -21,7 +21,7 @@ namespace CashmereDeposit.Utils.AlertClasses
     public class AlertDeviceUnLocked : AlertBase
     {
         public const int ALERT_ID = 1401;
-               private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
+        private readonly IAlertMessageTypeRepository _alertMessageTypeRepository;
         private readonly IAlertEventRepository _alertEventRepository;
         private string _errorMessage;
 
@@ -29,16 +29,16 @@ namespace CashmereDeposit.Utils.AlertClasses
           : base(device, dateDetected)
         {
             _errorMessage = errorMessage;
-              _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
+            _alertMessageTypeRepository = IoC.Get<IAlertMessageTypeRepository>();
             _alertEventRepository = IoC.Get<IAlertEventRepository>();
-            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x=>x.Result).Result;//== 1401);
+            AlertType = _alertMessageTypeRepository.GetByIdAsync(ALERT_ID).ContinueWith(x => x.Result).Result;//== 1401);
         }
 
         public override bool SendAlert()
         {
             try
             {
-            
+
                 GenerateTokens();
                 AlertEvent entity = new AlertEvent
                 {
@@ -51,7 +51,7 @@ namespace CashmereDeposit.Utils.AlertClasses
                     DeviceId = Device.Id,
                     IsResolved = true
                 };
-               
+
                 AlertEmail email = GenerateEmail();
                 if (email != null)
                     entity.AlertEmails.Add(email);

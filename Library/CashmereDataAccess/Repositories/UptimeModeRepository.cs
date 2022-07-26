@@ -1,23 +1,26 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class UptimeModeRepository : RepositoryBase<UptimeMode>, IUptimeModeRepository
     {
-        public UptimeModeRepository(DepositorDBContext dbContext) : base(dbContext)
+        public UptimeModeRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<UptimeMode> GetByDeviceIdAsync(Guid deviceId)
         {
-            return await DbContext.UptimeModes.Where(x =>x.Device ==deviceId).OrderByDescending(x => x.Created).FirstOrDefaultAsync();
+            var result = depositorDBContext.UptimeModes.Where(x => x.Device == deviceId).OrderByDescending(x => x.Created).FirstOrDefault();
+            return await Task.Run<UptimeMode>(() => result);
         }
 
         public async Task<List<UptimeMode>> GetEndDateHasValueAsync()
         {
-           return await DbContext.UptimeModes.Where(x => !x.EndDate.HasValue).ToListAsync();
+            var result = depositorDBContext.UptimeModes.Where(x => !x.EndDate.HasValue).ToList();
+            return await Task.Run<List<UptimeMode>>(() => result);
         }
     }
 }

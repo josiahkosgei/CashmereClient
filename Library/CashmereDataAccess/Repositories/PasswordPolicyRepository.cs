@@ -1,22 +1,25 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class PasswordPolicyRepository : RepositoryBase<PasswordPolicy>, IPasswordPolicyRepository
     {
-        public PasswordPolicyRepository(DepositorDBContext dbContext) : base(dbContext)
+        public PasswordPolicyRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<PasswordPolicy> GetByIdAsync(Guid Id)
         {
-            return await DbContext.PasswordPolicies.FirstOrDefaultAsync(x => x.Id == Id);
+            var result = depositorDBContext.PasswordPolicies.FirstOrDefault(x => x.Id == Id);
+            return await Task.Run<PasswordPolicy>(() => result);
         }
         public async Task<PasswordPolicy> GetFirst()
         {
-            return await DbContext.PasswordPolicies.FirstOrDefaultAsync();
+            var result = depositorDBContext.PasswordPolicies.FirstOrDefault();
+            return await Task.Run<PasswordPolicy>(() => result);
         }
     }
 }

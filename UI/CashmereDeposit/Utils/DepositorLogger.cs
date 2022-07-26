@@ -31,8 +31,8 @@ namespace CashmereDeposit.Utils
         public DepositorLogger(ApplicationViewModel applicationViewModel, string LoggerName = "CashmereDepositLog")
           : base(Assembly.GetCallingAssembly().GetName().Version.ToString(), LoggerName, null)
         {
-             _deviceRepository = IoC.Get<IDeviceRepository>();
-             _iApplicationLogRepository = IoC.Get<IApplicationLogRepository>();
+            _deviceRepository = IoC.Get<IDeviceRepository>();
+            _iApplicationLogRepository = IoC.Get<IApplicationLogRepository>();
             if (string.IsNullOrWhiteSpace(LoggerName))
                 LoggerName = "CashmereDepositLog";
             ApplicationViewModel = applicationViewModel;
@@ -142,10 +142,10 @@ namespace CashmereDeposit.Utils
             string str = string.Format(EventDetailFormat, EventDetailFormatObjects);
             if (string.IsNullOrEmpty(str) || Level < (UtilLoggingLevel)ApplicationViewModel.DeviceConfiguration.LOGGING_LEVEL)
                 return;
-        
+
             try
             {
-                var device = _deviceRepository.GetDevice(Environment.MachineName).ContinueWith(r=>r.Result).Result;
+                var device = _deviceRepository.GetDevice(Environment.MachineName).ContinueWith(r => r.Result).Result;
                 ApplicationLog applicationLog = new ApplicationLog
                 {
                     Id = GuidExt.UuidCreateSequential(),
@@ -160,7 +160,7 @@ namespace CashmereDeposit.Utils
                     MachineName = Environment.MachineName
                 };
                 ApplicationLog entity = new();
-               entity= _iApplicationLogRepository.AddAsync(applicationLog).ContinueWith(r=>r.Result).Result;
+                entity = _iApplicationLogRepository.AddAsync(applicationLog).ContinueWith(r => r.Result).Result;
             }
             catch (Exception ex)
             {

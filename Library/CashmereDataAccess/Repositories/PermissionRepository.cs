@@ -1,23 +1,26 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class PermissionRepository : RepositoryBase<Permission>, IPermissionRepository
     {
-        public PermissionRepository(DepositorDBContext dbContext) : base(dbContext)
+        public PermissionRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<Permission> GetByIdAsync(Guid Id)
         {
-            return await DbContext.Permissions.FirstOrDefaultAsync(x => x.Id == Id);
+            var result = depositorDBContext.Permissions.FirstOrDefault(x => x.Id == Id);
+            return await Task.Run<Permission>(() => result);
         }
 
         public async Task<Permission> GetFirst(ApplicationUser user, Guid ActivityId, bool isAuthenticating = false)
         {
-            return await DbContext.Permissions.FirstOrDefaultAsync(x => x.RoleId == user.RoleId && x.ActivityId == ActivityId && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
+            var result = depositorDBContext.Permissions.FirstOrDefault(x => x.RoleId == user.RoleId && x.ActivityId == ActivityId && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
+            return await Task.Run<Permission>(() => result);
         }
     }
 }

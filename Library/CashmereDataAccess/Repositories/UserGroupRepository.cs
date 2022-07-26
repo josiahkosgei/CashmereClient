@@ -1,11 +1,13 @@
 ﻿using Cashmere.Library.CashmereDataAccess.Entities;
 using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class UserGroupRepository : RepositoryBase<UserGroup>, IUserGroupRepository
     {
-        public UserGroupRepository(DepositorDBContext dbContext) : base(dbContext)
+        public UserGroupRepository(IConfiguration configuration) : base(configuration)
         {
         }
     }

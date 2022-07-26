@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cashmere.Library.CashmereDataAccess
 {
-    public class DepositorContextFactory //: IDesignTimeDbContextFactory<DepositorDBContext>
+    public class DepositorContextFactory : IDesignTimeDbContextFactory<DepositorDBContext>
     {
         private readonly IConfiguration _configuration;
         public DepositorContextFactory(IConfiguration configuration)
@@ -13,18 +13,21 @@ namespace Cashmere.Library.CashmereDataAccess
         }
         public DepositorDBContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<DepositorDBContext>();
-            optionsBuilder.UseSqlServer(@"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True",
-                options => options.EnableRetryOnFailure());
+            string connectionString = _configuration.GetConnectionString("DepositorDatabase");
 
-            return new DepositorDBContext(optionsBuilder.Options);
+            Console.WriteLine($"DesignTimeDbContextFactory: using connection string = {connectionString}");
+
+            var builder = new DbContextOptionsBuilder<DepositorDBContext>();
+
+            builder.UseSqlServer(connectionString);
+
+            return new DepositorDBContext(builder.Options);
         }
-        public static DbContextOptions<DepositorDBContext> Get()
+        public DbContextOptions<DepositorDBContext> Get()
         {
 
             var builder = new DbContextOptionsBuilder<DepositorDBContext>();
-            DbContextConfigurer.Configure(
-                builder, @"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True");
+            DbContextConfigurer.Configure(builder, _configuration.GetConnectionString("DepositorDatabase"));
 
             return builder.Options;
         }

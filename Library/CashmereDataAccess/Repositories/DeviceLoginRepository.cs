@@ -1,18 +1,20 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class DeviceLoginRepository : RepositoryBase<DeviceLogin>, IDeviceLoginRepository
     {
-        public DeviceLoginRepository(DepositorDBContext dbContext) : base(dbContext)
+        public DeviceLoginRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<DeviceLogin> GetFirst(Guid Id)
         {
-            return await DbContext.DeviceLogins.Where(x => x.User == Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefaultAsync();
+            var result = depositorDBContext.DeviceLogins.Where(x => x.User == Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
+            return await Task.Run<DeviceLogin>(() => result);
         }
     }
 }

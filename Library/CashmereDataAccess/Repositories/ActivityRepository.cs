@@ -1,18 +1,20 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Cashmere.Library.CashmereDataAccess.Entities;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class ActivityRepository : RepositoryBase<Activity>, IActivityRepository
     {
-        public ActivityRepository(DepositorDBContext dbContext) : base(dbContext)
+        public ActivityRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<Activity> GetByName(string activity)
         {
-            return await DbContext.Activities.Where(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefaultAsync();
+            var result = depositorDBContext.Activities.Where(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            return await Task.Run<Activity>(() => result);
         }
     }
 }

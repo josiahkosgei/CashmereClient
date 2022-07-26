@@ -1,27 +1,31 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class RoleRepository : RepositoryBase<Role>, IRoleRepository
     {
-        public RoleRepository(DepositorDBContext dbContext) : base(dbContext)
+        public RoleRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<Role> GetByIdAsync(Guid Id)
         {
-            return await DbContext.Roles.FirstOrDefaultAsync(x => x.Id == Id);
+            var result = depositorDBContext.Roles.FirstOrDefault(x => x.Id == Id);
+            return await Task.Run<Role>(() => result);
         }
         public async Task<Role> GetByNameAsync(string name)
         {
-            return await DbContext.Roles.FirstOrDefaultAsync(x => x.Name == name);
+            var result = depositorDBContext.Roles.FirstOrDefault(x => x.Name == name);
+            return await Task.Run<Role>(() => result);
         }
 
         public async Task<Role> GetFirst()
         {
-            return await DbContext.Roles.FirstOrDefaultAsync();
+            var result = depositorDBContext.Roles.FirstOrDefault();
+            return await Task.Run<Role>(() => result);
         }
     }
 }

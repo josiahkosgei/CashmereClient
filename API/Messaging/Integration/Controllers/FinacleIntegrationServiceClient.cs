@@ -21,7 +21,7 @@ public class FinacleIntegrationServiceClient : APIClient, IMonitoringController,
 
     public async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(AccountNumberValidationRequest request)
     {
-       // var BSGetAccountDetailsClient = new BSGetAccountDetailsClient();
+        // var BSGetAccountDetailsClient = new BSGetAccountDetailsClient();
         return await SendAsync<AccountNumberValidationResponse>("api/Accounts/ValidateAccountNumber", request);
     }
 

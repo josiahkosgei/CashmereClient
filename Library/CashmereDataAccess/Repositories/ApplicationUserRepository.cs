@@ -1,23 +1,26 @@
-﻿using Cashmere.Library.CashmereDataAccess.Entities;
-using Cashmere.Library.CashmereDataAccess.IRepositories;
+﻿using Cashmere.Library.CashmereDataAccess.IRepositories;
+using Cashmere.Library.CashmereDataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cashmere.Library.CashmereDataAccess.Repositories
 {
     public class ApplicationUserRepository : RepositoryBase<ApplicationUser>, IApplicationUserRepository
     {
-        public ApplicationUserRepository(DepositorDBContext dbContext) : base(dbContext)
+        public ApplicationUserRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
         public async Task<ApplicationUser> GetByIdAsync(Guid Id)
         {
-            return await DbContext.ApplicationUsers.FirstOrDefaultAsync(x => x.Id == Id);
+            var result = depositorDBContext.ApplicationUsers.FirstOrDefault(x => x.Id == Id);
+            return await Task.Run<ApplicationUser>(() => result);
         }
 
         public async Task<ApplicationUser> GetFirst()
         {
-            return await DbContext.ApplicationUsers.FirstOrDefaultAsync();
+            var result = depositorDBContext.ApplicationUsers.FirstOrDefault();
+            return await Task.Run<ApplicationUser>(() => result);
         }
     }
 }

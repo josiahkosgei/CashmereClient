@@ -41,12 +41,16 @@ namespace CashmereDeposit.Models
 
         public ApplicationViewModel ApplicationViewModel => _applicationViewModel;
         private static IDeviceRepository _deviceRepository { get; set; }
+
+        private readonly DepositorDBContext _depositorDBContext;
+
         private static IPasswordPolicyRepository _passwordPolicyRepository { get; set; }
         private static ITransactionTypeListItemRepository _transactionTypeListItemRepository { get; set; }
 
         public ApplicationModel(ApplicationViewModel ApplicationViewModel)
         {
             _deviceRepository = IoC.Get<IDeviceRepository>();
+            _depositorDBContext = IoC.Get<DepositorDBContext>();
             _passwordPolicyRepository = IoC.Get<IPasswordPolicyRepository>();
             _transactionTypeListItemRepository = IoC.Get<ITransactionTypeListItemRepository>();
             _applicationViewModel = ApplicationViewModel;
@@ -55,7 +59,7 @@ namespace CashmereDeposit.Models
         public bool TestConnection()
         {
             ApplicationViewModel.Log.Debug(GetType().Name, "Database Connectivity Test", "Initialisation", "Testing Database Connection....");
-            var _depositorDBContext = new DepositorDBContext();
+
             DbConnection connection = _depositorDBContext.Database.GetDbConnection();
             for (int index = 0; index < 10; ++index)
             {
@@ -100,7 +104,7 @@ namespace CashmereDeposit.Models
             {
 
 
-                var device = _deviceRepository.GetDeviceWithNavigations(Environment.MachineName).ContinueWith(x=>x.Result).Result;
+                var device = _deviceRepository.GetDeviceWithNavigations(Environment.MachineName).ContinueWith(x => x.Result).Result;
                 if (device != null)
                     return device;
                 ApplicationViewModel.Log.Fatal(nameof(ViewModels.ApplicationViewModel), 89, ApplicationErrorConst.ERROR_DATABASE_GENERAL.ToString(), "Could not get device info from database, terminating");
@@ -234,7 +238,7 @@ namespace CashmereDeposit.Models
           TransactionTypeListItem transactionChosen)
         {
 
-            var uIScreens = _transactionTypeListItemRepository.GetTransactionTypeScreenList(transactionChosen.Id).ContinueWith(x=>x.Result).Result;
+            var uIScreens = _transactionTypeListItemRepository.GetTransactionTypeScreenList(transactionChosen.Id).ContinueWith(x => x.Result).Result;
 
             var gUIScreens = uIScreens.TxTypeGUIScreenlistNavigation.GuiScreenListScreens.Where(x => x.Enabled)
                   .OrderBy(x => x.ScreenOrder)

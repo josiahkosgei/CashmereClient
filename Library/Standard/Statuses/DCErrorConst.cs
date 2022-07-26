@@ -89,7 +89,7 @@ namespace Cashmere.Library.Standard.Statuses
         public const int APP_ITEM_NOT_CONFIGURED = 313;
         public const int APP_LISTENER_ALREADY_REGISTERED = 314;
         public const int APP_LISTENER_NOT_REGISTERED = 315;
-        public   const int APP_NOT_DEPOSITABLE = 316;
+        public const int APP_NOT_DEPOSITABLE = 316;
         public const int APP_NOT_ENOUGH_CASH_ITEMS = 317;
         public const int APP_TELLER_STATISTIC_NOT_CONFIGURED = 318;
         public const int APP_WRONG_VALUE_USED = 319;

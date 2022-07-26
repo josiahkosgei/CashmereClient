@@ -15,13 +15,18 @@ using CashmereDeposit.ViewModels;
 using CashmereDeposit.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using System.IO;
+using CashmereDeposit.Utils;
 
 namespace CashmereDeposit
 {
     public class AutofacBootstrapper<TRootViewModel> : BootstrapperBase
     {
         #region Properties
+        public IServiceProvider ServiceProvider { get; private set; }
 
+        public IConfiguration Configuration { get; private set; }
         protected IContainer Container { get; private set; }
 
         protected IDictionary<string, object> RootViewDisplaySettings { get; set; }
@@ -118,14 +123,21 @@ namespace CashmereDeposit
             if (AutoSubscribeEventAggegatorHandlers)
                 builder.RegisterModule<EventAggregationAutoSubscriptionModule>();
 
+            var configurationBuilder = new ConfigurationBuilder()
+             .SetBasePath(Directory.GetCurrentDirectory())
+             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            Configuration = configurationBuilder.Build();
+
             ConfigureContainer(builder);
             var serviceCollection = new ServiceCollection();
-
+            serviceCollection.AddSingleton<IConfiguration>(Configuration);
             ConfigureServices(serviceCollection);
+
             builder.Populate(serviceCollection);
 
             Container = builder.Build();
-
+            ServiceProvider = new AutofacServiceProvider(Container);
         }
 
         private bool Func(Type type)
@@ -234,55 +246,52 @@ namespace CashmereDeposit
 
         private void ConfigureServices(IServiceCollection services)
         {
+
+
+            services.AddTransient<DepositorDBContext>();
+            services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
+
             string connectionString = @"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True";
-            //services.AddDbContext<DepositorDBContext>(sqlServerOptionsAction =>
-            //    sqlServerOptionsAction.UseSqlServer(connectionString),
-            //    sqlServerOptionsAction: sqlOptions =>
-            //    {
-            //        sqlOptions.EnableRetryOnFailure(
-            //        maxRetryCount: 10,
-            //        maxRetryDelay: TimeSpan.FromSeconds(30),
-            //        errorNumbersToAdd: null);
-            //    });
-            //    );
+            services.AddDbContext<DepositorDBContext>(sqlServerOptionsAction =>
+                sqlServerOptionsAction.UseSqlServer(connectionString));
 
-            //services.AddDbContext<DepositorDBContext>(options =>
-            //    {
-            //        if (options is null)
-            //        {
-            //            throw new ArgumentNullException(nameof(options));
-            //        }
+            services.AddDbContext<DepositorDBContext>(options =>
+                {
+                    if (options is null)
+                    {
+                        throw new ArgumentNullException(nameof(options));
+                    }
 
-            //        options.UseSqlServer(connectionString,
-            //        sqlServerOptionsAction: sqlOptions =>
-            //        {
-            //            sqlOptions.EnableRetryOnFailure(
-            //            maxRetryCount: 10,
-            //            maxRetryDelay: TimeSpan.FromSeconds(30),
-            //            errorNumbersToAdd: null);
-            //        });
-            //   });
-            //services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
+                    options.UseSqlServer(connectionString,
+                    sqlServerOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    });
+                });
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
+            services.AddScoped<DepositorContextFactory>();
+            services.AddHttpClient("CashmereDepositHttpClient", client => { });
+            using (new DepositorDBContext())
+            {
+                services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    Device device;
+                    using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
+                    {
+                        device = GetDevice(_depositorDBContext);
+                    }
 
-            //services.AddHttpClient("CashmereDepositHttpClient", client => { });
-            //using (new DepositorDBContext())
-            //{
-            //    services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
-            //    {
-            //        Device device;
-            //        using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
-            //        {
-            //            device = GetDevice(_depositorDBContext);
-            //        }
+                    var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
+                    return handler;
+                });
 
-            //        var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
-            //        return handler;
-            //    });
-
-            //}
+            }
 
             services.AddHttpClient("CDM_APIClient", client => { });
-           // InitDatabase(services);
+            // InitDatabase(services);
         }
 
         private Device GetDevice(DepositorDBContext dbContext)
