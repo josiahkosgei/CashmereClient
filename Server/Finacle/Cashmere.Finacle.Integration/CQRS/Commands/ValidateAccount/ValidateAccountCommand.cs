@@ -6,6 +6,6 @@ namespace Cashmere.Finacle.Integration.CQRS.Commands.ValidateAccount
 {
     public class ValidateAccountCommand  : IRequest<int>
     {
-        public ValidateAccountRequestDto ValidateAccount { get; set; }
+        public ValidateAccountRequestDto ValidateAccountRequest { get; set; }
     }
 }

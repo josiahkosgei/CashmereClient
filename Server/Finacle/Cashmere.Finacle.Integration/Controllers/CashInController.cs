@@ -1,9 +1,12 @@
-﻿using Cashmere.Finacle.Integration.CQRS.Commands.ValidateAccount;
+﻿using Cashmere.Finacle.Integration.CQRS.Commands.FundsTransfer;
+using Cashmere.Finacle.Integration.CQRS.Commands.ValidateAccount;
 using Cashmere.Finacle.Integration.CQRS.DTOs.FundsTransfer;
 using Cashmere.Finacle.Integration.CQRS.DTOs.ValidateAccount;
+using Cashmere.Finacle.Integration.CQRS.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace Cashmere.Finacle.Integration.Controllers
@@ -13,28 +16,42 @@ namespace Cashmere.Finacle.Integration.Controllers
     public class CashInController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<CashInController> _logger;
+        private readonly SOAServerConfiguration _soaServerConfiguration;
 
-        public CashInController(IMediator mediator)
+        public CashInController(ILogger<CashInController> logger, IMediator mediator, IOptionsMonitor<SOAServerConfiguration> optionsMonitor)
         {
+            _logger = logger;
+            _soaServerConfiguration = optionsMonitor.CurrentValue;
             _mediator = mediator;
         }
-        [HttpGet("ValidateAccount", Name = "ValidateAccount")]
+        [HttpPost("ValidateAccount", Name = "ValidateAccount")]
         [ProducesResponseType(typeof(ValidateAccountResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ValidateAccount([FromBody] ValidateAccountRequestDto validateAccountRequestDto)
+        public async Task<IActionResult> ValidateAccount([FromBody] AccountDetailsRequestTypeDto accountDetailsRequestTypeDto)
         {
             try
             {
-                var command = new ValidateAccountCommand { ValidateAccount = validateAccountRequestDto };
-                var validatedAccount = await _mediator.Send(command);
-                return Ok(validatedAccount);
+                _logger.LogInformation("ValidateAccount Request: ", accountDetailsRequestTypeDto.AsJson());
+                var command = new ValidateAccountCommand
+                {
+                    ValidateAccountRequest = new ValidateAccountRequestDto()
+                    {
+                        AccountDetailsRequestType = accountDetailsRequestTypeDto,
+                        RequestHeaderType = new RequestHeaderTypeDto()
+                    }
+                };
+                var validatedAccountResponse = await _mediator.Send(command);
+                _logger.LogInformation("ValidateAccount Finacle Response: ", validatedAccountResponse.AsJson());
+                return Ok(validatedAccountResponse);
             }
             catch (Exception ex)
             {
+                _logger.LogError("ValidateAccount Error: ", ex.Message);
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("FundsTransfer", Name = "FundsTransfer")]
+        [HttpPost("FundsTransfer", Name = "FundsTransfer")]
         [ProducesResponseType(typeof(FundsTransferResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> FundsTransfer([FromBody] FundsTransferRequestDto FundsTransferRequestDto)
@@ -47,6 +64,7 @@ namespace Cashmere.Finacle.Integration.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError("FundsTransfer Error: ", ex.Message);
                 return BadRequest(ex.Message);
             }
         }

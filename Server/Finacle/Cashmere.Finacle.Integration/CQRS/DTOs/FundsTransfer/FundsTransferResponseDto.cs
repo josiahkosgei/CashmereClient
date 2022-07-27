@@ -1,7 +1,10 @@
-﻿namespace Cashmere.Finacle.Integration.CQRS.DTOs.FundsTransfer
+﻿using Cashmere.Finacle.Integration.CQRS.DTOs.ValidateAccount;
+
+namespace Cashmere.Finacle.Integration.CQRS.DTOs.FundsTransfer
 {
     public class FundsTransferResponseDto
     {
-        public string AccountNumber { get; set; }
+        public  ResponseHeaderTypeDto ResponseHeaderType {get;set;}
+        public  FundsTransferTypeDto FundsTransferType {get;set;}
     }
 }

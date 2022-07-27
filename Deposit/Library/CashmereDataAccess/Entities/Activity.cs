@@ -26,7 +26,7 @@ namespace Cashmere.Library.CashmereDataAccess.Entities
         [StringLength(255)]
         public string? Description { get; set; }
 
-       //  //[InverseProperty("Activity")]
+       //  ////[InverseProperty("Activity")]
         public virtual ICollection<Permission> Permissions { get; set; }
     }
 }

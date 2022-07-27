@@ -2,6 +2,7 @@
 {
     public class ValidateAccountRequestDto
     {
-        public string AccountNumber { get; set; }
+        public RequestHeaderTypeDto RequestHeaderType { get; set; }
+        public AccountDetailsRequestTypeDto AccountDetailsRequestType { get; set; }
     }
 }
