@@ -1,0 +1,26 @@
+{
+  "ExtendedData": {
+    "inputs": [
+      "../../../../../../bak/APP.BS.Account.AccountDetails.Get.3.0.wsdl"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, BSAccountDetailsServiceReference"
+    ],
+    "references": [
+      "MediatR, {MediatR, 10.0.1}",
+      "MediatR.Contracts, {MediatR.Contracts, 1.0.1}",
+      "MediatR.Extensions.Microsoft.DependencyInjection, {MediatR.Extensions.Microsoft.DependencyInjection, 10.0.1}",
+      "Microsoft.Extensions.DependencyInjection.Abstractions, {Microsoft.Extensions.DependencyInjection.Abstractions, 6.0.0}",
+      "Microsoft.OpenApi, {Microsoft.OpenApi, 1.2.3}",
+      "Swashbuckle.AspNetCore.Swagger, {Swashbuckle.AspNetCore.Swagger, 6.4.0}",
+      "Swashbuckle.AspNetCore.SwaggerGen, {Swashbuckle.AspNetCore.SwaggerGen, 6.4.0}",
+      "Swashbuckle.AspNetCore.SwaggerUI, {Swashbuckle.AspNetCore.SwaggerUI, 6.4.0}"
+    ],
+    "targetFramework": "net6.0",
+    "typeReuseMode": "All"
+  }
+}

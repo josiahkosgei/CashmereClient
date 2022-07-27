@@ -9,43 +9,51 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Messaging", "Messaging", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CDM", "CDM", "{2B40D5B3-65F7-4444-B991-13347010F7CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication", "API\Messaging\Authentication\Authentication.csproj", "{0CD29006-5B2B-4F50-A155-4F56C142754A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication", "Deposit\API\Messaging\Authentication\Authentication.csproj", "{0CD29006-5B2B-4F50-A155-4F56C142754A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDM.GUIControl", "API\Messaging\CDM.GUIControl\CDM.GUIControl.csproj", "{A1E84C89-1A00-4C50-B254-A3FB00656EE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDM.GUIControl", "Deposit\API\Messaging\CDM.GUIControl\CDM.GUIControl.csproj", "{A1E84C89-1A00-4C50-B254-A3FB00656EE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communication", "API\Messaging\Communication\Communication.csproj", "{04AA5CFB-950B-49C8-B3C8-A3EE33046100}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communication", "Deposit\API\Messaging\Communication\Communication.csproj", "{04AA5CFB-950B-49C8-B3C8-A3EE33046100}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{4E449E1D-51EA-4CA4-8EFC-F1975D6E2352}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{F5AC7D75-CF0E-454B-894D-D704C4B0BD19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereDeposit", "UI\CashmereDeposit\CashmereDeposit.csproj", "{3097B0CD-E8FF-45CC-A689-C93DCF1CE0E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereDeposit", "Deposit\UI\CashmereDeposit\CashmereDeposit.csproj", "{3097B0CD-E8FF-45CC-A689-C93DCF1CE0E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDMMessaging", "API\CDM\Messaging\CDMMessaging.csproj", "{3FDECAA6-8271-4BB3-901E-2D63390DEFD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDMMessaging", "Deposit\API\CDM\Messaging\CDMMessaging.csproj", "{3FDECAA6-8271-4BB3-901E-2D63390DEFD0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reporting.UptimeDataAccess", "API\CDM\Reporting.Uptime.DataAccess\Reporting.UptimeDataAccess.csproj", "{129C81FD-C026-49BC-9E4F-768573706341}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reporting.UptimeDataAccess", "Deposit\API\CDM\Reporting.Uptime.DataAccess\Reporting.UptimeDataAccess.csproj", "{129C81FD-C026-49BC-9E4F-768573706341}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportingService", "API\CDM\ReportingService\ReportingService.csproj", "{3B14993F-9479-458F-BA33-B3F9BBE11855}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportingService", "Deposit\API\CDM\ReportingService\ReportingService.csproj", "{3B14993F-9479-458F-BA33-B3F9BBE11855}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UptimeReportLibrary", "API\CDM\UptimeReportLibrary\UptimeReportLibrary.csproj", "{33C3D018-8323-4441-85C7-A9342033CE72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UptimeReportLibrary", "Deposit\API\CDM\UptimeReportLibrary\UptimeReportLibrary.csproj", "{33C3D018-8323-4441-85C7-A9342033CE72}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Standard", "Library\Standard\Standard.csproj", "{D4AF7697-FAD6-4858-B7C4-7DE15BFE673B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Standard", "Deposit\Library\Standard\Standard.csproj", "{D4AF7697-FAD6-4858-B7C4-7DE15BFE673B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messaging", "API\Messaging\Messaging\Messaging.csproj", "{5A736C05-7667-4F41-AFCA-75B13D51A51D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messaging", "Deposit\API\Messaging\Messaging\Messaging.csproj", "{5A736C05-7667-4F41-AFCA-75B13D51A51D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reporting.Uptime", "API\CDM\Reporting.Uptime\Reporting.Uptime.csproj", "{4D5C1FB5-B4C1-422F-8F73-FC1AAD75525D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reporting.Uptime", "Deposit\API\CDM\Reporting.Uptime\Reporting.Uptime.csproj", "{4D5C1FB5-B4C1-422F-8F73-FC1AAD75525D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceManager", "Library\DeviceManager\DeviceManager.csproj", "{F5399109-A630-4595-83E1-E38B934AA14E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceManager", "Deposit\Library\DeviceManager\DeviceManager.csproj", "{F5399109-A630-4595-83E1-E38B934AA14E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashAccSysDeviceManager", "Library\CashAccSysDeviceManager\CashAccSysDeviceManager.csproj", "{D3E5653A-281D-45D8-849B-676A136EF8B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashAccSysDeviceManager", "Deposit\Library\CashAccSysDeviceManager\CashAccSysDeviceManager.csproj", "{D3E5653A-281D-45D8-849B-676A136EF8B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereUtil", "UI\CashmereUtil\CashmereUtil.csproj", "{AC960599-A747-487B-8AB2-6B32CCEF21FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereUtil", "Deposit\UI\CashmereUtil\CashmereUtil.csproj", "{AC960599-A747-487B-8AB2-6B32CCEF21FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereDataAccess", "Library\CashmereDataAccess\CashmereDataAccess.csproj", "{C9819522-4682-4389-A7C8-9BE3664962D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashmereDataAccess", "Deposit\Library\CashmereDataAccess\CashmereDataAccess.csproj", "{C9819522-4682-4389-A7C8-9BE3664962D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "UI\Sample\Sample.csproj", "{242109A7-78F5-45BF-B7FE-855C9A486C9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "Deposit\UI\Sample\Sample.csproj", "{242109A7-78F5-45BF-B7FE-855C9A486C9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration", "API\Messaging\Integration\Integration.csproj", "{486F01A8-6078-474D-A870-6933AFDFFC97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Integration", "Deposit\API\Messaging\Integration\Integration.csproj", "{486F01A8-6078-474D-A870-6933AFDFFC97}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{4EC00DC2-20AE-40F7-AE11-951311773099}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deposit", "Deposit", "{26B92EE8-C80F-4873-9925-3B22E624425D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Finacle", "Finacle", "{701C97E5-773B-4B85-BB68-E25BA0BD4F30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cashmere.Finacle.Integration", "Server\Finacle\Cashmere.Finacle.Integration\Cashmere.Finacle.Integration.csproj", "{79C6E251-8006-4BD2-A462-F4AD3A135C39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,16 +129,23 @@ Global
 		{486F01A8-6078-474D-A870-6933AFDFFC97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{486F01A8-6078-474D-A870-6933AFDFFC97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{486F01A8-6078-474D-A870-6933AFDFFC97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79C6E251-8006-4BD2-A462-F4AD3A135C39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79C6E251-8006-4BD2-A462-F4AD3A135C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79C6E251-8006-4BD2-A462-F4AD3A135C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79C6E251-8006-4BD2-A462-F4AD3A135C39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{257455FA-B957-42D9-B429-2572703AC979} = {26B92EE8-C80F-4873-9925-3B22E624425D}
 		{F0EC2E7F-DB73-40E8-A91E-CD8E600433E0} = {257455FA-B957-42D9-B429-2572703AC979}
 		{2B40D5B3-65F7-4444-B991-13347010F7CB} = {257455FA-B957-42D9-B429-2572703AC979}
 		{0CD29006-5B2B-4F50-A155-4F56C142754A} = {F0EC2E7F-DB73-40E8-A91E-CD8E600433E0}
 		{A1E84C89-1A00-4C50-B254-A3FB00656EE7} = {F0EC2E7F-DB73-40E8-A91E-CD8E600433E0}
 		{04AA5CFB-950B-49C8-B3C8-A3EE33046100} = {F0EC2E7F-DB73-40E8-A91E-CD8E600433E0}
+		{4E449E1D-51EA-4CA4-8EFC-F1975D6E2352} = {26B92EE8-C80F-4873-9925-3B22E624425D}
+		{F5AC7D75-CF0E-454B-894D-D704C4B0BD19} = {26B92EE8-C80F-4873-9925-3B22E624425D}
 		{3097B0CD-E8FF-45CC-A689-C93DCF1CE0E5} = {F5AC7D75-CF0E-454B-894D-D704C4B0BD19}
 		{3FDECAA6-8271-4BB3-901E-2D63390DEFD0} = {2B40D5B3-65F7-4444-B991-13347010F7CB}
 		{129C81FD-C026-49BC-9E4F-768573706341} = {2B40D5B3-65F7-4444-B991-13347010F7CB}
@@ -145,6 +160,8 @@ Global
 		{C9819522-4682-4389-A7C8-9BE3664962D3} = {4E449E1D-51EA-4CA4-8EFC-F1975D6E2352}
 		{242109A7-78F5-45BF-B7FE-855C9A486C9A} = {F5AC7D75-CF0E-454B-894D-D704C4B0BD19}
 		{486F01A8-6078-474D-A870-6933AFDFFC97} = {F0EC2E7F-DB73-40E8-A91E-CD8E600433E0}
+		{701C97E5-773B-4B85-BB68-E25BA0BD4F30} = {4EC00DC2-20AE-40F7-AE11-951311773099}
+		{79C6E251-8006-4BD2-A462-F4AD3A135C39} = {701C97E5-773B-4B85-BB68-E25BA0BD4F30}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4C523574-0B35-4C65-BA79-E59E85883181}
