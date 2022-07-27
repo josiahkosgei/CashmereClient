@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  UserLock GetFirst()
+        public UserLock GetFirst()
         {
-            var result = _depositorDBContext.UserLocks.OrderByDescending(x => x.LogDate).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.UserLocks.OrderByDescending(x => x.LogDate).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

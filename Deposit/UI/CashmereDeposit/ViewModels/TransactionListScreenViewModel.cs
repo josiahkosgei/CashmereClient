@@ -149,7 +149,7 @@ namespace CashmereDeposit.ViewModels
           string currency,
           int txType)
         {
-            return await ApplicationViewModel.ValidateAccountNumberAsync(accountNumber, currency, txType);
+            return await ApplicationViewModel._FinacleValidateAccountNumberAsync(accountNumber, currency, txType);
         }
     }
 }

@@ -11,16 +11,26 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  UptimeMode GetByDeviceIdAsync(Guid deviceId)
+        public UptimeMode GetByDeviceIdAsync(Guid deviceId)
         {
-            var result = _depositorDBContext.UptimeModes.Where(x => x.Device == deviceId).OrderByDescending(x => x.Created).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.UptimeModes.Where(x => x.Device == deviceId).OrderByDescending(x => x.Created).FirstOrDefault();
+                return result;
+
+            }
         }
 
-        public  List<UptimeMode> GetEndDateHasValueAsync()
+        public List<UptimeMode> GetEndDateHasValueAsync()
         {
-            var result = _depositorDBContext.UptimeModes.Where(x => !x.EndDate.HasValue).ToList();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.UptimeModes.Where(x => !x.EndDate.HasValue).ToList();
+                return result;
+
+            }
         }
     }
 }

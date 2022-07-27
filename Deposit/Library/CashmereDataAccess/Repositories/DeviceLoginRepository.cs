@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  DeviceLogin GetFirst(Guid Id)
+        public DeviceLogin GetFirst(Guid Id)
         {
-            var result = _depositorDBContext.DeviceLogins.Where(x => x.User == Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceLogins.Where(x => x.User == Id && x.Success == true).OrderByDescending(x => x.LoginDate).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

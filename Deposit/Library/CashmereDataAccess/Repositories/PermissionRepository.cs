@@ -13,14 +13,24 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public Permission GetById(Guid Id)
         {
-            var result = _depositorDBContext.Permissions.FirstOrDefault(x => x.Id == Id);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.Permissions.FirstOrDefault(x => x.Id == Id);
+                return result;
+
+            }
         }
 
         public Permission GetFirst(ApplicationUser user, Guid ActivityId, bool isAuthenticating = false)
         {
-            var result = _depositorDBContext.Permissions.FirstOrDefault(x => x.RoleId == user.RoleId && x.ActivityId == ActivityId && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.Permissions.FirstOrDefault(x => x.RoleId == user.RoleId && x.ActivityId == ActivityId && (isAuthenticating ? x.StandaloneCanAuthenticate : x.StandaloneAllowed));
+                return result;
+
+            }
         }
     }
 }

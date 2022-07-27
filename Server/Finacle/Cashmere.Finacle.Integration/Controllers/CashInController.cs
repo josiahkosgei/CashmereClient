@@ -25,10 +25,10 @@ namespace Cashmere.Finacle.Integration.Controllers
             _soaServerConfiguration = optionsMonitor.CurrentValue;
             _mediator = mediator;
         }
-        [HttpPost("ValidateAccount", Name = "ValidateAccount")]
+        [HttpPost("ValidateAccountNumber", Name = "ValidateAccountNumber")]
         [ProducesResponseType(typeof(ValidateAccountResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ValidateAccount([FromBody] AccountDetailsRequestTypeDto accountDetailsRequestTypeDto)
+        public async Task<IActionResult> ValidateAccountNumber([FromBody] AccountDetailsRequestTypeDto accountDetailsRequestTypeDto)
         {
             try
             {
@@ -51,10 +51,27 @@ namespace Cashmere.Finacle.Integration.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPost("FundsTransfer", Name = "FundsTransfer")]
+        [HttpPost("PostTransaction", Name = "PostTransaction")]
         [ProducesResponseType(typeof(FundsTransferResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> FundsTransfer([FromBody] FundsTransferRequestDto FundsTransferRequestDto)
+        public async Task<IActionResult> PostTransaction([FromBody] FundsTransferRequestDto FundsTransferRequestDto)
+        {
+            try
+            {
+                var command = new FundsTransferCommand { FundsTransfer = FundsTransferRequestDto };
+                var validatedAccount = await _mediator.Send(command);
+                return Ok(validatedAccount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("FundsTransfer Error: ", ex.Message);
+                return BadRequest(ex.Message);
+            }
+        } 
+        [HttpPost("PostCITTransaction", Name = "PostCITTransaction")]
+        [ProducesResponseType(typeof(FundsTransferResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PostCITTransaction([FromBody] FundsTransferRequestDto FundsTransferRequestDto)
         {
             try
             {

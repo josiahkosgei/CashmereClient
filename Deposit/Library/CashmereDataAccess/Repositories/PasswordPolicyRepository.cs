@@ -13,13 +13,23 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public PasswordPolicy GetById(Guid Id)
         {
-            var result = _depositorDBContext.PasswordPolicies.FirstOrDefault(x => x.Id == Id);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.PasswordPolicies.FirstOrDefault(x => x.Id == Id);
+                return result;
+
+            }
         }
         public PasswordPolicy GetFirst()
         {
-            var result = _depositorDBContext.PasswordPolicies.FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.PasswordPolicies.FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

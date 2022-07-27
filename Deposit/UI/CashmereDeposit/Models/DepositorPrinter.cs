@@ -447,7 +447,8 @@ namespace CashmereDeposit.Models
             bool flag = false;
             try
             {
-                flag = Port.CtsHolding;
+                //TODO: Remove
+                //flag = Port.CtsHolding;
             }
             catch (Exception ex)
             {

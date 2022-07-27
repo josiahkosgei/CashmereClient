@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  EscrowJam GetFirst()
+        public EscrowJam GetFirst()
         {
-            var result = _depositorDBContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.EscrowJams.OrderByDescending(x => x.DateDetected).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

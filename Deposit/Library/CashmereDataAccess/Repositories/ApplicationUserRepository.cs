@@ -11,16 +11,27 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  ApplicationUser GetById(Guid Id)
+        public ApplicationUser GetById(Guid Id)
         {
-            var result = _depositorDBContext.ApplicationUsers.FirstOrDefault(x => x.Id == Id);
-            return result;
+
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.ApplicationUsers.FirstOrDefault(x => x.Id == Id);
+                return result;
+
+            }
         }
 
         public ApplicationUser GetFirst()
         {
-            var result = _depositorDBContext.ApplicationUsers.FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.ApplicationUsers.FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

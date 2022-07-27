@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  IList<DeviceConfig> ExecuteStoredProc(int config_group)
+        public IList<DeviceConfig> ExecuteStoredProc(int config_group)
         {
-            var result = _depositorDBContext.DeviceConfigs.FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceConfigs.FromSqlRaw("EXECUTE  dbo.GetDeviceConfigByUserGroup @ConfigGroup = {0}", config_group).ToList();
+                return result;
+
+            }
         }
     }
 }

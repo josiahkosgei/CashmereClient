@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  Activity GetByName(string activity)
+        public Activity GetByName(string activity)
         {
-            var result = _depositorDBContext.Activities.Where(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Activities.Where(x => x.Name.Equals(activity, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
             return result;
+
+            }
         }
     }
 }

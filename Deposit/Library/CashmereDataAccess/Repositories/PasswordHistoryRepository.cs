@@ -13,20 +13,35 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public PasswordHistory GetById(Guid Id)
         {
-            var result = _depositorDBContext.PasswordHistories.FirstOrDefault(x => x.Id == Id);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.PasswordHistories.FirstOrDefault(x => x.Id == Id);
+                return result;
+
+            }
         }
 
         public IList<PasswordHistory> GetByUserId(Guid UserId, int historySize)
         {
-            var result = _depositorDBContext.PasswordHistories.Where(x => x.User == UserId).OrderByDescending(x => x.LogDate).Take(historySize).ToList();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.PasswordHistories.Where(x => x.User == UserId).OrderByDescending(x => x.LogDate).Take(historySize).ToList();
+                return result;
+
+            }
         }
 
         public PasswordHistory GetFirst()
         {
-            var result = _depositorDBContext.PasswordHistories.FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.PasswordHistories.FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

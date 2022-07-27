@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  List<AlertEmail> GetByAlertEventIdAsync(Guid alertEventId)
+        public List<AlertEmail> GetByAlertEventIdAsync(Guid alertEventId)
         {
-            var result = _depositorDBContext.AlertEmails.Where(x => x.AlertEventId == alertEventId).ToList();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.AlertEmails.Where(x => x.AlertEventId == alertEventId).ToList();
+                return result;
+
+            }
         }
     }
 }

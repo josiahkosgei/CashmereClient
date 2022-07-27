@@ -43,7 +43,7 @@ namespace CashmereDeposit.ViewModels.V3
 
         public async Task<bool> ValidateAsync(string accountNumber)
         {
-            AccountNumberValidationResponse cb_result = await ApplicationViewModel.ValidateAccountNumberAsync(CustomerInput, ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+            AccountNumberValidationResponse cb_result = await ApplicationViewModel._FinacleValidateAccountNumberAsync(CustomerInput, ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), ApplicationViewModel.CurrentTransaction.TransactionType.Id);
             if (cb_result != null && cb_result.IsSuccess && cb_result.CanTransact)
             {
                 ApplicationViewModel.CurrentTransaction.AccountNumber = CustomerInput;

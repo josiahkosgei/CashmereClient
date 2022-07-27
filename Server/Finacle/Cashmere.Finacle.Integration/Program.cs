@@ -13,6 +13,7 @@ using HealthChecks.UI.Client;
 using Cashmere.Finacle.Integration.Extensions;
 using Microsoft.OpenApi.Models;
 using Cashmere.Finacle.Integration.Extensions.HealthCheck;
+using Cashmere.Finacle.Integration.CQRS.DataAccessLayer.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,15 @@ var seriLogger = new LoggerConfiguration()
                shared: true,
                flushToDiskInterval: TimeSpan.FromSeconds(1))
             .CreateLogger();
-builder.Configuration.GetSection("SOAServerConfiguration").Get<SOAServerConfiguration>();
+ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
+IWebHostEnvironment environment = builder.Environment;
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", true, true);
+
+//builder.Configuration.GetSection("SOAServerConfiguration").Get<SOAServerConfiguration>();
+builder.Services.Configure<SOAServerConfiguration>(configuration.GetSection("SOAServerConfiguration"));
+builder.Services.AddTransient<DepositorServerContext>();
 builder.Services.AddControllers();
 builder.Services.AddInfrastructureHealthCheck(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
@@ -88,7 +97,7 @@ app.UseEndpoints(endpoints =>
                 {
                     Predicate = _ => _.Tags.Contains("db"),
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                }); 
+                });
                 endpoints.MapHealthChecks("/healthz-cdm", new HealthCheckOptions()
                 {
                     Predicate = _ => _.Tags.Contains("cdm"),
@@ -96,4 +105,4 @@ app.UseEndpoints(endpoints =>
                 });
                 endpoints.MapHealthChecksUI();
             });
-app.Run();
+app.MigrateDatabase<DepositorServerContext>((context, services) => { }).Run();

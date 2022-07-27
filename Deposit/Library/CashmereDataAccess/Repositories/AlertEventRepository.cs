@@ -13,14 +13,26 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public AlertEvent GetAlertEventAsync(int alertTypeId)
         {
-            var result = _depositorDBContext.AlertEvents.Where(x => x.AlertTypeId == alertTypeId).OrderByDescending(x => x.Created).FirstOrDefault();
-            return result;
+
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.AlertEvents.Where(x => x.AlertTypeId == alertTypeId).OrderByDescending(x => x.Created).FirstOrDefault();
+                return result;
+
+            }
         }
 
         public List<AlertEvent> GetUnProcessedAsync(int _alertBatchSize)
         {
-            var result = _depositorDBContext.AlertEvents.Where(x => x.IsProcessed == false).OrderBy(y => y.DateDetected).Take(_alertBatchSize).ToList();
-            return result;
+
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.AlertEvents.Where(x => x.IsProcessed == false).OrderBy(y => y.DateDetected).Take(_alertBatchSize).ToList();
+                return result;
+
+            }
         }
     }
 }

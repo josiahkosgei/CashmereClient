@@ -11,21 +11,36 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  Role GetByIdAsync(Guid Id)
+        public Role GetByIdAsync(Guid Id)
         {
-            var result = _depositorDBContext.Roles.FirstOrDefault(x => x.Id == Id);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.Roles.FirstOrDefault(x => x.Id == Id);
+                return result;
+
+            }
         }
-        public  Role GetByNameAsync(string name)
+        public Role GetByNameAsync(string name)
         {
-            var result = _depositorDBContext.Roles.FirstOrDefault(x => x.Name == name);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.Roles.FirstOrDefault(x => x.Name == name);
+                return result;
+
+            }
         }
 
-        public  Role GetFirst()
+        public Role GetFirst()
         {
-            var result = _depositorDBContext.Roles.FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.Roles.FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

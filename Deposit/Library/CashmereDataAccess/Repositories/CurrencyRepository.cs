@@ -14,8 +14,13 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public  Currency GetByCode(string code)
         {
-            var result = _depositorDBContext.Currencies.Where(x => x.Code == code).FirstOrDefault();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Currencies.Where(x => x.Code == code).FirstOrDefault();
             return result;
+
+            }
         }
     }
 }

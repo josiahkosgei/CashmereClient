@@ -66,7 +66,7 @@ namespace CashmereDeposit.ViewModels
           string currency)
         {
             var searchScreenViewModel = this;
-            return await searchScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(accountNumber, currency, searchScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+            return await searchScreenViewModel.ApplicationViewModel._FinacleValidateAccountNumberAsync(accountNumber, currency, searchScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
         }
     }
 }

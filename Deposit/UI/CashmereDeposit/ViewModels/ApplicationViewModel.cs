@@ -719,7 +719,7 @@ namespace CashmereDeposit.ViewModels
                     {
                         CurrentScreenIndex = screenIndex < 0 ? 0 : screenIndex;
                         CurrentScreenIndex = screenIndex > GUIScreens.Count - 1 ? 0 : screenIndex;
-                        // _depositorDBContext.GuiScreens.Attach(GUIScreens[CurrentScreenIndex]);
+                        // dbContext.GuiScreens.Attach(GUIScreens[CurrentScreenIndex]);
                         var GUIScreenTypeCode = GUIScreens[CurrentScreenIndex].GUIScreenType.Code;
                         TypeInfo typeInfo = Assembly.GetExecutingAssembly().DefinedTypes.First(x => x.GUID == GUIScreenTypeCode);
                         GUIScreen guiScreen = GUIScreens[CurrentScreenIndex];
@@ -871,7 +871,7 @@ namespace CashmereDeposit.ViewModels
 
         internal void CreateTransaction(TransactionTypeListItem value)
         {
-            //_depositorDBContext.TransactionTypeListItems.Attach(value);
+            //dbContext.TransactionTypeListItems.Attach(value);
             Log.Info(GetType().Name, "SetTransactionType", "User Input", value.Name);
             GUIScreens.AddRange(ApplicationModel.GetTransactionTypeScreenList(value).ToList());
             if (CurrentSession.Transaction == null)
@@ -1176,10 +1176,7 @@ namespace CashmereDeposit.ViewModels
             return accountListAsync;
         }
 
-        internal async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(
-          string accountNumber,
-          string Currency,
-          int txType)
+        internal async Task<AccountNumberValidationResponse> ValidateAccountNumberAsync(string accountNumber, string Currency, int txType)
         {
             ApplicationViewModel applicationViewModel = this;
             AccountNumberValidationResponse validationResponse1;
@@ -1284,16 +1281,13 @@ namespace CashmereDeposit.ViewModels
             return validationResponse1;
         }
 
-        internal async Task<AccountNumberValidationResponse> _FinacleValidateAccountNumberAsync(
-        string accountNumber,
-        string Currency,
-        int txType)
+        internal async Task<AccountNumberValidationResponse> _FinacleValidateAccountNumberAsync(string accountNumber, string Currency, int txType)
         {
             var applicationViewModel = this;
             AccountNumberValidationResponse validationResponse1;
             Log.Info(applicationViewModel.GetType().Name, "ValidateAccountNumber", "User Input", accountNumber);
             var response = new AccountNumberValidationResponse();
-            if (applicationViewModel.debugNoCoreBanking)
+            if (!applicationViewModel.debugNoCoreBanking)
             {
                 if (accountNumber == "1234")
                 {
@@ -1390,10 +1384,7 @@ namespace CashmereDeposit.ViewModels
             validationResponse1 = response;
             return validationResponse1;
         }
-        internal async Task<ReferenceAccountNumberValidationResponse> ValidateReferenceAccountNumberAsync(
-          string accountNumber,
-          string refAccountNumber,
-          string transactionType)
+        internal async Task<ReferenceAccountNumberValidationResponse> ValidateReferenceAccountNumberAsync(string accountNumber, string refAccountNumber, string transactionType)
         {
             ApplicationViewModel applicationViewModel = this;
             ReferenceAccountNumberValidationResponse validationResponse1;
@@ -2875,7 +2866,7 @@ namespace CashmereDeposit.ViewModels
             device.Enabled = false;
             Log.Debug(GetType().Name, nameof(LockDevice), "Device Lock", "AlertManager.SendAlert(new AlertDeviceLocked(errorMessage, device, DateTime.Now));");
             AlertManager.SendAlert(new AlertDeviceLocked(errorMessage, device, DateTime.Now));
-            Log.Debug(GetType().Name, nameof(LockDevice), "Device Lock", "_depositorDBContext.DeviceLocks.Add(new DeviceLock");
+            Log.Debug(GetType().Name, nameof(LockDevice), "Device Lock", "dbContext.DeviceLocks.Add(new DeviceLock");
             _deviceLockRepository.AddAsync(new DeviceLock()
             {
                 Id = Guid.NewGuid(),
@@ -3391,7 +3382,7 @@ namespace CashmereDeposit.ViewModels
             try
             {
                 Device device = _deviceRepository.GetDevice(Environment.MachineName);
-                //Device device = _depositorDBContext.Devices.Where(x => x.MachineName == Environment.MachineName)
+                //Device device = dbContext.Devices.Where(x => x.MachineName == Environment.MachineName)
                 //    .Include(x => x.Branch)
                 //     .Include(x => x.ConfigGroupNavigation)
                 //     .FirstOrDefault();

@@ -11,21 +11,36 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  DeviceStatus GetByDeviceId(Guid DeviceId)
+        public DeviceStatus GetByDeviceId(Guid DeviceId)
         {
-            var result = _depositorDBContext.DeviceStatus.Where(y => y.DeviceId == DeviceId).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceStatus.Where(y => y.DeviceId == DeviceId).FirstOrDefault();
+                return result;
+
+            }
         }
-        public  DeviceStatus GetByMachineName(string MachineName)
+        public DeviceStatus GetByMachineName(string MachineName)
         {
-            var result = _depositorDBContext.DeviceStatus.Where(y => y.MachineName == MachineName).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceStatus.Where(y => y.MachineName == MachineName).FirstOrDefault();
+                return result;
+
+            }
         }
 
-        public  IList<DeviceStatus> GetAllAsync()
+        public IList<DeviceStatus> GetAllAsync()
         {
-            var result = _depositorDBContext.DeviceStatus.ToList();
-            return result;
+
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceStatus.ToList();
+                return result;
+            }
         }
     }
 }

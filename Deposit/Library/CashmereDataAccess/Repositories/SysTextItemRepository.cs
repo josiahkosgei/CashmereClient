@@ -12,8 +12,13 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         }
         public  SysTextItem GetByTokenId(string tokenID)
         {
-            var result = _depositorDBContext.SysTextItems.Where(x => x.Token == tokenID).FirstOrDefault();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.SysTextItems.Where(x => x.Token == tokenID).FirstOrDefault();
             return result;
+
+            }
         }
     }
 }

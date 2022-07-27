@@ -179,8 +179,9 @@ namespace DeviceManager
 
         public void Send(byte[] data)
         {
-            if (ConnectionState != ConnectionStatus.Connected)
-                throw new InvalidOperationException("Cannot send data, socket is not connected");
+            //TODO: Remove
+            //if (ConnectionState != ConnectionStatus.Connected)
+            //    throw new InvalidOperationException("Cannot send data, socket is not connected");
             var errorCode = SocketError.Success;
             _client.Client.BeginSend(data, 0, data.Length, SocketFlags.None, out errorCode, cbSendComplete, _client.Client);
             if (errorCode == 0)
@@ -283,9 +284,10 @@ namespace DeviceManager
 
         private void cbChangeConnectionStateComplete(IAsyncResult result)
         {
-            if (!(result.AsyncState is EventDrivenTCPClient asyncState))
-                throw new InvalidOperationException("Invalid IAsyncResult - Could not interpret as a EDTC object");
-            asyncState.ConnectionStatusChanged.EndInvoke(result);
+            //TODO: Remove
+          //  if (!(result.AsyncState is EventDrivenTCPClient asyncState))
+                //throw new InvalidOperationException("Invalid IAsyncResult - Could not interpret as a EDTC object");
+           // asyncState.ConnectionStatusChanged.EndInvoke(result);
         }
 
         public void SendMessage(string message)

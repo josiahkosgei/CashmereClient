@@ -11,10 +11,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  DeviceCITSuspenseAccount GetAccountNumber(Guid deviceId, string currencyKey)
+        public DeviceCITSuspenseAccount GetAccountNumber(Guid deviceId, string currencyKey)
         {
-            var result = _depositorDBContext.DeviceCITSuspenseAccounts.Where(x => x.DeviceId == deviceId && x.CurrencyCode.Equals(currencyKey, StringComparison.OrdinalIgnoreCase) && x.Enabled == true).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceCITSuspenseAccounts.Where(x => x.DeviceId == deviceId && x.CurrencyCode.Equals(currencyKey, StringComparison.OrdinalIgnoreCase) && x.Enabled == true).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

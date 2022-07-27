@@ -67,7 +67,7 @@ namespace CashmereDeposit.ViewModels
             var inputScreenViewModel = this;
             if (!inputScreenViewModel.ClientValidation(accountNumber))
                 return false;
-            var validationResponse = await inputScreenViewModel.ApplicationViewModel.ValidateAccountNumberAsync(inputScreenViewModel.CustomerInput, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), inputScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
+            var validationResponse = await inputScreenViewModel.ApplicationViewModel._FinacleValidateAccountNumberAsync(inputScreenViewModel.CustomerInput, inputScreenViewModel.ApplicationViewModel.CurrentTransaction?.CurrencyCode.ToUpper(), inputScreenViewModel.ApplicationViewModel.CurrentTransaction.TransactionType.Id);
             if (validationResponse != null && validationResponse.IsSuccess && validationResponse.CanTransact)
             {
                 inputScreenViewModel.ApplicationViewModel.CurrentTransaction.AccountNumber = inputScreenViewModel.CustomerInput;

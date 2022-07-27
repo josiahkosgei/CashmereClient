@@ -13,7 +13,12 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public TransactionText GetByTxItemIdAsync(int id)
         {
-            return _depositorDBContext.TransactionTexts.Where(x=>x.TxItem ==id).FirstOrDefault();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                return dbContext.TransactionTexts.Where(x => x.TxItem == id).FirstOrDefault();
+
+            }
         }
     }
 }

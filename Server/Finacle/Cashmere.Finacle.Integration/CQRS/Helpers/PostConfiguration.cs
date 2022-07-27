@@ -9,7 +9,7 @@
         public string Password { get; set; }
         public string DateFormat { get; set; }
         public string SystemCode { get; set; }
-        public object UserID { get; set; }
+        public string UserID { get; set; }
         public string TransactionCode { get; set; }
         public string Realm { get; set; }
     }

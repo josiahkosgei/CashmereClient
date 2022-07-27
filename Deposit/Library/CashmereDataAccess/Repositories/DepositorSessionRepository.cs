@@ -11,15 +11,25 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  DepositorSession GetFirst()
+        public DepositorSession GetFirst()
         {
-            var result = _depositorDBContext.DepositorSessions.OrderByDescending(x => x.SessionEnd).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DepositorSessions.OrderByDescending(x => x.SessionEnd).FirstOrDefault();
+                return result;
+
+            }
         }
-        public  IList<DepositorSession> GetCompleted()
+        public IList<DepositorSession> GetCompleted()
         {
-            var result = _depositorDBContext.DepositorSessions.Where(x => !x.Complete).ToList();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DepositorSessions.Where(x => !x.Complete).ToList();
+                return result;
+
+            }
         }
     }
 }

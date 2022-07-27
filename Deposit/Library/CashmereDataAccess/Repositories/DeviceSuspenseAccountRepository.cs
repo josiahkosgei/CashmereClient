@@ -10,10 +10,15 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         public DeviceSuspenseAccountRepository(IConfiguration configuration) : base(configuration)
         {
         }
-        public  DeviceSuspenseAccount GetAccountNumber(Guid deviceId, string currencyKey)
+        public DeviceSuspenseAccount GetAccountNumber(Guid deviceId, string currencyKey)
         {
-            var result = _depositorDBContext.DeviceSuspenseAccounts.Where(x => x.DeviceId == deviceId && x.CurrencyCode.Equals(currencyKey, StringComparison.OrdinalIgnoreCase) && x.Enabled == true).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.DeviceSuspenseAccounts.Where(x => x.DeviceId == deviceId && x.CurrencyCode.Equals(currencyKey, StringComparison.OrdinalIgnoreCase) && x.Enabled == true).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

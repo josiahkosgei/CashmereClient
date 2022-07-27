@@ -291,6 +291,9 @@ namespace CashmereDeposit
             //}
 
             services.AddHttpClient("CDM_APIClient", client => { });
+            services.AddHttpClient("CashIn", client => {
+                client.BaseAddress = new Uri("https://localhost:7051");
+            });
             // InitDatabase(services);
         }
 

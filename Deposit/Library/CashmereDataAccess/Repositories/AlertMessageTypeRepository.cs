@@ -11,10 +11,16 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  List<AlertMessageType> GetEnabled()
+        public List<AlertMessageType> GetEnabled()
         {
-            var result = _depositorDBContext.AlertMessageTypes.Where(x => x.Enabled.Value == true).ToList();
-            return result;
+
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.AlertMessageTypes.Where(x => x.Enabled.Value == true).ToList();
+                return result;
+
+            }
         }
     }
 }

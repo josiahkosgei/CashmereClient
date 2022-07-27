@@ -14,17 +14,22 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public List<EmailAttachment> GetAlertEmailAttachments(Guid alertEmailId)
         {
-            var response = _depositorDBContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmailId).ToList().Join(_depositorDBContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
             {
-                Name = alertEmailAttachment.Name,
-                MimeType = new EmailAttachmentMIMEType()
+                var response = dbContext.AlertEmailAttachments.Where(y => y.AlertEmailId == alertEmailId).ToList().Join(dbContext.AlertAttachmentTypes, alertEmailAttachment => alertEmailAttachment.Type, alertAttachmentType => alertAttachmentType.Code, (alertEmailAttachment, alertAttachmentType) => new EmailAttachment()
                 {
-                    MimeType = alertAttachmentType.MimeType,
-                    MimeSubType = alertAttachmentType.MimeSubtype
-                },
-                Data = alertEmailAttachment.Data
-            }).ToList();
-            return response;
+                    Name = alertEmailAttachment.Name,
+                    MimeType = new EmailAttachmentMIMEType()
+                    {
+                        MimeType = alertAttachmentType.MimeType,
+                        MimeSubType = alertAttachmentType.MimeSubtype
+                    },
+                    Data = alertEmailAttachment.Data
+                }).ToList();
+                return response;
+
+            }
         }
     }
 }

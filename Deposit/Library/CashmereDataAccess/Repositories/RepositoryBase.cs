@@ -11,7 +11,9 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
     {
         protected readonly DepositorContextFactory _dbContextFactory;
+
         protected readonly DepositorDBContext _depositorDBContext;
+
         public RepositoryBase(IConfiguration configuration)
         {
             _dbContextFactory = new DepositorContextFactory(configuration);
@@ -20,61 +22,97 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
 
         public virtual T AddAsync(T entity)
-        {//TODO: Remove
-            //_depositorDBContext.Set<T>().Add(entity);
-            //_depositorDBContext.SaveChanges();
+        {
+          
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                dbContext.Set<T>().Add(entity);
+                dbContext.SaveChanges();
+
+            }
             return entity;
         }
 
         public virtual void DeleteAsync(T entity)
         {
-            _depositorDBContext.Set<T>().Remove(entity);
-            _depositorDBContext.SaveChanges();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            dbContext.Set<T>().Remove(entity);
+            dbContext.SaveChanges();
 
+            }
 
         }
 
         public bool Exists(int id)
         {
-            var result = _depositorDBContext.Set<T>().Find(id);
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Set<T>().Find(id);
             return result != null;
+
+            }
         }
 
         public virtual IReadOnlyList<T> GetAllAsync()
         {
-
-            var result = _depositorDBContext.Set<T>().ToList();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Set<T>().ToList();
             return result;
+
+            }
         }
 
         public virtual IReadOnlyList<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            var result = _depositorDBContext.Set<T>().Where(predicate).ToList();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Set<T>().Where(predicate).ToList();
             return result;
+
+            }
 
         }
 
         public virtual T GetByIdAsync(int id)
         {
-            var result = _depositorDBContext.Set<T>().Find(id);
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.Set<T>().Find(id);
             return result;
 
+
+            }
         }
         public virtual T GetByIdAsync(Guid id)
         {
-            var result = _depositorDBContext.Set<T>().Find(id);
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+
+                var result = dbContext.Set<T>().Find(id);
+                return result;
+            }
 
         }
 
         public virtual T UpdateAsync(T entity)
         {
-            var saved = false;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                dbContext.Entry(entity).State = EntityState.Modified;
+                dbContext.SaveChanges();
+                return entity;
 
-            //TODO: Remove
-            //_depositorDBContext.Entry(entity).State = EntityState.Modified;
-            //_depositorDBContext.SaveChanges();
-            return entity;
+            }
         }
 
     }

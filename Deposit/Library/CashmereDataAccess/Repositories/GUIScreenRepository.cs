@@ -11,16 +11,26 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
         {
         }
 
-        public  GUIScreen GetCurrentGUIScreen(int Id)
+        public GUIScreen GetCurrentGUIScreen(int Id)
         {
-            var result = _depositorDBContext.GuiScreens.Where(w => w.Id == Id).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.GuiScreens.Where(w => w.Id == Id).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).FirstOrDefault();
+                return result;
+
+            }
         }
 
-        public  GUIScreen GetGUIScreenByCode(Guid code)
+        public GUIScreen GetGUIScreenByCode(Guid code)
         {
-            var result = _depositorDBContext.GuiScreens.Where(w => w.GUIScreenType.Code == code).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).OrderBy(y => y.Id).FirstOrDefault();
-            return result;
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+                var result = dbContext.GuiScreens.Where(w => w.GUIScreenType.Code == code).Include(i => i.GuiTextNavigation.ScreenTitleNavigation).OrderBy(y => y.Id).FirstOrDefault();
+                return result;
+
+            }
         }
     }
 }

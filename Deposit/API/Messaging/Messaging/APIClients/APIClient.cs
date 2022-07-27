@@ -27,6 +27,7 @@ namespace Cashmere.API.Messaging.APIClients
         private byte[] API_Key { get; set; }
 
         private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClientCashIn;
         public APIClient(
           ICashmereAPILogger logger,
           string apiBaseAddress,
@@ -44,6 +45,7 @@ namespace Cashmere.API.Messaging.APIClients
             API_ID = appID;
             API_Key = appKey;
             _httpClient = _httpClientFactory.CreateClient("CashmereDepositHttpClient");
+            _httpClientCashIn = _httpClientFactory.CreateClient("CashIn");
         }
 
         public async Task<T> SendAsync<T>(string endpoint, APIMessageBase message)
@@ -75,7 +77,15 @@ namespace Cashmere.API.Messaging.APIClients
                 stringContent.Headers.Add("MessageID", message.MessageID);
                 stringContent.Headers.Add("AppName", message.AppName);
                 Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "API TX", nameof(SendAsync), "Sending to {0} >> {1}", APIBaseAddress + endpoint, Message);
-                var response = await _httpClient.PostAsync(APIBaseAddress + endpoint, stringContent);
+                var httpRequestMessageRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}")
+                {
+                    Content = stringContent
+                };
+                //var response = await _httpClientCashIn.PostAsync(APIBaseAddress + endpoint, stringContent);
+                var response = await _httpClientCashIn.SendAsync(httpRequestMessageRequest); ;
+                response.EnsureSuccessStatusCode();
+
+                var responseString = await response.Content.ReadAsStringAsync();
                 Log.Debug(message.SessionID, message.MessageID, message.AppName, nameof(APIClient), "API Rx", nameof(SendAsync), "Received http response {0}", response.ToString());
                 if (response.IsSuccessStatusCode)
                 {

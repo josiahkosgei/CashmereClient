@@ -13,8 +13,13 @@ namespace Cashmere.Library.CashmereDataAccess.Repositories
 
         public  AlertAttachmentType GetByCode(string code)
         {
-            var result = _depositorDBContext.AlertAttachmentTypes.Where(x => x.Code.Equals("130001", StringComparison.Ordinal)).FirstOrDefault();
+            var db = _dbContextFactory.CreateDbContext(null);
+            using (var dbContext = db)
+            {
+            var result = dbContext.AlertAttachmentTypes.Where(x => x.Code.Equals("130001", StringComparison.Ordinal)).FirstOrDefault();
             return result;
+
+            }
         }
     }
 }
