@@ -20,24 +20,24 @@ namespace Cashmere.Finacle.Integration.Extensions
                 {
                     logger.LogInformation("Migrating database associated with context {DbContextName}", typeof(TContext).Name);
 
-                    var retryPolicy = Policy.Handle<SqlException>()
-                            .WaitAndRetry(
-                                retryCount: 5,
-                                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // 2,4,8,16,32 sc
-                                onRetry: (exception, retryCount, context) =>
-                                {
-                                    logger.LogError(message: $"Retry {retryCount} of {context.PolicyKey} at {context.OperationKey}, due to: {exception}.");
-                                });
+                    //var retryPolicy = Policy.Handle<SqlException>()
+                    //        .WaitAndRetry(
+                    //            retryCount: 5,
+                    //            sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // 2,4,8,16,32 sc
+                    //            onRetry: (exception, retryCount, context) =>
+                    //            {
+                    //                logger.LogError(message: $"Retry {retryCount} of {context.PolicyKey} at {context.OperationKey}, due to: {exception}.");
+                    //            });
 
 
                     //apply to transient exceptions
-                    if (context.Database.GetPendingMigrations().Any())
-                    {
-                        //policy.Execute(async () => await ResetDatabaseFriendlyWay(context, logger));
-                        ResetDatabaseFriendlyWay(context, logger);
-                    }
+//                    if (context.Database.GetPendingMigrations().Any())
+//                    {
+//                        //policy.Execute(async () => await ResetDatabaseFriendlyWay(context, logger));
+////ResetDatabaseFriendlyWay(context, logger);
+//                    }
 
-                    retryPolicy.Execute(() => InvokeSeeder(seeder, context, services));
+                    //retryPolicy.Execute(() => InvokeSeeder(seeder, context, services));
 
                     logger.LogInformation("Migrated database associated with context {DbContextName}", typeof(TContext).Name);
                 }
@@ -57,7 +57,7 @@ namespace Cashmere.Finacle.Integration.Extensions
         private static void InvokeSeeder<TContext>(Action<TContext, IServiceProvider> seeder, TContext context, IServiceProvider services)
             where TContext : DepositorServerContext
         {
-            context.Database.Migrate();
+           // context.Database.Migrate();
         }
         private static void ResetDatabaseFriendlyWay<TContext>(TContext context, ILogger<TContext> logger)
             where TContext : DepositorServerContext

@@ -3,7 +3,9 @@ using BSAccountFundsTransferServiceReference;
 using Cashmere.Finacle.Integration.CQRS.DTOs.FundsTransfer;
 using Cashmere.Finacle.Integration.CQRS.DTOs.ValidateAccount;
 using Cashmere.Finacle.Integration.CQRS.Events;
+using Cashmere.Finacle.Integration.CQRS.Helpers;
 using MediatR;
+using Microsoft.Extensions.Options;
 using System.ServiceModel;
 using FundsTransferRequestHeaderType = BSAccountFundsTransferServiceReference.RequestHeaderType;
 
@@ -13,30 +15,35 @@ namespace Cashmere.Finacle.Integration.CQRS.Commands.FundsTransfer
     {
         private readonly IMediator _mediator;
         private readonly ILogger<FundsTransferCommandHandler> _logger;
+        private readonly SOAServerConfiguration _soaServerConfiguration;
         private readonly IMapper _mapper;
-        public FundsTransferCommandHandler(IMapper mapper, IMediator mediator, ILogger<FundsTransferCommandHandler>logger)
+        public FundsTransferCommandHandler(IMapper mapper, IMediator mediator, ILogger<FundsTransferCommandHandler>logger, IOptionsMonitor<SOAServerConfiguration> optionsMonitor)
         {
             _mediator = mediator;
             _logger = logger;
+            _soaServerConfiguration = optionsMonitor.CurrentValue;
             _mapper = mapper;
         }
         public async Task<int> Handle(FundsTransferCommand request, CancellationToken cancellationToken)
         {
             BasicHttpBinding binding = new BasicHttpBinding();
-            var remoteAddress = new EndpointAddress("http://192.168.0.180/Account/FundsTransfer/Get/3.0");
+                binding.Security.Mode= BasicHttpSecurityMode.Transport;
+                binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Basic;
+            var remoteAddress = new EndpointAddress(_soaServerConfiguration.PostConfiguration.ServerURI);
             //validation
             var bsAccountClient = new BSAccountClient(binding, remoteAddress);
             var requestHeaderTypeDto = new RequestHeaderTypeDto()
             {
-                CorrelationID = new Guid().ToString(),
+               
+                CorrelationID = Guid.NewGuid().ToString(),
                 CreationTimestamp = DateTime.Now.ToUniversalTime(),
-                MessageID = new Guid().ToString(),
+                MessageID = Guid.NewGuid().ToString(),
                 Credentials = new CredentialsTypeDto
                 {
                     BankID = "01",
-                    SystemCode = "0",
-                    Password = "",
-                    Username = "",
+                    SystemCode = _soaServerConfiguration.AccountValidationConfiguration.SystemCode,
+                    Password = _soaServerConfiguration.AccountValidationConfiguration.Password,
+                    Username = _soaServerConfiguration.AccountValidationConfiguration.Username,
                 },
 
             };

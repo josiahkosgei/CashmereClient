@@ -236,7 +236,7 @@ namespace CashmereDeposit.Models
                     }
                     else
                     {
-                        List<ApplicationUser> list2 = deviceUsersByDevice.ToList<ApplicationUser>();
+                        List<ApplicationUser> list2 = deviceUsersByDevice.ToList();
                         if (list2 == null)
                         {
                             applicationUserList = null;
@@ -325,7 +325,7 @@ namespace CashmereDeposit.Models
                     }
                     else
                     {
-                        List<ApplicationUser> list2 = deviceUsersByDevice.ToList<ApplicationUser>();
+                        List<ApplicationUser> list2 = deviceUsersByDevice.ToList();
                         if (list2 == null)
                         {
                             applicationUserList = null;

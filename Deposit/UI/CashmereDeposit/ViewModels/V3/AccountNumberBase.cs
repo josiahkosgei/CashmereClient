@@ -56,7 +56,7 @@ namespace CashmereDeposit.ViewModels.V3
 
         private void StatusWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (ClientValidation(CustomerInput) && Task.Run<bool>(() => ValidateAsync(CustomerInput)).Result)
+            if (ClientValidation(CustomerInput) && Task.Run(() => ValidateAsync(CustomerInput)).Result)
             {
                 ApplicationViewModel.NavigateNextScreen();
             }

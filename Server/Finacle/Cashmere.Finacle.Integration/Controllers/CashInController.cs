@@ -32,22 +32,25 @@ namespace Cashmere.Finacle.Integration.Controllers
         {
             try
             {
-                _logger.LogInformation("ValidateAccount Request: ", accountDetailsRequestTypeDto.AsJson());
+                var request = new ValidateAccountRequestDto()
+                {
+                    AccountDetailsRequestType = accountDetailsRequestTypeDto,
+                    RequestHeaderType = new RequestHeaderTypeDto()
+                };
+                _logger.LogInformation($"ValidateAccount Request: {request.ToJson()}");
                 var command = new ValidateAccountCommand
                 {
-                    ValidateAccountRequest = new ValidateAccountRequestDto()
-                    {
-                        AccountDetailsRequestType = accountDetailsRequestTypeDto,
-                        RequestHeaderType = new RequestHeaderTypeDto()
-                    }
+                    ValidateAccountRequest = request
+
                 };
                 var validatedAccountResponse = await _mediator.Send(command);
-                _logger.LogInformation("ValidateAccount Finacle Response: ", validatedAccountResponse.AsJson());
+                _logger.LogInformation($"ValidateAccount Response: {validatedAccountResponse.ToJson()}");
+
                 return Ok(validatedAccountResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError("ValidateAccount Error: ", ex.Message);
+                _logger.LogError($"ValidateAccount Error: {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }
@@ -67,7 +70,7 @@ namespace Cashmere.Finacle.Integration.Controllers
                 _logger.LogError("FundsTransfer Error: ", ex.Message);
                 return BadRequest(ex.Message);
             }
-        } 
+        }
         [HttpPost("PostCITTransaction", Name = "PostCITTransaction")]
         [ProducesResponseType(typeof(FundsTransferResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

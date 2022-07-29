@@ -35,7 +35,7 @@ namespace CashmereDeposit.ViewModels.RearScreen
             set
             {
                 adminButtonCaption = value;
-                NotifyOfPropertyChange<string>((System.Linq.Expressions.Expression<Func<string>>)(() => AdminButtonCaption));
+                NotifyOfPropertyChange((System.Linq.Expressions.Expression<Func<string>>)(() => AdminButtonCaption));
             }
         }
 
@@ -134,7 +134,7 @@ namespace CashmereDeposit.ViewModels.RearScreen
           object sender,
           DeviceStatusChangedEventArgs e)
         {
-            NotifyOfPropertyChange<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => CanAdminButton));
+            NotifyOfPropertyChange((System.Linq.Expressions.Expression<Func<bool>>)(() => CanAdminButton));
         }
 
         public Conductor<Screen> Conductor { get; }

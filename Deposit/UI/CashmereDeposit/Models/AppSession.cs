@@ -108,11 +108,11 @@ namespace CashmereDeposit.Models
             {
                 ApplicationViewModel.Log.InfoFormat(GetType().Name, "Language Changed", "Tx Property Changed", "Language changed from {0} to {1}", DepositorSession.LanguageCode, value);
                 DepositorSession.LanguageCode = value;
-                NotifyOfPropertyChange<string>((Expression<Func<string>>)(() => Language));
+                NotifyOfPropertyChange((Expression<Func<string>>)(() => Language));
                 Culture = new CultureInfo(Language);
-                NotifyOfPropertyChange<CultureInfo>((Expression<Func<CultureInfo>>)(() => Culture));
+                NotifyOfPropertyChange((Expression<Func<CultureInfo>>)(() => Culture));
                 UICulture = new CultureInfo(Language);
-                NotifyOfPropertyChange<CultureInfo>((Expression<Func<CultureInfo>>)(() => UICulture));
+                NotifyOfPropertyChange((Expression<Func<CultureInfo>>)(() => UICulture));
             }
         }
 

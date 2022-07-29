@@ -7,12 +7,14 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Core;
+using System.Net;
 using System.ServiceModel;
+using System.ServiceModel.Description;
 using AccountDetailsRequestHeaderType = BSAccountDetailsServiceReference.RequestHeaderType;
 
 namespace Cashmere.Finacle.Integration.CQRS.Commands.ValidateAccount
 {
-    public class ValidateAccountCommandHandler : IRequestHandler<ValidateAccountCommand, int>
+    public class ValidateAccountCommandHandler : IRequestHandler<ValidateAccountCommand, ValidateAccountResponseDto>
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
@@ -27,51 +29,63 @@ namespace Cashmere.Finacle.Integration.CQRS.Commands.ValidateAccount
             _soaServerConfiguration = optionsMonitor.CurrentValue;
         }
 
-        public async Task<int> Handle(ValidateAccountCommand request, CancellationToken cancellationToken)
+        public async Task<ValidateAccountResponseDto> Handle(ValidateAccountCommand request, CancellationToken cancellationToken)
         {
-            var remoteAddress = new EndpointAddress("http://192.168.0.180/Account/AccountDetails/Get/3.0");
-            //validation
-            BasicHttpBinding binding = new BasicHttpBinding();
-            var bsGetAccountDetailsClient = new BSGetAccountDetailsClient(binding, remoteAddress);
-            request.ValidateAccountRequest.RequestHeaderType = new RequestHeaderTypeDto()
+            try
             {
-                CorrelationID = new Guid().ToString(),
-                CreationTimestamp = DateTime.Now.ToUniversalTime(),
-                MessageID = new Guid().ToString(),
-                Credentials = new CredentialsTypeDto
+
+                var remoteAddress = new EndpointAddress(_soaServerConfiguration.AccountValidationConfiguration.ServerURI);
+                //validation
+                BasicHttpBinding binding = new BasicHttpBinding();
+                binding.Security.Mode = BasicHttpSecurityMode.None;
+                binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Basic;
+
+
+                var bsGetAccountDetailsClient = new BSGetAccountDetailsClient(binding, remoteAddress);
+                bsGetAccountDetailsClient.ClientCredentials.UserName.Password = _soaServerConfiguration.AccountValidationConfiguration.Password;
+                bsGetAccountDetailsClient.ClientCredentials.UserName.UserName = _soaServerConfiguration.AccountValidationConfiguration.Username;
+
+                request.ValidateAccountRequest.RequestHeaderType = new RequestHeaderTypeDto()
                 {
-                    BankID = "01",
-                    SystemCode = _soaServerConfiguration.AccountValidationConfiguration.SystemCode,
-                    Password = _soaServerConfiguration.AccountValidationConfiguration.Password,
-                    Username = _soaServerConfiguration.AccountValidationConfiguration.Username,
-                },
+                    CorrelationID = Guid.NewGuid().ToString(),
 
-            };
+                    CreationTimestamp = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                    CreationTimestampSpecified = true,
+                    // CreationTimestamp = Convert.ToDateTime(DateTime.Now.ToString(_soaServerConfiguration.AccountValidationConfiguration.DateFormat)),
+                    MessageID = Guid.NewGuid().ToString(),
+                    Credentials = new CredentialsTypeDto
+                    {
 
-            var accountDetailsRequestType = _mapper.Map<AccountDetailsRequestType>(request.ValidateAccountRequest.AccountDetailsRequestType);
-            var requestHeaderType = _mapper.Map<AccountDetailsRequestHeaderType>(request.ValidateAccountRequest.RequestHeaderType);
-            //var response = await bsGetAccountDetailsClient.GetAccountDetailsAsync(requestHeaderType, accountDetailsRequestType);
-            var response = new operationOutput()
+
+                        BankID = "01",
+                        SystemCode = _soaServerConfiguration.AccountValidationConfiguration.SystemCode,
+                        Password = _soaServerConfiguration.AccountValidationConfiguration.Password,
+                        Username = _soaServerConfiguration.AccountValidationConfiguration.Username,
+                    },
+
+                };
+
+                var accountDetailsRequestType = _mapper.Map<AccountDetailsRequestType>(request.ValidateAccountRequest.AccountDetailsRequestType);
+                var requestHeaderType = _mapper.Map<AccountDetailsRequestHeaderType>(request.ValidateAccountRequest.RequestHeaderType);
+                _logger.LogInformation($"CommandHandler Finacle Request Body: {accountDetailsRequestType.ToJson()}");
+                _logger.LogInformation($"CommandHandler Finacle Request Header: {requestHeaderType.ToJson()}");
+                var response = await bsGetAccountDetailsClient.GetAccountDetailsAsync(requestHeaderType, accountDetailsRequestType);
+
+                _logger.LogInformation($"CommandHandler: Finacle Response: {response.AsJson()}");
+                //mapper
+
+                var validateAccountResponseDto = _mapper.Map<ValidateAccountResponseDto>(response);
+
+                //notification
+                await _mediator.Publish(new AccountValidated(validateAccountResponseDto));
+                return validateAccountResponseDto;
+            }
+            catch (Exception ex)
             {
-                AccountDetailsResponse = new AccountDetailsResponseType
-                {
-                    AccountNumber = request.ValidateAccountRequest.AccountDetailsRequestType.AccountNumber
-                },
-                ResponseHeader = new ResponseHeaderType
-                {
-                    CorrelationID = new Guid().ToString(),
-                    StatusCode = "0",
-                    MessageID = new Guid().ToString(),
 
-                }
-            };
-            //mapper
-            var validateAccountResponseDto = _mapper.Map<ValidateAccountResponseDto>(response);
-
-            //notification
-            await _mediator.Publish(new AccountValidated(validateAccountResponseDto));
-
-            return 1;
+                _logger.LogError($"CommandHandler Finacle Error: {ex.Message}");
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ using Cashmere.Finacle.Integration.CQRS.DataAccessLayer.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 string timestamp = DateTime.Now.ToString("yyyy-MM-dd");
 var seriLogger = new LoggerConfiguration()
             .MinimumLevel.Debug()
@@ -33,13 +33,13 @@ var seriLogger = new LoggerConfiguration()
                shared: true,
                flushToDiskInterval: TimeSpan.FromSeconds(1))
             .CreateLogger();
-ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
+
+ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", true, true);
 
-//builder.Configuration.GetSection("SOAServerConfiguration").Get<SOAServerConfiguration>();
 builder.Services.Configure<SOAServerConfiguration>(configuration.GetSection("SOAServerConfiguration"));
 builder.Services.AddTransient<DepositorServerContext>();
 builder.Services.AddControllers();
@@ -57,21 +57,21 @@ builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Logging.ClearProviders();
 
 builder.Logging.AddSerilog(seriLogger);
-//builder.Host.UseSerilog(seriLogger);
+builder.Host.UseSerilog(seriLogger);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.DefaultModelsExpandDepth(-1);
     });
-}
+//}
 
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.UseEndpoints(endpoints =>
@@ -93,11 +93,11 @@ app.UseEndpoints(endpoints =>
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-                endpoints.MapHealthChecks("/healthz-db", new HealthCheckOptions()
-                {
-                    Predicate = _ => _.Tags.Contains("db"),
-                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                });
+                //endpoints.MapHealthChecks("/healthz-db", new HealthCheckOptions()
+                //{
+                //    Predicate = _ => _.Tags.Contains("db"),
+                //    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                //});
                 endpoints.MapHealthChecks("/healthz-cdm", new HealthCheckOptions()
                 {
                     Predicate = _ => _.Tags.Contains("cdm"),

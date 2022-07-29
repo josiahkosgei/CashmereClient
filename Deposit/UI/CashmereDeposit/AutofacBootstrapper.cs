@@ -64,7 +64,7 @@ namespace CashmereDeposit
         /// <summary>
         /// Do not override this method. This is where the IoC container is configured.
         /// <remarks>
-        /// Will throw <see cref="System.ArgumentNullException"/> is either CreateWindowManager
+        /// Will throw <see cref="ArgumentNullException"/> is either CreateWindowManager
         /// or CreateEventAggregator is null.
         /// </remarks>
         /// </summary>
@@ -110,15 +110,8 @@ namespace CashmereDeposit
               .AsSelf()
               .InstancePerDependency();
 
-            //  register userControls
-            //builder.RegisterAssemblyTypes(AssemblySource.Instance.ToArray())
-            //    .Where(type => type.Name.EndsWith("View"))
-            //    .Where(type => !EnforceNamespaceConvention || (!(string.IsNullOrWhiteSpace(type.Namespace)) && type.Namespace.EndsWith("Views")))
-            //    .AsSelf()
-            //    .InstancePerDependency();
-
             builder.Register(c => CreateWindowManager()).InstancePerLifetimeScope();
-            builder.Register<IEventAggregator>(c => CreateEventAggregator()).InstancePerLifetimeScope();
+            builder.Register(c => CreateEventAggregator()).InstancePerLifetimeScope();
 
             if (AutoSubscribeEventAggegatorHandlers)
                 builder.RegisterModule<EventAggregationAutoSubscriptionModule>();
@@ -131,7 +124,7 @@ namespace CashmereDeposit
 
             ConfigureContainer(builder);
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<IConfiguration>(Configuration);
+            serviceCollection.AddSingleton(Configuration);
             ConfigureServices(serviceCollection);
 
             builder.Populate(serviceCollection);
@@ -195,8 +188,8 @@ namespace CashmereDeposit
         /// Current Defaults:
         ///   EnforceNamespaceConvention = true
         ///   ViewModelBaseType = <see cref="System.ComponentModel.INotifyPropertyChanged"/>
-        ///   CreateWindowManager = <see cref="Caliburn.Micro.WindowManager"/>
-        ///   CreateEventAggregator = <see cref="Caliburn.Micro.EventAggregator"/>
+        ///   CreateWindowManager = <see cref="WindowManager"/>
+        ///   CreateEventAggregator = <see cref="EventAggregator"/>
         /// </summary>
         protected virtual void ConfigureBootstrapper()
         { //  by default, enforce the namespace convention
@@ -251,50 +244,28 @@ namespace CashmereDeposit
             services.AddTransient<DepositorDBContext>();
             services.AddTransient<DepositorContextFactory>();
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
-
-            //string connectionString = @"Data Source=.\;Initial Catalog=DepositorProduction;Integrated Security=True";
-            //services.AddDbContext<DepositorDBContext>(sqlServerOptionsAction =>
-            //    sqlServerOptionsAction.UseSqlServer(connectionString));
-
-            //services.AddDbContext<DepositorDBContext>(options =>
-            //    {
-            //        if (options is null)
-            //        {
-            //            throw new ArgumentNullException(nameof(options));
-            //        }
-
-            //        options.UseSqlServer(connectionString,
-            //        sqlServerOptionsAction: sqlOptions =>
-            //        {
-            //            sqlOptions.EnableRetryOnFailure(
-            //            maxRetryCount: 10,
-            //            maxRetryDelay: TimeSpan.FromSeconds(30),
-            //            errorNumbersToAdd: null);
-            //        });
-            //    });
             services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
-            services.AddHttpClient("CashmereDepositHttpClient", client => { });
-            //using (new DepositorDBContext())
-            //{
-            //    services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
-            //    {
-            //        Device device;
-            //        using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
-            //        {
-            //            device = GetDevice(_depositorDBContext);
-            //        }
+            using (new DepositorDBContext())
+            {
+                services.AddHttpClient("CashmereDepositHttpClient", client => { }).ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    Device device;
+                    using (DepositorDBContext _depositorDBContext = new DepositorDBContext())
+                    {
+                        device = GetDevice(_depositorDBContext);
+                    }
 
-            //        var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
-            //        return handler;
-            //    });
+                    var handler = new HMACDelegatingHandler(device.AppId, device.AppKey);
+                    return handler;
+                });
 
-            //}
+            }
 
             services.AddHttpClient("CDM_APIClient", client => { });
             services.AddHttpClient("CashIn", client => {
                 client.BaseAddress = new Uri("https://localhost:7051");
             });
-            // InitDatabase(services);
+            InitDatabase(services);
         }
 
         private Device GetDevice(DepositorDBContext dbContext)

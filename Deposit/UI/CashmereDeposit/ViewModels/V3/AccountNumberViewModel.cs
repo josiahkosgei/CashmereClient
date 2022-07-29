@@ -43,9 +43,9 @@ namespace CashmereDeposit.ViewModels.V3
             set
             {
                 accountNameFrameIsVisible = value;
-                NotifyOfPropertyChange<bool>(() => KeyboardGridIsVisible);
+                NotifyOfPropertyChange(() => KeyboardGridIsVisible);
                 NotifyOfPropertyChange(nameof(AccountDetailsFrameIsVisible));
-                NotifyOfPropertyChange<bool>(() => AccountEntryFrameIsVisible);
+                NotifyOfPropertyChange(() => AccountEntryFrameIsVisible);
             }
         }
 
@@ -178,7 +178,7 @@ namespace CashmereDeposit.ViewModels.V3
                 }
                 if (num1 != 0 && ClientValidation(CustomerInput))
                 {
-                    if (Task.Run<bool>(() => ValidateAsync(CustomerInput)).Result)
+                    if (Task.Run(() => ValidateAsync(CustomerInput)).Result)
                     {
                         AccountName = ApplicationViewModel.CurrentTransaction.AccountName;
                         AccountNumber = ApplicationViewModel.CurrentTransaction.AccountNumber;
@@ -241,7 +241,7 @@ namespace CashmereDeposit.ViewModels.V3
                     log.Warning(nameof(AccountNumberViewModel), "Block Validation", "Validate", "Validation tries exceeded. Tries = {0}", objArray);
                     ErrorText = ApplicationViewModel.CashmereTranslationService.TranslateSystemText("AccountNumberViewModel.Validate", "sys_ValidateAccountNumberCallsExceededErrorMessage", "Too many validation requests. Kindly restart the transaction.");
                 }
-                NotifyOfPropertyChange<bool>(() => CanValidate);
+                NotifyOfPropertyChange(() => CanValidate);
             }
             catch (Exception ex)
             {

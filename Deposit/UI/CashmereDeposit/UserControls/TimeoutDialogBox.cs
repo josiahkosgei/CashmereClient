@@ -24,7 +24,7 @@ namespace CashmereDeposit.UserControls
             Window window2 = window1;
             window2.Show();
             IntPtr handle = new WindowInteropHelper(window2).Handle;
-            Task.Delay((int)timeout.TotalMilliseconds).ContinueWith<IntPtr>(t => NativeMethods.SendMessage(handle, 16U, IntPtr.Zero, IntPtr.Zero));
+            Task.Delay((int)timeout.TotalMilliseconds).ContinueWith(t => NativeMethods.SendMessage(handle, 16U, IntPtr.Zero, IntPtr.Zero));
             return window2;
         }
 

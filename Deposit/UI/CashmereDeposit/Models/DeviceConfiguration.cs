@@ -467,7 +467,7 @@ namespace CashmereDeposit.Models
             var configs =  _configRepository.GetAllAsync();
             var config_group =  _deviceRepository.GetDevice(Environment.MachineName);
             var deviceConfigs =  _deviceConfigRepository.ExecuteStoredProc(config_group.ConfigGroup);
-            deviceConfigs.ToList().ForEach(deviceConfig => configs.First<Config>(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
+            deviceConfigs.ToList().ForEach(deviceConfig => configs.First(x => x.Name.Equals(deviceConfig.ConfigId, StringComparison.OrdinalIgnoreCase)).DefaultValue = deviceConfig.ConfigValue);
             var rsult = configs.Select(x => (name: x.Name, default_value: x.DefaultValue))
                 .ToList();
             return rsult;

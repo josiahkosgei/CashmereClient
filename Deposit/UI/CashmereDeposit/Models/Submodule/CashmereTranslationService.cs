@@ -138,7 +138,7 @@ namespace CashmereDeposit.Models.Submodule
                         else
                         {
                             ICollection<TextTranslation> textTranslations = textItem1.TextTranslations;
-                            str = textTranslations != null ? textTranslations.FirstOrDefault<TextTranslation>(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationText : null;
+                            str = textTranslations != null ? textTranslations.FirstOrDefault(x => x.LanguageCode.Equals(languageCode, StringComparison.InvariantCultureIgnoreCase))?.TranslationText : null;
                         }
                         if (str == null)
                             str = textItem1?.DefaultTranslation ?? defaultText;
