@@ -33,7 +33,6 @@ namespace CashmereDeposit.Startup
                     id = RouteParameter.Optional
                 });
             });
-            //app.UseMvcWithDefaultRoute();
         }
     }
 

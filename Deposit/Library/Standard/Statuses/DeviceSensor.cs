@@ -1,18 +1,17 @@
-﻿// DeviceSensor
-
+﻿//DeviceSensor
 
 namespace Cashmere.Library.Standard.Statuses
 {
-    public class DeviceSensor
-    {
-        public DeviceSensorType Type { get; set; }
+  public class DeviceSensor
+  {
+    public DeviceSensorType Type { get; set; }
 
-        public DeviceSensorState Status { get; set; }
+    public DeviceSensorState Status { get; set; }
 
-        public int Value { get; set; }
+    public int Value { get; set; }
 
-        public DeviceSensorDoor Door { get; set; }
+    public DeviceSensorDoor Door { get; set; }
 
-        public DeviceSensorBag Bag { get; set; }
-    }
+    public DeviceSensorBag Bag { get; set; }
+  }
 }

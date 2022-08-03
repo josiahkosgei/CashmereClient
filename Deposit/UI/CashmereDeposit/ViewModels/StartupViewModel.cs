@@ -44,7 +44,6 @@ namespace CashmereDeposit.ViewModels
         {
 
             _iDeviceRepository = IoC.Get<IDeviceRepository>();
-            //  _depositorDBContext = IoC.Get<DepositorDBContext>();
             _deviceStatusRepository = IoC.Get<IDeviceStatusRepository>();
             Log = new CashmereLogger(Assembly.GetExecutingAssembly().GetName().Version?.ToString(), "CashmereDepositLog", null);
             AppDomain.CurrentDomain.UnhandledException += CrashHandler;
@@ -75,6 +74,7 @@ namespace CashmereDeposit.ViewModels
                 if ((deviceConfiguration.ALLOW_WEB_SERVER ? 1 : 0) == 0)
                     return;
                 await HostBuilder.Start();
+                Log.Info(nameof(StartupViewModel), "OWIN Started", nameof(WebAPI_StartSelfHost), "Startied server at {0}", new { url });
             }
             catch (Exception ex)
             {
@@ -111,11 +111,11 @@ namespace CashmereDeposit.ViewModels
                     ActivateItemAsync(new OutOfOrderFatalScreenViewModel());
                     AlertManager?.SendAlert(new AlertDeviceStartupFailed(ex?.Message, device, DateTime.Now));
                     CrashHandler(this, new UnhandledExceptionEventArgs(ex, false));
-                    var deviceStatus =  _deviceStatusRepository.GetByDeviceId(device.Id);
+                    var deviceStatus = _deviceStatusRepository.GetByDeviceId(device.Id);
                     if (deviceStatus == null)
                     {
                         deviceStatus = CashmereDepositCommonClasses.GenerateDeviceStatus(deviceID: device.Id);
-                         _deviceStatusRepository.AddAsync(deviceStatus);
+                        _deviceStatusRepository.AddAsync(deviceStatus);
                     }
                     deviceStatus.CurrentStatus |= 1024;
                     deviceStatus.Modified = DateTime.Now;

@@ -3,10 +3,12 @@ using System;
 
 namespace DeviceManager
 {
-    public class CountChangedEventArgs : EventArgs
-    {
-        public CountChangedEventArgs(DenominationResult data) => Data = data;
+  public class CountChangedEventArgs : EventArgs
+  {
+    private DenominationResult _data;
 
-        public DenominationResult Data { get; }
-    }
+    public CountChangedEventArgs(DenominationResult data) => this._data = data;
+
+    public DenominationResult Data => this._data;
+  }
 }

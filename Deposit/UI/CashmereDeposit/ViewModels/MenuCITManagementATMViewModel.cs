@@ -1,14 +1,8 @@
-﻿
-//.MenuCITManagementATMViewModel
-
-
-
-
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using System;
 using System.Windows;
 using CashmereDeposit.Models;
-using DeviceManager;
+using CashAccSysDeviceManager;
 
 namespace CashmereDeposit.ViewModels
 {

@@ -40,29 +40,34 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Activity = Cashmere.Library.CashmereDataAccess.Entities.Activity;
+using DeviceManagerMode = CashAccSysDeviceManager.DeviceManagerMode;
 
 namespace CashmereDeposit.ViewModels
 {
     [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
     public class ApplicationViewModel : Conductor<Screen>, IShell
     {
-        private bool _adminMode;
         private ApplicationUser _currentUser;
         private ApplicationUser _validatingUser;
         private CashAccSysDeviceManager.CashAccSysDeviceManager _deviceManager;
         private ApplicationState _currentApplicationState = ApplicationState.STARTUP;
         private DispatcherTimer statusTimer = new(DispatcherPriority.Send);
 
-        public bool debugNoDevice { get; } = true;
+        //public bool debugNoDevice { get; } = false;
 
-        public bool debugNoCoreBanking { get; } = true;
+        //public bool debugNoCoreBanking { get; } = true;
 
-        public bool debugDisableSafeSensor { get; } = true;
+        //public bool debugDisableSafeSensor { get; } = true;
 
-        public bool debugDisableBagSensor { get; } = true;
+        //public bool debugDisableBagSensor { get; } = true;
 
-        public bool debugDisablePrinter { get; } = true;
-
+        //public bool debugDisablePrinter { get; } = true;
+        public bool debugNoDevice = false;
+        public bool debugNoCoreBanking = true;
+        public bool debugDisableSafeSensor = false;
+        public bool debugDisableBagSensor = false;
+        public bool debugDisablePrinter = false;
+        private bool _adminMode = false;
         public static CashmereTranslationService CashmereTranslationService { get; set; }
 
         public object NavigationLock { get; set; } = new object();
@@ -215,8 +220,6 @@ namespace CashmereDeposit.ViewModels
         private readonly IActivityRepository _activityRepository;
         private readonly IPermissionRepository _permissionRepository;
 
-        //  private static ;
-
         private readonly StartupViewModel startupModel;
 
         public ApplicationViewModel()
@@ -294,28 +297,28 @@ namespace CashmereDeposit.ViewModels
 
         public void InitialiseApp()
         {
-            Log.Info(GetType().Name, nameof(InitialiseApp), "Initialisation", "Initialising Application");
-            CheckHDDSpace();
-            InitialiseDevice();
-            if (CurrentApplicationState == ApplicationState.STARTUP)
+            Log.Info(this.GetType().Name, nameof(InitialiseApp), "Initialisation", "Initialising Application");
+            this.CheckHDDSpace();
+            this.InitialiseDevice();
+            if (this.CurrentApplicationState == Cashmere.Library.Standard.Statuses.ApplicationState.STARTUP)
             {
-                SystemStartupChecks();
-                InitialiseEmailManager();
-                InitialisePrinter();
+                this.SystemStartupChecks();
+                this.InitialiseEmailManager();
+                this.InitialisePrinter();
             }
-            AlertManager?.InitialiseAlertManager();
-            InitialiseUsersAndPermissions();
-            InitialiseFolders();
-            CurrentScreenIndex = 0;
-            InitialiseCurrencyList();
-            InitialiseScreenList();
-            InitialiseLanguageList();
-            InitialiseTransactionTypeList();
-            InitialiseCoreBankingAsync().AsResult();
-            SetLanguage(DeviceConfiguration.UI_CULTURE);
-            ConnectToDevice();
-            HandleIncompleteSession();
-            NavigateFirstScreen();
+            this.AlertManager?.InitialiseAlertManager();
+            this.InitialiseUsersAndPermissions();
+            this.InitialiseFolders();
+            this.CurrentScreenIndex = 0;
+            this.InitialiseCurrencyList();
+            this.InitialiseScreenList();
+            this.InitialiseLanguageList();
+            this.InitialiseTransactionTypeList();
+            this.InitialiseCoreBankingAsync().AsResult();
+            this.SetLanguage(ApplicationViewModel.DeviceConfiguration.UI_CULTURE);
+            this.ConnectToDevice();
+            this.HandleIncompleteSession();
+            this.NavigateFirstScreen();
         }
 
         private void statusWorker_DoWork(object sender, DoWorkEventArgs e)

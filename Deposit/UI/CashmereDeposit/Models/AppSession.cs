@@ -220,7 +220,7 @@ namespace CashmereDeposit.Models
             Transaction = new AppTransaction(this, transactionTypeListItem, transactionType.DefaultAccountCurrency);
             Transaction.TransactionLimitReachedEvent += new EventHandler<EventArgs>(Transaction_TransactionLimitReachedEvent);
             //TODO: Remove
-            var alertTransactionStarted = new AlertTransactionStarted(Transaction, Device, DateTime.Now);
+            //var alertTransactionStarted = new AlertTransactionStarted(Transaction, Device, DateTime.Now);
             //ApplicationViewModel.AlertManager.SendAlert(alertTransactionStarted);
         }
 

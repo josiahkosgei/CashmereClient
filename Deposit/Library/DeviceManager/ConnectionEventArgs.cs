@@ -1,13 +1,14 @@
-﻿
+﻿using Cashmere.Library.Standard.Statuses;
 using System;
-using Cashmere.Library.Standard.Statuses;
 
 namespace DeviceManager
 {
-    public class ConnectionEventArgs : EventArgs
-    {
-        public ConnectionEventArgs(StandardResult data) => Data = data;
+  public class ConnectionEventArgs : EventArgs
+  {
+    private StandardResult _data;
 
-        public StandardResult Data { get; }
-    }
+    public ConnectionEventArgs(StandardResult data) => this._data = data;
+
+    public StandardResult Data => this._data;
+  }
 }

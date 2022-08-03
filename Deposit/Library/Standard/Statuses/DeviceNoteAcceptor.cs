@@ -1,14 +1,13 @@
-﻿// DeviceNoteAcceptor
-
+﻿//DeviceNoteAcceptor
 
 namespace Cashmere.Library.Standard.Statuses
 {
-    public class DeviceNoteAcceptor
-    {
-        public DeviceNoteAcceptorType Type { get; set; }
+  public class DeviceNoteAcceptor
+  {
+    public DeviceNoteAcceptorType Type { get; set; }
 
-        public DeviceState Status { get; set; }
+    public DeviceState Status { get; set; }
 
-        public string Currency { get; set; } = "";
-    }
+    public string Currency { get; set; } = "";
+  }
 }

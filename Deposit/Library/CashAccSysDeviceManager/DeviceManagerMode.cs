@@ -1,8 +1,9 @@
 ﻿namespace CashAccSysDeviceManager
 {
-  public enum SerialFixState
+  public enum DeviceManagerMode
   {
     NONE,
-    SERIAL_PORT_ERROR,
+    CIT,
+    ESCROW_JAM,
   }
 }

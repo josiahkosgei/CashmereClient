@@ -1,10 +1,8 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Cashmere.Library.Standard.Statuses.CommonClasses
-
+﻿//CommonClasses
 
 namespace Cashmere.Library.Standard.Statuses
 {
-    public class CommonClasses
-    {
-    }
+  public class CommonClasses
+  {
+  }
 }

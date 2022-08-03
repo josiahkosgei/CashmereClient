@@ -1,17 +1,13 @@
-﻿
-//DE50Mode
-
-
-namespace CashAccSysDeviceManager
+﻿namespace CashAccSysDeviceManager
 {
-    public enum DE50Mode
-    {
-        NeutralSettingMode,
-        InitialMode,
-        DepositMode,
-        ManualMode,
-        NormalErrorRecoveryMode,
-        StoringErrorRecoveryMode,
-        CollectMode,
-    }
+  public enum DE50Mode
+  {
+    NeutralSettingMode,
+    InitialMode,
+    DepositMode,
+    ManualMode,
+    NormalErrorRecoveryMode,
+    StoringErrorRecoveryMode,
+    CollectMode,
+  }
 }

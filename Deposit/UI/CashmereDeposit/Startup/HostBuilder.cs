@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 
 namespace CashmereDeposit.Startup
@@ -19,6 +20,8 @@ namespace CashmereDeposit.Startup
                     {
                         options.Listen(ip, port);
                     })
+                    .UseContentRoot(Directory.GetCurrentDirectory())
+                    //.UseIISIntegration()
                     .UseStartup<HostStartup>()
                     .Build();
 

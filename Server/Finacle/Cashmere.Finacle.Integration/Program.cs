@@ -18,15 +18,15 @@ using Cashmere.Finacle.Integration.CQRS.DataAccessLayer.DataAccess;
 var builder = WebApplication.CreateBuilder(args);
 
 
-string timestamp = DateTime.Now.ToString("yyyy-MM-dd");
 var seriLogger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.File(
-               System.IO.Path.Combine(@"C:\\CashmereDeposit", "Transactions", "FinacleIntegration", "API", "6.0", $"finacle-integration-{timestamp}.txt"),
-               rollingInterval: RollingInterval.Infinite,
+               System.IO.Path.Combine(@"C:\\CashmereDeposit", "Transactions", "FinacleIntegration", "API", "6.0", $"finacle-integration-.txt"),
+               rollingInterval:RollingInterval.Day,
+//rollingInterval: RollingInterval.Infinite,
                fileSizeLimitBytes: 10 * 1024 * 1024,
                retainedFileCountLimit: 2,
                rollOnFileSizeLimit: true,

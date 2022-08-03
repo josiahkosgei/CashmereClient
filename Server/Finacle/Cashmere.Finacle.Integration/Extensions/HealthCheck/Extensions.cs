@@ -28,7 +28,7 @@ namespace Cashmere.Finacle.Integration.Extensions.HealthCheck
                 setup.AddHealthCheckEndpoint("fundstransfer", $"{_globalSettings.APPLICATION_PATH.AppendAsURL("healthz-fundstransfer")}");
                 setup.AddHealthCheckEndpoint("accountdetails", $"{_globalSettings.APPLICATION_PATH.AppendAsURL("healthz-accountdetails")}");
                 setup.AddHealthCheckEndpoint("cdm", $"{_globalSettings.APPLICATION_PATH.AppendAsURL("healthz-cdm")}");
-                setup.SetEvaluationTimeInSeconds(300); //Configures the UI to poll for healthchecks updates every 60 seconds
+                setup.SetEvaluationTimeInSeconds(600); //Configures the UI to poll for healthchecks updates every 60 seconds
                 setup.SetApiMaxActiveRequests(1); //Only one active request will be executed at a time.
                 setup.MaximumHistoryEntriesPerEndpoint(50);
             }).AddInMemoryStorage();

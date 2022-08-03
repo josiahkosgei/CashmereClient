@@ -1,5 +1,6 @@
-﻿
-//CashAccSysDeviceManager
+﻿using CashAccSysDeviceManager.MessageClasses;
+using Cashmere.Library.Standard.Logging;
+using Cashmere.Library.Standard.Statuses;
 using DeviceManager;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -11,69 +12,34 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using CashAccSysDeviceManager.MessageClasses;
-using Cashmere.Library.Standard.Logging;
-using Cashmere.Library.Standard.Statuses;
-
 
 namespace CashAccSysDeviceManager
 {
     public class CashAccSysDeviceManager : DeviceManagerBase
     {
         private bool clearHopperRequest;
+        private bool escrowBillPresent;
         private string DEVICE_PORT;
         private string CONTROLLER_PORT;
         private int BAGFULL_WARN_PERCENT;
         private bool SENSOR_INVERT_DOOR;
         private string CONTROLLER_LOG_DIRECTORY;
+        private DeviceManagerState _currentState = DeviceManagerState.INIT;
         public CDCMessenger DeviceMessenger;
+        private DeviceManagerMode deviceManagerMode;
+        private bool _isEnabled = true;
+        private ControllerStatus _currentDeviceStatus = new ControllerStatus();
         private string _connectionStatus = "Disconnected";
         private bool _acceptNotes = true;
-        private bool _acceptCoins = false;
+        private bool _acceptCoins;
         private long _requestAmount;
         private int _userID;
         private bool _multiDrop;
+        private bool _hasEscrow = true;
         private string _tcpStatus = "Disconnected";
         private StringBuilder _comLog = new StringBuilder();
         private string _currentCurrency;
-        private bool _canTransactionEnd = false;
-
-        public NoteCounts CurrentCount { get; set; } = new NoteCounts()
-        {
-            NoteCount = new List<NoteCount>()
-      {
-        new NoteCount()
-        {
-          Denomination = 5000,
-          Count = 0,
-          Currency = "KES"
-        },
-        new NoteCount()
-        {
-          Denomination = 10000,
-          Count = 0,
-          Currency = "KES"
-        },
-        new NoteCount()
-        {
-          Denomination = 20000,
-          Count = 0,
-          Currency = "KES"
-        },
-        new NoteCount()
-        {
-          Denomination = 50000,
-          Count = 0,
-          Currency = "KES"
-        },
-        new NoteCount()
-        {
-          Denomination = 100000,
-          Count = 0,
-          Currency = "KES"
-        }
-      }
-        };
+        private bool _canTransactionEnd;
 
         public bool ClearHopperRequest
         {
@@ -87,9 +53,66 @@ namespace CashAccSysDeviceManager
             }
         }
 
-        public override Version DeviceManagerVersion => Assembly.GetExecutingAssembly().GetName().Version;
+        public bool EscrowBillPresent
+        {
+            get => escrowBillPresent;
+            set
+            {
+                if (escrowBillPresent == value)
+                    return;
+                escrowBillPresent = value;
+                NotifyPropertyChanged(nameof(EscrowBillPresent));
+            }
+        }
 
-        protected new CashmereLogger Log { get; set; }
+        public Version DeviceManagerVersion => Assembly.GetExecutingAssembly().GetName().Version;
+
+        public DeviceManagerState CurrentState
+        {
+            get => _currentState;
+            set
+            {
+                if (_currentState == value)
+                    return;
+                Log.Debug(GetType().Name, nameof(CurrentState), "CurrentStateProperty", "CurrentState changing from {0} to {1}", new object[2]
+                {
+           CurrentState,
+           value
+                });
+                _currentState = value;
+                NotifyCurrentTransactionStatusChanged();
+            }
+        }
+
+        public DeviceManagerMode DeviceManagerMode
+        {
+            get => deviceManagerMode;
+            set => deviceManagerMode = value;
+        }
+
+        public bool Enabled
+        {
+            get => _isEnabled;
+            set
+            {
+                if (value == _isEnabled)
+                    return;
+                _isEnabled = value;
+                if (_isEnabled)
+                    OnDeviceUnlockedEvent(this, EventArgs.Empty);
+                else
+                    OnDeviceLockedEvent(this, EventArgs.Empty);
+                NotifyPropertyChanged("IsLocked");
+            }
+        }
+
+        protected CashmereLogger Log { get; set; }
+
+        public ControllerStatus CurrentDeviceStatus
+        {
+            get => _currentDeviceStatus;
+            set => _currentDeviceStatus = value;
+        }
 
         public CashAccSysSerialFix CashAccSysSerialFix { get; set; }
 
@@ -106,7 +129,7 @@ namespace CashAccSysDeviceManager
           int messagSendInterval = 1,
           string clientType = "UI")
         {
-            Log = new CashmereLogger(Assembly.GetAssembly(typeof(DeviceMessageBase)).GetName().Version.ToString(), "DeviceManagerLog", (IConfiguration)null);
+            Log = new CashmereLogger(Assembly.GetAssembly(typeof(DeviceMessageBase)).GetName().Version.ToString(), "DeviceManagerLog", null);
             Log.Debug(GetType().Name, "Constructor", "Initialisation", "Creating CashAccSysDeviceManager", Array.Empty<object>());
             this.DEVICE_PORT = DEVICE_PORT;
             this.CONTROLLER_PORT = CONTROLLER_PORT;
@@ -114,15 +137,15 @@ namespace CashAccSysDeviceManager
             this.SENSOR_INVERT_DOOR = SENSOR_INVERT_DOOR;
             this.CONTROLLER_LOG_DIRECTORY = CONTROLLER_LOG_DIRECTORY;
             DeviceMessenger = new CDCMessenger(host, port, macAddress, clientID, clientType, messagSendInterval);
-            DeviceMessenger.ConnectionEvent += OnConnectionEvent;
-            DeviceMessenger.StatusReportEvent += OnStatusReportEvent;
-            DeviceMessenger.DropStatusResultEvent += this.OnDropStatusResultEvent;
-            DeviceMessenger.TransactionStatusEvent += OnTransactionStatusEvent;
-            DeviceMessenger.DropResultEvent += OnDropResultEvent;
-            DeviceMessenger.CITResultEvent += OnCITResultEvent;
+            DeviceMessenger.ConnectionEvent += new EventHandler<AuthoriseResponse>(OnConnectionEvent);
+            DeviceMessenger.StatusReportEvent += new EventHandler<StatusReport>(OnStatusReportEvent);
+            DeviceMessenger.DropStatusResultEvent += new EventHandler<DropStatus>(OnDropStatusResultEvent);
+            DeviceMessenger.TransactionStatusEvent += new EventHandler<TransactionStatusResponse>(OnTransactionStatusEvent);
+            DeviceMessenger.DropResultEvent += new EventHandler<DropResult>(OnDropResultEvent);
+            DeviceMessenger.CITResultEvent += new EventHandler<CITResult>(OnCITResultEvent);
             CashAccSysSerialFix = CashAccSysSerialFix.GetInstance(DEVICE_PORT, CONTROLLER_PORT);
-            CashAccSysSerialFix.DE50StatusChangedEvent += CashAccSysSerialFix_DE50StatusChangedEvent;
-            CashAccSysSerialFix.PropertyChanged += CashAccSysSerialFix_PropertyChanged;
+            CashAccSysSerialFix.DE50StatusChangedEvent += new EventHandler<DE50StatusChangedResult>(CashAccSysSerialFix_DE50StatusChangedEvent);
+            CashAccSysSerialFix.PropertyChanged += new PropertyChangedEventHandler(CashAccSysSerialFix_PropertyChanged);
         }
 
         private void CashAccSysSerialFix_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -138,6 +161,8 @@ namespace CashAccSysDeviceManager
                 EscrowBillPresent = CashAccSysSerialFix.EscrowBillPresent;
             }
         }
+
+        public DeviceTransaction CurrentTransaction { get; set; }
 
         public string ConnectionStatus
         {
@@ -201,7 +226,23 @@ namespace CashAccSysDeviceManager
             }
         }
 
+        public bool HasEscrow
+        {
+            get => _hasEscrow;
+            set
+            {
+                if (_hasEscrow == value)
+                    return;
+                _hasEscrow = value;
+                NotifyPropertyChanged(nameof(HasEscrow));
+            }
+        }
+
         public DropStatusResult DropStatus => CurrentTransaction?.CurrentTransactionResult?.CurrentDropStatus;
+
+        public long DroppedAmountCents => (long)(CurrentTransaction?.CurrentTransactionResult?.TotalDroppedAmountCents);
+
+        public double DroppedAmountMajorCurrency => DroppedAmountCents / 100.0;
 
         public string TCPStatus
         {
@@ -219,7 +260,7 @@ namespace CashAccSysDeviceManager
             set
             {
                 _comLog.AppendLine(value);
-                Console.WriteLine(string.Format("[{0}] COMLOG {1}", (object)DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"), (object)value));
+                Console.WriteLine(string.Format("[{0}] COMLOG {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"), value));
                 NotifyPropertyChanged(nameof(ComLog));
             }
         }
@@ -236,6 +277,14 @@ namespace CashAccSysDeviceManager
 
         private void SelectCurrency(string currency) => DeviceMessenger.SetCurrency(currency);
 
+        public void ShowDeviceController()
+        {
+            Log.Info(GetType().Name, "ShowDeviceController()", "Command", "Showing the device controller", Array.Empty<object>());
+            DeviceMessenger.ShowDeviceController();
+        }
+
+        public event EventHandler<StringResult> ConnectionEvent;
+
         private void OnConnectionEvent(object sender, AuthoriseResponse authoriseResponse)
         {
             StringResult e = new StringResult();
@@ -251,47 +300,62 @@ namespace CashAccSysDeviceManager
                 e.resultCode = 0;
                 e.data = authoriseResponse.Body.Result;
             }
-            OnConnectionEvent((object)this, e);
+            if (ConnectionEvent == null)
+                return;
+            ConnectionEvent(this, e);
         }
 
-        public new void OnTransactionStartedEvent(object sender, DeviceTransaction e)
+        public event EventHandler<EventArgs> NotifyCurrentTransactionStatusChangedEvent;
+
+        private void OnNotifyCurrentTransactionStatusChangedEvent(object sender, EventArgs e)
+        {
+            if (NotifyCurrentTransactionStatusChangedEvent == null)
+                return;
+            NotifyCurrentTransactionStatusChangedEvent(this, e);
+        }
+
+        public event EventHandler<DeviceTransaction> TransactionStartedEvent;
+
+        public void OnTransactionStartedEvent(object sender, DeviceTransaction e)
         {
             Log.Debug(GetType().Name, nameof(OnTransactionStartedEvent), "EventHandler", "CurrentState = {0}: Handling TransactionStartedEvent", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentState == DeviceManagerState.TRANSACTION_STARTING)
             {
                 CurrentState = DeviceManagerState.TRANSACTION_STARTED;
                 Log.Info(GetType().Name, nameof(OnTransactionStartedEvent), "EventHandler", "CurrentState = {0}: TransactionStartedEvent complete, re-raising event", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
-                base.OnTransactionStartedEvent((object)this, e);
+                if (TransactionStartedEvent == null)
+                    return;
+                TransactionStartedEvent(this, e);
             }
             else
             {
                 Log.Warning(GetType().Name, nameof(OnTransactionStartedEvent), "EventHandler", "CurrentState = {0}: TransactionStartedEvent outside DeviceManagerState.TRANSACTION_STARTING", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
             }
         }
 
-        private void OnDropStatusResultEvent(object sender, MessageClasses.DropStatus dropStatus)
+        private void OnDropStatusResultEvent(object sender, DropStatus dropStatus)
         {
             Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Handling DropStatusResultEvent", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             DropStatusResult dropStatusResult = ProcessDropStatus(dropStatus);
             CashmereLogger log = Log;
             string name = GetType().Name;
             object[] objArray = new object[3]
             {
-        (object) CurrentState,
+         CurrentState,
         null,
         null
             };
@@ -299,14 +363,14 @@ namespace CashAccSysDeviceManager
             string str;
             if (dropStatusResult == null)
             {
-                str = (string)null;
+                str = null;
             }
             else
             {
                 DropStatusResultData data = dropStatusResult.data;
                 if (data == null)
                 {
-                    str = (string)null;
+                    str = null;
                 }
                 else
                 {
@@ -314,8 +378,8 @@ namespace CashAccSysDeviceManager
                     str = statusResultStatus1.ToString();
                 }
             }
-            objArray[1] = (object)str;
-            objArray[2] = (object)dropStatusResult?.data?.DenominationResult?.ToString();
+            objArray[1] = str;
+            objArray[2] = (dropStatusResult?.data?.DenominationResult?.ToString());
             log.Info(name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: DropStatusResultStatus = {1} Denomination = {2}", objArray);
             if (CurrentState == DeviceManagerState.DROP_STARTING)
             {
@@ -330,17 +394,26 @@ namespace CashAccSysDeviceManager
                     {
                         DropStatusResultStatus? statusResultStatus2 = CurrentTransaction?.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
                         CurrentTransaction.CurrentTransactionResult.CurrentDropStatus = dropStatusResult;
+                        if (!HasEscrow)
+                        {
+                            CurrentTransaction.CurrentTransactionResult.LastDroppedAmountCents = (long)(dropStatusResult?.data?.DenominationResult?.data?.TotalValue);
+                            CurrentTransaction.CurrentTransactionResult.LastDroppedNotes = dropStatusResult?.data?.DenominationResult?.data;
+                            CurrentTransaction.CurrentTransactionResult.TotalDroppedAmountCents = CurrentTransaction.CurrentTransactionResult.LastDroppedAmountCents;
+                            CurrentTransaction.CurrentTransactionResult.TotalDroppedNotes = CurrentTransaction.CurrentTransactionResult.LastDroppedNotes;
+                            CurrentTransaction.CurrentTransactionResult.CurrentDropStatus.data.DenominationResult = null;
+                        }
                         DropStatusResultStatus? nullable = statusResultStatus2;
                         statusResultStatus1 = dropStatusResult.data.DropStatusResultStatus;
-                        if (!(nullable == statusResultStatus1 & nullable.HasValue))
+                        if (!(nullable.GetValueOrDefault() == statusResultStatus1 & nullable.HasValue))
                         {
                             Log.Info(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: DropStatus has changed from {1} to {2}", new object[3]
                             {
-                (object) CurrentState,
-                (object) statusResultStatus2,
-                (object) dropStatusResult.data.DropStatusResultStatus
+                 CurrentState,
+                 statusResultStatus2,
+                 dropStatusResult.data.DropStatusResultStatus
                             });
-                            switch (dropStatusResult.data.DropStatusResultStatus)
+                            statusResultStatus1 = dropStatusResult.data.DropStatusResultStatus;
+                            switch (statusResultStatus1)
                             {
                                 case DropStatusResultStatus.DROPPING:
                                     CurrentState = DeviceManagerState.DROP_STOPPED;
@@ -348,72 +421,63 @@ namespace CashAccSysDeviceManager
                                 case DropStatusResultStatus.ESCROW_REJECT:
                                     Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Raising OnEscrowRejectEvent", new object[1]
                                     {
-                    (object) CurrentState
+                     CurrentState
                                     });
-                                    DeviceTransactionResult e1 = new DeviceTransactionResult
-                                    {
-                                        level = dropStatusResult.level,
-                                        data = CurrentTransaction
-                                    };
-                                    OnEscrowRejectEvent((object)this, e1);
+                                    DeviceTransactionResult e1 = new DeviceTransactionResult();
+                                    e1.level = dropStatusResult.level;
+                                    e1.data = CurrentTransaction;
+                                    OnEscrowRejectEvent(this, e1);
                                     break;
                                 case DropStatusResultStatus.ESCROW_DROP:
                                     Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Raising OnEscrowDropEvent", new object[1]
                                     {
-                    (object) CurrentState
+                     CurrentState
                                     });
-                                    DeviceTransactionResult e2 = new DeviceTransactionResult
-                                    {
-                                        level = dropStatusResult.level,
-                                        data = CurrentTransaction
-                                    };
-                                    OnEscrowDropEvent((object)this, e2);
+                                    DeviceTransactionResult e2 = new DeviceTransactionResult();
+                                    e2.level = dropStatusResult.level;
+                                    e2.data = CurrentTransaction;
+                                    OnEscrowDropEvent(this, e2);
                                     break;
                                 case DropStatusResultStatus.ESCROW_DONE:
                                     Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Raising OnEscrowOperationCompleteEvent", new object[1]
                                     {
-                    (object) CurrentState
+                     CurrentState
                                     });
-                                    DeviceTransactionResult e3 = new DeviceTransactionResult
-                                    {
-                                        level = dropStatusResult.level,
-                                        data = CurrentTransaction
-                                    };
-                                    OnEscrowOperationCompleteEvent((object)this, e3);
+                                    DeviceTransactionResult e3 = new DeviceTransactionResult();
+                                    e3.level = dropStatusResult.level;
+                                    e3.data = CurrentTransaction;
+                                    OnEscrowOperationCompleteEvent(this, e3);
                                     break;
                                 case DropStatusResultStatus.DONE:
-                                    GetTransactionStatus();
                                     Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Raising OnCountEndEvent", new object[1]
                                     {
-                    (object) CurrentState
+                     CurrentState
                                     });
-                                    DeviceTransactionResult e4 = new DeviceTransactionResult
-                                    {
-                                        level = dropStatusResult.level,
-                                        data = CurrentTransaction
-                                    };
-                                    OnCountEndEvent((object)this, e4);
+                                    DeviceTransactionResult e4 = new DeviceTransactionResult();
+                                    e4.level = dropStatusResult.level;
+                                    e4.data = CurrentTransaction;
+                                    OnCountEndEvent(this, e4);
                                     break;
                             }
                         }
                         Log.Debug(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: Raising OnTransactionStatusEvent", new object[1]
                         {
-              (object) CurrentState
+               CurrentState
                         });
-                        OnTransactionStatusEvent((object)this, (TransactionStatusResponse)null);
+                        OnTransactionStatusEvent(this, null);
                     }
                 }
                 else
                     Log.Warning(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: dropstatus received outside of a drop", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
             }
             else
             {
-                Log.Warning(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnDropStatusResultEvent()", new object[1]
+                Log.Warning(GetType().Name, nameof(OnDropStatusResultEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnDropStatusResultEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
@@ -421,290 +485,273 @@ namespace CashAccSysDeviceManager
             NotifyCurrentTransactionStatusChanged();
         }
 
-        protected void OnStatusReportEvent(object sender, StatusReport statusReport)
+        public event EventHandler<DeviceStatusChangedEventArgs> StatusReportEvent;
+
+        private void OnStatusReportEvent(object sender, StatusReport statusReport)
         {
-            lock (StatusChangeLock)
+            if (CurrentState == DeviceManagerState.INIT)
             {
-                if (CurrentState == DeviceManagerState.INIT)
+                CurrentState = DeviceManagerState.NONE;
+                Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentState changed from INIT to NONE", new object[1]
                 {
-                    CurrentState = DeviceManagerState.NONE;
-                    Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentState changed from INIT to NONE", new object[1]
-                    {
-            (object) CurrentState
-                    });
-                }
-                DeviceStatusChangedEventArgs deviceStatusResult = ProcessStatusReport(statusReport);
-                DeviceState = deviceStatusResult.ControllerStatus.NoteAcceptor.Status;
-                ControllerState = deviceStatusResult.ControllerStatus.ControllerState;
-                HasEscrow = deviceStatusResult.ControllerStatus.Escrow.Type != EscrowType.NONE && deviceStatusResult.ControllerStatus.Escrow.Type != EscrowType.NO_DEVICE;
-                if (CurrentDeviceStatus.Bag.BagState != deviceStatusResult.ControllerStatus.Bag.BagState)
+           CurrentState
+                });
+            }
+            DeviceStatusChangedEventArgs e = ProcessStatusReport(statusReport);
+            DeviceState = e.ControllerStatus.NoteAcceptor.Status;
+            ControllerState = e.ControllerStatus.ControllerState;
+            HasEscrow = e.ControllerStatus.Escrow.Type != EscrowType.NONE && e.ControllerStatus.Escrow.Type != EscrowType.NO_DEVICE;
+            if (CurrentDeviceStatus.Bag.BagState != e.ControllerStatus.Bag.BagState)
+            {
+                if (e.ControllerStatus.Bag.BagState == BagState.CLOSED)
+                    OnBagClosedEvent(this, EventArgs.Empty);
+                else if (CurrentDeviceStatus.Bag.BagState != BagState.NONE && e.ControllerStatus.Bag.BagState == BagState.OK)
+                    OnBagOpenedEvent(this, EventArgs.Empty);
+            }
+            if (CurrentDeviceStatus.Sensor.Bag != e.ControllerStatus.Sensor.Bag)
+            {
+                if (CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.PRESENT && e.ControllerStatus.Sensor.Bag == DeviceSensorBag.REMOVED)
+                    OnBagRemovedEvent(this, EventArgs.Empty);
+                else if (CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.REMOVED && e.ControllerStatus.Sensor.Bag == DeviceSensorBag.PRESENT)
+                    OnBagPresentEvent(this, EventArgs.Empty);
+            }
+            if (CurrentDeviceStatus.Bag.BagState == BagState.BAG_REMOVED && CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.PRESENT)
+                EndCIT("12345");
+            if (CurrentDeviceStatus.Bag.PercentFull != e.ControllerStatus.Bag.PercentFull)
+            {
+                if (e.ControllerStatus.Bag.PercentFull >= 100)
+                    OnBagFullAlertEvent(this, e.ControllerStatus);
+                else if (e.ControllerStatus.Bag.PercentFull >= BAGFULL_WARN_PERCENT)
+                    OnBagFullWarningEvent(this, e.ControllerStatus);
+            }
+            if (CurrentDeviceStatus.Sensor.Door != DeviceSensorDoor.NONE && CurrentDeviceStatus.Sensor.Door != e.ControllerStatus.Sensor.Door)
+            {
+                if (e.ControllerStatus.Sensor.Door == DeviceSensorDoor.OPEN)
+                    OnDoorOpenEvent(this, EventArgs.Empty);
+                else if (e.ControllerStatus.Sensor.Door == DeviceSensorDoor.CLOSED)
+                    OnDoorClosedEvent(this, EventArgs.Empty);
+            }
+            if (CurrentDeviceStatus.ControllerState != e.ControllerStatus.ControllerState)
+            {
+                switch (e.ControllerStatus.ControllerState)
                 {
-                    if (deviceStatusResult.ControllerStatus.Bag.BagState == BagState.CLOSED)
-                        OnBagClosedEvent((object)this, EventArgs.Empty);
-                    else if (CurrentDeviceStatus.Bag.BagState != BagState.NONE && deviceStatusResult.ControllerStatus.Bag.BagState == BagState.OK)
-                        OnBagOpenedEvent((object)this, EventArgs.Empty);
-                }
-                if (CurrentDeviceStatus.Sensor.Bag != deviceStatusResult.ControllerStatus.Sensor.Bag)
-                {
-                    if (CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.PRESENT && deviceStatusResult.ControllerStatus.Sensor.Bag == DeviceSensorBag.REMOVED)
-                        OnBagRemovedEvent((object)this, EventArgs.Empty);
-                    else if (CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.REMOVED && deviceStatusResult.ControllerStatus.Sensor.Bag == DeviceSensorBag.PRESENT)
-                        OnBagPresentEvent((object)this, EventArgs.Empty);
-                }
-                if (CurrentDeviceStatus.Bag.BagState == BagState.BAG_REMOVED && CurrentDeviceStatus.Sensor.Bag == DeviceSensorBag.PRESENT)
-                    EndCIT("12345");
-                if (CurrentDeviceStatus.Bag.PercentFull != deviceStatusResult.ControllerStatus.Bag.PercentFull)
-                {
-                    if (deviceStatusResult.ControllerStatus.Bag.PercentFull >= 100)
-                        OnBagFullAlertEvent((object)this, deviceStatusResult.ControllerStatus);
-                    else if (deviceStatusResult.ControllerStatus.Bag.PercentFull >= BAGFULL_WARN_PERCENT)
-                        OnBagFullWarningEvent((object)this, deviceStatusResult.ControllerStatus);
-                }
-                if (CurrentDeviceStatus.Sensor.Door != DeviceSensorDoor.NONE && CurrentDeviceStatus.Sensor.Door != deviceStatusResult.ControllerStatus.Sensor.Door)
-                {
-                    if (deviceStatusResult.ControllerStatus.Sensor.Door == DeviceSensorDoor.OPEN)
-                        OnDoorOpenEvent((object)this, EventArgs.Empty);
-                    else if (deviceStatusResult.ControllerStatus.Sensor.Door == DeviceSensorDoor.CLOSED)
-                        OnDoorClosedEvent((object)this, EventArgs.Empty);
-                }
-                if (CurrentDeviceStatus.ControllerState != deviceStatusResult.ControllerStatus.ControllerState)
-                {
-                    switch (deviceStatusResult.ControllerStatus.ControllerState)
-                    {
-                        case ControllerState.IDLE:
-                            Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: ControllerState changed from {1} to {2}", new object[3]
-                            {
-                (object) CurrentState,
-                (object) CurrentDeviceStatus.ControllerState,
-                (object) deviceStatusResult.ControllerStatus.ControllerState
-                            });
-                            if (deviceStatusResult.ControllerStatus.Transaction.Status != 0 && CurrentTransaction == null && DeviceManagerMode == DeviceManagerMode.NONE)
-                            {
-                                Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to IDLE", new object[1]
-                                {
-                  (object) CurrentState
-                                });
-                                CurrentState = DeviceManagerState.OUT_OF_ORDER;
-                                ResetDevice(false);
-                                break;
-                            }
-                            break;
-                        case ControllerState.DROP:
-                            Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnCountStartedEvent", new object[1]
-                            {
-                (object) CurrentState
-                            });
-                            OnCountStartedEvent((object)this, new DeviceTransactionResult()
-                            {
-                                data = CurrentTransaction
-                            });
-                            break;
-                        case ControllerState.DROP_PAUSED:
-                            Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnCountPauseEvent", new object[1]
-                            {
-                (object) CurrentState
-                            });
-                            OnCountPauseEvent((object)this, new DeviceTransactionResult()
-                            {
-                                data = CurrentTransaction
-                            });
-                            break;
-                        case ControllerState.ESCROW_DROP:
-                            if (CurrentTransaction == null)
-                            {
-                                Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to ESCROW_DROP", new object[1]
-                                {
-                  (object) CurrentState
-                                });
-                                CurrentState = DeviceManagerState.OUT_OF_ORDER;
-                                ResetDevice(false);
-                                break;
-                            }
-                            break;
-                        case ControllerState.ESCROW_REJECT:
-                            if (CurrentTransaction == null)
-                            {
-                                Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to ESCROW_REJECT", new object[1]
-                                {
-                  (object) CurrentState
-                                });
-                                CurrentState = DeviceManagerState.OUT_OF_ORDER;
-                                ResetDevice(false);
-                                break;
-                            }
-                            break;
-                    }
-                }
-                IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
-                EscrowStatus? status1;
-                DeviceTransactionStatus? status2;
-                int num1;
-                if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
-                {
-                    if (HasEscrow)
-                    {
-                        IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                        int num2;
-                        if (currentDeviceStatus2 == null)
+                    case ControllerState.IDLE:
+                        Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: ControllerState changed from {1} to {2}", new object[3]
                         {
-                            num2 = 0;
-                        }
-                        else
+               CurrentState,
+               CurrentDeviceStatus.ControllerState,
+               e.ControllerStatus.ControllerState
+                        });
+                        if (e.ControllerStatus.Transaction.Status != DeviceTransactionStatus.NONE && CurrentTransaction == null && DeviceManagerMode == DeviceManagerMode.NONE)
                         {
-                            status1 = currentDeviceStatus2.Escrow?.Status;
-                            EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                            num2 = status1 == escrowStatus & status1.HasValue ? 1 : 0;
+                            Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to IDLE", new object[1]
+                            {
+                 CurrentState
+                            });
+                            CurrentState = DeviceManagerState.OUT_OF_ORDER;
+                            ResetDevice(false);
+                            break;
                         }
-                        if (num2 == 0)
-                            goto label_49;
-                    }
-                    IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
-                    if (currentDeviceStatus3 == null)
+                        break;
+                    case ControllerState.DROP:
+                        Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnCountStartedEvent", new object[1]
+                        {
+               CurrentState
+                        });
+                        OnCountStartedEvent(this, new DeviceTransactionResult()
+                        {
+                            data = CurrentTransaction
+                        });
+                        break;
+                    case ControllerState.DROP_PAUSED:
+                        Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnCountPauseEvent", new object[1]
+                        {
+               CurrentState
+                        });
+                        OnCountPauseEvent(this, new DeviceTransactionResult()
+                        {
+                            data = CurrentTransaction
+                        });
+                        break;
+                    case ControllerState.ESCROW_DROP:
+                        if (CurrentTransaction == null)
+                        {
+                            Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to ESCROW_DROP", new object[1]
+                            {
+                 CurrentState
+                            });
+                            CurrentState = DeviceManagerState.OUT_OF_ORDER;
+                            ResetDevice(false);
+                            break;
+                        }
+                        break;
+                    case ControllerState.ESCROW_REJECT:
+                        if (CurrentTransaction == null)
+                        {
+                            Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction is null during change to ESCROW_REJECT", new object[1]
+                            {
+                 CurrentState
+                            });
+                            CurrentState = DeviceManagerState.OUT_OF_ORDER;
+                            ResetDevice(false);
+                            break;
+                        }
+                        break;
+                }
+            }
+            ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+            EscrowStatus? status1;
+            DeviceTransactionStatus? status2;
+            if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
+            {
+                if (HasEscrow)
+                {
+                    ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                    int num;
+                    if (currentDeviceStatus2 == null)
                     {
-                        num1 = 1;
-                        goto label_50;
+                        num = 0;
                     }
                     else
                     {
-                        status2 = currentDeviceStatus3.Transaction?.Status;
-                        DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
-                        num1 = !(status2 == transactionStatus & status2.HasValue) ? 1 : 0;
-                        goto label_50;
+                        status1 = currentDeviceStatus2.Escrow?.Status;
+                        EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
+                        num = status1.GetValueOrDefault() == escrowStatus & status1.HasValue ? 1 : 0;
                     }
+                    if (num == 0)
+                        goto label_48;
                 }
-            label_49:
-                num1 = 0;
-            label_50:
+                ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                int num1;
+                if (currentDeviceStatus3 == null)
+                {
+                    num1 = 1;
+                }
+                else
+                {
+                    status2 = currentDeviceStatus3.Transaction?.Status;
+                    DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
+                    num1 = !(status2.GetValueOrDefault() == transactionStatus & status2.HasValue) ? 1 : 0;
+                }
                 if (num1 != 0)
                 {
                     if (!CanCount && CurrentTransaction != null)
                     {
-                        if (CurrentState != 0)
+                        if (CurrentState != DeviceManagerState.NONE)
                         {
                             Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: handles lost TransactionStatusResponse>>Raising GetTransactionStatus", new object[1]
                             {
-                (object) CurrentState
+                 CurrentState
                             });
-                            DeviceTransactionResult e = new DeviceTransactionResult
-                            {
-                                level = ErrorLevel.SUCCESS,
-                                data = CurrentTransaction
-                            };
-                            OnEscrowOperationCompleteEvent((object)this, e);
+                            GetTransactionStatus();
                         }
                     }
                     else
                         ResetDevice(false);
                 }
-                if (CurrentDeviceStatus.Transaction.Status != deviceStatusResult.ControllerStatus.Transaction.Status)
+            }
+        label_48:
+            if (CurrentDeviceStatus.Transaction.Status != e.ControllerStatus.Transaction.Status)
+            {
+                Log.Info(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Transaction status has changed from {1} to {2}", new object[3]
                 {
-                    Log.Info(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Transaction status has changed from {1} to {2}", new object[3]
-                    {
-            (object) CurrentState,
-            (object) CurrentDeviceStatus.Transaction.Status,
-            (object) deviceStatusResult.ControllerStatus.Transaction.Status
-                    });
-                    switch (deviceStatusResult.ControllerStatus.Transaction.Status)
-                    {
-                        case DeviceTransactionStatus.NONE:
-                            if (CurrentState == DeviceManagerState.TRANSACTION_ENDING)
+           CurrentState,
+           CurrentDeviceStatus.Transaction.Status,
+           e.ControllerStatus.Transaction.Status
+                });
+                switch (e.ControllerStatus.Transaction.Status)
+                {
+                    case DeviceTransactionStatus.NONE:
+                        if (CurrentState == DeviceManagerState.TRANSACTION_ENDING)
+                        {
+                            CurrentState = DeviceManagerState.TRANSACTION_ENDED;
+                            Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnTransactionEndEvent", new object[1]
                             {
-                                CurrentState = DeviceManagerState.TRANSACTION_ENDED;
-                                Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Raising OnTransactionEndEvent", new object[1]
-                                {
-                  (object) CurrentState
-                                });
-                                OnTransactionEndEvent((object)this, new DeviceTransactionResult()
-                                {
-                                    data = CurrentTransaction
-                                });
-                                break;
-                            }
-                            Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Invalid state, DeviceTransactionStatus changed to NONE while CurrentState is {0}", new object[1]
+                 CurrentState
+                            });
+                            OnTransactionEndEvent(this, new DeviceTransactionResult()
                             {
-                (object) CurrentState
+                                data = CurrentTransaction
                             });
                             break;
-                    }
-                }
-                if (CurrentState == DeviceManagerState.OUT_OF_ORDER)
-                {
-                    int num3;
-                    if (CurrentTransaction == null)
-                    {
-                        IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
-                        if ((currentDeviceStatus4 != null ? (currentDeviceStatus4.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
+                        }
+                        Log.Warning(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Invalid state, DeviceTransactionStatus changed to NONE while CurrentState is {0}", new object[1]
                         {
-                            IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+               CurrentState
+                        });
+                        break;
+                }
+            }
+            if (CurrentState == DeviceManagerState.OUT_OF_ORDER && CurrentTransaction == null)
+            {
+                ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                if ((currentDeviceStatus4 != null ? (currentDeviceStatus4.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
+                {
+                    ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                    int num2;
+                    if (currentDeviceStatus5 == null)
+                    {
+                        num2 = 0;
+                    }
+                    else
+                    {
+                        DeviceState? status3 = currentDeviceStatus5.NoteAcceptor?.Status;
+                        DeviceState deviceState = DeviceState.IDLE;
+                        num2 = status3.GetValueOrDefault() == deviceState & status3.HasValue ? 1 : 0;
+                    }
+                    if (num2 != 0)
+                    {
+                        ControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
+                        int num3;
+                        if (currentDeviceStatus6 == null)
+                        {
+                            num3 = 0;
+                        }
+                        else
+                        {
+                            status1 = currentDeviceStatus6.Escrow?.Status;
+                            EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
+                            num3 = status1.GetValueOrDefault() == escrowStatus & status1.HasValue ? 1 : 0;
+                        }
+                        if (num3 != 0)
+                        {
+                            ControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
                             int num4;
-                            if (currentDeviceStatus5 == null)
+                            if (currentDeviceStatus7 == null)
                             {
                                 num4 = 0;
                             }
                             else
                             {
-                                DeviceState? status3 = currentDeviceStatus5.NoteAcceptor?.Status;
-                                DeviceState deviceState = DeviceState.IDLE;
-                                num4 = status3 == deviceState & status3.HasValue ? 1 : 0;
+                                status2 = currentDeviceStatus7.Transaction?.Status;
+                                DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
+                                num4 = status2.GetValueOrDefault() == transactionStatus & status2.HasValue ? 1 : 0;
                             }
                             if (num4 != 0)
                             {
-                                IControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
-                                int num5;
-                                if (currentDeviceStatus6 == null)
+                                Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Reset from out of order is complete", new object[1]
                                 {
-                                    num5 = 0;
-                                }
-                                else
-                                {
-                                    status1 = currentDeviceStatus6.Escrow?.Status;
-                                    EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                    num5 = status1 == escrowStatus & status1.HasValue ? 1 : 0;
-                                }
-                                if (num5 != 0)
-                                {
-                                    IControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
-                                    if (currentDeviceStatus7 == null)
-                                    {
-                                        num3 = 0;
-                                        goto label_77;
-                                    }
-                                    else
-                                    {
-                                        status2 = currentDeviceStatus7.Transaction?.Status;
-                                        DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                                        num3 = status2 == transactionStatus & status2.HasValue ? 1 : 0;
-                                        goto label_77;
-                                    }
-                                }
+                   CurrentState
+                                });
+                                CurrentState = DeviceManagerState.NONE;
                             }
                         }
                     }
-                    num3 = 0;
-                label_77:
-                    if (num3 != 0)
-                    {
-                        Log.Debug(GetType().Name, nameof(OnStatusReportEvent), "EventHandler", "CurrentState = {0}: Reset from out of order is complete", new object[1]
-                        {
-              (object) CurrentState
-                        });
-                        CurrentState = DeviceManagerState.NONE;
-                    }
                 }
-                if (deviceStatusResult.ControllerStatus.NoteAcceptor.Status == DeviceState.JAM && DeviceManagerMode != DeviceManagerMode.NOTEJAM)
-                    OnNoteJamStartEvent((object)this, EventArgs.Empty);
-                else if (deviceStatusResult.ControllerStatus.NoteAcceptor.Status != DeviceState.JAM && DeviceManagerMode == DeviceManagerMode.NOTEJAM && CurrentState == DeviceManagerState.NOTEJAM_START)
-                    OnNoteJamEndEvent((object)this, EventArgs.Empty);
-                CurrentDeviceStatus = (IControllerStatus)deviceStatusResult.ControllerStatus;
-                deviceStatusResult.DeviceManagerState = CurrentState;
-                if (CurrentState == DeviceManagerState.OUT_OF_ORDER)
-                    ResetDevice(false);
-                NotifyCurrentTransactionStatusChanged();
-                OnStatusReportEvent((object)this, deviceStatusResult);
             }
+            CurrentDeviceStatus = e.ControllerStatus;
+            e.DeviceManagerState = CurrentState;
+            if (CurrentState == DeviceManagerState.OUT_OF_ORDER)
+                ResetDevice(false);
+            NotifyCurrentTransactionStatusChanged();
+            if (StatusReportEvent == null)
+                return;
+            StatusReportEvent(this, e);
         }
 
-        public override void Initialise() => CurrentTransaction = (DeviceTransaction)null;
+        public void Initialise() => CurrentTransaction = null;
+
+        public event EventHandler<DeviceTransactionResult> TransactionStatusEvent;
 
         private void OnTransactionStatusEvent(
           object sender,
@@ -716,50 +763,55 @@ namespace CashAccSysDeviceManager
                 {
                     Log.Debug(GetType().Name, nameof(OnTransactionStatusEvent), "EventHandler", "CurrentState = {0}: Updating CurrentTransactionResult", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
                     CurrentState = DeviceManagerState.NONE;
                     TransactionStatusResponseResult statusResponseResult = ProcessTransactionStatusResponse(TransactionStatusResponse);
-                    if (statusResponseResult.data.SessionID == CurrentTransaction.SessionID && statusResponseResult.data.TransactionID == CurrentTransaction.TransactionID && statusResponseResult.data.Status != 0)
+                    if (statusResponseResult.data.SessionID == CurrentTransaction.SessionID && statusResponseResult.data.TransactionID == CurrentTransaction.TransactionID && statusResponseResult.data.Status != TransactionResultStatus.NONE)
                     {
                         CurrentTransaction.CurrentTransactionResult = statusResponseResult.data;
                     }
                     else
                     {
-                        Log.Error(nameof(CashAccSysDeviceManager), "ERROR", nameof(OnTransactionStatusEvent), "Invalid TransactionStatusResult: " + JsonConvert.SerializeObject((object)statusResponseResult), Array.Empty<object>());
+                        Log.Error(nameof(CashAccSysDeviceManager), "ERROR", nameof(OnTransactionStatusEvent), "Invalid TransactionStatusResult: " + JsonConvert.SerializeObject(statusResponseResult), Array.Empty<object>());
                         CurrentState = DeviceManagerState.OUT_OF_ORDER;
                         ResetDevice(false);
                     }
                 }
                 NotifyCurrentTransactionStatusChanged();
-                DeviceTransactionResult deviceTransactionResult = new DeviceTransactionResult
-                {
-                    level = ErrorLevel.SUCCESS,
-                    data = CurrentTransaction
-                };
-                OnTransactionStatusEvent((object)this, deviceTransactionResult);
+                if (TransactionStatusEvent == null)
+                    return;
+                EventHandler<DeviceTransactionResult> transactionStatusEvent = TransactionStatusEvent;
+                DeviceTransactionResult e = new DeviceTransactionResult();
+                e.level = ErrorLevel.SUCCESS;
+                e.data = CurrentTransaction;
+                transactionStatusEvent(this, e);
             }
             else
                 Log.Warning(GetType().Name, nameof(OnTransactionStatusEvent), "EventHandler", "CurrentState = {0}: TransactionStatusResponse received outside of a transaction, ignore", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
         }
 
-        public override void OnTransactionEndEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> TransactionEndEvent;
+
+        private void OnTransactionEndEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnTransactionEndEvent), "EventHandler", "CurrentState = {0}: Running Handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentState == DeviceManagerState.TRANSACTION_ENDED)
             {
                 Log.Debug(GetType().Name, nameof(OnTransactionEndEvent), "EventHandler", "CurrentState = {0}: Transaction Complete", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.NONE;
-                base.OnTransactionEndEvent((object)this, e);
+                if (TransactionEndEvent == null)
+                    return;
+                TransactionEndEvent(this, e);
             }
             else
             {
@@ -767,18 +819,20 @@ namespace CashAccSysDeviceManager
                     return;
                 Log.Warning(GetType().Name, nameof(OnTransactionEndEvent), "EventHandler", "CurrentState = {0}: OnTransactionEndEvent outside DeviceManagerState.TRANSACTION_ENDING", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
             }
         }
 
+        public event EventHandler<DeviceTransactionResult> DropResultEvent;
+
         private void OnDropResultEvent(object sender, DropResult DropResult)
         {
             Log.Debug(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: Running Handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             DropResultResult dropResultResult = ProcessDropResult(DropResult);
             if (CurrentState == DeviceManagerState.OUT_OF_ORDER)
@@ -790,64 +844,74 @@ namespace CashAccSysDeviceManager
                     CurrentTransaction.DropResults.Drops[CurrentTransaction.DropResults.CurrentDropID] = dropResultResult;
                     Log.Debug(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: invoking OnTransactionStatusEvent", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
-                    CurrentTransaction.DropResults.CurrentDropID = (string)null;
-                    OnTransactionStatusEvent((object)this, (TransactionStatusResponse)null);
-                }
-                else if (CurrentTransaction.DropResults.Drops[dropResultResult.DropID]?.DropID != null)
-                {
-                    Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: ERROR in OnDropResultEvent(): Expecting DropResult with DropID {1} but found DropID {2} instead", new object[3]
-                    {
-            (object) CurrentState,
-            (object) CurrentTransaction.DropResults.CurrentDropID,
-            (object) dropResultResult.DropID
-                    });
+                    CurrentTransaction.DropResults.CurrentDropID = null;
+                    OnTransactionStatusEvent(this, null);
                 }
                 else
                 {
-                    Console.Error.WriteLine("ERROR in OnDropResultEvent(): DropResult for a drop that is not part of the CurrentTranscation: DropID " + dropResultResult.DropID + " was not found");
-                    Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: ERROR in OnDropResultEvent(): DropResult for a drop that is not part of the CurrentTranscation: DropID {2} was not found", new object[2]
+                    switch (CurrentTransaction.DropResults.Drops[dropResultResult.DropID]?.DropID)
                     {
-            (object) CurrentState,
-            (object) dropResultResult.DropID
-                    });
-                    CurrentState = DeviceManagerState.OUT_OF_ORDER;
-                    ResetDevice(false);
+                        case null:
+                            Console.Error.WriteLine("ERROR in CashAccSysDeviceManager.OnDropResultEvent(): DropResult for a drop that is not part of the CurrentTranscation: DropID " + dropResultResult.DropID + " was not found");
+                            Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: ERROR in CashAccSysDeviceManager.OnDropResultEvent(): DropResult for a drop that is not part of the CurrentTranscation: DropID {2} was not found", new object[2]
+                            {
+                 CurrentState,
+                 dropResultResult.DropID
+                            });
+                            CurrentState = DeviceManagerState.OUT_OF_ORDER;
+                            ResetDevice(false);
+                            break;
+                        default:
+                            Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: ERROR in CashAccSysDeviceManager.OnDropResultEvent(): Expecting DropResult with DropID {1} but found DropID {2} instead", new object[3]
+                            {
+                 CurrentState,
+                 CurrentTransaction.DropResults.CurrentDropID,
+                 dropResultResult.DropID
+                            });
+                            break;
+                    }
                 }
             }
             else
             {
-                Console.Error.WriteLine("CurrentTransaction cannot be null in OnDropResultEvent()");
-                Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnDropResultEvent()", new object[1]
+                Console.Error.WriteLine("CurrentTransaction cannot be null in CashAccSysDeviceManager.OnDropResultEvent()");
+                Log.Warning(GetType().Name, nameof(OnDropResultEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnDropResultEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
             }
         }
 
-        public override void OnCashInStartedEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> CashInStartedEvent;
+
+        private void OnCashInStartedEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnCashInStartedEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
-            base.OnCashInStartedEvent((object)this, e);
+            if (CashInStartedEvent == null)
+                return;
+            CashInStartedEvent(this, e);
         }
 
-        public override void OnCountEndEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> CountEndEvent;
+
+        private void OnCountEndEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnCountEndEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentTransaction == null)
             {
-                Log.Warning(GetType().Name, nameof(OnCountEndEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnCountEndEvent()", new object[1]
+                Log.Warning(GetType().Name, nameof(OnCountEndEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnCountEndEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
@@ -858,37 +922,45 @@ namespace CashAccSysDeviceManager
                 {
                     Log.Debug(GetType().Name, nameof(OnCountEndEvent), "EventHandler", "CurrentState = {0}: Raising OnEscrowOperationCompleteEvent", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
-                    OnEscrowOperationCompleteEvent((object)this, e);
+                    OnEscrowOperationCompleteEvent(this, e);
                 }
-                base.OnCountEndEvent((object)this, e);
+                if (CountEndEvent == null)
+                    return;
+                CountEndEvent(this, e);
             }
         }
 
-        public override void OnCountStartedEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> CountStartedEvent;
+
+        private void OnCountStartedEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnCountStartedEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
-            base.OnCountStartedEvent((object)this, e);
+            if (CountStartedEvent == null)
+                return;
+            CountStartedEvent(this, e);
         }
 
-        public override void OnCountPauseEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> CountPauseEvent;
+
+        private void OnCountPauseEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnCountPauseEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentState == DeviceManagerState.OUT_OF_ORDER)
                 return;
             if (CurrentTransaction == null)
             {
-                Console.Error.WriteLine("CurrentTransaction cannot be null in OnCountPauseEvent()");
-                Log.Warning(GetType().Name, nameof(OnCountPauseEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnCountPauseEvent()", new object[1]
+                Console.Error.WriteLine("CurrentTransaction cannot be null in CashAccSysDeviceManager.OnCountPauseEvent()");
+                Log.Warning(GetType().Name, nameof(OnCountPauseEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnCountPauseEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
@@ -896,90 +968,80 @@ namespace CashAccSysDeviceManager
             else if (CurrentState == DeviceManagerState.DROP_ESCROW_ACCEPTING)
                 DeviceMessenger.EscrowDrop();
             else if (CurrentState == DeviceManagerState.DROP_ESCROW_REJECTING)
+            {
                 DeviceMessenger.EscrowReject();
+            }
             else
-                base.OnCountPauseEvent((object)this, e);
+            {
+                if (CountPauseEvent == null)
+                    return;
+                CountPauseEvent(this, e);
+            }
         }
 
-        public override void OnNoteJamStartEvent(object sender, EventArgs e)
-        {
-            CurrentState = DeviceManagerState.NOTEJAM_START;
-            DeviceManagerMode = DeviceManagerMode.NOTEJAM;
-            base.OnNoteJamStartEvent((object)this, e);
-        }
+        public event EventHandler<DeviceTransactionResult> EscrowDropEvent;
 
-        public override void OnNoteJamClearWaitEvent(object sender, EventArgs e)
-        {
-            CurrentState = DeviceManagerState.NOTEJAM_CLEAR_WAIT;
-            DeviceManagerMode = DeviceManagerMode.NOTEJAM;
-            base.OnNoteJamClearWaitEvent((object)this, e);
-        }
-
-        public override void OnNoteJamEndRequestEvent(object sender, EventArgs e)
-        {
-            if (DeviceManagerMode != DeviceManagerMode.NOTEJAM || CurrentState == DeviceManagerState.NOTEJAM_END_REQUEST)
-                return;
-            CurrentState = DeviceManagerState.NOTEJAM_END_REQUEST;
-            DeviceManagerMode = DeviceManagerMode.NOTEJAM;
-            base.OnNoteJamEndRequestEvent((object)this, e);
-        }
-
-        public override void OnNoteJamEndEvent(object sender, EventArgs e)
-        {
-            CurrentState = DeviceManagerState.NONE;
-            DeviceManagerMode = DeviceManagerMode.NONE;
-            base.OnNoteJamEndEvent((object)this, e);
-        }
-
-        public override void OnEscrowDropEvent(object sender, DeviceTransactionResult e)
+        private void OnEscrowDropEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnEscrowDropEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentTransaction == null)
             {
-                Log.Warning(GetType().Name, nameof(OnEscrowDropEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnEscrowDropEvent()", new object[1]
+                Log.Warning(GetType().Name, nameof(OnEscrowDropEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnEscrowDropEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
             }
             else
-                base.OnEscrowDropEvent((object)this, e);
+            {
+                if (EscrowDropEvent == null)
+                    return;
+                EscrowDropEvent(this, e);
+            }
         }
 
-        public override void OnEscrowRejectEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> EscrowRejectEvent;
+
+        private void OnEscrowRejectEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnEscrowRejectEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentTransaction == null)
             {
-                Log.Warning(GetType().Name, nameof(OnEscrowRejectEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnEscrowRejectEvent()", new object[1]
+                Log.Warning(GetType().Name, nameof(OnEscrowRejectEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnEscrowRejectEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
             }
             else
-                base.OnEscrowRejectEvent((object)this, e);
+            {
+                if (EscrowRejectEvent == null)
+                    return;
+                EscrowRejectEvent(this, e);
+            }
         }
 
-        public override void OnEscrowOperationCompleteEvent(object sender, DeviceTransactionResult e)
+        public event EventHandler<DeviceTransactionResult> EscrowOperationCompleteEvent;
+
+        private void OnEscrowOperationCompleteEvent(object sender, DeviceTransactionResult e)
         {
             Log.Debug(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: Running handler", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CurrentTransaction == null)
             {
-                Log.Warning(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in OnEscrowOperationCompleteEvent()", new object[1]
+                Log.Warning(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.OnEscrowOperationCompleteEvent()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 ResetDevice(false);
@@ -991,78 +1053,201 @@ namespace CashAccSysDeviceManager
                     CurrentState = DeviceManagerState.DROP_ESCROW_ACCEPTED;
                     Log.Info(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: CurrentState changed from DROP_ESCROW_ACCEPTING to DROP_ESCROW_ACCEPTED", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
-                    DeviceTransactionResult e1 = new DeviceTransactionResult
-                    {
-                        level = e.level,
-                        data = CurrentTransaction
-                    };
-                    OnEscrowDropEvent((object)this, e1);
+                    DeviceTransactionResult e1 = new DeviceTransactionResult();
+                    e1.level = e.level;
+                    e1.data = CurrentTransaction;
+                    OnEscrowDropEvent(this, e1);
                 }
                 else if (CurrentState == DeviceManagerState.DROP_ESCROW_REJECTING || CurrentState == DeviceManagerState.OUT_OF_ORDER)
                 {
                     CurrentState = DeviceManagerState.DROP_ESCROW_REJECTED;
                     Log.Info(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: CurrentState changed from DROP_ESCROW_REJECTING to DROP_ESCROW_REJECTED", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
-                    DeviceTransactionResult e2 = new DeviceTransactionResult
-                    {
-                        level = e.level,
-                        data = CurrentTransaction
-                    };
-                    OnEscrowRejectEvent((object)this, e2);
+                    DeviceTransactionResult e2 = new DeviceTransactionResult();
+                    e2.level = e.level;
+                    e2.data = CurrentTransaction;
+                    OnEscrowRejectEvent(this, e2);
                 }
                 if (CurrentState == DeviceManagerState.DROP_ESCROW_ACCEPTED || CurrentState == DeviceManagerState.DROP_ESCROW_REJECTED)
                 {
                     Log.Info(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: CurrentState changing to DROP_ESCROW_DONE", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
                     CurrentState = DeviceManagerState.DROP_ESCROW_DONE;
-                    base.OnEscrowOperationCompleteEvent((object)this, e);
+                    if (EscrowOperationCompleteEvent == null)
+                        return;
+                    EscrowOperationCompleteEvent(this, e);
                 }
-                else if (CurrentState != DeviceManagerState.DROP_ESCROW_DONE)
+                else
                 {
+                    if (CurrentState == DeviceManagerState.DROP_ESCROW_DONE)
+                        return;
                     Log.Warning(GetType().Name, nameof(OnEscrowOperationCompleteEvent), "EventHandler", "CurrentState = {0}: FAILED: CurrentState == DeviceManagerState.DROP_ESCROW_ACCEPTED|| CurrentState == DeviceManagerState.DROP_ESCROW_REJECTED", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
                     CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 }
             }
-            GetTransactionStatus();
         }
 
-        public override void OnEscrowJamStartEvent(object sender, EventArgs e)
+        public event EventHandler<CITResult> CITResultEvent;
+
+        private void OnCITResultEvent(object sender, CITResult e)
+        {
+            if (CITResultEvent == null)
+                return;
+            CITResultEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> DoorOpenEvent;
+
+        private void OnDoorOpenEvent(object sender, EventArgs e)
+        {
+            if (DoorOpenEvent == null)
+                return;
+            DoorOpenEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> DoorClosedEvent;
+
+        private void OnDoorClosedEvent(object sender, EventArgs e)
+        {
+            if (DoorClosedEvent == null)
+                return;
+            DoorClosedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> BagRemovedEvent;
+
+        private void OnBagRemovedEvent(object sender, EventArgs e)
+        {
+            if (BagRemovedEvent == null)
+                return;
+            BagRemovedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> BagPresentEvent;
+
+        private void OnBagPresentEvent(object sender, EventArgs e)
+        {
+            if (BagPresentEvent == null)
+                return;
+            BagPresentEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> BagOpenedEvent;
+
+        private void OnBagOpenedEvent(object sender, EventArgs e)
+        {
+            if (BagOpenedEvent == null)
+                return;
+            BagOpenedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> BagClosedEvent;
+
+        private void OnBagClosedEvent(object sender, EventArgs e)
+        {
+            if (BagClosedEvent == null)
+                return;
+            BagClosedEvent(this, e);
+        }
+
+        public event EventHandler<ControllerStatus> BagFullAlertEvent;
+
+        private void OnBagFullAlertEvent(object sender, ControllerStatus e)
+        {
+            if (BagFullAlertEvent == null)
+                return;
+            BagFullAlertEvent(this, e);
+        }
+
+        public event EventHandler<ControllerStatus> BagFullWarningEvent;
+
+        private void OnBagFullWarningEvent(object sender, ControllerStatus e)
+        {
+            if (BagFullWarningEvent == null)
+                return;
+            BagFullWarningEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> BagReplacedEvent;
+
+        private void OnBagReplacedEvent(object sender, EventArgs e)
+        {
+            if (BagReplacedEvent == null)
+                return;
+            BagReplacedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> DeviceLockedEvent;
+
+        private void OnDeviceLockedEvent(object sender, EventArgs e)
+        {
+            if (DeviceLockedEvent == null)
+                return;
+            DeviceLockedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> DeviceUnlockedEvent;
+
+        private void OnDeviceUnlockedEvent(object sender, EventArgs e)
+        {
+            if (DeviceUnlockedEvent == null)
+                return;
+            DeviceUnlockedEvent(this, e);
+        }
+
+        public event EventHandler<EventArgs> EscrowJamStartEvent;
+
+        public void OnEscrowJamStartEvent(object sender, EventArgs e)
         {
             CurrentState = DeviceManagerState.ESCROWJAM_START;
             DeviceManagerMode = DeviceManagerMode.ESCROW_JAM;
-            base.OnEscrowJamStartEvent((object)this, e);
+            if (EscrowJamStartEvent == null)
+                return;
+            EscrowJamStartEvent(this, e);
         }
 
-        public override void OnEscrowJamClearWaitEvent(object sender, EventArgs e)
+        public event EventHandler<EventArgs> EscrowJamClearWaitEvent;
+
+        private void OnEscrowJamClearWaitEvent(object sender, EventArgs e)
         {
             CurrentState = DeviceManagerState.ESCROWJAM_CLEAR_WAIT;
             DeviceManagerMode = DeviceManagerMode.ESCROW_JAM;
-            base.OnEscrowJamClearWaitEvent((object)this, e);
+            if (EscrowJamClearWaitEvent == null)
+                return;
+            EscrowJamClearWaitEvent(this, e);
         }
 
-        public override void OnEscrowJamEndRequestEvent(object sender, EventArgs e)
+        public event EventHandler<EventArgs> EscrowJamEndRequestEvent;
+
+        private void OnEscrowJamEndRequestEvent(object sender, EventArgs e)
         {
             if (DeviceManagerMode != DeviceManagerMode.ESCROW_JAM || CurrentState == DeviceManagerState.ESCROWJAM_END_REQUEST)
                 return;
             CurrentState = DeviceManagerState.ESCROWJAM_END_REQUEST;
             DeviceManagerMode = DeviceManagerMode.ESCROW_JAM;
-            base.OnEscrowJamEndRequestEvent((object)this, e);
+            if (EscrowJamEndRequestEvent == null)
+                return;
+            EscrowJamEndRequestEvent(this, e);
         }
 
-        public override void OnEscrowJamEndEvent(object sender, EventArgs e)
+        public event EventHandler<EventArgs> EscrowJamEndEvent;
+
+        private void OnEscrowJamEndEvent(object sender, EventArgs e)
         {
             CurrentState = DeviceManagerState.NONE;
             DeviceManagerMode = DeviceManagerMode.NONE;
-            base.OnEscrowJamEndEvent((object)this, e);
+            if (EscrowJamEndEvent == null)
+                return;
+            EscrowJamEndEvent(this, e);
         }
 
         public override void CountNotes() => throw new NotImplementedException();
@@ -1081,7 +1266,7 @@ namespace CashAccSysDeviceManager
                     case ControllerState.IDLE:
                     case ControllerState.ESCROW_DROP:
                     case ControllerState.ESCROW_REJECT:
-                        IControllerStatus currentDeviceStatus = CurrentDeviceStatus;
+                        ControllerStatus currentDeviceStatus = CurrentDeviceStatus;
                         int num;
                         if (currentDeviceStatus == null)
                         {
@@ -1091,7 +1276,7 @@ namespace CashAccSysDeviceManager
                         {
                             DeviceTransactionStatus? status = currentDeviceStatus.Transaction?.Status;
                             DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                            num = !(status == transactionStatus & status.HasValue) ? 1 : 0;
+                            num = !(status.GetValueOrDefault() == transactionStatus & status.HasValue) ? 1 : 0;
                         }
                         if (num == 0)
                             break;
@@ -1107,12 +1292,8 @@ namespace CashAccSysDeviceManager
                         break;
                 }
             }
-            else
-            {
-                switch (CurrentDeviceStatus.ControllerState)
-                {
-                }
-            }
+            else if (CurrentDeviceStatus.ControllerState == ControllerState.IDLE)
+                ;
         }
 
         public override void SetCurrency(string currency) => DeviceMessenger.SetCurrency(currency);
@@ -1123,84 +1304,64 @@ namespace CashAccSysDeviceManager
             {
                 if (HasEscrow)
                 {
-                    int num1;
                     if (CurrentTransaction == null && CurrentState == DeviceManagerState.NONE)
                     {
-                        IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                        ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
                         if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
                         {
-                            IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                            int num2;
+                            ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                            int num1;
                             if (currentDeviceStatus2 == null)
                             {
-                                num2 = 0;
+                                num1 = 0;
                             }
                             else
                             {
                                 DeviceState? status = currentDeviceStatus2.NoteAcceptor?.Status;
                                 DeviceState deviceState = DeviceState.IDLE;
-                                num2 = status == deviceState & status.HasValue ? 1 : 0;
+                                num1 = status.GetValueOrDefault() == deviceState & status.HasValue ? 1 : 0;
                             }
-                            if (num2 != 0)
+                            if (num1 != 0)
                             {
-                                IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
-                                int num3;
+                                ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                                int num2;
                                 if (currentDeviceStatus3 == null)
                                 {
-                                    num3 = 0;
+                                    num2 = 0;
                                 }
                                 else
                                 {
                                     EscrowStatus? status = currentDeviceStatus3.Escrow?.Status;
                                     EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                    num3 = status == escrowStatus & status.HasValue ? 1 : 0;
+                                    num2 = status.GetValueOrDefault() == escrowStatus & status.HasValue ? 1 : 0;
                                 }
-                                if (num3 != 0)
+                                if (num2 != 0)
                                 {
-                                    IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                                    ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
                                     if (currentDeviceStatus4 == null)
-                                    {
-                                        num1 = 0;
-                                        goto label_15;
-                                    }
-                                    else
-                                    {
-                                        DeviceTransactionStatus? status = currentDeviceStatus4.Transaction?.Status;
-                                        DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                                        num1 = status == transactionStatus & status.HasValue ? 1 : 0;
-                                        goto label_15;
-                                    }
+                                        return false;
+                                    DeviceTransactionStatus? status = currentDeviceStatus4.Transaction?.Status;
+                                    DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
+                                    return status.GetValueOrDefault() == transactionStatus & status.HasValue;
                                 }
                             }
                         }
                     }
-                    num1 = 0;
-                label_15:
-                    return num1 != 0;
+                    return false;
                 }
-                IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
-                int num;
-                if ((currentDeviceStatus5 != null ? (currentDeviceStatus5.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
-                {
-                    IControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
-                    if (currentDeviceStatus6 == null)
-                    {
-                        num = 0;
-                    }
-                    else
-                    {
-                        DeviceTransactionStatus? status = currentDeviceStatus6.Transaction?.Status;
-                        DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                        num = status == transactionStatus & status.HasValue ? 1 : 0;
-                    }
-                }
-                else
-                    num = 0;
-                return num != 0;
+                ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                if ((currentDeviceStatus5 != null ? (currentDeviceStatus5.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) == 0)
+                    return false;
+                ControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
+                if (currentDeviceStatus6 == null)
+                    return false;
+                DeviceTransactionStatus? status1 = currentDeviceStatus6.Transaction?.Status;
+                DeviceTransactionStatus transactionStatus1 = DeviceTransactionStatus.NONE;
+                return status1.GetValueOrDefault() == transactionStatus1 & status1.HasValue;
             }
         }
 
-        public override void TransactionStart(
+        public void TransactionStart(
           string currency,
           string accountNumber,
           string sessionID,
@@ -1210,7 +1371,7 @@ namespace CashAccSysDeviceManager
         {
             Log.Debug(GetType().Name, nameof(TransactionStart), "Command", "CurrentState = {0}: StartingTransaction", new object[1]
             {
-        (object) CurrentState
+         CurrentState
             });
             if (CanTransactionStart)
             {
@@ -1222,7 +1383,7 @@ namespace CashAccSysDeviceManager
                         if (CurrentTransaction == null)
                         {
                             CurrentTransaction = new DeviceTransaction(accountNumber, sessionID, transactionID, currency, transactionValueCents, transactionValueCents);
-                            OnTransactionStartedEvent((object)this, CurrentTransaction);
+                            OnTransactionStartedEvent(this, CurrentTransaction);
                         }
                         else
                         {
@@ -1233,24 +1394,24 @@ namespace CashAccSysDeviceManager
                                     Console.Error.WriteLine("This session and transaction is currently transacting");
                                     Log.Warning(GetType().Name, nameof(TransactionStart), "InvalidOperation", "DeviceManager is currently processing Session={0} and Transaction={1}.", new object[2]
                                     {
-                    (object) CurrentTransaction?.SessionID,
-                    (object) CurrentTransaction?.TransactionID
+                     CurrentTransaction?.SessionID,
+                     CurrentTransaction?.TransactionID
                                     });
                                 }
                                 else
                                     Log.Warning(GetType().Name, nameof(TransactionStart), "InvalidOperation", "DeviceManager is currently processing Session={0} and Transaction={1}. Please end the current transaction before starting Session={2}; Transaction={3};", new object[4]
                                     {
-                    (object) CurrentTransaction?.SessionID,
-                    (object) CurrentTransaction?.TransactionID,
-                    (object) sessionID,
-                    (object) transactionID
+                     CurrentTransaction?.SessionID,
+                     CurrentTransaction?.TransactionID,
+                     sessionID,
+                     transactionID
                                     });
                             }
                             else
                                 Log.Warning(GetType().Name, nameof(TransactionStart), "InvalidOperation", "CurrentTransaction.TransactionID {0} != transactionID {1}", new object[2]
                                 {
-                  (object) CurrentTransaction?.SessionID,
-                  (object) sessionID
+                   CurrentTransaction?.SessionID,
+                   sessionID
                                 });
                             ResetDevice(false);
                         }
@@ -1264,7 +1425,7 @@ namespace CashAccSysDeviceManager
                 {
                     Log.Warning(GetType().Name, nameof(TransactionStart), "InvalidOperation", "CurrentState = {0}: TransactionStart outside DeviceManagerState.NONE", new object[1]
                     {
-            (object) CurrentState
+             CurrentState
                     });
                     CurrentState = DeviceManagerState.OUT_OF_ORDER;
                     ResetDevice(false);
@@ -1274,144 +1435,130 @@ namespace CashAccSysDeviceManager
                 Log.Warning(GetType().Name, nameof(TransactionStart), "InvalidOperation", "FAILED: CanTransactionStart", Array.Empty<object>());
         }
 
-        public override bool CanTransactionEnd
+        public bool CanTransactionEnd
         {
             get
             {
                 if (HasEscrow)
                 {
-                    int num1;
                     if (CurrentState == DeviceManagerState.NONE && CurrentTransaction?.CurrentTransactionResult != null)
                     {
-                        IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                        ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
                         DeviceState? status1;
                         if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) == 0)
                         {
-                            IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                            int num2;
+                            ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                            int num;
                             if (currentDeviceStatus2 == null)
                             {
-                                num2 = 0;
+                                num = 0;
                             }
                             else
                             {
                                 status1 = currentDeviceStatus2.NoteAcceptor?.Status;
                                 DeviceState deviceState = DeviceState.OK;
-                                num2 = status1 == deviceState & status1.HasValue ? 1 : 0;
+                                num = status1.GetValueOrDefault() == deviceState & status1.HasValue ? 1 : 0;
                             }
-                            if (num2 == 0)
+                            if (num == 0)
                                 goto label_23;
                         }
-                        IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
-                        int num3;
+                        ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                        int num1;
                         if (currentDeviceStatus3 == null)
                         {
-                            num3 = 0;
+                            num1 = 0;
                         }
                         else
                         {
                             status1 = currentDeviceStatus3.NoteAcceptor?.Status;
                             DeviceState deviceState = DeviceState.IDLE;
-                            num3 = status1 == deviceState & status1.HasValue ? 1 : 0;
+                            num1 = status1.GetValueOrDefault() == deviceState & status1.HasValue ? 1 : 0;
                         }
-                        if (num3 == 0)
+                        if (num1 == 0)
                         {
-                            IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
-                            int num4;
+                            ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                            int num2;
                             if (currentDeviceStatus4 == null)
                             {
-                                num4 = 0;
+                                num2 = 0;
                             }
                             else
                             {
                                 status1 = currentDeviceStatus4.NoteAcceptor?.Status;
                                 DeviceState deviceState = DeviceState.OK;
-                                num4 = status1 == deviceState & status1.HasValue ? 1 : 0;
+                                num2 = status1.GetValueOrDefault() == deviceState & status1.HasValue ? 1 : 0;
                             }
-                            if (num4 == 0)
+                            if (num2 == 0)
                                 goto label_23;
                         }
                         if (HasEscrow)
                         {
-                            IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
-                            int num5;
+                            ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                            int num3;
                             if (currentDeviceStatus5 == null)
                             {
-                                num5 = 0;
+                                num3 = 0;
                             }
                             else
                             {
                                 EscrowStatus? status2 = currentDeviceStatus5.Escrow?.Status;
                                 EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                num5 = status2 == escrowStatus & status2.HasValue ? 1 : 0;
+                                num3 = status2.GetValueOrDefault() == escrowStatus & status2.HasValue ? 1 : 0;
                             }
-                            if (num5 == 0)
+                            if (num3 == 0)
                                 goto label_23;
                         }
-                        IControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
+                        ControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
                         if (currentDeviceStatus6 == null)
-                        {
-                            num1 = 0;
-                            goto label_24;
-                        }
-                        else
-                        {
-                            DeviceTransactionStatus? status3 = currentDeviceStatus6.Transaction?.Status;
-                            DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
-                            num1 = status3 == transactionStatus & status3.HasValue ? 1 : 0;
-                            goto label_24;
-                        }
+                            return false;
+                        DeviceTransactionStatus? status3 = currentDeviceStatus6.Transaction?.Status;
+                        DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
+                        return status3.GetValueOrDefault() == transactionStatus & status3.HasValue;
                     }
                 label_23:
-                    num1 = 0;
-                label_24:
-                    return num1 != 0;
+                    return false;
                 }
-                int num6;
                 if (CurrentTransaction?.CurrentTransactionResult != null && CurrentState != DeviceManagerState.TRANSACTION_ENDING)
                 {
-                    IControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
+                    ControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
                     DeviceState? status;
-                    int num7;
+                    int num4;
                     if (currentDeviceStatus7 == null)
                     {
-                        num7 = 0;
+                        num4 = 0;
                     }
                     else
                     {
                         status = currentDeviceStatus7.NoteAcceptor?.Status;
                         DeviceState deviceState = DeviceState.IDLE;
-                        num7 = status == deviceState & status.HasValue ? 1 : 0;
+                        num4 = status.GetValueOrDefault() == deviceState & status.HasValue ? 1 : 0;
                     }
-                    if (num7 == 0)
+                    if (num4 == 0)
                     {
-                        IControllerStatus currentDeviceStatus8 = CurrentDeviceStatus;
-                        int num8;
+                        ControllerStatus currentDeviceStatus8 = CurrentDeviceStatus;
+                        int num5;
                         if (currentDeviceStatus8 == null)
                         {
-                            num8 = 0;
+                            num5 = 0;
                         }
                         else
                         {
                             status = currentDeviceStatus8.NoteAcceptor?.Status;
                             DeviceState deviceState = DeviceState.OK;
-                            num8 = status == deviceState & status.HasValue ? 1 : 0;
+                            num5 = status.GetValueOrDefault() == deviceState & status.HasValue ? 1 : 0;
                         }
-                        if (num8 == 0)
-                            goto label_35;
+                        if (num5 == 0)
+                            goto label_36;
                     }
-                    IControllerStatus currentDeviceStatus9 = CurrentDeviceStatus;
-                    num6 = currentDeviceStatus9 != null ? (currentDeviceStatus9.ControllerState == ControllerState.DROP ? 1 : 0) : 0;
-                    goto label_36;
+                    ControllerStatus currentDeviceStatus9 = CurrentDeviceStatus;
+                    return currentDeviceStatus9 != null && currentDeviceStatus9.ControllerState == ControllerState.DROP;
                 }
-            label_35:
-                num6 = 0;
             label_36:
-                return num6 != 0;
+                return false;
             }
         }
 
-        public override void TransactionEnd()
+        public void TransactionEnd()
         {
             if (CurrentState != DeviceManagerState.OUT_OF_ORDER)
                 CurrentState = DeviceManagerState.TRANSACTION_ENDING;
@@ -1424,19 +1571,16 @@ namespace CashAccSysDeviceManager
         public override void CashInStart()
         {
             DeviceMessenger.CashInStart(CurrentTransaction.Currency, CurrentTransaction.AccountNumber, CurrentTransaction.SessionID, CurrentTransaction.TransactionID, HasEscrow ? DropMode.MULTIDROP_NOTES : DropMode.DROP_NOTES);
-            DeviceTransactionResult e = new DeviceTransactionResult
-            {
-                level = ErrorLevel.SUCCESS,
-                data = CurrentTransaction
-            };
-            OnCashInStartedEvent((object)this, e);
+            DeviceTransactionResult e = new DeviceTransactionResult();
+            e.level = ErrorLevel.SUCCESS;
+            e.data = CurrentTransaction;
+            OnCashInStartedEvent(this, e);
         }
 
-        public override bool CanCount
+        public bool CanCount
         {
             get
             {
-                int num1;
                 if (CurrentTransaction != null && !ClearHopperRequest && CurrentState != DeviceManagerState.OUT_OF_ORDER)
                 {
                     DeviceTransaction currentTransaction = CurrentTransaction;
@@ -1444,91 +1588,73 @@ namespace CashAccSysDeviceManager
                     {
                         long? droppedTotalCents = CurrentTransaction?.CurrentTransactionResult?.EscrowPlusDroppedTotalCents;
                         long? transactionLimitCents = CurrentTransaction?.TransactionLimitCents;
-                        if (!(droppedTotalCents <= transactionLimitCents & droppedTotalCents.HasValue & transactionLimitCents.HasValue))
+                        if (!(droppedTotalCents.GetValueOrDefault() <= transactionLimitCents.GetValueOrDefault() & droppedTotalCents.HasValue & transactionLimitCents.HasValue))
                             goto label_21;
                     }
-                    IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                    ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
                     if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.IDLE ? 1 : 0) : 0) != 0)
                     {
-                        IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                        int num2;
+                        ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                        int num1;
                         if (currentDeviceStatus2 == null)
                         {
-                            num2 = 0;
+                            num1 = 0;
                         }
                         else
                         {
                             DeviceState? status = currentDeviceStatus2.NoteAcceptor?.Status;
                             DeviceState deviceState = DeviceState.IDLE;
-                            num2 = status == deviceState & status.HasValue ? 1 : 0;
+                            num1 = status.GetValueOrDefault() == deviceState & status.HasValue ? 1 : 0;
                         }
-                        if (num2 != 0)
+                        if (num1 != 0)
                         {
                             if (HasEscrow)
                             {
-                                IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
-                                int num3;
+                                ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                                int num2;
                                 if (currentDeviceStatus3 == null)
                                 {
-                                    num3 = 0;
+                                    num2 = 0;
                                 }
                                 else
                                 {
                                     EscrowStatus? status = currentDeviceStatus3.Escrow?.Status;
                                     EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                    num3 = status == escrowStatus & status.HasValue ? 1 : 0;
+                                    num2 = status.GetValueOrDefault() == escrowStatus & status.HasValue ? 1 : 0;
                                 }
-                                if (num3 == 0)
+                                if (num2 == 0)
                                     goto label_21;
                             }
-                            IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
-                            DeviceTransactionStatus? status1;
-                            int num4;
+                            ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                            int num3;
                             if (currentDeviceStatus4 == null)
                             {
-                                num4 = 0;
+                                num3 = 0;
                             }
                             else
                             {
-                                status1 = currentDeviceStatus4.Transaction?.Status;
+                                DeviceTransactionStatus? status = currentDeviceStatus4.Transaction?.Status;
                                 DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                                num4 = status1 == transactionStatus & status1.HasValue ? 1 : 0;
+                                num3 = status.GetValueOrDefault() == transactionStatus & status.HasValue ? 1 : 0;
                             }
-                            if (num4 == 0)
-                            {
-                                IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
-                                if (currentDeviceStatus5 == null)
-                                {
-                                    num1 = 0;
-                                    goto label_22;
-                                }
-                                else
-                                {
-                                    status1 = currentDeviceStatus5.Transaction?.Status;
-                                    DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
-                                    num1 = status1 == transactionStatus & status1.HasValue ? 1 : 0;
-                                    goto label_22;
-                                }
-                            }
-                            else
-                            {
-                                num1 = 1;
-                                goto label_22;
-                            }
+                            if (num3 != 0)
+                                return true;
+                            ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                            if (currentDeviceStatus5 == null)
+                                return false;
+                            DeviceTransactionStatus? status1 = currentDeviceStatus5.Transaction?.Status;
+                            DeviceTransactionStatus transactionStatus1 = DeviceTransactionStatus.ACTIVE;
+                            return status1.GetValueOrDefault() == transactionStatus1 & status1.HasValue;
                         }
                     }
                 }
             label_21:
-                num1 = 0;
-            label_22:
-                return num1 != 0;
+                return false;
             }
         }
 
-        public override void Count()
+        public void Count()
         {
-            if (!CanCount)
-                return;
             if (CurrentTransaction != null)
             {
                 if (CurrentTransaction.TransactionValueCents == 0L || CurrentTransaction.TransactionValueCentsLeft > 0L)
@@ -1538,12 +1664,12 @@ namespace CashAccSysDeviceManager
                         Console.Error.WriteLine("CurrentDeviceStatus cannot be null in CashAccSysDeviceManager.Count()");
                         Log.Warning(GetType().Name, nameof(Count), "Command", "CurrentState = {0}: CurrentDeviceStatus cannot be null in CashAccSysDeviceManager.Count()", new object[1]
                         {
-              (object) CurrentState
+               CurrentState
                         });
                         CurrentState = DeviceManagerState.OUT_OF_ORDER;
                         throw new NullReferenceException("CurrentDeviceStatus cannot be null in CashAccSysDeviceManager.Count()");
                     }
-                    if (CurrentState == DeviceManagerState.DROP_STARTING || CurrentState == DeviceManagerState.TRANSACTION_STARTED || CurrentState == DeviceManagerState.NONE)
+                    if (CanCount && (CurrentState == DeviceManagerState.DROP_STARTING || CurrentState == DeviceManagerState.TRANSACTION_STARTED || CurrentState == DeviceManagerState.NONE))
                     {
                         if (CurrentState != DeviceManagerState.DROP_STARTING)
                         {
@@ -1552,28 +1678,30 @@ namespace CashAccSysDeviceManager
                         }
                         DeviceMessenger.Count(CurrentTransaction.DropResults.CurrentDropID, CurrentTransaction.TransactionValueCentsLeft);
                     }
-                    else if (CurrentState != DeviceManagerState.DROP_STARTED)
+                    else
                     {
-                        Console.Error.WriteLine(string.Format("Controller not ready for count: CurrentDeviceStatus?.ControllerState={0}: CurrentDeviceStatus?.NoteAcceptor?.Status={1}: CurrentDeviceStatus?.Escrow?.Status={2}: CurrentDeviceStatus?.Transaction?.Status={3}", (object)CurrentDeviceStatus?.ControllerState, (object)CurrentDeviceStatus?.NoteAcceptor?.Status, (object)CurrentDeviceStatus?.Escrow?.Status, (object)CurrentDeviceStatus?.Transaction?.Status));
+                        if (CurrentState == DeviceManagerState.DROP_STARTED)
+                            return;
+                        Console.Error.WriteLine(string.Format("Controller not ready for count: CurrentDeviceStatus?.ControllerState={0}: CurrentDeviceStatus?.NoteAcceptor?.Status={1}: CurrentDeviceStatus?.Escrow?.Status={2}: CurrentDeviceStatus?.Transaction?.Status={3}", CurrentDeviceStatus?.ControllerState, CurrentDeviceStatus?.NoteAcceptor?.Status, CurrentDeviceStatus?.Escrow?.Status, CurrentDeviceStatus?.Transaction?.Status));
                         Log.Warning(GetType().Name, nameof(Count), "Command", "CurrentState = {0}: Controller not ready for count: CurrentDeviceStatus?.ControllerState={1}: CurrentDeviceStatus?.NoteAcceptor?.Status={2}: CurrentDeviceStatus?.Escrow?.Status={3}: CurrentDeviceStatus?.Transaction?.Status={4}", new object[5]
                         {
-              (object) CurrentState,
-              (object) CurrentDeviceStatus?.ControllerState,
-              (object) CurrentDeviceStatus?.NoteAcceptor?.Status,
-              (object) CurrentDeviceStatus?.Escrow?.Status,
-              (object) CurrentDeviceStatus?.Transaction?.Status
+               CurrentState,
+               CurrentDeviceStatus?.ControllerState,
+               CurrentDeviceStatus?.NoteAcceptor?.Status,
+               CurrentDeviceStatus?.Escrow?.Status,
+               CurrentDeviceStatus?.Transaction?.Status
                         });
                         CurrentState = DeviceManagerState.OUT_OF_ORDER;
                     }
                 }
                 else
                 {
-                    Console.Error.WriteLine(string.Format("transaction limit reached: TotalValue={0}: Limit={1}", (object)CurrentTransaction?.CurrentTransactionResult?.EscrowPlusDroppedTotalCents, (object)CurrentTransaction?.TransactionLimitCents));
+                    Console.Error.WriteLine(string.Format("transaction limit reached: TotalValue={0}: Limit={1}", CurrentTransaction?.CurrentTransactionResult?.EscrowPlusDroppedTotalCents, CurrentTransaction?.TransactionLimitCents));
                     Log.Warning(GetType().Name, nameof(Count), "Command", "CurrentState = {0}: transaction limit reached: TotalValue={1}: Limit={2}", new object[3]
                     {
-            (object) CurrentState,
-            (object) CurrentTransaction?.CurrentTransactionResult?.EscrowPlusDroppedTotalCents,
-            (object) CurrentTransaction?.TransactionLimitCents
+             CurrentState,
+             CurrentTransaction?.CurrentTransactionResult?.EscrowPlusDroppedTotalCents,
+             CurrentTransaction?.TransactionLimitCents
                     });
                 }
             }
@@ -1582,278 +1710,256 @@ namespace CashAccSysDeviceManager
                 Console.Error.WriteLine("CurrentTransaction cannot be null in CashAccSysDeviceManager.Count()");
                 Log.Warning(GetType().Name, nameof(Count), "Command", "CurrentState = {0}: CurrentTransaction cannot be null in CashAccSysDeviceManager.Count()", new object[1]
                 {
-          (object) CurrentState
+           CurrentState
                 });
                 CurrentState = DeviceManagerState.OUT_OF_ORDER;
                 throw new NullReferenceException("CurrentTransaction cannot be null in CashAccSysDeviceManager.Count()");
             }
         }
 
-        public override bool CanPauseCount => false;
-
-        public bool CanStopCount
+        public bool CanPauseCount
         {
             get
             {
-                int num1;
                 if (CurrentState != DeviceManagerState.OUT_OF_ORDER && CurrentTransaction != null)
                 {
-                    IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                    ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
                     if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.DROP ? 1 : 0) : 0) != 0)
                     {
-                        IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                        int num2;
+                        ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                        int num1;
                         if (currentDeviceStatus2 == null)
                         {
-                            num2 = 0;
+                            num1 = 0;
                         }
                         else
                         {
                             DeviceState? status = currentDeviceStatus2.NoteAcceptor?.Status;
                             DeviceState deviceState = DeviceState.OK;
-                            num2 = status == deviceState & status.HasValue ? 1 : 0;
+                            num1 = status.GetValueOrDefault() == deviceState & status.HasValue ? 1 : 0;
                         }
-                        if (num2 != 0)
+                        if (num1 != 0)
                         {
                             if (HasEscrow)
                             {
-                                IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
-                                int num3;
+                                ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                                int num2;
                                 if (currentDeviceStatus3 == null)
                                 {
-                                    num3 = 0;
+                                    num2 = 0;
                                 }
                                 else
                                 {
                                     EscrowStatus? status = currentDeviceStatus3.Escrow?.Status;
                                     EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                    num3 = status == escrowStatus & status.HasValue ? 1 : 0;
+                                    num2 = status.GetValueOrDefault() == escrowStatus & status.HasValue ? 1 : 0;
                                 }
-                                if (num3 == 0)
+                                if (num2 == 0)
                                     goto label_22;
                             }
-                            IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                            ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
                             DeviceTransactionStatus? status1;
-                            int num4;
-                            if (currentDeviceStatus4 == null)
-                            {
-                                num4 = 0;
-                            }
-                            else
-                            {
-                                status1 = currentDeviceStatus4.Transaction?.Status;
-                                DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.COUNTING;
-                                num4 = status1 == transactionStatus & status1.HasValue ? 1 : 0;
-                            }
-                            if (num4 == 0)
-                            {
-                                IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
-                                int num5;
-                                if (currentDeviceStatus5 == null)
-                                {
-                                    num5 = 0;
-                                }
-                                else
-                                {
-                                    status1 = currentDeviceStatus5.Transaction?.Status;
-                                    DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
-                                    num5 = status1 == transactionStatus & status1.HasValue ? 1 : 0;
-                                }
-                                if (num5 == 0)
-                                    goto label_22;
-                            }
-                            DeviceTransaction currentTransaction = CurrentTransaction;
-                            if (currentTransaction == null)
-                            {
-                                num1 = 0;
-                                goto label_23;
-                            }
-                            else
-                            {
-                                DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
-                                DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DROPPING;
-                                num1 = statusResultStatus1 == statusResultStatus2 & statusResultStatus1.HasValue ? 1 : 0;
-                                goto label_23;
-                            }
-                        }
-                    }
-                }
-            label_22:
-                num1 = 0;
-            label_23:
-                return num1 != 0;
-            }
-        }
-
-        public override void PauseCount()
-        {
-            if (CurrentTransaction != null)
-            {
-                IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
-                DeviceState? nullable1;
-                EscrowStatus? nullable2;
-                DeviceTransactionStatus? nullable3;
-                int num1;
-                if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.DROP ? 1 : 0) : 0) != 0)
-                {
-                    IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                    int num2;
-                    if (currentDeviceStatus2 == null)
-                    {
-                        num2 = 0;
-                    }
-                    else
-                    {
-                        nullable1 = currentDeviceStatus2.NoteAcceptor?.Status;
-                        DeviceState deviceState = DeviceState.OK;
-                        num2 = nullable1 == deviceState & nullable1.HasValue ? 1 : 0;
-                    }
-                    if (num2 != 0)
-                    {
-                        if (HasEscrow)
-                        {
-                            IControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
                             int num3;
-                            if (currentDeviceStatus3 == null)
+                            if (currentDeviceStatus4 == null)
                             {
                                 num3 = 0;
                             }
                             else
                             {
-                                nullable2 = currentDeviceStatus3.Escrow?.Status;
-                                EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
-                                num3 = nullable2 == escrowStatus & nullable2.HasValue ? 1 : 0;
+                                status1 = currentDeviceStatus4.Transaction?.Status;
+                                DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.COUNTING;
+                                num3 = status1.GetValueOrDefault() == transactionStatus & status1.HasValue ? 1 : 0;
                             }
                             if (num3 == 0)
-                                goto label_19;
+                            {
+                                ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                                int num4;
+                                if (currentDeviceStatus5 == null)
+                                {
+                                    num4 = 0;
+                                }
+                                else
+                                {
+                                    status1 = currentDeviceStatus5.Transaction?.Status;
+                                    DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.ACTIVE;
+                                    num4 = status1.GetValueOrDefault() == transactionStatus & status1.HasValue ? 1 : 0;
+                                }
+                                if (num4 == 0)
+                                    goto label_22;
+                            }
+                            DeviceTransaction currentTransaction = CurrentTransaction;
+                            if (currentTransaction == null)
+                                return false;
+                            DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
+                            DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DROPPING;
+                            return statusResultStatus1.GetValueOrDefault() == statusResultStatus2 & statusResultStatus1.HasValue;
                         }
-                        IControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
-                        int num4;
+                    }
+                }
+            label_22:
+                return false;
+            }
+        }
+
+        public void PauseCount()
+        {
+            if (CurrentTransaction != null)
+            {
+                ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                DeviceState? nullable1;
+                EscrowStatus? nullable2;
+                DeviceTransactionStatus? nullable3;
+                if ((currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.DROP ? 1 : 0) : 0) != 0)
+                {
+                    ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                    int num1;
+                    if (currentDeviceStatus2 == null)
+                    {
+                        num1 = 0;
+                    }
+                    else
+                    {
+                        nullable1 = currentDeviceStatus2.NoteAcceptor?.Status;
+                        DeviceState deviceState = DeviceState.OK;
+                        num1 = nullable1.GetValueOrDefault() == deviceState & nullable1.HasValue ? 1 : 0;
+                    }
+                    if (num1 != 0)
+                    {
+                        if (HasEscrow)
+                        {
+                            ControllerStatus currentDeviceStatus3 = CurrentDeviceStatus;
+                            int num2;
+                            if (currentDeviceStatus3 == null)
+                            {
+                                num2 = 0;
+                            }
+                            else
+                            {
+                                nullable2 = currentDeviceStatus3.Escrow?.Status;
+                                EscrowStatus escrowStatus = EscrowStatus.IDLE_POS;
+                                num2 = nullable2.GetValueOrDefault() == escrowStatus & nullable2.HasValue ? 1 : 0;
+                            }
+                            if (num2 == 0)
+                                goto label_25;
+                        }
+                        ControllerStatus currentDeviceStatus4 = CurrentDeviceStatus;
+                        int num3;
                         if (currentDeviceStatus4 == null)
                         {
-                            num4 = 0;
+                            num3 = 0;
                         }
                         else
                         {
                             nullable3 = currentDeviceStatus4.Transaction?.Status;
                             DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.COUNTING;
-                            num4 = nullable3 == transactionStatus & nullable3.HasValue ? 1 : 0;
+                            num3 = nullable3.GetValueOrDefault() == transactionStatus & nullable3.HasValue ? 1 : 0;
                         }
-                        if (num4 == 0)
+                        if (num3 == 0)
                         {
-                            IControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                            ControllerStatus currentDeviceStatus5 = CurrentDeviceStatus;
+                            int num4;
                             if (currentDeviceStatus5 == null)
                             {
-                                num1 = 0;
-                                goto label_20;
+                                num4 = 0;
                             }
                             else
                             {
                                 nullable3 = currentDeviceStatus5.Transaction?.Status;
                                 DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.NONE;
-                                num1 = nullable3 == transactionStatus & nullable3.HasValue ? 1 : 0;
-                                goto label_20;
+                                num4 = nullable3.GetValueOrDefault() == transactionStatus & nullable3.HasValue ? 1 : 0;
                             }
+                            if (num4 == 0)
+                                goto label_25;
+                        }
+                        DeviceTransaction currentTransaction = CurrentTransaction;
+                        int num5;
+                        if (currentTransaction == null)
+                        {
+                            num5 = 0;
                         }
                         else
                         {
-                            num1 = 1;
-                            goto label_20;
+                            DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
+                            DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DROPPING;
+                            num5 = statusResultStatus1.GetValueOrDefault() == statusResultStatus2 & statusResultStatus1.HasValue ? 1 : 0;
                         }
+                        if (num5 != 0)
+                        {
+                            DeviceMessenger.RequestPause();
+                            return;
+                        }
+                        Console.Error.WriteLine("DropStatus is " + CurrentTransaction?.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus.ToString() + ", expecting DropStatusResultStatus.DROPPING");
+                        return;
                     }
                 }
-            label_19:
-                num1 = 0;
-            label_20:
-                if (num1 != 0)
+            label_25:
+                TextWriter error = Console.Error;
+                object[] objArray = new object[4]
                 {
-                    DeviceTransaction currentTransaction = CurrentTransaction;
-                    int num5;
-                    if (currentTransaction == null)
-                    {
-                        num5 = 0;
-                    }
-                    else
-                    {
-                        DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
-                        DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DROPPING;
-                        num5 = statusResultStatus1 == statusResultStatus2 & statusResultStatus1.HasValue ? 1 : 0;
-                    }
-                    if (num5 != 0)
-                        DeviceMessenger.RequestPause();
-                    else
-                        Console.Error.WriteLine("DropStatus is " + CurrentTransaction?.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus.ToString() + ", expecting DropStatusResultStatus.DROPPING");
+           CurrentDeviceStatus?.ControllerState,
+          null,
+          null,
+          null
+                };
+                ControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
+                DeviceState? nullable4;
+                if (currentDeviceStatus6 == null)
+                {
+                    nullable1 = new DeviceState?();
+                    nullable4 = nullable1;
                 }
                 else
                 {
-                    TextWriter error = Console.Error;
-                    object[] objArray = new object[4]
-                    {
-            (object) CurrentDeviceStatus?.ControllerState,
-            null,
-            null,
-            null
-                    };
-                    IControllerStatus currentDeviceStatus6 = CurrentDeviceStatus;
-                    DeviceState? nullable4;
-                    if (currentDeviceStatus6 == null)
+                    DeviceNoteAcceptor noteAcceptor = currentDeviceStatus6.NoteAcceptor;
+                    if (noteAcceptor == null)
                     {
                         nullable1 = new DeviceState?();
                         nullable4 = nullable1;
                     }
                     else
-                    {
-                        DeviceNoteAcceptor noteAcceptor = currentDeviceStatus6.NoteAcceptor;
-                        if (noteAcceptor == null)
-                        {
-                            nullable1 = new DeviceState?();
-                            nullable4 = nullable1;
-                        }
-                        else
-                            nullable4 = new DeviceState?(noteAcceptor.Status);
-                    }
-                    objArray[1] = (object)nullable4;
-                    IControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
-                    EscrowStatus? nullable5;
-                    if (currentDeviceStatus7 == null)
+                        nullable4 = new DeviceState?(noteAcceptor.Status);
+                }
+                objArray[1] = nullable4;
+                ControllerStatus currentDeviceStatus7 = CurrentDeviceStatus;
+                EscrowStatus? nullable5;
+                if (currentDeviceStatus7 == null)
+                {
+                    nullable2 = new EscrowStatus?();
+                    nullable5 = nullable2;
+                }
+                else
+                {
+                    DeviceEscrow escrow = currentDeviceStatus7.Escrow;
+                    if (escrow == null)
                     {
                         nullable2 = new EscrowStatus?();
                         nullable5 = nullable2;
                     }
                     else
-                    {
-                        DeviceEscrow escrow = currentDeviceStatus7.Escrow;
-                        if (escrow == null)
-                        {
-                            nullable2 = new EscrowStatus?();
-                            nullable5 = nullable2;
-                        }
-                        else
-                            nullable5 = new EscrowStatus?(escrow.Status);
-                    }
-                    objArray[2] = (object)nullable5;
-                    IControllerStatus currentDeviceStatus8 = CurrentDeviceStatus;
-                    DeviceTransactionStatus? nullable6;
-                    if (currentDeviceStatus8 == null)
+                        nullable5 = new EscrowStatus?(escrow.Status);
+                }
+                objArray[2] = nullable5;
+                ControllerStatus currentDeviceStatus8 = CurrentDeviceStatus;
+                DeviceTransactionStatus? nullable6;
+                if (currentDeviceStatus8 == null)
+                {
+                    nullable3 = new DeviceTransactionStatus?();
+                    nullable6 = nullable3;
+                }
+                else
+                {
+                    ControllerDeviceTransaction transaction = currentDeviceStatus8.Transaction;
+                    if (transaction == null)
                     {
                         nullable3 = new DeviceTransactionStatus?();
                         nullable6 = nullable3;
                     }
                     else
-                    {
-                        ControllerDeviceTransaction transaction = currentDeviceStatus8.Transaction;
-                        if (transaction == null)
-                        {
-                            nullable3 = new DeviceTransactionStatus?();
-                            nullable6 = nullable3;
-                        }
-                        else
-                            nullable6 = new DeviceTransactionStatus?(transaction.Status);
-                    }
-                    objArray[3] = (object)nullable6;
-                    string str = string.Format("Controller not ready for pause: CurrentDeviceStatus?.ControllerState={0}: CurrentDeviceStatus?.NoteAcceptor?.Status={1}: CurrentDeviceStatus?.Escrow?.Status={2}: CurrentDeviceStatus?.Transaction?.Status={3}", objArray);
-                    error.WriteLine(str);
+                        nullable6 = new DeviceTransactionStatus?(transaction.Status);
                 }
+                objArray[3] = nullable6;
+                string str = string.Format("Controller not ready for pause: CurrentDeviceStatus?.ControllerState={0}: CurrentDeviceStatus?.NoteAcceptor?.Status={1}: CurrentDeviceStatus?.Escrow?.Status={2}: CurrentDeviceStatus?.Transaction?.Status={3}", objArray);
+                error.WriteLine(str);
             }
             else
             {
@@ -1862,60 +1968,50 @@ namespace CashAccSysDeviceManager
             }
         }
 
-        public override void StartCIT(string sealNumber) => DeviceMessenger.StartCIT(sealNumber);
+        public void StartCIT(string sealNumber) => DeviceMessenger.StartCIT(sealNumber);
 
-        public override void EndCIT(string bagnumber) => DeviceMessenger.EndCIT(bagnumber);
+        public void EndCIT(string bagnumber) => DeviceMessenger.EndCIT(bagnumber);
 
-        public override bool CanEndCount
+        public bool CanEndCount
         {
             get
             {
                 if (HasEscrow)
                     return false;
                 int num1 = CurrentState != DeviceManagerState.OUT_OF_ORDER ? 1 : 0;
-                IControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
+                ControllerStatus currentDeviceStatus1 = CurrentDeviceStatus;
                 int num2 = currentDeviceStatus1 != null ? (currentDeviceStatus1.ControllerState == ControllerState.DROP_PAUSED ? 1 : 0) : 0;
-                int num3;
                 if ((num1 & num2) != 0)
                 {
-                    IControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
-                    int num4;
+                    ControllerStatus currentDeviceStatus2 = CurrentDeviceStatus;
+                    int num3;
                     if (currentDeviceStatus2 == null)
                     {
-                        num4 = 0;
+                        num3 = 0;
                     }
                     else
                     {
                         DeviceTransactionStatus? status = currentDeviceStatus2.Transaction?.Status;
                         DeviceTransactionStatus transactionStatus = DeviceTransactionStatus.PAUSED;
-                        num4 = status == transactionStatus & status.HasValue ? 1 : 0;
+                        num3 = status.GetValueOrDefault() == transactionStatus & status.HasValue ? 1 : 0;
                     }
-                    if (num4 != 0)
+                    if (num3 != 0)
                     {
                         DeviceTransaction currentTransaction = CurrentTransaction;
                         if (currentTransaction == null)
-                        {
-                            num3 = 0;
-                            goto label_11;
-                        }
-                        else
-                        {
-                            DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
-                            DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DONE;
-                            num3 = statusResultStatus1 == statusResultStatus2 & statusResultStatus1.HasValue ? 1 : 0;
-                            goto label_11;
-                        }
+                            return false;
+                        DropStatusResultStatus? statusResultStatus1 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
+                        DropStatusResultStatus statusResultStatus2 = DropStatusResultStatus.DONE;
+                        return statusResultStatus1.GetValueOrDefault() == statusResultStatus2 & statusResultStatus1.HasValue;
                     }
                 }
-                num3 = 0;
-            label_11:
-                return num3 != 0;
+                return false;
             }
         }
 
-        public override bool CanEscrowDrop => HasEscrow && CurrentState == DeviceManagerState.DROP_STOPPED && !ClearHopperRequest && CurrentTransaction?.CurrentTransactionResult != null && CurrentTransaction.CurrentTransactionResult.EscrowTotalCents > 0L && CanStopCount;
+        public bool CanEscrowDrop => HasEscrow && CurrentState == DeviceManagerState.DROP_STOPPED && !ClearHopperRequest && CurrentTransaction?.CurrentTransactionResult != null && CurrentTransaction.CurrentTransactionResult.EscrowTotalCents > 0L && CanPauseCount;
 
-        public override void EscrowDrop()
+        public void EscrowDrop()
         {
             if (CurrentState != DeviceManagerState.DROP_STOPPED)
                 return;
@@ -1923,13 +2019,9 @@ namespace CashAccSysDeviceManager
             DeviceMessenger.EscrowDrop();
         }
 
-        public override bool CanEscrowReject => HasEscrow && CurrentState == DeviceManagerState.DROP_STOPPED && !ClearHopperRequest && CurrentTransaction?.CurrentTransactionResult != null && CanStopCount;
+        public bool CanEscrowReject => HasEscrow && CurrentState == DeviceManagerState.DROP_STOPPED && !ClearHopperRequest && CurrentTransaction?.CurrentTransactionResult != null && CanPauseCount;
 
-        public override bool CanClearNoteJam => false;
-
-        public object StatusChangeLock { get; private set; } = new object();
-
-        public override void EscrowReject()
+        public void EscrowReject()
         {
             if (CurrentState != DeviceManagerState.DROP_STOPPED && CurrentState != DeviceManagerState.OUT_OF_ORDER)
                 return;
@@ -1946,10 +2038,14 @@ namespace CashAccSysDeviceManager
 
         public void GetStatus() => DeviceMessenger.GetStatus();
 
-        public override void ShowDeviceController()
+        private void NotifyCurrentTransactionStatusChanged()
         {
-            Log.Info(GetType().Name, "ShowDeviceController()", "Command", "Showing the device controller", Array.Empty<object>());
-            DeviceMessenger.ShowDeviceController();
+            NotifyPropertyChanged("CanCount");
+            NotifyPropertyChanged("CanPauseCount");
+            NotifyPropertyChanged("CanEscrowDrop");
+            NotifyPropertyChanged("CanEscrowReject");
+            NotifyPropertyChanged("CanTransactionEnd");
+            OnNotifyCurrentTransactionStatusChangedEvent(this, EventArgs.Empty);
         }
 
         public override void ClearEscrowJam() => CashAccSysSerialFix.ClearEscrowJam();
@@ -1958,7 +2054,7 @@ namespace CashAccSysDeviceManager
         {
             if (CurrentState != DeviceManagerState.ESCROWJAM_END_REQUEST)
                 return;
-            OnEscrowJamEndEvent((object)this, EventArgs.Empty);
+            OnEscrowJamEndEvent(this, EventArgs.Empty);
         }
 
         private DeviceStatusChangedEventArgs ProcessStatusReport(
@@ -1969,7 +2065,7 @@ namespace CashAccSysDeviceManager
             string position = statusReport.Status.Escrow.Position;
             EscrowPosition escrowPosition = position == "IDLE" ? EscrowPosition.IDLE : (position == "DROP" ? EscrowPosition.DROP : (position == "REJECT" ? EscrowPosition.REJECT : EscrowPosition.NONE));
             string status2 = statusReport.Status.Escrow.Status;
-            EscrowStatus escrowStatus = status2 == "IDLE_POS" ? EscrowStatus.IDLE_POS : (status2 == "DROP_POS" ? EscrowStatus.DROP_POS : (status2 == "REJECT_POS" ? EscrowStatus.REJECT_POS : (status2 == "MOVING" ? EscrowStatus.ESCROW_JAM : EscrowStatus.NONE)));
+            EscrowStatus escrowStatus = status2 == "IDLE_POS" ? EscrowStatus.IDLE_POS : (status2 == "DROP_POS" ? EscrowStatus.DROP_POS : (status2 == "REJECT_POS" ? EscrowStatus.REJECT_POS : (status2 == "MOVING" ? EscrowStatus.MOVING : EscrowStatus.NONE)));
             string type1 = statusReport.Status.Escrow.Type;
             EscrowType escrowType = type1 == "NO_DEVICE" ? EscrowType.NO_DEVICE : (type1 == "VIRTUAL" ? EscrowType.VIRTUAL : (type1 == "DE50" ? EscrowType.DE50 : (type1 == "GPIO" ? EscrowType.GPIO : EscrowType.NONE)));
             DeviceNoteAcceptorType noteAcceptorType;
@@ -2010,7 +2106,8 @@ namespace CashAccSysDeviceManager
             DeviceState deviceState = status3 == "IDLE" ? DeviceState.IDLE : (status3 == "OK" ? DeviceState.OK : (status3 == "COUNTING" ? DeviceState.COUNTING : (status3 == "JAM" ? DeviceState.JAM : (status3 == "NO_COMMS" ? DeviceState.NO_COMMS : (status3 == "NO_DEVICE" ? DeviceState.NO_DEVICE : DeviceState.NONE)))));
             string status4 = statusReport.Status.Sensors.Status;
             DeviceSensorState deviceSensorState = status4 == "OK" ? DeviceSensorState.OK : (status4 == "NO_COMMS" ? DeviceSensorState.NO_COMMS : (status4 == "NO_DEVICE" ? DeviceSensorState.NO_DEVICE : DeviceSensorState.NONE));
-            int result = int.TryParse(statusReport.Status.Sensors.Value, NumberStyles.HexNumber, (IFormatProvider)new CultureInfo("en-US"), out result) ? result : 0;
+            int result;
+            int num = int.TryParse(statusReport.Status.Sensors.Value, NumberStyles.HexNumber, new CultureInfo("en-US"), out result) ? result : 0;
             string type2 = statusReport.Status.Sensors.Type;
             DeviceSensorType deviceSensorType = type2 == "SITECH" ? DeviceSensorType.SITECH : (type2 == "VIRTUAL" ? DeviceSensorType.VIRTUAL : (type2 == "NUMATO" ? DeviceSensorType.NUMATO : DeviceSensorType.NONE));
             DeviceSensorDoor deviceSensorDoor;
@@ -2125,7 +2222,7 @@ namespace CashAccSysDeviceManager
                 Sensor = new DeviceSensor()
                 {
                     Status = deviceSensorState,
-                    Value = result,
+                    Value = num,
                     Type = deviceSensorType,
                     Bag = deviceSensorBag,
                     Door = deviceSensorDoor
@@ -2171,29 +2268,25 @@ namespace CashAccSysDeviceManager
             try
             {
                 DeviceTransaction currentTransaction = CurrentTransaction;
-                int num1;
+                int num;
                 if (currentTransaction == null)
                 {
-                    num1 = 0;
+                    num = 0;
                 }
                 else
                 {
                     DropStatusResultStatus? statusResultStatus2 = currentTransaction.CurrentTransactionResult?.CurrentDropStatus?.data?.DropStatusResultStatus;
                     DropStatusResultStatus statusResultStatus3 = statusResultStatus1;
-                    num1 = statusResultStatus2 == statusResultStatus3 & statusResultStatus2.HasValue ? 1 : 0;
+                    num = statusResultStatus2.GetValueOrDefault() == statusResultStatus3 & statusResultStatus2.HasValue ? 1 : 0;
                 }
-                int num2;
-                if (num1 != 0)
+                if (num != 0)
                 {
                     long? totalCount1 = CurrentTransaction?.CurrentTransactionResult?.CurrentDropStatus?.data?.DenominationResult?.data?.TotalCount;
                     int? totalCount2 = dropStatus?.Body?.TotalCount;
-                    long? nullable = totalCount2.HasValue ? new long?((long)totalCount2) : new long?();
-                    num2 = totalCount1 == nullable & totalCount1.HasValue == nullable.HasValue ? 1 : 0;
+                    long? nullable = totalCount2.HasValue ? new long?(totalCount2.GetValueOrDefault()) : new long?();
+                    if (totalCount1.GetValueOrDefault() == nullable.GetValueOrDefault() & totalCount1.HasValue == nullable.HasValue)
+                        return CurrentTransaction.CurrentTransactionResult.CurrentDropStatus;
                 }
-                else
-                    num2 = 0;
-                if (num2 != 0)
-                    return CurrentTransaction.CurrentTransactionResult.CurrentDropStatus;
             }
             catch (Exception ex)
             {
@@ -2202,19 +2295,17 @@ namespace CashAccSysDeviceManager
             foreach (NoteCount noteCount in dropStatus.Body.NoteCounts.NoteCount)
                 denominationItemList.Add(new DenominationItem()
                 {
-                    count = (long)noteCount.Count,
+                    count = noteCount.Count,
                     Currency = noteCount.Currency,
                     type = DenominationItemType.NOTE,
                     denominationValue = noteCount.Denomination
                 });
-            DenominationResult denominationResult1 = new DenominationResult
+            DenominationResult denominationResult1 = new DenominationResult();
+            denominationResult1.level = ErrorLevel.SUCCESS;
+            denominationResult1.resultCode = 0;
+            denominationResult1.data = new Denomination()
             {
-                level = ErrorLevel.SUCCESS,
-                resultCode = 0,
-                data = new Denomination()
-                {
-                    DenominationItems = denominationItemList
-                }
+                DenominationItems = denominationItemList
             };
             DenominationResult denominationResult2 = denominationResult1;
             DropStatusResult dropStatusResult1 = new DropStatusResult()
@@ -2228,23 +2319,64 @@ namespace CashAccSysDeviceManager
             DropStatusResult dropStatusResult2 = dropStatusResult1;
             long totalValue = dropStatusResult1.data.DenominationResult.data.TotalValue;
             long? nullable1 = dropStatus?.Body?.TotalValue;
-            long valueOrDefault1 = (long)nullable1;
-            int num;
+            long valueOrDefault1 = nullable1.GetValueOrDefault();
+            int num1;
             if (totalValue == valueOrDefault1 & nullable1.HasValue)
             {
-                long totalCount3 = dropStatusResult1.data.DenominationResult.data.TotalCount;
-                int? totalCount4 = dropStatus?.Body?.TotalCount;
-                nullable1 = totalCount4.HasValue ? new long?((long)totalCount4) : new long?();
-                long valueOrDefault2 = (long)nullable1;
-                if (totalCount3 == valueOrDefault2 & nullable1.HasValue)
+                long totalCount = dropStatusResult1.data.DenominationResult.data.TotalCount;
+                int? nullable2 = dropStatus?.Body?.TotalCount;
+                nullable1 = nullable2.HasValue ? new long?(nullable2.GetValueOrDefault()) : new long?();
+                long valueOrDefault2 = nullable1.GetValueOrDefault();
+                if (totalCount == valueOrDefault2 & nullable1.HasValue)
                 {
-                    num = 0;
-                    goto label_29;
+                    int? nullable3;
+                    if (dropStatus == null)
+                    {
+                        nullable2 = new int?();
+                        nullable3 = nullable2;
+                    }
+                    else
+                    {
+                        DropStatusBody body = dropStatus.Body;
+                        if (body == null)
+                        {
+                            nullable2 = new int?();
+                            nullable3 = nullable2;
+                        }
+                        else
+                        {
+                            NoteCounts noteCounts = body.NoteCounts;
+                            if (noteCounts == null)
+                            {
+                                nullable2 = new int?();
+                                nullable3 = nullable2;
+                            }
+                            else
+                            {
+                                List<NoteCount> noteCount = noteCounts.NoteCount;
+                                if (noteCount == null)
+                                {
+                                    nullable2 = new int?();
+                                    nullable3 = nullable2;
+                                }
+                                else
+                                {
+                                    nullable3 = noteCount.Count;
+                                }
+                            }
+                        }
+                    }
+                    nullable2 = nullable3;
+                    if (nullable2.GetValueOrDefault() > 0)
+                    {
+                        num1 = 0;
+                        goto label_37;
+                    }
                 }
             }
-            num = 2;
-        label_29:
-            dropStatusResult2.level = (ErrorLevel)num;
+            num1 = 2;
+        label_37:
+            dropStatusResult2.level = (ErrorLevel)num1;
             return dropStatusResult1;
         }
 
@@ -2254,7 +2386,7 @@ namespace CashAccSysDeviceManager
             foreach (NoteCount noteCount in dropResult.Body.NoteCounts.NoteCount)
                 denominationItemList.Add(new DenominationItem()
                 {
-                    count = (long)noteCount.Count,
+                    count = noteCount.Count,
                     Currency = noteCount.Currency,
                     type = DenominationItemType.NOTE,
                     denominationValue = noteCount.Denomination
@@ -2287,29 +2419,44 @@ namespace CashAccSysDeviceManager
                     dropMode = DropMode.NONE;
                     break;
             }
-            DropResultResult dropResultResult = new DropResultResult
+            DropResultResult dropResultResult = new DropResultResult();
+            dropResultResult.DropDeviceID = dropResult?.Body?.DeviceSerialNumber;
+            dropResultResult.SessionID = dropResult?.Body?.InputNumber;
+            dropResultResult.TransactionID = dropResult?.Body?.Reference;
+            dropResultResult.DropID = dropResult?.Body?.InputSubNumber;
+            dropResultResult.level = dropResult.Body.NoteJam > 0 ? ErrorLevel.ERROR : ErrorLevel.SUCCESS;
+            int? nullable1 = dropResult?.Body?.TotalNumberOfNotes;
+            dropResultResult.TotalNumberOfNotes = nullable1.GetValueOrDefault();
+            dropResultResult.DroppedAmountCents = (long)(dropResult?.Body?.TranAmount);
+            int? nullable2;
+            if (dropResult == null)
             {
-                DropDeviceID = dropResult?.Body?.DeviceSerialNumber,
-                SessionID = dropResult?.Body?.InputNumber,
-                TransactionID = dropResult?.Body?.Reference,
-                DropID = dropResult?.Body?.InputSubNumber,
-                level = dropResult.Body.NoteJam > 0 ? ErrorLevel.ERROR : ErrorLevel.SUCCESS,
-                TotalNumberOfNotes = (int)dropResult?.Body?.TotalNumberOfNotes,
-                DroppedAmountCents = (long)dropResult?.Body?.TranAmount,
-                TransactionNumber = dropResult?.Body?.TranCycle.ToString() + string.Empty,
-                DropMode = dropMode,
-                isMultiDrop = dropMode == DropMode.DROP_NOTES || dropMode == DropMode.DROP_COINS
-            };
-            DenominationResult denominationResult = new DenominationResult
+                nullable1 = new int?();
+                nullable2 = nullable1;
+            }
+            else
             {
-                level = dropResult.Body.NoteJam > 0 ? ErrorLevel.ERROR : ErrorLevel.SUCCESS,
-                resultCode = 0,
-                NoteJamDetected = dropResult.Body.NoteJam > 0,
-                NotesRejected = dropResult.Body.Rejected > 0,
-                data = new Denomination()
+                DropResultBody body = dropResult.Body;
+                if (body == null)
                 {
-                    DenominationItems = denominationItemList
+                    nullable1 = new int?();
+                    nullable2 = nullable1;
                 }
+                else
+                    nullable2 = new int?(body.TranCycle);
+            }
+            nullable1 = nullable2;
+            dropResultResult.TransactionNumber = nullable1.ToString() + string.Empty;
+            dropResultResult.DropMode = dropMode;
+            dropResultResult.isMultiDrop = dropMode == DropMode.DROP_NOTES || dropMode == DropMode.DROP_COINS;
+            DenominationResult denominationResult = new DenominationResult();
+            denominationResult.level = dropResult.Body.NoteJam > 0 ? ErrorLevel.ERROR : ErrorLevel.SUCCESS;
+            denominationResult.resultCode = 0;
+            denominationResult.NoteJamDetected = dropResult.Body.NoteJam > 0;
+            denominationResult.NotesRejected = dropResult.Body.Rejected > 0;
+            denominationResult.data = new Denomination()
+            {
+                DenominationItems = denominationItemList
             };
             dropResultResult.DroppedDenomination = denominationResult;
             return dropResultResult;
@@ -2322,113 +2469,191 @@ namespace CashAccSysDeviceManager
             TransactionResultResult transactionResultResult = result == "SUCCESS" ? TransactionResultResult.SUCCESS : (result == "REJECTED" ? TransactionResultResult.REJECTED : TransactionResultResult.NONE);
             string transactionStatus = transactionStatusResponse?.Body?.TransactionStatus;
             TransactionResultStatus transactionResultStatus = transactionStatus == "NONE" ? TransactionResultStatus.NONE : (transactionStatus == "ACTIVE" ? TransactionResultStatus.IDLE : (transactionStatus == "COUNTING" ? TransactionResultStatus.COUNTING : (transactionStatus == "PAUSED" ? TransactionResultStatus.PAUSED : (transactionStatus == "ESCROW_DROP" ? TransactionResultStatus.ESCROW_DROP : (transactionStatus == "ESCROW_REJECT" ? TransactionResultStatus.ESCROW_REJECT : TransactionResultStatus.ERROR)))));
-            TransactionResultType transactionResultType = transactionStatusResponse?.Body?.TransactionType == "MULTIDROP" ? TransactionResultType.MULTIDROP : TransactionResultType.ERROR;
+            TransactionResultType transactionResultType = !(transactionStatusResponse?.Body?.TransactionType == "MULTIDROP") ? TransactionResultType.ERROR : TransactionResultType.MULTIDROP;
             TransactionStatusResponseResult statusResponseResult = new TransactionStatusResponseResult();
-            TransactionStatusResponseData statusResponseData = new TransactionStatusResponseData(transactionStatusResponse?.Body?.InputNumber, transactionStatusResponse?.Body?.Reference)
-            {
-                DispensedAmountCents = (long)transactionStatusResponse?.Body?.DispensedAmount
-            };
+            TransactionStatusResponseData statusResponseData = new TransactionStatusResponseData(transactionStatusResponse?.Body?.InputNumber, transactionStatusResponse?.Body?.Reference);
+            long? nullable1 = transactionStatusResponse?.Body?.DispensedAmount;
+            statusResponseData.DispensedAmountCents = nullable1.GetValueOrDefault();
             Denomination denomination1;
             if (transactionStatusResponse == null)
             {
-                denomination1 = (Denomination)null;
+                denomination1 = null;
             }
             else
             {
                 Body body = transactionStatusResponse.Body;
-                denomination1 = body != null ? body.DispensedNotes.CreateDenomination() : (Denomination)null;
+                denomination1 = body != null ? body.DispensedNotes.CreateDenomination() : null;
             }
             statusResponseData.DispensedNotes = denomination1;
-            statusResponseData.NumberOfDrops = (int)transactionStatusResponse?.Body?.NumberOfDrops;
-            statusResponseData.RequestedDispenseAmount = (long)transactionStatusResponse?.Body?.RequestedDispenseAmount;
+            long? nullable2;
+            if (transactionStatusResponse == null)
+            {
+                nullable1 = new long?();
+                nullable2 = nullable1;
+            }
+            else
+            {
+                Body body = transactionStatusResponse.Body;
+                if (body == null)
+                {
+                    nullable1 = new long?();
+                    nullable2 = nullable1;
+                }
+                else
+                    nullable2 = new long?(body.LastDroppedAmount);
+            }
+            nullable1 = nullable2;
+            statusResponseData.LastDroppedAmountCents = nullable1.GetValueOrDefault();
             Denomination denomination2;
             if (transactionStatusResponse == null)
             {
-                denomination2 = (Denomination)null;
+                denomination2 = null;
             }
             else
             {
                 Body body = transactionStatusResponse.Body;
-                denomination2 = body != null ? body.RequestedDispenseNotes.CreateDenomination() : (Denomination)null;
+                denomination2 = body != null ? body.LastDroppedNotes.CreateDenomination() : null;
             }
-            statusResponseData.RequestedDispenseNotes = denomination2;
-            statusResponseData.RequestedDropAmount = (long)transactionStatusResponse?.Body?.RequestedDropAmount;
-            statusResponseData.TotalDroppedAmountCents = (long)transactionStatusResponse?.Body?.TotalDroppedAmount;
+            statusResponseData.LastDroppedNotes = denomination2;
+            statusResponseData.NumberOfDrops = (int)(transactionStatusResponse?.Body?.NumberOfDrops);
+            long? nullable3;
+            if (transactionStatusResponse == null)
+            {
+                nullable1 = new long?();
+                nullable3 = nullable1;
+            }
+            else
+            {
+                Body body = transactionStatusResponse.Body;
+                if (body == null)
+                {
+                    nullable1 = new long?();
+                    nullable3 = nullable1;
+                }
+                else
+                    nullable3 = new long?(body.RequestedDispenseAmount);
+            }
+            nullable1 = nullable3;
+            statusResponseData.RequestedDispenseAmount = nullable1.GetValueOrDefault();
             Denomination denomination3;
             if (transactionStatusResponse == null)
             {
-                denomination3 = (Denomination)null;
+                denomination3 = null;
             }
             else
             {
                 Body body = transactionStatusResponse.Body;
-                denomination3 = body != null ? body.TotalDroppedNotes.CreateDenomination() : (Denomination)null;
+                denomination3 = body != null ? body.RequestedDispenseNotes.CreateDenomination() : null;
             }
-            statusResponseData.TotalDroppedNotes = denomination3;
+            statusResponseData.RequestedDispenseNotes = denomination3;
+            long? nullable4;
+            if (transactionStatusResponse == null)
+            {
+                nullable1 = new long?();
+                nullable4 = nullable1;
+            }
+            else
+            {
+                Body body = transactionStatusResponse.Body;
+                if (body == null)
+                {
+                    nullable1 = new long?();
+                    nullable4 = nullable1;
+                }
+                else
+                    nullable4 = new long?(body.RequestedDropAmount);
+            }
+            nullable1 = nullable4;
+            statusResponseData.RequestedDropAmount = nullable1.GetValueOrDefault();
+            long? nullable5;
+            if (transactionStatusResponse == null)
+            {
+                nullable1 = new long?();
+                nullable5 = nullable1;
+            }
+            else
+            {
+                Body body = transactionStatusResponse.Body;
+                if (body == null)
+                {
+                    nullable1 = new long?();
+                    nullable5 = nullable1;
+                }
+                else
+                    nullable5 = new long?(body.TotalDroppedAmount);
+            }
+            nullable1 = nullable5;
+            statusResponseData.TotalDroppedAmountCents = nullable1.GetValueOrDefault();
+            Denomination denomination4;
+            if (transactionStatusResponse == null)
+            {
+                denomination4 = null;
+            }
+            else
+            {
+                Body body = transactionStatusResponse.Body;
+                denomination4 = body != null ? body.TotalDroppedNotes.CreateDenomination() : null;
+            }
+            statusResponseData.TotalDroppedNotes = denomination4;
             statusResponseData.Result = transactionResultResult;
             statusResponseData.Status = transactionResultStatus;
             statusResponseData.Type = transactionResultType;
             statusResponseResult.data = statusResponseData;
             return statusResponseResult;
         }
+        /*
+            private List<(DateTime FileDate, FileInfo File)> GetCashAccSysLogFiles(
+              DateTime StartDate,
+              DateTime EndDate)
+            {
+              List<string> list = Directory.GetFiles(CONTROLLER_LOG_DIRECTORY, "TRACE*.log", SearchOption.TopDirectoryOnly).Reverse<string>().ToList<string>();
+              List<(DateTime, FileInfo)> source = new List<(DateTime, FileInfo)>();
+              foreach (string fileName in list)
+              {
+                FileInfo fileInfo = new FileInfo(fileName);
+                DateTime exact = DateTime.ParseExact(fileInfo.Name.Substring(5, 14), "yyyyMMddHHmmss", new CultureInfo("en-US"), DateTimeStyles.None);
+                if (StartDate <= exact)
+                {
+                  source.Add((exact, fileInfo));
+                }
+                else
+                {
+                  source.Add((exact, fileInfo));
+                  break;
+                }
+              }
+              DateTime startLogDate = source.Where(x => x.FileDate <= StartDate)).OrderByDescending<(DateTime, FileInfo), DateTime>((Func<(DateTime, FileInfo), DateTime>) (y => y.FileDate)).FirstOrDefault<(DateTime, FileInfo)>().Item1;
+              DateTime endLogDate = source.Where<(DateTime, FileInfo)>((Func<(DateTime, FileInfo), bool>) (x => x.FileDate <= EndDate)).OrderByDescending<(DateTime, FileInfo), DateTime>((Func<(DateTime, FileInfo), DateTime>) (y => y.FileDate)).FirstOrDefault<(DateTime, FileInfo)>().Item1;
+              return source.Where<(DateTime, FileInfo)>((Func<(DateTime, FileInfo), bool>) (x => x.FileDate >= startLogDate && x.FileDate <= endLogDate)).ToList<(DateTime, FileInfo)>();
+            }
 
-        //private List<(DateTime FileDate, FileInfo File)> GetCashAccSysLogFiles(
-        //  DateTime StartDate,
-        //  DateTime EndDate)
-        //{
-        //  List<string> list = (Directory.GetFiles(CONTROLLER_LOG_DIRECTORY, "TRACE*.log", SearchOption.TopDirectoryOnly)).Reverse<string>().ToList<string>();
-        //  var source = new List();
-        //  foreach (string fileName in list)
-        //  {
-        //    FileInfo fileInfo = new FileInfo(fileName);
-        //    DateTime exact = DateTime.ParseExact(fileInfo.Name.Substring(5, 14), "yyyyMMddHHmmss", (IFormatProvider) new CultureInfo("en-US"), DateTimeStyles.None);
-        //    if (StartDate <= exact)
-        //    {
-        //      source.Add((exact, fileInfo));
-        //    }
-        //    else
-        //    {
-        //      source.Add((exact, fileInfo));
-        //      break;
-        //    }
-        //  }
-        //  DateTime startLogDate = source.Where(x => x.FileDate <= StartDate).OrderByDescending((y => y.FileDate)).FirstOrDefault().Item1;
-        //  DateTime endLogDate = source.Where(x => x.FileDate <= EndDate).OrderByDescending( (y => y.FileDate)).FirstOrDefault().Item1;
-        //  return source.Where(x => x.FileDate >= startLogDate && x.FileDate <= endLogDate).ToList();
-        //}
-
-        //private bool IsEscrowJam(List<(DateTime FileDate, FileInfo File)> logFiles, DateTime startDate)
-        //{
-        //  foreach (FileInfo fileInfo in logFiles.Select<(DateTime, FileInfo), FileInfo>((Func<(DateTime, FileInfo), FileInfo>) (x => x.File)).ToList<FileInfo>())
-        //  {
-        //    string str = ((IEnumerable<string>) File.ReadAllLines(fileInfo.FullName)).Reverse<string>().ToList<string>().FirstOrDefault<string>((Func<string, bool>) (x => x.Contains("JamOpenEscrowWait")));
-        //    if (str != null && DateTime.ParseExact(fileInfo.Name.Substring(5, 8) + str.Substring(1, 12), "yyyyMMddHH:mm:ss.fff", (IFormatProvider) new CultureInfo("en-US"), DateTimeStyles.None) >= startDate)
-        //      return true;
-        //  }
-        //  return false;
-        //}
-
+            private bool IsEscrowJam(List<(DateTime FileDate, FileInfo File)> logFiles, DateTime startDate)
+            {
+              foreach (FileInfo fileInfo in logFiles.Select<(DateTime, FileInfo), FileInfo>((Func<(DateTime, FileInfo), FileInfo>) (x => x.File)).ToList<FileInfo>())
+              {
+                string str = File.ReadAllLines(fileInfo.FullName).Reverse<string>().ToList<string>().FirstOrDefault<string>(x => x.Contains("JamOpenEscrowWait"));
+                if (str != null && DateTime.ParseExact(fileInfo.Name.Substring(5, 8) + str.Substring(1, 12), "yyyyMMddHH:mm:ss.fff", new CultureInfo("en-US"), DateTimeStyles.None) >= startDate)
+                  return true;
+              }
+              return false;
+            }
+        */
         private void CashAccSysSerialFix_DE50StatusChangedEvent(
           object sender,
           DE50StatusChangedResult e)
         {
             if (DeviceManagerMode != DeviceManagerMode.ESCROW_JAM && e.Status[4] == 'R')
-                OnEscrowJamStartEvent((object)this, EventArgs.Empty);
+                OnEscrowJamStartEvent(this, EventArgs.Empty);
             else if (DeviceManagerMode == DeviceManagerMode.ESCROW_JAM && CurrentState != DeviceManagerState.ESCROWJAM_CLEAR_WAIT && e.Status[4] == 'I')
             {
-                OnEscrowJamClearWaitEvent((object)this, EventArgs.Empty);
+                OnEscrowJamClearWaitEvent(this, EventArgs.Empty);
             }
             else
             {
                 if (DeviceManagerMode != DeviceManagerMode.ESCROW_JAM || CurrentState == DeviceManagerState.ESCROWJAM_END_REQUEST || e.Status[4] != '@')
                     return;
-                OnEscrowJamEndRequestEvent((object)this, EventArgs.Empty);
+                OnEscrowJamEndRequestEvent(this, EventArgs.Empty);
             }
         }
-
-        public override void ClearNotesinEscrowWithDrop() => throw new NotImplementedException();
-
-        public override void ClearNoteJam() => throw new NotImplementedException();
     }
 }
-
