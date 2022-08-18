@@ -42,7 +42,13 @@ builder.Configuration
 
 builder.Services.Configure<SOAServerConfiguration>(configuration.GetSection("SOAServerConfiguration"));
 builder.Services.AddTransient<DepositorServerContext>();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.WriteIndented = true;
+                options.JsonSerializerOptions.Converters.Add(new CustomJsonConverterForType());
+                options.JsonSerializerOptions.Converters.Add(new ExceptionConverter());
+            });
+
 builder.Services.AddInfrastructureHealthCheck(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swaggerOptions =>

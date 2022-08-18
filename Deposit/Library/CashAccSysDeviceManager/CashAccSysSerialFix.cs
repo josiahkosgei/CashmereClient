@@ -211,18 +211,18 @@ namespace CashAccSysDeviceManager
       string DEVICE_PORT,
       string CONTROLLER_PORT)
     {
-      if (CashAccSysSerialFix.instance == null)
-        CashAccSysSerialFix.instance = new CashAccSysSerialFix(DEVICE_PORT, CONTROLLER_PORT);
-      return CashAccSysSerialFix.instance;
+      if (instance == null)
+                instance = new CashAccSysSerialFix(DEVICE_PORT, CONTROLLER_PORT);
+      return instance;
     }
 
     public static CashAccSysSerialFix NewCashAccSysSerialFix(
       string DEVICE_PORT,
       string CONTROLLER_PORT)
     {
-      if (CashAccSysSerialFix.instance != null)
-        CashAccSysSerialFix.instance.Dispose();
-      return CashAccSysSerialFix.GetInstance(DEVICE_PORT, CONTROLLER_PORT);
+      if (instance != null)
+                instance.Dispose();
+      return GetInstance(DEVICE_PORT, CONTROLLER_PORT);
     }
 
     protected void OnPropertyChanged([CallerMemberName] string name = null)

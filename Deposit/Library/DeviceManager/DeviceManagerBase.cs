@@ -14,27 +14,27 @@ namespace DeviceManager
 
     public ControllerState ControllerState
     {
-      get => this._controllerState;
+      get => _controllerState;
       set
       {
-        if (this._controllerState == value)
+        if (_controllerState == value)
           return;
-        this._controllerState = value;
-        this.OnRaiseControllerStateChangedEvent(new ControllerStateChangedEventArgs(value));
-        this.NotifyPropertyChanged(nameof (ControllerState));
+        _controllerState = value;
+        OnRaiseControllerStateChangedEvent(new ControllerStateChangedEventArgs(value));
+        NotifyPropertyChanged(nameof (ControllerState));
       }
     }
 
     public DeviceState DeviceState
     {
-      get => this._deviceState;
+      get => _deviceState;
       set
       {
-        if (this._deviceState == value)
+        if (_deviceState == value)
           return;
-        this._deviceState = value;
-        this.OnRaiseDeviceStateChangedEvent(new DeviceStateChangedEventArgs(value));
-        this.NotifyPropertyChanged(nameof (DeviceState));
+        _deviceState = value;
+        OnRaiseDeviceStateChangedEvent(new DeviceStateChangedEventArgs(value));
+        NotifyPropertyChanged(nameof (DeviceState));
       }
     }
 
@@ -46,60 +46,60 @@ namespace DeviceManager
 
     private void OnRaiseDeviceStatusChangedEvent(DeviceStatusChangedEventArgs e)
     {
-      EventHandler<DeviceStatusChangedEventArgs> statusChangedEvent = this.RaiseDeviceStatusChangedEvent;
+      EventHandler<DeviceStatusChangedEventArgs> statusChangedEvent = RaiseDeviceStatusChangedEvent;
       if (statusChangedEvent == null)
         return;
-      statusChangedEvent((object) this, e);
+      statusChangedEvent(this, e);
     }
 
     public event EventHandler<ControllerStateChangedEventArgs> RaiseControllerStateChangedEvent;
 
     private void OnRaiseControllerStateChangedEvent(ControllerStateChangedEventArgs e)
     {
-      EventHandler<ControllerStateChangedEventArgs> stateChangedEvent = this.RaiseControllerStateChangedEvent;
+      EventHandler<ControllerStateChangedEventArgs> stateChangedEvent = RaiseControllerStateChangedEvent;
       if (stateChangedEvent == null)
         return;
-      stateChangedEvent((object) this, e);
+      stateChangedEvent(this, e);
     }
 
     public event EventHandler<DeviceStateChangedEventArgs> RaiseDeviceStateChangedEvent;
 
     public void OnRaiseDeviceStateChangedEvent(DeviceStateChangedEventArgs e)
     {
-      EventHandler<DeviceStateChangedEventArgs> stateChangedEvent = this.RaiseDeviceStateChangedEvent;
+      EventHandler<DeviceStateChangedEventArgs> stateChangedEvent = RaiseDeviceStateChangedEvent;
       if (stateChangedEvent == null)
         return;
-      stateChangedEvent((object) this, e);
+      stateChangedEvent(this, e);
     }
 
     public event EventHandler<CountChangedEventArgs> RaiseCountChangedEvent;
 
     public void OnRaiseCountChangedEvent(CountChangedEventArgs e)
     {
-      EventHandler<CountChangedEventArgs> countChangedEvent = this.RaiseCountChangedEvent;
+      EventHandler<CountChangedEventArgs> countChangedEvent = RaiseCountChangedEvent;
       if (countChangedEvent == null)
         return;
-      countChangedEvent((object) this, e);
+      countChangedEvent(this, e);
     }
 
     public event EventHandler<ConnectionEventArgs> RaiseConnectionEvent;
 
     public void OnRaiseConnectionEvent(ConnectionEventArgs e)
     {
-      EventHandler<ConnectionEventArgs> raiseConnectionEvent = this.RaiseConnectionEvent;
+      EventHandler<ConnectionEventArgs> raiseConnectionEvent = RaiseConnectionEvent;
       if (raiseConnectionEvent == null)
         return;
-      raiseConnectionEvent((object) this, e);
+      raiseConnectionEvent(this, e);
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
     {
-      PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+      PropertyChangedEventHandler propertyChanged = PropertyChanged;
       if (propertyChanged == null)
         return;
-      propertyChanged((object) this, new PropertyChangedEventArgs(propertyName));
+      propertyChanged(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public virtual void CashInStart() => throw new NotImplementedException();

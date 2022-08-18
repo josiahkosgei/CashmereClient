@@ -2,9 +2,56 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Polly;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Cashmere.Finacle.Integration.Extensions
 {
+    public class ExceptionConverter : JsonConverter<Exception>
+    {
+        public override Exception Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("Message", value.Message);
+            // Add any other propoerties that you may want to include in your JSON.
+            // ...
+            writer.WriteEndObject();
+        }
+    }
+    public class CustomJsonConverterForType : JsonConverter<Type>
+    {
+        public override Type Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options
+            )
+        {
+            // Caution: Deserialization of type instances like this 
+            // is not recommended and should be avoided
+            // since it can lead to potential security issues.
+
+            // If you really want this supported (for instance if the JSON input is trusted):
+            // string assemblyQualifiedName = reader.GetString();
+            // return Type.GetType(assemblyQualifiedName);
+            throw new NotSupportedException();
+        }
+
+        public override void Write(
+            Utf8JsonWriter writer,
+            Type value,
+            JsonSerializerOptions options
+            )
+        {
+            String assemblyQualifiedName = value.AssemblyQualifiedName;
+            writer.WriteStringValue(assemblyQualifiedName);
+        }
+    }
+
 
     public static class HostExtensions
     {
@@ -31,11 +78,11 @@ namespace Cashmere.Finacle.Integration.Extensions
 
 
                     //apply to transient exceptions
-//                    if (context.Database.GetPendingMigrations().Any())
-//                    {
-//                        //policy.Execute(async () => await ResetDatabaseFriendlyWay(context, logger));
-////ResetDatabaseFriendlyWay(context, logger);
-//                    }
+                    //                    if (context.Database.GetPendingMigrations().Any())
+                    //                    {
+                    //                        //policy.Execute(async () => await ResetDatabaseFriendlyWay(context, logger));
+                    ////ResetDatabaseFriendlyWay(context, logger);
+                    //                    }
 
                     //retryPolicy.Execute(() => InvokeSeeder(seeder, context, services));
 
@@ -57,7 +104,7 @@ namespace Cashmere.Finacle.Integration.Extensions
         private static void InvokeSeeder<TContext>(Action<TContext, IServiceProvider> seeder, TContext context, IServiceProvider services)
             where TContext : DepositorServerContext
         {
-           // context.Database.Migrate();
+            // context.Database.Migrate();
         }
         private static void ResetDatabaseFriendlyWay<TContext>(TContext context, ILogger<TContext> logger)
             where TContext : DepositorServerContext

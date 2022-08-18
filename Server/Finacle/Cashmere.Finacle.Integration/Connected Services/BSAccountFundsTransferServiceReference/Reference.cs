@@ -606,7 +606,9 @@ namespace BSAccountFundsTransferServiceReference
         
         private string systemCodeField;
         
-        private string transactionDatetimeField;
+        private System.DateTime transactionDatetimeField;
+        
+        private bool transactionDatetimeFieldSpecified;
         
         private System.DateTime valueDateField;
         
@@ -618,7 +620,9 @@ namespace BSAccountFundsTransferServiceReference
         
         private string transactionSubTypeField;
         
-        private FundsTransferTypeTransactionItem[] transactionItemField;
+        private string[] transactionResponseDetailsField;
+        
+        private FundsTransferTypeTransactionItem[] transactionItemsField;
         
         private FundsTransferTypeCharge[] transactionChargesField;
         
@@ -652,7 +656,7 @@ namespace BSAccountFundsTransferServiceReference
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=2)]
-        public string TransactionDatetime
+        public System.DateTime TransactionDatetime
         {
             get
             {
@@ -661,6 +665,20 @@ namespace BSAccountFundsTransferServiceReference
             set
             {
                 this.transactionDatetimeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool TransactionDatetimeSpecified
+        {
+            get
+            {
+                return this.transactionDatetimeFieldSpecified;
+            }
+            set
+            {
+                this.transactionDatetimeFieldSpecified = value;
             }
         }
         
@@ -735,21 +753,37 @@ namespace BSAccountFundsTransferServiceReference
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("TransactionItem", Order=7)]
-        public FundsTransferTypeTransactionItem[] TransactionItem
+        [System.Xml.Serialization.XmlArrayAttribute(Order=7)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("Remarks", IsNullable=false)]
+        public string[] TransactionResponseDetails
         {
             get
             {
-                return this.transactionItemField;
+                return this.transactionResponseDetailsField;
             }
             set
             {
-                this.transactionItemField = value;
+                this.transactionResponseDetailsField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayAttribute(Order=8)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("TransactionItem", IsNullable=false)]
+        public FundsTransferTypeTransactionItem[] TransactionItems
+        {
+            get
+            {
+                return this.transactionItemsField;
+            }
+            set
+            {
+                this.transactionItemsField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=9)]
         [System.Xml.Serialization.XmlArrayItemAttribute("Charge", IsNullable=false)]
         public FundsTransferTypeCharge[] TransactionCharges
         {
@@ -781,8 +815,6 @@ namespace BSAccountFundsTransferServiceReference
         
         private decimal transactionAmountField;
         
-        private bool transactionAmountFieldSpecified;
-        
         private string transactionCurrencyField;
         
         private string narrativeField;
@@ -791,9 +823,11 @@ namespace BSAccountFundsTransferServiceReference
         
         private string transactionCodeField;
         
-        private string availableBalanceField;
+        private decimal availableBalanceField;
         
-        private string bookedBalanceField;
+        private decimal bookedBalanceField;
+        
+        private bool bookedBalanceFieldSpecified;
         
         private string chequeOrDraftNumberField;
         
@@ -801,11 +835,16 @@ namespace BSAccountFundsTransferServiceReference
         
         private decimal exchangeRateField;
         
-        private bool exchangeRateFieldSpecified;
-        
         private string temporaryODRequiredField;
         
         private FundsTransferTypeTransactionItemTemporaryODDetails temporaryODDetailsField;
+        
+        public FundsTransferTypeTransactionItem()
+        {
+            this.transactionAmountField = ((decimal)(0.00m));
+            this.availableBalanceField = ((decimal)(0.00m));
+            this.exchangeRateField = ((decimal)(0.00m));
+        }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -878,20 +917,6 @@ namespace BSAccountFundsTransferServiceReference
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool TransactionAmountSpecified
-        {
-            get
-            {
-                return this.transactionAmountFieldSpecified;
-            }
-            set
-            {
-                this.transactionAmountFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=5)]
         public string TransactionCurrency
         {
@@ -949,7 +974,8 @@ namespace BSAccountFundsTransferServiceReference
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=9)]
-        public string AvailableBalance
+        [System.ComponentModel.DefaultValueAttribute(typeof(decimal), "0")]
+        public decimal AvailableBalance
         {
             get
             {
@@ -963,7 +989,7 @@ namespace BSAccountFundsTransferServiceReference
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=10)]
-        public string BookedBalance
+        public decimal BookedBalance
         {
             get
             {
@@ -972,6 +998,20 @@ namespace BSAccountFundsTransferServiceReference
             set
             {
                 this.bookedBalanceField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool BookedBalanceSpecified
+        {
+            get
+            {
+                return this.bookedBalanceFieldSpecified;
+            }
+            set
+            {
+                this.bookedBalanceFieldSpecified = value;
             }
         }
         
@@ -1005,6 +1045,7 @@ namespace BSAccountFundsTransferServiceReference
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=13)]
+        [System.ComponentModel.DefaultValueAttribute(typeof(decimal), "0")]
         public decimal ExchangeRate
         {
             get
@@ -1014,20 +1055,6 @@ namespace BSAccountFundsTransferServiceReference
             set
             {
                 this.exchangeRateField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool ExchangeRateSpecified
-        {
-            get
-            {
-                return this.exchangeRateFieldSpecified;
-            }
-            set
-            {
-                this.exchangeRateFieldSpecified = value;
             }
         }
         
@@ -1335,6 +1362,13 @@ namespace BSAccountFundsTransferServiceReference
         
         private string realmField;
         
+        private string bankIDField;
+        
+        public CredentialsType()
+        {
+            this.bankIDField = "01";
+        }
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=0)]
         public string SystemCode
@@ -1388,6 +1422,21 @@ namespace BSAccountFundsTransferServiceReference
             set
             {
                 this.realmField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=4)]
+        [System.ComponentModel.DefaultValueAttribute("01")]
+        public string BankID
+        {
+            get
+            {
+                return this.bankIDField;
+            }
+            set
+            {
+                this.bankIDField = value;
             }
         }
     }
@@ -1521,7 +1570,7 @@ namespace BSAccountFundsTransferServiceReference
         {
             if ((endpointConfiguration == EndpointConfiguration.BSAccountSOAP))
             {
-                return new System.ServiceModel.EndpointAddress("http://localhost:8080/Account/FundsTransfer/SyncPost/4.0");
+                return new System.ServiceModel.EndpointAddress("http://localhost:8080/SOAPServiceBinding/bSAccount/");
             }
             throw new System.InvalidOperationException(string.Format("Could not find endpoint with name \'{0}\'.", endpointConfiguration));
         }

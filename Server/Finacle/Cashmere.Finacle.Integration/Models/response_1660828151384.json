@@ -1,0 +1,83 @@
+{
+  "message": "Transaction Success",
+  "envelope": {
+    "?xml": {
+      "@version": "1.0",
+      "@encoding": "UTF-8"
+    },
+    "soapenv:Envelope": {
+      "@xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/",
+      "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+      "@xmlns:ns7": "urn://co-opbank.co.ke/Banking/CanonicalDataModel/FundsTransfer/4.0",
+      "soapenv:Header": {
+        "head:ResponseHeader": {
+          "@xmlns:head": "urn://co-opbank.co.ke/CommonServices/Data/Message/MessageHeader",
+          "@xmlns:tns4": "urn://co-opbank.co.ke/CommonServices/Data/Common",
+          "@xmlns:ns3": "http://www.finacle.com/fixml",
+          "tns4:CorrelationID": "9f0ceafe-1924-464c-9dad-a30af625b2ff",
+          "head:MessageID": "e2102936-f712-4b6f-b8d0-7ea1b462d16c",
+          "head:StatusCode": "S_001",
+          "head:StatusDescription": "Success",
+          "head:StatusMessages": {
+            "head:MessageCode": "0",
+            "head:MessageDescription": "SUCCESS",
+            "head:MessageType": null
+          }
+        }
+      },
+      "soapenv:Body": {
+        "ns7:FundsTransfer": {
+          "ns7:MessageReference": "e2102936-f712-4b6f-b8d0-7ea1b462d16c",
+          "ns7:SystemCode": "070",
+          "ns7:TransactionDatetime": "2022-08-18T16:09:09.941",
+          "ns7:ValueDate": "2022-08-18T16:09:09.941",
+          "ns7:TransactionID": "CB0001129_20220818",
+          "ns7:TransactionType": "T",
+          "ns7:TransactionSubType": "BI",
+          "ns7:TransactionResponseDetails": {
+            "ns7:Remarks": "CB0001129"
+          },
+          "ns7:TransactionItems": {
+            "ns7:TransactionItem": [
+              {
+                "ns7:TransactionReference": "914135243",
+                "ns7:TransactionItemKey": "914135243_1",
+                "ns7:AccountNumber": "01148743633300",
+                "ns7:DebitCreditFlag": "D",
+                "ns7:TransactionAmount": "100.0",
+                "ns7:TransactionCurrency": "KES",
+                "ns7:Narrative": "914135243|T|01148743633300|7",
+                "ns7:TransactionCode": "A2A",
+                "ns7:AvailableBalance": "122988.28",
+                "ns7:BookedBalance": "0.0",
+                "ns7:TemporaryODDetails": null
+              },
+              {
+                "ns7:TransactionReference": "914135243",
+                "ns7:TransactionItemKey": "914135243_2",
+                "ns7:AccountNumber": "01103173040200",
+                "ns7:DebitCreditFlag": "C",
+                "ns7:TransactionAmount": "100.0",
+                "ns7:TransactionCurrency": "KES",
+                "ns7:Narrative": "914135243|T|01103173040200|7",
+                "ns7:TransactionCode": "A2A",
+                "ns7:AvailableBalance": "3556766.01",
+                "ns7:BookedBalance": "0.0",
+                "ns7:TemporaryODDetails": null
+              }
+            ]
+          },
+          "ns7:TransactionCharges": {
+            "ns7:Charge": {
+              "ns7:EventType": null,
+              "ns7:EventId": null
+            }
+          },
+          "ns7:TransactionItem": {
+            "ns7:ValueDate": "2022-08-18T16:09:09.941"
+          }
+        }
+      }
+    }
+  }
+}

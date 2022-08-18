@@ -1,0 +1,69 @@
+{
+  "message": "Transaction Success",
+  "resHeader": {
+    "header": {
+      "responseHeader": {
+        "correlationID": "9f0ceafe-1924-464c-9dad-a30af625b2ff",
+        "messageID": "553c0e37-65e4-4d20-8c5d-dfea4ae6aa70",
+        "statusCode": "S_001",
+        "statusDescription": "Success",
+        "statusMessages": {
+          "messageCode": 0,
+          "messageDescription": "SUCCESS",
+          "messageType": {}
+        }
+      }
+    },
+    "body": {
+      "fundsTransfer": {
+        "messageReference": "553c0e37-65e4-4d20-8c5d-dfea4ae6aa70",
+        "systemCode": 70,
+        "transactionDatetime": "2022-08-18T15:31:54.515",
+        "valueDate": "2022-08-18T15:31:54.515",
+        "transactionID": "CB0001095_20220818",
+        "transactionType": "T",
+        "transactionSubType": "BI",
+        "transactionResponseDetails": {
+          "remarks": "CB0001095"
+        },
+        "transactionItems": [
+          {
+            "transactionReference": 483456576,
+            "transactionItemKey": "483456576_1",
+            "accountNumber": 1148743633300,
+            "debitCreditFlag": "D",
+            "transactionAmount": 100,
+            "transactionCurrency": "KES",
+            "narrative": "483456576|T|01148743633300|7",
+            "transactionCode": "A2A",
+            "availableBalance": 2125989.28,
+            "bookedBalance": 0,
+            "temporaryODDetails": {}
+          },
+          {
+            "transactionReference": 483456576,
+            "transactionItemKey": "483456576_2",
+            "accountNumber": 1103173040200,
+            "debitCreditFlag": "C",
+            "transactionAmount": 100,
+            "transactionCurrency": "KES",
+            "narrative": "483456576|T|01103173040200|7",
+            "transactionCode": "A2A",
+            "availableBalance": 1553465.01,
+            "bookedBalance": 0,
+            "temporaryODDetails": {}
+          }
+        ],
+        "transactionCharges": {
+          "charge": {
+            "eventType": {},
+            "eventId": {}
+          }
+        },
+        "transactionItem": {
+          "valueDate": "2022-08-18T15:31:54.515"
+        }
+      }
+    }
+  }
+}

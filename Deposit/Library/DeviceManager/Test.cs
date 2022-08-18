@@ -13,11 +13,11 @@ namespace DeviceManager
       if (eventHandler1 == null)
         return;
       Delegate[] invocationList = eventHandler1.GetInvocationList();
-      Task.Factory.StartNew((Action) (() =>
+      Task.Factory.StartNew(() =>
       {
-        foreach (EventHandler<string> eventHandler2 in invocationList)
-          eventHandler2(sender, args);
-      }));
+          foreach (EventHandler<string> eventHandler2 in invocationList)
+              eventHandler2(sender, args);
+      });
     }
   }
 }
